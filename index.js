@@ -27,11 +27,16 @@ var questions = []
 var email = ''
 
 if (subcommand == 'quickstart') {
+  console.log('If you have no Storyblok account yet')
+  console.log('please signup at https://app.storyblok.com/#!/signup')
+  console.log()
+  console.log()
+
   questions = [
     {
       type: 'input',
       name: 'email',
-      message: 'Enter your Storyblok email:',
+      message: 'Enter your email:',
       validate: function (value) {
         email = value    
         if (value.length > 0) {
@@ -43,7 +48,7 @@ if (subcommand == 'quickstart') {
     {
       type: 'password',
       name: 'password',
-      message: 'Enter your Storyblok password:',
+      message: 'Enter your password:',
       validate: function (value) {
         var done = this.async();
       
@@ -253,6 +258,10 @@ inquirer.prompt(questions).then(function (answers) {
             spaceConfig['INSERT_YOUR_DOMAIN'] = answers.spaceDomain
           }
 
+          if (answers.loginToken) {
+            spaceConfig['TEMP_QUICKSTART_TOKEN'] = answers.loginToken
+          }
+
           replace(outputDir + '/config.js', spaceConfig)
         }
       })
@@ -265,28 +274,34 @@ inquirer.prompt(questions).then(function (answers) {
       create_demo: false,
       dup_id: 40088,
       space: {
-        name: answers.name
+        name: answers.name,
+        environments: [{name: 'Dev', location: 'http://localhost:4200/'}]
       }
     }, (space_res) => {
       if (space_res.status == 200) {
         console.log(chalk.green('  ' + answers.name + ' has been created in Storyblok!'))
 
-        api.setSpaceId(space_res.body.space.id)
-        api.get('api_keys', (keys_res) => {
-          if (keys_res.status == 200) {
-            answers.spaceId = space_res.body.space.id
-            answers.spaceDomain = space_res.body.space.domain.replace('https://', '')
-                                                             .replace('/', '')
+        api.post('tokens', {}, (tokens_res) => {
+          answers.loginToken = tokens_res.body.key
 
-            let tokens = keys_res.body.api_keys.filter((token) => {
-              return token.access == 'theme'
-            })
+          api.setSpaceId(space_res.body.space.id)
+          api.get('api_keys', (keys_res) => {
+            if (keys_res.status == 200) {
+              answers.spaceId = space_res.body.space.id
+              answers.spaceDomain = space_res.body.space.domain.replace('https://', '')
+                                                               .replace('/', '')
 
-            answers.themeToken = tokens[0].token
-            lastStep()
-          } else {
-            console.log(keys_res.body)
-          }
+              var tokens = keys_res.body.api_keys.filter((token) => {
+                return token.access == 'theme'
+              })
+
+              answers.themeToken = tokens[0].token
+
+              lastStep()
+            } else {
+              console.log(keys_res.body)
+            }
+          })
         })
       } else {
         console.log(space_res.body)
