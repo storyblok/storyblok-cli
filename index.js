@@ -201,7 +201,7 @@ inquirer.prompt(questions).then(function (answers) {
     }
 
     if (answers.type == 'quickstart') {
-      gitRepo = 'https://github.com/storyblok/creator-theme'
+      gitRepo = 'https://github.com/storyblok/quickstart.git'
     }
 
     var outputDir = './' + answers.name
@@ -275,7 +275,7 @@ inquirer.prompt(questions).then(function (answers) {
       dup_id: 40088,
       space: {
         name: answers.name,
-        environments: [{name: 'Dev', location: 'http://localhost:4200/'}]
+        environments: [{name: 'Dev', location: 'http://localhost:4440/'}]
       }
     }, (space_res) => {
       if (space_res.status == 200) {
