@@ -272,7 +272,7 @@ inquirer.prompt(questions).then(function (answers) {
 
     api.post('spaces', {
       create_demo: false,
-      dup_id: 40088,
+      dup_id: 40288,
       space: {
         name: answers.name,
         environments: [{name: 'Dev', location: 'http://localhost:4440/'}]
