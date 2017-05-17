@@ -27,22 +27,48 @@ var questions = []
 var email = ''
 
 if (subcommand == 'quickstart') {
-  console.log('If you have no Storyblok account yet')
-  console.log('please signup at https://app.storyblok.com/#!/signup')
   console.log()
   console.log()
 
   questions = [
     {
+      type: 'list',
+      name: 'has_account',
+      message: 'Do you have already a Storyblok account?',
+      choices: [
+        'No',
+        'Yes'
+      ]
+    },
+    {
       type: 'input',
       name: 'email',
-      message: 'Enter your email:',
+      message: 'Enter your email address:',
       validate: function (value) {
         email = value    
         if (value.length > 0) {
           return true
         }
         return 'Please enter a valid email:'
+      }
+    },
+    {
+      type: 'password',
+      name: 'password',
+      message: 'Define your password:',
+      validate: function (value) {
+        var done = this.async();
+      
+        api.signup(email, value, (data) => {
+          if (data.status == 200) {
+            done(null, true)
+          } else {
+            done('Failed: ' + JSON.stringify(data.body) + '. Please try again:')
+          }
+        })
+      },
+      when: function (answers) {
+        return answers.has_account == 'No'
       }
     },
     {
@@ -56,9 +82,12 @@ if (subcommand == 'quickstart') {
           if (data.status == 200) {
             done(null, true)
           } else {
-            done('Password wrong. Please try again:')
+            done('Password seams to be wrong. Please try again:')
           }
         })
+      },
+      when: function (answers) {
+        return answers.has_account == 'Yes'
       }
     },
     {

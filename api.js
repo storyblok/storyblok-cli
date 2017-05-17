@@ -16,6 +16,18 @@ module.exports = {
     })
   },
 
+  signup: function(email, password, callback) {
+    var login = unirest('POST', 'https://api.storyblok.com/v1/users/signup')
+    login.type('json')
+    login.send({user: {email: email, password: password}})
+    login.end((res) => {
+      if (res.status == 200) {
+        this.accessToken = res.body.access_token
+      }
+      callback(res)
+    })
+  },
+
   setSpaceId: function(spaceId) {
     this.spaceId = spaceId
   },
