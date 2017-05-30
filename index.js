@@ -25,6 +25,7 @@ if (typeof process.argv[1] != 'undefined' && typeof process.argv[2] != 'undefine
 
 var questions = []
 var email = ''
+var error = false
 
 if (subcommand == 'quickstart') {
   console.log()
@@ -159,7 +160,7 @@ if (subcommand == 'quickstart') {
       message: 'We got some Boilerplates prepared for you:',
       choices: [
         'PHP - Silex Boilerplate [https://github.com/storyblok/silex-boilerplate]',
-        'JavaScript - NodeJs Boilerplate [https://github.com/storyblok/nodejs-boilerplate]',
+        'JavaScript - NodeJs Boilerplate [https://github.com/storyblok/storyblok-express-boilerplate]',
         'Ruby - Sinatra Boilerplate [https://github.com/storyblok/sinatra-boilerplate]',
         'Python - Django Boilerplate [https://github.com/storyblok/django-boilerplate]',
         'JavaScript - VueJs Boilerplate [https://github.com/storyblok/vuejs-boilerplate]',
@@ -243,6 +244,8 @@ inquirer.prompt(questions).then(function (answers) {
           console.log()
           console.log(chalk.red('  Oh Snap! It seems that you already have a project with the name: ' + answers.name))
           console.log()
+          error = true;
+          return;
         } else {
           console.log()
           console.log(chalk.red('  We never had this kind of issue - Sorry for that!'))
@@ -251,20 +254,70 @@ inquirer.prompt(questions).then(function (answers) {
           console.log(chalk.red('  Don\'t forget to mark it with the tag `storyblok` so will can find it.'))
           console.log()
           console.error(err)
-          exit(0);
+          error = true;
+          return;
         }
       })
       .on('end', function () {
+        if (error) {
+          return;
+        }
+
         var finalStep = 'gulp'
         if (answers.type == 'Fieldtype') {
           finalStep = 'npm run dev'
         }
 
         console.log()
-        console.log(chalk.cyan('  Your storyblok project is ready for you!'))
+        console.log(chalk.green('  Your storyblok project is ready for you!'))
         console.log()
-        console.log(chalk.cyan('  Execute the following command to start Storyblok:'))
-        console.log('  cd ./' + answers.name + ' && npm install && ' + finalStep)
+
+        switch (answers.theme) {
+          case 'Custom Theme [We will ask you about your Github URL]':
+            break;  
+            
+          case 'Python - Django Boilerplate [https://github.com/storyblok/django-boilerplate]':
+            console.log('  Make sure Django & Jinja2 are installed')
+            console.log(chalk.cyan('  pip install django && pip install jinja2'))
+            console.log()
+            console.log('  Start your local python server:')
+            console.log(chalk.cyan('  cd ./' + answers.name + ' && python manage.py migrate && python manage.py runserver'))
+            console.log()
+            console.log('  In a second window we start the static file proxy using gulp:')
+            console.log(chalk.cyan('  cd ./' + answers.name + ' && npm install && gulp'))
+            console.log()
+            console.log('  You can start exploring the boilerplate or have a look at:')
+            console.log('  https://www.storyblok.com/tp/add-a-headless-cms-to-python-django-in-5-minutes')
+            break;  
+
+          case 'JavaScript - VueJs Boilerplate [https://github.com/storyblok/vuejs-boilerplate]':
+            console.log('  Execute the following command to start Storyblok:')
+            console.log(chalk.cyan('  cd ./' + answers.name + ' && npm install && npm run dev'))
+            console.log()
+            console.log('  You can start exploring the boilerplate or have a look at:')
+            console.log('  https://www.storyblok.com/tp/add-a-headless-CMS-to-vuejs-in-5-minutes')
+            break;
+
+          case 'JavaScript - NodeJs Boilerplate [https://github.com/storyblok/storyblok-express-boilerplate]':
+            console.log('  Execute the following command to start Storyblok:')
+            console.log(chalk.cyan('  cd ./' + answers.name + ' && npm install && node ./index.js'))
+            console.log()
+            console.log('  You can start exploring the boilerplate or have a look at:')
+            console.log('  https://www.storyblok.com/tp/node-js-cms')
+            break;
+
+          case 'Ruby - Sinatra Boilerplate [https://github.com/storyblok/sinatra-boilerplate]':
+            console.log('  Execute the following command to start Storyblok:')
+            console.log(chalk.cyan('  cd ./' + answers.name + ' && bundle install'))
+            console.log(chalk.cyan('  rerun --pattern \'{Gemfile, Gemfile.lock, app.rb, app/**/*.rb }\' \'ruby app.rb\''))
+            break;  
+
+          default:
+            console.log('  Execute the following command to start Storyblok:')
+            console.log(chalk.cyan('  cd ./' + answers.name + ' && npm install && ' + finalStep)) 
+            break;
+        }
+
         console.log()
         console.log(chalk.white('  If you need more help, just try asking a question on stackoverflow'))
         console.log(chalk.white('  with the [storyblok] tag'))
