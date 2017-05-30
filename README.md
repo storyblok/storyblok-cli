@@ -39,7 +39,7 @@ The CLI allows developers to get started with a new Storyblok project by answeri
 
 ## Boilerplates
 - PHP - Silex Boilerplate [https://github.com/storyblok/silex-boilerplate]
-- JavaScript - NodeJs Boilerplate [https://github.com/storyblok/nodejs-boilerplate]
+- JavaScript - NodeJs Boilerplate [https://github.com/storyblok/storyblok-express-boilerplate]
 - Ruby - Sinatra Boilerplate [https://github.com/storyblok/sinatra-boilerplate]
 - Python - Django Boilerplate [https://github.com/storyblok/django-boilerplate]
 - JavaScript - VueJs Boilerplate [https://github.com/storyblok/vuejs-boilerplate]
