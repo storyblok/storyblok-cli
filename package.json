@@ -2,6 +2,10 @@
   "name": "storyblok-cli",
   "version": "1.2.9",
   "description": "A simple CLI for scaffolding storyblok projects and fieldtypes",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/storyblok/storyblok-cli.git"
+  },
   "keywords": [
     "storyblok",
     "cli",
