@@ -10,9 +10,13 @@ You found an issue?<br>Tell us about it - <a href="https://github.com/storyblok/
 [![GitHub issues](https://img.shields.io/github/issues/storyblok/storyblok.svg?style=flat-square&v=1)](https://github.com/storyblok/storyblok/issues?q=is%3Aopen+is%3Aissue)
 [![GitHub closed issues](https://img.shields.io/github/issues-closed/storyblok/storyblok.svg?style=flat-square&v=1)](https://github.com/storyblok/storyblok/issues?q=is%3Aissue+is%3Aclosed)
 
+## BREAKING CHANGE
+
+We added the `region` option upon login. If you are using the CLI, please `logout` and `login` again providing your user region.
+
 ## Installation
 
-Make sure you've node `>= 9.11.0` installed.
+Make sure you have Node `>= 9.11.0` installed.
 
 ```sh
 $ npm i storyblok -g
@@ -28,12 +32,24 @@ Usage to kickstart a boilerplate, fieldtype or theme
 $ storyblok select
 ```
 
+### pull-languages
+
+Download your space's languages schema as json. This command will download 1 file.
+
+```sh
+$ storyblok pull-languages --space <SPACE_ID>
+```
+
+#### Options
+
+* `space`: your space id
+
 ### pull-components
 
 Download your space's components schema as json. This command will download 2 files: 1 for the components and 1 for the presets.
 
 ```sh
-$ storyblok pull-components --space <SPACE_ID>
+$ storyblok pull-components --space <SPACE_ID> --region <REGION>
 ```
 
 #### Options
@@ -45,7 +61,7 @@ $ storyblok pull-components --space <SPACE_ID>
 Push your components file to your/another space
 
 ```sh
-$ storyblok push-components <SOURCE> --space <SPACE_ID> --presets-source <PRESETS_SOURCE>
+$ storyblok push-components <SOURCE> --space <SPACE_ID> --region <REGION> --presets-source <PRESETS_SOURCE>
 ```
 
 #### Parameters
@@ -81,6 +97,65 @@ Using a **path** to file
 
 ```sh
 $ storyblok push-components ./components.json --presets-source ./presets.json --space 67819
+```
+
+### delete-component
+
+Delete a single component on your space.
+
+```sh
+storyblok delete-component <component> --space <SPACE_ID>
+```
+
+#### Parameters
+* `component`: The name or id of the component
+
+#### Options
+* `space_id`: the space where the command should be executed.
+
+#### Examples
+
+Delete a component on your space.
+```sh
+storyblok delete-component 111111 --space 67819
+```
+
+```sh
+storyblok delete-component teaser --space 67819
+```
+
+### delete-components
+
+Delete all components from your Space that occur in your Local JSON.
+Or delete those components on your Space that do not appear in the JSON. (`--reverse`)
+
+```sh
+storyblok delete-components <SOURCE> --space <SPACE_ID>
+```
+
+#### Parameters
+* `source`: can be a URL or path to JSON file.
+
+#### Options
+* `space_id`: the space where the command should be executed.
+* `reverse`: When passed as an argument, deletes only those components on your space that do not appear in the JSON.
+* `dryrun`: when passed as an argument, does not perform any changes on the given space.
+
+#### Examples
+
+Delete all components on a certain space that occur in your local JSON.
+```sh
+storyblok delete-components ./components.json --space 67819
+```
+
+Delete only those components which do not occur in your local json from your space.
+```sh
+storyblok delete-components ./components.json --space 67819 --reverse
+```
+
+To see the result in your console output but to not perform the command on your space, use the `--dryrun` argument.
+```sh
+storyblok delete-components ./components.json --space 67819 --reverse --dryrun
 ```
 
 ### sync
@@ -130,6 +205,19 @@ Login to the Storyblok cli
 ```sh
 $ storyblok login
 ```
+#### Options
+
+* `email`: your user's email address
+* `password`: your user's password
+* `region`: your user's region (default: `eu`). You can use `us`, `cn` or `eu`. This region will be used for the other cli's commands.
+
+### user
+
+Get the currently logged in user
+
+```sh
+$ storyblok user
+```
 
 ### generate-migration
 
@@ -138,6 +226,7 @@ Create a migration file (with the name `change_<COMPONENT>_<FIELD>.js`) inside t
 ```sh
 $ storyblok generate-migration --space <SPACE_ID> --component <COMPONENT_NAME> --field <FIELD>
 ```
+It's important to note that the `component` and `field` parameters are required and must be spelled exactly as they are in Storyblok. You can check the exact name by looking at the `Block library` inside your space.
 
 #### Options
 
@@ -188,6 +277,7 @@ $ storyblok rollback-migration --space 1234 --component Product --field title
 * `field`: name of field
 
 ### spaces
+
 
 List all spaces of the logged account
 
@@ -275,7 +365,7 @@ $ storyblok -V # or --version
 
 Content migrations are a convenient way to change fields of your content.
 
-To execute a migration you first need to create a migration file. This file is a pure Javascript function where the content of a specific content type or compontent gets passed through.
+To execute a migration you first need to create a migration file. This file is a pure Javascript function where the content of a specific content type or component gets passed through.
 
 ### 1. Creating a migration file
 

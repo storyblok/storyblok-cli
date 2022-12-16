@@ -5,16 +5,22 @@ const inquirer = require('inquirer')
 
 const creds = require('./creds')
 const getQuestions = require('./get-questions')
-const { LOGIN_URL, SIGNUP_URL, API_URL } = require('../constants')
+const { SIGNUP_URL, API_URL, US_API_URL, CN_API_URL } = require('../constants')
 
 module.exports = {
   accessToken: '',
+  oauthToken: '',
   spaceId: null,
+  region: '',
 
   getClient () {
+    const { region } = creds.get()
+
     return new Storyblok({
-      oauthToken: this.accessToken
-    }, API_URL)
+      accessToken: this.accessToken,
+      oauthToken: this.oauthToken,
+      region: this.region
+    }, this.apiSwitcher(region))
   },
 
   getPath (path) {
@@ -25,9 +31,9 @@ module.exports = {
     return path
   },
 
-  async login (email, password) {
+  async login (email, password, region) {
     try {
-      const response = await axios.post(LOGIN_URL, {
+      const response = await axios.post(`${this.apiSwitcher(region)}users/login`, {
         email: email,
         password: password
       })
@@ -52,26 +58,41 @@ module.exports = {
 
         const { otp_attempt: code } = await inquirer.prompt(questions)
 
-        const newResponse = await axios.post(LOGIN_URL, {
+        const newResponse = await axios.post(`${this.apiSwitcher(region)}users/login`, {
           email: email,
           password: password,
           otp_attempt: code
         })
 
-        return this.persistCredentials(email, newResponse.data || {})
+        return this.persistCredentials(email, newResponse.data || {}, region)
       }
 
-      return this.persistCredentials(email, data)
+      return this.persistCredentials(email, data, region)
     } catch (e) {
       return Promise.reject(e)
     }
   },
 
-  persistCredentials (email, data) {
+  async getUser () {
+    const { region } = creds.get()
+
+    try {
+      const { data } = await axios.get(`${this.apiSwitcher(this.region ? this.region : region)}users/me`, {
+        headers: {
+          Authorization: this.oauthToken
+        }
+      })
+      return data.user
+    } catch (e) {
+      return Promise.reject(e)
+    }
+  },
+
+  persistCredentials (email, data, region = 'eu') {
     const token = this.extractToken(data)
     if (token) {
-      this.accessToken = token
-      creds.set(email, token)
+      this.oauthToken = token
+      creds.set(email, token, region)
 
       return Promise.resolve(data)
     }
@@ -81,9 +102,9 @@ module.exports = {
   async processLogin () {
     try {
       const questions = getQuestions('login')
-      const { email, password } = await inquirer.prompt(questions)
+      const { email, password, region } = await inquirer.prompt(questions)
 
-      const data = await this.login(email, password)
+      const data = await this.login(email, password, region)
 
       console.log(chalk.green('✓') + ' Log in successfully! Token has been added to .netrc file.')
 
@@ -104,19 +125,23 @@ module.exports = {
     return data.access_token
   },
 
-  logout () {
+  logout (unauthorized) {
+    if (creds.get().email && unauthorized) {
+      console.log(chalk.red('X') + ' Your login seems to be expired, we logged you out. Please log back in again.')
+    }
     creds.set(null)
   },
 
-  signup (email, password) {
+  signup (email, password, region = 'eu') {
     return axios.post(SIGNUP_URL, {
       email: email,
-      password: password
+      password: password,
+      region
     })
       .then(response => {
         const token = this.extractToken(response)
-        this.accessToken = token
-        creds.set(email, token)
+        this.oauthToken = token
+        creds.set(email, token, region)
 
         return Promise.resolve(true)
       })
@@ -125,9 +150,8 @@ module.exports = {
 
   isAuthorized () {
     const { token } = creds.get() || {}
-
     if (token) {
-      this.accessToken = token
+      this.oauthToken = token
       return true
     }
 
@@ -138,6 +162,10 @@ module.exports = {
     this.spaceId = spaceId
   },
 
+  setRegion (region) {
+    this.region = region
+  },
+
   getPresets () {
     const client = this.getClient()
 
@@ -145,6 +173,15 @@ module.exports = {
       .get(this.getPath('presets'))
       .then(data => data.data.presets || [])
       .catch(err => Promise.reject(err))
+  },
+
+  getSpaceOptions () {
+    const client = this.getClient()
+
+    return client
+      .get(this.getPath(''))
+      .then((data) => data.data.space.options || {})
+      .catch((err) => Promise.reject(err))
   },
 
   getComponents () {
@@ -208,5 +245,15 @@ module.exports = {
       .get('spaces/', {})
       .then(res => res.data.spaces || [])
       .catch(err => Promise.reject(err))
+  },
+
+  apiSwitcher (region) {
+    const apiList = {
+      us: US_API_URL,
+      cn: CN_API_URL,
+      eu: API_URL
+    }
+
+    return region ? apiList[region] : apiList[this.region]
   }
 }
