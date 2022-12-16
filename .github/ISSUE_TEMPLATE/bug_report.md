@@ -1,19 +1,12 @@
 ---
 name: Bug report
-about: Create a report to help us improve Storyblok
+about: Create a report to help us improve the CLI
 title: ''
 labels: bug
 assignees: ''
 
 ---
 
-**The issue occurs while working with:** (check one with "x")   
-- [ ] *app.storyblok.com (CMS - Interface)*   
-- [ ] *api.storyblok.com (CMS - Content Delivery API)*
-- [ ] *mapi.storyblok.com (CMS - Management API)*
-- [ ] *a.storyblok.com (CMS - Image Service)*
-- [ ] *storyblok.com (Website)*
-- [ ] *Other:* <!-- => If you've got an issue with on of our boilerplates or themes - please create an issue in the specific repo -->
 
 **Current behavior:**
 <!-- Describe how the bug manifests. -->
