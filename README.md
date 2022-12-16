@@ -3,7 +3,7 @@
   <p align="center">A simple CLI for scaffolding <a href="https://www.storyblok.com" target="_blank">Storyblok</a> projects and fieldtypes.</p>
 </p>
 
-You found an issue?<br>Tell us about it - <a href="https://github.com/storyblok/storyblok/issues/new">open an issue</a> or look if it was <a href="https://github.com/storyblok/storyblok/issues/">already reported</a>.
+You found an issue?<br>Tell us about it - <a href="https://github.com/storyblok/storyblok-cli/issues/new">open an issue</a> or look if it was <a href="https://github.com/storyblok/storyblok-cli/issues/">already reported</a>.
 
 [![npm](https://img.shields.io/npm/v/storyblok.svg)](https://www.npmjs.com/package/storyblok)
 [![npm](https://img.shields.io/npm/dt/storyblok.svg)](ttps://img.shields.io/npm/dt/storyblok.svg)
