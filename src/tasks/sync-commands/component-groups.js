@@ -1,6 +1,6 @@
 const chalk = require('chalk')
-const StoryblokClient = require('storyblok-js-client')
 const { findByProperty } = require('../../utils')
+const api = require('../../utils/api')
 
 class SyncComponentGroups {
   /**
@@ -14,9 +14,7 @@ class SyncComponentGroups {
     this.sourceComponentGroups = []
     this.targetComponentGroups = []
 
-    this.client = new StoryblokClient({
-      oauthToken: options.oauthToken
-    })
+    this.client = api.getClient()
   }
 
   async init () {
