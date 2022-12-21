@@ -1,9 +1,9 @@
 const chalk = require('chalk')
-const StoryblokClient = require('storyblok-js-client')
 const { find } = require('lodash')
 const SyncComponentGroups = require('./component-groups')
 const { findByProperty } = require('../../utils')
 const PresetsLib = require('../../utils/presets-lib')
+const api = require('../../utils/api')
 
 class SyncComponents {
   /**
@@ -16,9 +16,7 @@ class SyncComponents {
     this.sourceSpaceId = options.sourceSpaceId
     this.targetSpaceId = options.targetSpaceId
     this.oauthToken = options.oauthToken
-    this.client = new StoryblokClient({
-      oauthToken: options.oauthToken
-    })
+    this.client = api.getClient()
     this.presetsLib = new PresetsLib({ oauthToken: options.oauthToken, targetSpaceId: this.targetSpaceId })
   }
 

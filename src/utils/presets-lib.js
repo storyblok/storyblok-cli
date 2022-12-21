@@ -1,8 +1,8 @@
 const chalk = require('chalk')
-const StoryblokClient = require('storyblok-js-client')
 const FormData = require('form-data')
 const axios = require('axios')
 const { last } = require('lodash')
+const api = require('./api')
 
 class PresetsLib {
   /**
@@ -10,9 +10,7 @@ class PresetsLib {
    */
   constructor (options) {
     this.oauthToken = options.oauthToken
-    this.client = new StoryblokClient({
-      oauthToken: options.oauthToken
-    })
+    this.client = api.getClient()
     this.targetSpaceId = options.targetSpaceId
   }
 
