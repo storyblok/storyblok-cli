@@ -240,8 +240,13 @@ module.exports = {
     return client[method](_path, props)
   },
 
-  async getAllSpaces () {
-    return await this.getClient()
+  async getAllSpaces (region) {
+    const customClient = new Storyblok({
+      accessToken: this.accessToken,
+      oauthToken: this.oauthToken,
+      region
+    }, this.apiSwitcher(region))
+    return await customClient
       .get('spaces/', {})
       .then(res => res.data.spaces || [])
       .catch(err => Promise.reject(err))
