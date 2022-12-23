@@ -240,7 +240,7 @@ module.exports = {
     return client[method](_path, props)
   },
 
-  async getAllSpaces (region) {
+  async getAllSpacesByRegion (region) {
     const customClient = new Storyblok({
       accessToken: this.accessToken,
       oauthToken: this.oauthToken,

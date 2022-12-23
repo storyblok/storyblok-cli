@@ -435,8 +435,9 @@ program
       if (!api.isAuthorized()) {
         await api.processLogin()
       }
+      const { region } = creds.get()
 
-      await tasks.listSpaces(api)
+      await tasks.listSpaces(api, region)
     } catch (e) {
       console.log(chalk.red('X') + ' An error ocurred to listing spaces: ' + e.message)
       process.exit(1)

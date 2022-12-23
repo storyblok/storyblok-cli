@@ -1,15 +1,12 @@
 const chalk = require('chalk')
-const creds = require('../utils/creds')
-
 /**
  * @method listSpaces
  * @param api - Pass the api instance as a parameter
  * @return {Promise}
  */
 
-const listSpaces = async (api) => {
-  const { region } = creds.get()
-  const isChinaEnv = region === 'cn'
+const listSpaces = async (api, currentRegion) => {
+  const isChinaEnv = currentRegion === 'cn'
   const regionOptions = {
     eu: 'Europe',
     us: 'United States'
@@ -23,7 +20,7 @@ const listSpaces = async (api) => {
   }
 
   if (isChinaEnv) {
-    const spaces = await api.getAllSpaces(region)
+    const spaces = await api.getAllSpacesByRegion(currentRegion)
       .then(res => res)
       .catch(err => Promise.reject(err))
 
@@ -31,15 +28,16 @@ const listSpaces = async (api) => {
       console.log(chalk.red('X') + ' No spaces were found for this user ')
       return []
     }
-    console.log(chalk.blue(' -') + ' Spaces From China')
+    console.log(chalk.blue(' -') + ' Spaces From China region:')
 
     spaces.map(space => {
       console.log(`    ${space.name} (id: ${space.id})`)
     })
+    return spaces
   } else {
     const spacesList = []
     for (const key in regionOptions) {
-      spacesList.push(await api.getAllSpaces(key)
+      spacesList.push(await api.getAllSpacesByRegion(key)
         .then((res) => {
           return {
             key,
@@ -54,11 +52,12 @@ const listSpaces = async (api) => {
     }
     spacesList.forEach(region => {
       console.log()
-      console.log(`${chalk.blue(' -')} Spaces From ${regionOptions[region.key]}:`)
+      console.log(`${chalk.blue(' -')} Spaces From ${regionOptions[region.key]} region:`)
       region.res.forEach((space) => {
         console.log(`    ${space.name} (id: ${space.id})`)
       })
     })
+    return spacesList
   }
 }
 
