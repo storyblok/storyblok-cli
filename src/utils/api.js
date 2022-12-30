@@ -16,11 +16,15 @@ module.exports = {
   getClient () {
     const { region } = creds.get()
 
-    return new Storyblok({
-      accessToken: this.accessToken,
-      oauthToken: this.oauthToken,
-      region: this.region
-    }, this.apiSwitcher(region))
+    try {
+      return new Storyblok({
+        accessToken: this.accessToken,
+        oauthToken: this.oauthToken,
+        region: this.region
+      }, this.apiSwitcher(region))
+    } catch (error) {
+      throw new Error(error)
+    }
   },
 
   getPath (path) {
