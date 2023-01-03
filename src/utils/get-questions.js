@@ -103,7 +103,29 @@ const getOptions = (subCommand, argv = {}, api = {}) => {
     ]
   }
 
-  if (subCommand === 'login') {
+  if (subCommand === 'login-strategy') {
+    return [
+      {
+        type: 'list',
+        name: 'strategy',
+        message: 'Select the login strategy: ',
+        choices: [
+          {
+            name: 'With email and password (Common users with storyblok account)',
+            value: 'login-with-email',
+            short: 'Email'
+          },
+          {
+            name: 'With Token (Most recommended for SSO users)',
+            value: 'login-with-token',
+            short: 'Token'
+          }
+        ]
+      }
+    ]
+  }
+
+  if (subCommand === 'login-with-email') {
     return [
       {
         type: 'input',
@@ -127,6 +149,35 @@ const getOptions = (subCommand, argv = {}, api = {}) => {
           }
 
           return 'Please enter a valid password:'
+        }
+      },
+      {
+        type: 'input',
+        name: 'region',
+        message: 'Enter your user\'s region (us, eu or cn):',
+        validate: function (value) {
+          const flagList = ['us', 'cn', 'eu']
+          if (flagList.indexOf(value) > -1) {
+            return true
+          }
+
+          return 'Please enter a valid region: us, eu or cn'
+        }
+      }
+    ]
+  }
+
+  if (subCommand === 'login-with-token') {
+    return [
+      {
+        type: 'input',
+        name: 'token',
+        message: 'Enter your token:',
+        validate: function (value) {
+          if (value.length > 0) {
+            return true
+          }
+          return 'Please enter a valid token:'
         }
       },
       {
