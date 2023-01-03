@@ -22,6 +22,43 @@ $ npm i storyblok -g
 
 ## Commands
 
+
+### login
+
+Login to the Storyblok cli
+
+```sh
+$ storyblok login
+```
+#### Login options
+
+##### Options for Login with email and password
+* `email`: your user's email address
+* `password`: your user's password
+
+##### Options for Login with token (Recomended to SSO user's but works with all user accounts)
+* `token`: your access token
+
+**For Both login options you nedd to pass the region**
+
+* `region`: your user's region (default: `eu`). You can use `us`, `cn` or `eu`. This region will be used for the other cli's commands.
+
+### logout
+
+Logout from the Storyblok cli
+
+```sh
+$ storyblok logout
+```
+### user
+
+Get the currently logged in user
+
+```sh
+$ storyblok user
+```
+
+
 ### select
 
 Usage to kickstart a boilerplate, fieldtype or theme
@@ -186,35 +223,6 @@ Create a space in Storyblok and select the boilerplate to use
 
 ```sh
 $ storyblok quickstart
-```
-
-### logout
-
-Logout from the Storyblok cli
-
-```sh
-$ storyblok logout
-```
-
-### login
-
-Login to the Storyblok cli
-
-```sh
-$ storyblok login
-```
-#### Options
-
-* `email`: your user's email address
-* `password`: your user's password
-* `region`: your user's region (default: `eu`). You can use `us`, `cn` or `eu`. This region will be used for the other cli's commands.
-
-### user
-
-Get the currently logged in user
-
-```sh
-$ storyblok user
 ```
 
 ### generate-migration
