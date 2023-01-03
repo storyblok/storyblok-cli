@@ -1,5 +1,24 @@
 const getOptions = (subCommand, argv = {}, api = {}) => {
   let email = ''
+  const moreOptions = [
+    'delete-templates',
+    'pull-components',
+    'push-components',
+    'scaffold'
+  ]
+  const regionInput = {
+    type: 'input',
+    name: 'region',
+    message: 'Enter your user\'s region (us, eu or cn):',
+    validate: function (value) {
+      const flagList = ['us', 'cn', 'eu']
+      if (flagList.indexOf(value) > -1) {
+        return true
+      }
+
+      return 'Please enter a valid region: us, eu or cn'
+    }
+  }
 
   if (subCommand === 'select') {
     return [
@@ -151,19 +170,7 @@ const getOptions = (subCommand, argv = {}, api = {}) => {
           return 'Please enter a valid password:'
         }
       },
-      {
-        type: 'input',
-        name: 'region',
-        message: 'Enter your user\'s region (us, eu or cn):',
-        validate: function (value) {
-          const flagList = ['us', 'cn', 'eu']
-          if (flagList.indexOf(value) > -1) {
-            return true
-          }
-
-          return 'Please enter a valid region: us, eu or cn'
-        }
-      }
+      regionInput
     ]
   }
 
@@ -180,28 +187,9 @@ const getOptions = (subCommand, argv = {}, api = {}) => {
           return 'Please enter a valid token:'
         }
       },
-      {
-        type: 'input',
-        name: 'region',
-        message: 'Enter your user\'s region (us, eu or cn):',
-        validate: function (value) {
-          const flagList = ['us', 'cn', 'eu']
-          if (flagList.indexOf(value) > -1) {
-            return true
-          }
-
-          return 'Please enter a valid region: us, eu or cn'
-        }
-      }
+      regionInput
     ]
   }
-
-  const moreOptions = [
-    'delete-templates',
-    'pull-components',
-    'push-components',
-    'scaffold'
-  ]
 
   if (moreOptions.indexOf(subCommand) > -1) {
     const loginQuestions = [
