@@ -16,7 +16,7 @@ const { getQuestions, lastStep, api, creds } = require('./utils')
 const { SYNC_TYPES, COMMANDS } = require('./constants')
 
 clear()
-console.log(chalk.cyan(figlet.textSync('Storyblok')))
+console.log(chalk.cyan(figlet.textSync('storyblok')))
 console.log()
 console.log()
 console.log('Hi, welcome to the Storyblok CLI')
