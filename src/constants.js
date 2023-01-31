@@ -1,6 +1,6 @@
 const API_URL = 'https://api.storyblok.com/v1/'
 const US_API_URL = 'https://api-us.storyblok.com/v1/'
-const CN_API_URL = 'https://api.storyblokchina.cn/v1/'
+const CN_API_URL = 'https://app.storyblokchina.cn/v1/'
 const LOGIN_URL = `${API_URL}users/login`
 const SIGNUP_URL = `${API_URL}users/signup`
 
