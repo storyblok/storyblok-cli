@@ -35,7 +35,8 @@ module.exports = {
     return path
   },
 
-  async login (email, password, region) {
+  async login (content) {
+    const { email, password, region } = content
     try {
       const response = await axios.post(`${this.apiSwitcher(region)}users/login`, {
         email: email,
@@ -68,10 +69,10 @@ module.exports = {
           otp_attempt: code
         })
 
-        return this.persistCredentials(email, newResponse.data || {}, region)
+        return this.persistCredentials(email, newResponse.data.access_token || {}, region)
       }
 
-      return this.persistCredentials(email, data, region)
+      return this.persistCredentials(email, data.access_token, region)
     } catch (e) {
       return Promise.reject(e)
     }
@@ -92,27 +93,37 @@ module.exports = {
     }
   },
 
-  persistCredentials (email, data, region = 'eu') {
-    const token = this.extractToken(data)
+  persistCredentials (email, token = null, region = 'eu') {
     if (token) {
       this.oauthToken = token
       creds.set(email, token, region)
 
-      return Promise.resolve(data)
+      return Promise.resolve(token)
     }
     return Promise.reject(new Error('The code could not be authenticated.'))
   },
 
   async processLogin () {
     try {
-      const questions = getQuestions('login')
-      const { email, password, region } = await inquirer.prompt(questions)
+      let content = {}
+      await inquirer
+        .prompt(getQuestions('login-strategy'))
+        .then(async ({ strategy }) => {
+          content = await inquirer.prompt(getQuestions(strategy))
+        })
+        .catch((error) => {
+          console.log(error)
+        })
 
-      const data = await this.login(email, password, region)
+      if (!content.token) {
+        await this.login(content)
+      } else {
+        await this.loginWithToken(content)
+      }
 
       console.log(chalk.green('✓') + ' Log in successfully! Token has been added to .netrc file.')
 
-      return Promise.resolve(data)
+      return Promise.resolve(content)
     } catch (e) {
       if (e.response && e.response.data && e.response.data.error) {
         console.error(chalk.red('X') + ' An error ocurred when login the user: ' + e.response.data.error)
@@ -125,8 +136,20 @@ module.exports = {
     }
   },
 
-  extractToken (data) {
-    return data.access_token
+  async loginWithToken (content) {
+    const { token, region } = content
+    try {
+      const { data } = await axios.get(`${this.apiSwitcher(region)}users/me`, {
+        headers: {
+          Authorization: token
+        }
+      })
+
+      this.persistCredentials(data.user.email, token, region)
+      return data.user
+    } catch (e) {
+      return Promise.reject(e)
+    }
   },
 
   logout (unauthorized) {
