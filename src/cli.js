@@ -115,10 +115,13 @@ program
 // pull-components
 program
   .command(COMMANDS.PULL_COMPONENTS)
+  .option('--sf, --single-file [value]', 'Argument to create a single file for each component')
+  .option('-p, --path <path>', 'Path to save the component files')
   .description("Download your space's components schema as json")
-  .action(async () => {
+  .action(async (options) => {
     console.log(`${chalk.blue('-')} Executing pull-components task`)
     const space = program.space
+    const { singleFile, path } = options
     if (!space) {
       console.log(chalk.red('X') + ' Please provide the space as argument --space YOUR_SPACE_ID.')
       process.exit(0)
@@ -130,7 +133,7 @@ program
       }
 
       api.setSpaceId(space)
-      await tasks.pullComponents(api, { space })
+      await tasks.pullComponents(api, { space, singleFile, path })
     } catch (e) {
       errorHandler(e, COMMANDS.PULL_COMPONENTS)
     }
