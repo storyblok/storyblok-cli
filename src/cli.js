@@ -261,6 +261,7 @@ program
   .requiredOption('--type <TYPE>', 'Define what will be sync. Can be components, folders, stories, datasources or roles')
   .requiredOption('--source <SPACE_ID>', 'Source space id')
   .requiredOption('--target <SPACE_ID>', 'Target space id')
+  .option('--starts-with <STARTS_WITH>', 'Sync only stories that starts with the given string')
   .action(async (options) => {
     console.log(`${chalk.blue('-')} Sync data between spaces\n`)
 
@@ -272,7 +273,8 @@ program
       const {
         type,
         source,
-        target
+        target,
+        startsWith
       } = options
 
       const _types = type.split(',') || []
@@ -288,7 +290,8 @@ program
         api,
         token,
         source,
-        target
+        target,
+        startsWith
       })
 
       console.log('\n' + chalk.green('✓') + ' Sync data between spaces successfully completed')
