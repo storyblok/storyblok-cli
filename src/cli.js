@@ -262,6 +262,10 @@ program
   .requiredOption('--source <SPACE_ID>', 'Source space id')
   .requiredOption('--target <SPACE_ID>', 'Target space id')
   .option('--starts-with <STARTS_WITH>', 'Sync only stories that starts with the given string')
+  .option('--filter', 'Enable filter options to sync only stories that match the given filter. Required options: --keys; --operations; --values')
+  .option('--keys <KEYS>', 'Field names in your story object which should be used for filtering. Multiple keys should be inside quotes and separated by whitespace.')
+  .option('--operations <OPERATIONS>', 'Operations to be used for filtering. Can be: is, in, not_in, like, not_like, any_in_array, all_in_array, gt_date, lt_date, gt_int, lt_int, gt_float, lt_float. Multiple operations should be inside quotes and separated by whitespace.')
+  .option('--values <VALUES>', 'Values to be used for filtering. Any string or number. If you want to use multiple values, separate them with a comma. Multiple values should be inside quotes and separated by whitespace.')
   .action(async (options) => {
     console.log(`${chalk.blue('-')} Sync data between spaces\n`)
 
@@ -274,7 +278,11 @@ program
         type,
         source,
         target,
-        startsWith
+        startsWith,
+        filter,
+        keys,
+        operations,
+        values
       } = options
 
       const _types = type.split(',') || []
@@ -284,14 +292,36 @@ program
         }
       })
 
-      const token = creds.get().token || null
+      let filterQuery
+      if (filter) {
+        const operators = ['is', 'in', 'not_in', 'like', 'not_like', 'any_in_array', 'all_in_array', 'gt_date', 'lt_date', 'gt_int', 'lt_int', 'gt_float', 'lt_float']
+        if (!keys || !operations || !values) {
+          throw new Error('Filter options are required: --keys; --operations; --values')
+        }
+        const _keys = keys.split(' ')
+        const _operations = operations.split(' ')
+        const _values = values.split(' ')
+        if (_keys.length !== _operations.length || _keys.length !== _values.length) {
+          throw new Error('The number of keys, operations and values must be the same')
+        }
+        const invalidOperators = _operations.filter((o) => !operators.includes(o))
+        if (invalidOperators.length) {
+          throw new Error('Invalid operator(s) applied for filter: ' + invalidOperators.join(' '))
+        }
+        filterQuery = {}
+        _keys.forEach((key, index) => {
+          filterQuery[key] = { [_operations[index]]: _values[index] }
+        })
+      }
 
+      const token = creds.get().token || null
       await tasks.sync(_types, {
         api,
         token,
         source,
         target,
-        startsWith
+        startsWith,
+        filterQuery
       })
 
       console.log('\n' + chalk.green('✓') + ' Sync data between spaces successfully completed')

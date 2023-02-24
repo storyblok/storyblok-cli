@@ -207,6 +207,9 @@ $ storyblok sync --type <COMMAND> --source <SPACE_ID> --target <SPACE_ID>
 * `source`: the source space to use to sync
 * `target`: the target space to use to sync
 * `starts-with`: sync only stories that starts with the given string
+* `filter`: sync stories based on the given filter. Required Options: Required options: `--keys`, `--operations`, `--values`
+* `keys`: Multiple keys should be inside quotes and separated by whitespace. Example: `--keys "key1 key2"`, `--keys key1`
+* `operations`: Operations to be used for filtering. Can be: `is`, `in`, `not_in`, `like`, `not_like`, `any_in_array`, `all_in_array`, `gt_date`, `lt_date`, `gt_int`, `lt_int`, `gt_float`, `lt_float`. Multiple operations should be inside quotes and separated by whitespace.
 
 #### Examples
 
@@ -219,6 +222,12 @@ $ storyblok sync --type components,stories --source 00001 --target 00002
 
 # Sync only stories that starts with `myStartsWithString` from `00001` space to `00002` space
 $ storyblok sync --type stories --source 00001 --target 00002 --starts-with myStartsWithString
+
+# Sync only stories with a category field like `reference` from `00001` space to `00002` space
+$ storyblok sync --type stories --source 00001 --target 00002 --filter --keys category --operations like --values reference
+
+# Sync only stories with a category field like `reference` and a name field not like `demo` from `00001` space to `00002` space
+$ storyblok sync --type stories --source 00001 --target 00002 --filter --keys "category name" --operations "like not_like" --values "reference demo"
 ```
 
 ### quickstart
