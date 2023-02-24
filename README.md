@@ -206,6 +206,7 @@ $ storyblok sync --type <COMMAND> --source <SPACE_ID> --target <SPACE_ID>
 * `type`: describe the command type to execute. Can be: `folders`, `components`, `stories`, `datasources` or `roles`. It's possible pass multiple types separated by comma (`,`).
 * `source`: the source space to use to sync
 * `target`: the target space to use to sync
+* `starts-with`: sync only stories that starts with the given string
 
 #### Examples
 
@@ -215,6 +216,9 @@ $ storyblok sync --type components --source 00001 --target 00002
 
 # Sync components and stories from `00001` space to `00002` space
 $ storyblok sync --type components,stories --source 00001 --target 00002
+
+# Sync only stories that starts with `myStartsWithString` from `00001` space to `00002` space
+$ storyblok sync --type stories --source 00001 --target 00002 --starts-with myStartsWithString
 ```
 
 ### quickstart
