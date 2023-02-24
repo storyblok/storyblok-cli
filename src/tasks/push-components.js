@@ -24,7 +24,7 @@ const getGroupByUuid = (groups, uuid) => {
  * @param {string} path the local path or remote url of the file
  * @returns {Promise<Object>} return the data from the source or an error
  */
-const getDataFromSource = async (path) => {
+const getDataFromPath = async (path) => {
   if (!path) {
     return {}
   }
@@ -49,16 +49,24 @@ const getDataFromSource = async (path) => {
   }
 }
 
+/**
+ * Creat an array based in the content parameter and the key provided
+ * @param {object} content the data to create a list
+ * @param {string} key key to serch in the content
+ * @returns {Array} return the data from the source or an error
+ */
+const createContentList = (content, key) => {
+  if (content[key]) return content[key]
+  else if (Array.isArray(content)) return [...content]
+  else return [content]
+}
+
 module.exports = async (api, { source, presetsSource }) => {
   try {
-    const rawComponents = await getDataFromSource(source)
-    const components = rawComponents.components
-      ? rawComponents.components
-      : Array.isArray(rawComponents)
-        ? [...rawComponents]
-        : [rawComponents]
-    const rawPresets = await getDataFromSource(presetsSource)
-    const presets = rawPresets.presets ? rawPresets.presets : [rawPresets]
+    const rawComponents = await getDataFromPath(source)
+    const components = createContentList(rawComponents, 'components')
+    const rawPresets = await getDataFromPath(presetsSource)
+    const presets = createContentList(rawPresets, 'presets')
 
     return push(api, components, presets)
   } catch (err) {
