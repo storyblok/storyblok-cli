@@ -117,10 +117,13 @@ describe('testing pullComponents', () => {
         expect(fs.writeFile.mock.calls.length).toBe(FAKE_COMPONENTS().length)
 
         for (const comp in FAKE_COMPONENTS()) {
-          console.log(comp)
           const compFileName = `${FAKE_COMPONENTS()[comp].name}-${SPACE}.json`
-          const data = FAKE_COMPONENTS()[comp]
+          let data = FAKE_COMPONENTS()[comp]
           const [compPath, compData] = fs.writeFile.mock.calls[comp]
+
+          if (FAKE_COMPONENTS()[comp].name === 'logo') {
+            data = { ...FAKE_COMPONENTS()[comp], component_group_name: '' }
+          }
 
           expect(compPath).toBe(`./${compFileName}`)
           expect(JSON.parse(compData)).toEqual(data)

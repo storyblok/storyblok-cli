@@ -75,7 +75,7 @@ const FAKE_COMPONENTS = () => [
     all_presets: [],
     preset_id: null,
     real_name: 'logo',
-    component_group_uuid: null
+    component_group_uuid: '529cc32a-1d97-4b4a-b0b6-28e33dc56c0d'
   },
   {
     name: 'blocks',
