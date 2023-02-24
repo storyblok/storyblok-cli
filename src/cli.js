@@ -39,14 +39,18 @@ program
 program
   .command(COMMANDS.LOGIN)
   .description('Login to the Storyblok cli')
+  .option('-t, --token <token>', 'Token to login directly without questions, like for CI enviroments')
+  .option('-r, --region <region>', 'Region of the user')
   .action(async (options) => {
+    const { token, region } = options
+
     if (api.isAuthorized()) {
       console.log(chalk.green('✓') + ' The user has been already logged. If you want to change the logged user, you must logout and login again')
       return
     }
 
     try {
-      await api.processLogin()
+      await api.processLogin(token, region)
       process.exit(0)
     } catch (e) {
       console.log(chalk.red('X') + ' An error occurred when logging the user: ' + e.message)

@@ -103,8 +103,14 @@ module.exports = {
     return Promise.reject(new Error('The code could not be authenticated.'))
   },
 
-  async processLogin () {
+  async processLogin (token = null, region = null) {
     try {
+      if (token && region) {
+        await this.loginWithToken({ token, region })
+        console.log(chalk.green('✓') + ' Log in successfully! Token has been added to .netrc file.')
+        return Promise.resolve({ token, region })
+      }
+
       let content = {}
       await inquirer
         .prompt(getQuestions('login-strategy'))
