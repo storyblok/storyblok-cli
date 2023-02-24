@@ -20,11 +20,11 @@ const getNameFromComponentGroups = (groups, uuid) => {
 /**
  * @method pullComponents
  * @param  {Object} api
- * @param  {Object} options { space: Number, singleFile: Boolean, path: String }
+ * @param  {Object} options { space: Number, separateFiles: Boolean, path: String }
  * @return {Promise<Object>}
  */
 const pullComponents = async (api, options) => {
-  const { space, singleFile, path } = options
+  const { space, separateFiles, path } = options
 
   try {
     const componentGroups = await api.getComponentGroups()
@@ -41,7 +41,7 @@ const pullComponents = async (api, options) => {
       }
     })
 
-    if (singleFile) {
+    if (separateFiles) {
       for (const comp in components) {
         const compFileName = `${components[comp].name}-${space}.json`
         const data = JSON.stringify(components[comp], null, 2)
