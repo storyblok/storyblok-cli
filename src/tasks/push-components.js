@@ -21,30 +21,45 @@ const getGroupByUuid = (groups, uuid) => {
 
 /**
  * Get the data from a local or remote JSON file
- * @param {string} source the local path or remote url of the file
+ * @param {string} path the local path or remote url of the file
  * @returns {Promise<Object>} return the data from the source or an error
  */
-const getDataFromSource = async (source) => {
-  if (!source) {
+const getDataFromSource = async (path) => {
+  if (!path) {
     return {}
   }
+  const sources = path.split(',')
+  const isList = sources.length > 1
 
   try {
-    if (isUrl(source)) {
-      return (await axios.get(source)).data
+    if (isUrl(path)) {
+      return (await axios.get(path)).data
     } else {
-      return JSON.parse(fs.readFileSync(source, 'utf8'))
+      if (!isList) return JSON.parse(fs.readFileSync(sources[0], 'utf8'))
+
+      const data = []
+      sources.forEach((source) => {
+        data.push(JSON.parse(fs.readFileSync(source, 'utf8')))
+      })
+      return data
     }
   } catch (err) {
-    console.error(`${chalk.red('X')} Can not load json file from ${source}`)
+    console.error(`${chalk.red('X')} Can not load json file from ${path}`)
     return Promise.reject(err)
   }
 }
 
 module.exports = async (api, { source, presetsSource }) => {
   try {
-    const components = (await getDataFromSource(source)).components || []
-    const presets = (await getDataFromSource(presetsSource)).presets || []
+    const rawComponents = await getDataFromSource(source)
+    const components = rawComponents.components
+      ? rawComponents.components
+      : Array.isArray(rawComponents)
+        ? [...rawComponents]
+        : [rawComponents]
+    const rawPresets = await getDataFromSource(presetsSource)
+    const presets = rawPresets.presets ? rawPresets.presets : [rawPresets]
+
     return push(api, components, presets)
   } catch (err) {
     console.error(`${chalk.red('X')} Can not push invalid json - please provide a valid json file`)
