@@ -49,7 +49,7 @@ const pullComponents = async (api, options) => {
       }
       console.log(`${chalk.green('✓')} We've saved your components in files with the names of each component`)
 
-      if (!presets.length) return
+      if (presets.length === 0) return
 
       for (const preset in presets) {
         const presetFileName = `${presets[preset].name}-${space}.json`
@@ -67,7 +67,7 @@ const pullComponents = async (api, options) => {
 
     saveFileFactory(file, data, path)
 
-    if (!presets.length) return
+    if (presets.length === 0) return
 
     const presetsFile = `presets.${space}.json`
     const presetsData = JSON.stringify({ presets }, null, 2)
