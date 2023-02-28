@@ -43,6 +43,13 @@ $ storyblok login
 
 * `region`: your user's region (default: `eu`). You can use `us`, `cn` or `eu`. This region will be used for the other cli's commands.
 
+#### Login with token flag
+You can also add the token directly from the login’s command, like the example below:
+
+```sh
+$ storyblok login --token <YOUR_OUTH_TOKEN> --region eu 
+```
+
 ### logout
 
 Logout from the Storyblok cli
@@ -81,27 +88,33 @@ $ storyblok pull-languages --space <SPACE_ID>
 
 ### pull-components
 
-Download your space's components schema as json. This command will download 2 files: 1 for the components and 1 for the presets.
+Download your space's components schema as json. By default this command will download 2 files: 1 for the components and 1 for the presets; But if you pass a flag `--separate-files or --sf` the command will create file for each component and presets. And also you could pass a path `--path or -p` to save your components and presets.
 
 ```sh
-$ storyblok pull-components --space <SPACE_ID> --region <REGION>
+$ storyblok pull-components --space <SPACE_ID> # Will save files like components-1234.json
+```
+
+```sh
+$ storyblok pull-components --space <SPACE_ID> --separate-files # Will save files like feature-1234.json grid-1234.json
 ```
 
 #### Options
 
 * `space`: your space id
+* `separate-files`: boolean flag to save components and presets in single files instead a file with all
+* `path`: the path to save your components and preset files
 
 ### push-components
 
 Push your components file to your/another space
 
 ```sh
-$ storyblok push-components <SOURCE> --space <SPACE_ID> --region <REGION> --presets-source <PRESETS_SOURCE>
+$ storyblok push-components <SOURCE> --space <SPACE_ID> --presets-source <PRESETS_SOURCE>
 ```
 
 #### Parameters
 
-* `source`: can be a URL or path to JSON file.
+* `source`: can be a URL or path to JSON file, the path to a json file could be to a single or multiple files separated by comma, like `./pages-1234.json,../User/components/grid-1234.json`
 
 Using an **URL**
 
@@ -109,10 +122,16 @@ Using an **URL**
 $ storyblok push-components https://raw.githubusercontent.com/storyblok/nuxtdoc/master/seed.components.json --space 67819
 ```
 
-Using a **path** to file
+Using a **path** to a single file
 
 ```sh
 $ storyblok push-components ./components.json --space 67819
+```
+
+Using a **path** to a multiple files
+
+```sh
+$ storyblok push-components ./page.json,../grid.json,./feature.json --space 67819
 ```
 
 #### Options

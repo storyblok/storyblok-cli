@@ -3,7 +3,7 @@ const PASSWORD_TEST = 'test'
 const TOKEN_TEST = 'storyblok1234'
 const REGION_TEST = 'eu'
 
-// use functions to always returns "new" data
+// use functions to always returns 'new' data
 const FAKE_COMPONENTS = () => [
   {
     name: 'teaser',
@@ -136,7 +136,7 @@ const FAKE_COMPONENTS = () => [
   }
 ]
 
-// use functions to always returns "new" data
+// use functions to always returns 'new' data
 const FAKE_STORIES = () => [
   {
     name: 'About',
@@ -249,6 +249,46 @@ const FAKE_SPACE_OPTIONS = () => ({
   use_translated_stories: false
 })
 
+const FAKE_PRESET = () => ({
+  id: 123,
+  name: 'page_preset',
+  preset: {
+    _uid: '7dce995b-07ed-4e5b-a4bb-5d22447252d8',
+    body: [
+      {
+        _uid: '995e84c1-a08d-45cd-b121-e4db45e9cf50',
+        headline: 'Hello world!',
+        component: 'teaser'
+      },
+      {
+        _uid: 'a6e118ec-1a57-4f0f-b1e9-1ed625a82751',
+        columns: [
+          {
+            _uid: '9b0a9bed-e891-4edc-8f5e-bc29e7ec785c',
+            name: 'Feature 1',
+            component: 'feature'
+          },
+          {
+            _uid: '07863609-7518-48b9-8d28-b1e8037818e2',
+            name: 'Feature 2',
+            component: 'feature'
+          }
+        ],
+        component: 'grid'
+      }
+    ],
+    component: 'page'
+  },
+  component_id: 3481284,
+  space_id: 200378,
+  created_at: '2023-02-24T16:49:14.723Z',
+  updated_at: '2023-02-24T16:49:14.723Z',
+  image: '',
+  color: '',
+  icon: '',
+  description: 'page preset'
+})
+
 module.exports = {
   EMAIL_TEST,
   TOKEN_TEST,
@@ -257,5 +297,6 @@ module.exports = {
   FAKE_COMPONENTS,
   FAKE_SPACES,
   FAKE_SPACE_OPTIONS,
-  REGION_TEST
+  REGION_TEST,
+  FAKE_PRESET
 }

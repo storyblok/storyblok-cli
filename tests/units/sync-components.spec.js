@@ -1,6 +1,7 @@
 const sync = require('../../src/tasks/sync')
 const PresetsLib = jest.requireActual('../../src/utils/presets-lib')
-const { TOKEN_TEST, FAKE_COMPONENTS } = require('../constants')
+const { TOKEN_TEST, EMAIL_TEST, REGION_TEST, FAKE_COMPONENTS } = require('../constants')
+const creds = require('../../src/utils/creds')
 
 const FAKE_COMPONENTS_TO_TEST = {
   '001': {
@@ -217,6 +218,7 @@ const TARGET_SPACE_TEST = '002'
 
 describe('testing syncComponents', () => {
   beforeAll(() => {
+    creds.set(EMAIL_TEST, TOKEN_TEST, REGION_TEST)
     // we need to execute once this function to test it
     const _types = ['components']
 

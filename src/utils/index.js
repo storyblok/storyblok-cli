@@ -5,5 +5,6 @@ module.exports = {
   creds: require('./creds'),
   capitalize: require('./capitalize'),
   findByProperty: require('./find-by-property'),
-  parseError: require('./parse-error')
+  parseError: require('./parse-error'),
+  saveFileFactory: require('./save-file-factory')
 }
