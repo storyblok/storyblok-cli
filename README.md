@@ -43,7 +43,8 @@ $ storyblok login
 
 * `region`: your user's region (default: `eu`). You can use `us`, `cn` or `eu`. This region will be used for the other cli's commands.
 
-**You also could login in the CLI adding the token directly in the login command without waiting and adding the information in the questions, like:**
+#### Login with token flag
+You can also add the token directly from the login’s command, like the example below:
 
 ```sh
 $ storyblok login --token <YOUR_OUTH_TOKEN> --region eu 
