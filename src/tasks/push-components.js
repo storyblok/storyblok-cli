@@ -21,30 +21,53 @@ const getGroupByUuid = (groups, uuid) => {
 
 /**
  * Get the data from a local or remote JSON file
- * @param {string} source the local path or remote url of the file
+ * @param {string} path the local path or remote url of the file
  * @returns {Promise<Object>} return the data from the source or an error
  */
-const getDataFromSource = async (source) => {
-  if (!source) {
+const getDataFromPath = async (path) => {
+  if (!path) {
     return {}
   }
+  const sources = path.split(',')
+  const isList = sources.length > 1
 
   try {
-    if (isUrl(source)) {
-      return (await axios.get(source)).data
+    if (isUrl(path)) {
+      return (await axios.get(path)).data
     } else {
-      return JSON.parse(fs.readFileSync(source, 'utf8'))
+      if (!isList) return JSON.parse(fs.readFileSync(sources[0], 'utf8'))
+
+      const data = []
+      sources.forEach((source) => {
+        data.push(JSON.parse(fs.readFileSync(source, 'utf8')))
+      })
+      return data
     }
   } catch (err) {
-    console.error(`${chalk.red('X')} Can not load json file from ${source}`)
+    console.error(`${chalk.red('X')} Can not load json file from ${path}`)
     return Promise.reject(err)
   }
 }
 
+/**
+ * Creat an array based in the content parameter and the key provided
+ * @param {object} content the data to create a list
+ * @param {string} key key to serch in the content
+ * @returns {Array} return the data from the source or an error
+ */
+const createContentList = (content, key) => {
+  if (content[key]) return content[key]
+  else if (Array.isArray(content)) return [...content]
+  else return [content]
+}
+
 module.exports = async (api, { source, presetsSource }) => {
   try {
-    const components = (await getDataFromSource(source)).components || []
-    const presets = (await getDataFromSource(presetsSource)).presets || []
+    const rawComponents = await getDataFromPath(source)
+    const components = createContentList(rawComponents, 'components')
+    const rawPresets = await getDataFromPath(presetsSource)
+    const presets = createContentList(rawPresets, 'presets')
+
     return push(api, components, presets)
   } catch (err) {
     console.error(`${chalk.red('X')} Can not push invalid json - please provide a valid json file`)

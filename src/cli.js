@@ -39,14 +39,18 @@ program
 program
   .command(COMMANDS.LOGIN)
   .description('Login to the Storyblok cli')
+  .option('-t, --token <token>', 'Token to login directly without questions, like for CI enviroments')
+  .option('-r, --region <region>', 'Region of the user')
   .action(async (options) => {
+    const { token, region } = options
+
     if (api.isAuthorized()) {
       console.log(chalk.green('✓') + ' The user has been already logged. If you want to change the logged user, you must logout and login again')
       return
     }
 
     try {
-      await api.processLogin()
+      await api.processLogin(token, region)
       process.exit(0)
     } catch (e) {
       console.log(chalk.red('X') + ' An error occurred when logging the user: ' + e.message)
@@ -115,10 +119,13 @@ program
 // pull-components
 program
   .command(COMMANDS.PULL_COMPONENTS)
+  .option('--sf, --separate-files [value]', 'Argument to create a single file for each component')
+  .option('-p, --path <path>', 'Path to save the component files')
   .description("Download your space's components schema as json")
-  .action(async () => {
+  .action(async (options) => {
     console.log(`${chalk.blue('-')} Executing pull-components task`)
     const space = program.space
+    const { separateFiles, path } = options
     if (!space) {
       console.log(chalk.red('X') + ' Please provide the space as argument --space YOUR_SPACE_ID.')
       process.exit(0)
@@ -130,7 +137,7 @@ program
       }
 
       api.setSpaceId(space)
-      await tasks.pullComponents(api, { space })
+      await tasks.pullComponents(api, { space, separateFiles, path })
     } catch (e) {
       errorHandler(e, COMMANDS.PULL_COMPONENTS)
     }

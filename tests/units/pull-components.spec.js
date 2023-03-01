@@ -1,6 +1,6 @@
 const fs = require('fs')
 const pullComponents = require('../../src/tasks/pull-components')
-const { FAKE_COMPONENTS } = require('../constants')
+const { FAKE_COMPONENTS, FAKE_PRESET } = require('../constants')
 
 jest.mock('fs')
 
@@ -24,36 +24,12 @@ describe('testing pullComponents', () => {
       })
   })
 
-  it('api.getComponents() should be call fs.writeFile correctly', async () => {
+  it('pull components should be call fs.writeFile correctly and generate component file', async () => {
     const SPACE = 12345
-    const BODY = {
-      components: [
-        {
-          name: 'teaser',
-          display_name: null,
-          created_at: '2019-10-15T17:00:32.212Z',
-          id: 581153,
-          schema: {
-            headline: {
-              type: 'text'
-            }
-          },
-          image: null,
-          preview_field: null,
-          is_root: false,
-          preview_tmpl: null,
-          is_nestable: true,
-          all_presets: [],
-          preset_id: null,
-          real_name: 'teaser',
-          component_group_uuid: null
-        }
-      ]
-    }
 
     const api = {
       getComponents () {
-        return Promise.resolve(BODY.components)
+        return Promise.resolve([FAKE_COMPONENTS()[0]])
       },
       getComponentGroups () {
         return Promise.resolve([])
@@ -73,9 +49,85 @@ describe('testing pullComponents', () => {
       .then(_ => {
         const [path, data] = fs.writeFile.mock.calls[0]
 
-        expect(fs.writeFile.mock.calls.length).toBe(2)
+        expect(fs.writeFile.mock.calls.length).toBe(1)
         expect(path).toBe(`./${expectFileName}`)
-        expect(JSON.parse(data)).toEqual(BODY)
+        expect(JSON.parse(data)).toEqual({ components: [FAKE_COMPONENTS()[0]] })
+      })
+  })
+
+  it('pull components should be call fs.writeFile correctly and generate a component and preset files', async () => {
+    const SPACE = 12345
+
+    const api = {
+      getComponents () {
+        return Promise.resolve([FAKE_COMPONENTS()[0]])
+      },
+      getComponentGroups () {
+        return Promise.resolve([])
+      },
+      getPresets () {
+        return Promise.resolve(FAKE_PRESET())
+      }
+    }
+
+    const options = {
+      space: SPACE
+    }
+
+    const expectComponentFileName = `components.${SPACE}.json`
+    const expectPresetFileName = `presets.${SPACE}.json`
+
+    return pullComponents(api, options)
+      .then(_ => {
+        const [compPath, compData] = fs.writeFile.mock.calls[0]
+        const [presetPath, presetData] = fs.writeFile.mock.calls[1]
+
+        expect(fs.writeFile.mock.calls.length).toBe(2)
+
+        expect(compPath).toBe(`./${expectComponentFileName}`)
+        expect(JSON.parse(compData)).toEqual({ components: [FAKE_COMPONENTS()[0]] })
+
+        expect(presetPath).toBe(`./${expectPresetFileName}`)
+        expect(JSON.parse(presetData)).toEqual({ presets: FAKE_PRESET() })
+      })
+  })
+
+  it('pull components should be call fs.writeFile and generate a single file for each component', async () => {
+    const SPACE = 12345
+
+    const api = {
+      getComponents () {
+        return Promise.resolve(FAKE_COMPONENTS())
+      },
+      getComponentGroups () {
+        return Promise.resolve([])
+      },
+      getPresets () {
+        return Promise.resolve([])
+      }
+    }
+
+    const options = {
+      space: SPACE,
+      separateFiles: true
+    }
+
+    return pullComponents(api, options)
+      .then(_ => {
+        expect(fs.writeFile.mock.calls.length).toBe(FAKE_COMPONENTS().length)
+
+        for (const comp in FAKE_COMPONENTS()) {
+          const compFileName = `${FAKE_COMPONENTS()[comp].name}-${SPACE}.json`
+          let data = FAKE_COMPONENTS()[comp]
+          const [compPath, compData] = fs.writeFile.mock.calls[comp]
+
+          if (FAKE_COMPONENTS()[comp].name === 'logo') {
+            data = { ...FAKE_COMPONENTS()[comp], component_group_name: '' }
+          }
+
+          expect(compPath).toBe(`./${compFileName}`)
+          expect(JSON.parse(compData)).toEqual(data)
+        }
       })
   })
 
