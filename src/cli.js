@@ -270,9 +270,9 @@ program
   .requiredOption('--target <SPACE_ID>', 'Target space id')
   .option('--starts-with <STARTS_WITH>', 'Sync only stories that starts with the given string')
   .option('--filter', 'Enable filter options to sync only stories that match the given filter. Required options: --keys; --operations; --values')
-  .option('--keys <KEYS>', 'Field names in your story object which should be used for filtering. Multiple keys should be inside quotes and separated by whitespace.')
-  .option('--operations <OPERATIONS>', 'Operations to be used for filtering. Can be: is, in, not_in, like, not_like, any_in_array, all_in_array, gt_date, lt_date, gt_int, lt_int, gt_float, lt_float. Multiple operations should be inside quotes and separated by whitespace.')
-  .option('--values <VALUES>', 'Values to be used for filtering. Any string or number. If you want to use multiple values, separate them with a comma. Multiple values should be inside quotes and separated by whitespace.')
+  .option('--keys <KEYS>', 'Field names in your story object which should be used for filtering. Multiple keys should separated by comma.')
+  .option('--operations <OPERATIONS>', 'Operations to be used for filtering. Can be: is, in, not_in, like, not_like, any_in_array, all_in_array, gt_date, lt_date, gt_int, lt_int, gt_float, lt_float. Multiple operations should be separated by comma.')
+  .option('--values <VALUES>', 'Values to be used for filtering. Any string or number. If you want to use multiple values, separate them with a comma. Multiple values should be separated by comma.')
   .action(async (options) => {
     console.log(`${chalk.blue('-')} Sync data between spaces\n`)
 

@@ -3,9 +3,9 @@ const buildFilterQuery = (keys, operations, values) => {
   if (!keys || !operations || !values) {
     throw new Error('Filter options are required: --keys; --operations; --values')
   }
-  const _keys = keys.split(' ')
-  const _operations = operations.split(' ')
-  const _values = values.split(' ')
+  const _keys = keys.split(',')
+  const _operations = operations.split(',')
+  const _values = values.split(',')
   if (_keys.length !== _operations.length || _keys.length !== _values.length) {
     throw new Error('The number of keys, operations and values must be the same')
   }
