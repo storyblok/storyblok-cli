@@ -12,7 +12,7 @@ const updateNotifier = require('update-notifier')
 const pkg = require('../package.json')
 
 const tasks = require('./tasks')
-const { getQuestions, lastStep, api, creds } = require('./utils')
+const { getQuestions, lastStep, api, creds, buildFilterQuery } = require('./utils')
 const { SYNC_TYPES, COMMANDS } = require('./constants')
 
 clear()
@@ -268,6 +268,11 @@ program
   .requiredOption('--type <TYPE>', 'Define what will be sync. Can be components, folders, stories, datasources or roles')
   .requiredOption('--source <SPACE_ID>', 'Source space id')
   .requiredOption('--target <SPACE_ID>', 'Target space id')
+  .option('--starts-with <STARTS_WITH>', 'Sync only stories that starts with the given string')
+  .option('--filter', 'Enable filter options to sync only stories that match the given filter. Required options: --keys; --operations; --values')
+  .option('--keys <KEYS>', 'Field names in your story object which should be used for filtering. Multiple keys should separated by comma.')
+  .option('--operations <OPERATIONS>', 'Operations to be used for filtering. Can be: is, in, not_in, like, not_like, any_in_array, all_in_array, gt_date, lt_date, gt_int, lt_int, gt_float, lt_float. Multiple operations should be separated by comma.')
+  .option('--values <VALUES>', 'Values to be used for filtering. Any string or number. If you want to use multiple values, separate them with a comma. Multiple values should be separated by comma.')
   .action(async (options) => {
     console.log(`${chalk.blue('-')} Sync data between spaces\n`)
 
@@ -279,7 +284,12 @@ program
       const {
         type,
         source,
-        target
+        target,
+        startsWith,
+        filter,
+        keys,
+        operations,
+        values
       } = options
 
       const _types = type.split(',') || []
@@ -289,13 +299,16 @@ program
         }
       })
 
-      const token = creds.get().token || null
+      const filterQuery = filter ? buildFilterQuery(keys, operations, values) : undefined
 
+      const token = creds.get().token || null
       await tasks.sync(_types, {
         api,
         token,
         source,
-        target
+        target,
+        startsWith,
+        filterQuery
       })
 
       console.log('\n' + chalk.green('✓') + ' Sync data between spaces successfully completed')

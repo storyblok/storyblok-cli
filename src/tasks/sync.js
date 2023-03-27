@@ -3,6 +3,7 @@ const chalk = require('chalk')
 const SyncComponents = require('./sync-commands/components')
 const SyncDatasources = require('./sync-commands/datasources')
 const { capitalize } = require('../utils')
+const { startsWith } = require('lodash/string')
 
 const SyncSpaces = {
   targetComponents: [],
@@ -14,6 +15,8 @@ const SyncSpaces = {
     this.sourceSpaceId = options.source
     this.targetSpaceId = options.target
     this.oauthToken = options.token
+    this.startsWith = options.startsWith
+    this.filterQuery = options.filterQuery
     this.client = api.getClient()
   },
 
@@ -56,7 +59,9 @@ const SyncSpaces = {
     }
 
     const all = await this.client.getAll(`spaces/${this.sourceSpaceId}/stories`, {
-      story_only: 1
+      story_only: 1,
+      ...(this.startsWith ? { starts_with: this.startsWith } : {}),
+      ...(this.filterQuery ? { filter_query: this.filterQuery } : {})
     })
 
     for (let i = 0; i < all.length; i++) {
