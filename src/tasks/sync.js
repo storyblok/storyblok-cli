@@ -48,7 +48,7 @@ const SyncSpaces = {
   async syncStories () {
     console.log(chalk.green('✓') + ' Syncing stories...')
     const targetFolders = await this.client.getAll(`spaces/${this.targetSpaceId}/stories`, {
-        folder_only: 1,
+      folder_only: 1,
       sort_by: 'slug:asc'
     })
 
@@ -60,8 +60,8 @@ const SyncSpaces = {
     }
 
     const all = await this.client.getAll(`spaces/${this.sourceSpaceId}/stories`, {
-        story_only: 1,
-        ...(this.startsWith ? { starts_with: this.startsWith } : {}),
+      story_only: 1,
+      ...(this.startsWith ? { starts_with: this.startsWith } : {}),
       ...(this.filterQuery ? { filter_query: this.filterQuery } : {})
     })
 
@@ -121,7 +121,7 @@ const SyncSpaces = {
   async syncFolders () {
     console.log(chalk.green('✓') + ' Syncing folders...')
     const sourceFolders = await this.client.getAll(`spaces/${this.sourceSpaceId}/stories`, {
-        folder_only: 1,
+      folder_only: 1,
       sort_by: 'slug:asc'
     })
     const syncedFolders = {}
@@ -285,7 +285,7 @@ const sync = (types, options) => {
     const command = `sync${capitalize(_type)}`
 
     return () => SyncSpaces[command]()
-    })
+  })
 
   return pSeries(tasks)
 }

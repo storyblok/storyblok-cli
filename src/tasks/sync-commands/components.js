@@ -128,8 +128,8 @@ class SyncComponents {
           console.log(chalk.green('✓') + ` Component ${component.name} synced`)
 
           const presetsToSave = this.presetsLib.filterPresetsFromTargetComponent(
-              componentPresets || [],
-              componentTarget.all_presets || []
+            componentPresets || [],
+            componentTarget.all_presets || []
           )
 
           if (presetsToSave.newPresets.length) {
