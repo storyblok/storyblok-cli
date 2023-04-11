@@ -273,7 +273,7 @@ program
   .option('--keys <KEYS>', 'Field names in your story object which should be used for filtering. Multiple keys should separated by comma.')
   .option('--operations <OPERATIONS>', 'Operations to be used for filtering. Can be: is, in, not_in, like, not_like, any_in_array, all_in_array, gt_date, lt_date, gt_int, lt_int, gt_float, lt_float. Multiple operations should be separated by comma.')
   .option('--values <VALUES>', 'Values to be used for filtering. Any string or number. If you want to use multiple values, separate them with a comma. Multiple values should be separated by comma.')
-  .option('--c-group <VALUES>', 'Synchronize components based on their group UUIDs separated by commas')
+  .option('--c-groups <UUIDs>', 'Synchronize components based on their group UUIDs separated by commas')
   .action(async (options) => {
     console.log(`${chalk.blue('-')} Sync data between spaces\n`)
 
@@ -291,10 +291,10 @@ program
         keys,
         operations,
         values,
-        cGroup
+        cGroups
       } = options
 
-      const _cGroup = cGroup ? cGroup.split(',') : null
+      const _cGroups = cGroups ? cGroups.split(',') : null
 
       const _types = type.split(',') || []
       _types.forEach(_type => {
@@ -313,7 +313,7 @@ program
         target,
         startsWith,
         filterQuery,
-        _cGroup
+        _cGroups
       })
 
       console.log('\n' + chalk.green('✓') + ' Sync data between spaces successfully completed')
