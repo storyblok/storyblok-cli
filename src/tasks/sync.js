@@ -188,7 +188,7 @@ const SyncSpaces = {
   async syncRoles () {
     console.log(chalk.green('✓') + ' Syncing roles...')
     const existingFolders = await this.client.getAll(`spaces/${this.targetSpaceId}/stories`, {
-        folder_only: 1,
+      folder_only: 1,
       sort_by: 'slug:asc'
     })
 
