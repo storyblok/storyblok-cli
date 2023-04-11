@@ -18,6 +18,7 @@ const SyncSpaces = {
     this.startsWith = options.startsWith
     this.filterQuery = options.filterQuery
     this.client = api.getClient()
+    this.cGroup = options._cGroup
   },
 
   async getStoryWithTranslatedSlugs (sourceStory, targetStory) {
@@ -47,7 +48,7 @@ const SyncSpaces = {
   async syncStories () {
     console.log(chalk.green('✓') + ' Syncing stories...')
     const targetFolders = await this.client.getAll(`spaces/${this.targetSpaceId}/stories`, {
-      folder_only: 1,
+        folder_only: 1,
       sort_by: 'slug:asc'
     })
 
@@ -59,8 +60,8 @@ const SyncSpaces = {
     }
 
     const all = await this.client.getAll(`spaces/${this.sourceSpaceId}/stories`, {
-      story_only: 1,
-      ...(this.startsWith ? { starts_with: this.startsWith } : {}),
+        story_only: 1,
+        ...(this.startsWith ? { starts_with: this.startsWith } : {}),
       ...(this.filterQuery ? { filter_query: this.filterQuery } : {})
     })
 
@@ -120,7 +121,7 @@ const SyncSpaces = {
   async syncFolders () {
     console.log(chalk.green('✓') + ' Syncing folders...')
     const sourceFolders = await this.client.getAll(`spaces/${this.sourceSpaceId}/stories`, {
-      folder_only: 1,
+        folder_only: 1,
       sort_by: 'slug:asc'
     })
     const syncedFolders = {}
@@ -187,7 +188,7 @@ const SyncSpaces = {
   async syncRoles () {
     console.log(chalk.green('✓') + ' Syncing roles...')
     const existingFolders = await this.client.getAll(`spaces/${this.targetSpaceId}/stories`, {
-      folder_only: 1,
+        folder_only: 1,
       sort_by: 'slug:asc'
     })
 
@@ -231,7 +232,8 @@ const SyncSpaces = {
     const syncComponentsInstance = new SyncComponents({
       sourceSpaceId: this.sourceSpaceId,
       targetSpaceId: this.targetSpaceId,
-      oauthToken: this.oauthToken
+      oauthToken: this.oauthToken,
+      cGroup: this.cGroup
     })
 
     try {
@@ -283,7 +285,7 @@ const sync = (types, options) => {
     const command = `sync${capitalize(_type)}`
 
     return () => SyncSpaces[command]()
-  })
+    })
 
   return pSeries(tasks)
 }

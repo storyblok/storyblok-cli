@@ -18,6 +18,7 @@ class SyncComponents {
     this.oauthToken = options.oauthToken
     this.client = api.getClient()
     this.presetsLib = new PresetsLib({ oauthToken: options.oauthToken, targetSpaceId: this.targetSpaceId })
+    this.cGroup = options.cGroup
   }
 
   async sync () {
@@ -70,6 +71,14 @@ class SyncComponents {
 
       const sourceGroupUuid = component.component_group_uuid
 
+      if (this.cGroup && !this.cGroup.includes(sourceGroupUuid)) {
+        console.log(
+          chalk.yellow("-") +
+            ` Component ${component.name} is not in group ${this.cGroup}`
+        );
+        continue;
+      }
+
       // if the component belongs to a group
       if (sourceGroupUuid) {
         const sourceGroup = findByProperty(
@@ -119,8 +128,8 @@ class SyncComponents {
           console.log(chalk.green('✓') + ` Component ${component.name} synced`)
 
           const presetsToSave = this.presetsLib.filterPresetsFromTargetComponent(
-            componentPresets || [],
-            componentTarget.all_presets || []
+              componentPresets || [],
+              componentTarget.all_presets || []
           )
 
           if (presetsToSave.newPresets.length) {
