@@ -102,7 +102,7 @@ const deleteComponentsReversed = async (api, components, spaceComponents, dryrun
 
 const deleteComponentAndSkip = async (api, c, dryrun) => {
   try {
-    return await deleteComponent(api, { comp: c.id, dryrun: dryrun })
+    return await deleteComponent(api, { comp: c.name, dryrun: dryrun })
   } catch (e) {
     console.log(chalk.red('-') + ' Error deleting component ' + chalk.blue(c.name) + '! Skipped...')
   }
