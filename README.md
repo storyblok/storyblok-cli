@@ -188,7 +188,25 @@ storyblok delete-components <SOURCE> --space <SPACE_ID>
 ```
 
 #### Parameters
-* `source`: can be a URL or path to JSON file.
+* `source`: can be a URL or path to JSON file, the path to a json file could be to a single or multiple files separated by comma, like `./pages-1234.json,../User/components/grid-1234.json`
+
+Using an **URL**
+
+```sh
+$ storyblok push-components https://raw.githubusercontent.com/storyblok/nuxtdoc/master/seed.components.json --space 67819
+```
+
+Using a **path** to a single file
+
+```sh
+$ storyblok push-components ./components.json --space 67819
+```
+
+Using a **path** to a multiple files
+
+```sh
+$ storyblok push-components ./page.json,../grid.json,./feature.json --space 67819
+```
 
 #### Options
 * `space_id`: the space where the command should be executed.
