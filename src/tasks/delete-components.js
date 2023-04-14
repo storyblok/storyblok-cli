@@ -95,7 +95,7 @@ const deleteComponentsReversed = async (api, components, spaceComponents, dryrun
   const unifiedComps = components.concat([...spaceComponents])
   const toDelete = unifiedComps
     .filter((value, index, self) =>
-      self.findIndex((o, i) => o.id === value.id && i !== index) < 0)
+      self.findIndex((o, i) => o.name === value.name && i !== index) < 0)
   console.log(chalk.blue('-') + ' Deleting all components which do not appear in the given source.')
   for (const c of toDelete) {
     await deleteComponentAndSkip(api, c, dryrun)
@@ -104,7 +104,7 @@ const deleteComponentsReversed = async (api, components, spaceComponents, dryrun
 
 const deleteComponentAndSkip = async (api, c, dryrun) => {
   try {
-    return await deleteComponent(api, { comp: c.id, dryrun: dryrun })
+    return await deleteComponent(api, { comp: c.name, dryrun: dryrun })
   } catch (e) {
     console.log(chalk.red('-') + ' Error deleting component ' + chalk.blue(c.name) + '! Skipped...')
   }
