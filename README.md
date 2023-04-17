@@ -37,7 +37,10 @@ $ storyblok login
 * `password`: your user's password
 
 ##### Options for Login with token (Recomended to SSO user's but works with all user accounts)
-* `token`: your access token
+* `token`: your personal access token
+
+**Get your personal access token**
+* Go to [https://app.storyblok.com/#/me/account?tab=token](https://app.storyblok.com/#/me/account?tab=token) and click on Generate new token.
 
 **For Both login options you nedd to pass the region**
 
