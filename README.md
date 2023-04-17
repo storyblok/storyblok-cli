@@ -50,7 +50,7 @@ $ storyblok login
 You can also add the token directly from the login’s command, like the example below:
 
 ```sh
-$ storyblok login --token <YOUR_OUTH_TOKEN> --region eu 
+$ storyblok login --token <PERSONAL_ACCESS_TOKEN> --region eu 
 ```
 
 ### logout
