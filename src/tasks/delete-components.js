@@ -92,12 +92,10 @@ const deleteAllComponents = async (api, components, dryrun) => {
  * @returns {Promise<void>}
  */
 const deleteComponentsReversed = async (api, components, spaceComponents, dryrun) => {
-  const unifiedComps = components.concat([...spaceComponents])
-  const toDelete = unifiedComps
-    .filter((value, index, self) =>
-      self.findIndex((o, i) => o.id === value.id && i !== index) < 0)
+  const toDeleteSpaceComponents = spaceComponents
+    .filter(spaceComponent => components.findIndex(o => o.name === spaceComponent.name) < 0)
   console.log(chalk.blue('-') + ' Deleting all components which do not appear in the given source.')
-  for (const c of toDelete) {
+  for (const c of toDeleteSpaceComponents) {
     await deleteComponentAndSkip(api, c, dryrun)
   }
 }
