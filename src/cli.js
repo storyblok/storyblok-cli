@@ -294,7 +294,7 @@ program
         cGroups
       } = options
 
-      const _cGroups = cGroups ? cGroups.split(',') : null
+      const componentsGroups = cGroups ? cGroups.split(',') : null
 
       const _types = type.split(',') || []
       _types.forEach(_type => {
@@ -313,7 +313,7 @@ program
         target,
         startsWith,
         filterQuery,
-        _cGroups
+        componentsGroups
       })
 
       console.log('\n' + chalk.green('✓') + ' Sync data between spaces successfully completed')

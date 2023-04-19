@@ -18,7 +18,7 @@ const SyncSpaces = {
     this.startsWith = options.startsWith
     this.filterQuery = options.filterQuery
     this.client = api.getClient()
-    this.cGroups = options._cGroups
+    this.componentsGroups = options.componentsGroups
   },
 
   async getStoryWithTranslatedSlugs (sourceStory, targetStory) {
@@ -233,7 +233,7 @@ const SyncSpaces = {
       sourceSpaceId: this.sourceSpaceId,
       targetSpaceId: this.targetSpaceId,
       oauthToken: this.oauthToken,
-      cGroups: this.cGroups
+      componentsGroups: this.componentsGroups
     })
 
     try {
