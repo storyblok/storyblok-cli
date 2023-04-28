@@ -18,7 +18,7 @@ const SyncSpaces = {
     this.startsWith = options.startsWith
     this.filterQuery = options.filterQuery
     this.client = api.getClient()
-    this.componentsGroups = options.componentsGroups
+    this.componentsGroups = options._componentsGroups
   },
 
   async getStoryWithTranslatedSlugs (sourceStory, targetStory) {
