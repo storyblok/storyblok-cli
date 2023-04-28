@@ -18,6 +18,7 @@ class SyncComponents {
     this.oauthToken = options.oauthToken
     this.client = api.getClient()
     this.presetsLib = new PresetsLib({ oauthToken: options.oauthToken, targetSpaceId: this.targetSpaceId })
+    this.componentsGroups = options.componentsGroups
   }
 
   async sync () {
@@ -69,6 +70,14 @@ class SyncComponents {
       delete component.created_at
 
       const sourceGroupUuid = component.component_group_uuid
+
+      if (this.componentsGroups && !this.componentsGroups.includes(sourceGroupUuid)) {
+        console.log(
+          chalk.yellow("-") +
+            ` Component ${component.name} does not belong to the ${this.componentsGroups} group(s).`
+        );
+        continue;
+      }
 
       // if the component belongs to a group
       if (sourceGroupUuid) {
