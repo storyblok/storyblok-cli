@@ -44,7 +44,7 @@ $ storyblok login
 
 **For Both login options you nedd to pass the region**
 
-* `region`: your user's region (default: `eu`). You can use `us`, `cn` or `eu`. This region will be used for the other cli's commands.
+* `region`: region you would like to work in. Please keep in mind that the region must match the region of your space. You can use `us`, `cn` or `eu`, if left empty, default is `eu`. This region flag will be used for the other cli's commands. 
 
 #### Login with token flag
 You can also add the token directly from the login’s command, like the example below:
