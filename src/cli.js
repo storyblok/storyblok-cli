@@ -40,7 +40,7 @@ program
   .command(COMMANDS.LOGIN)
   .description('Login to the Storyblok cli')
   .option('-t, --token <token>', 'Token to login directly without questions, like for CI enviroments')
-  .option('-r, --region <region>', 'Region of the user')
+  .option('-r, --region <region>', 'The region you would like to work in. Please keep in mind that the region must match the region of your space. You can use us, cn or eu, if left empty, default is eu. This region flag will be used for the other cli\'s commands')
   .action(async (options) => {
     const { token, region } = options
 

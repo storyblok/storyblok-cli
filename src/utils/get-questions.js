@@ -9,7 +9,7 @@ const getOptions = (subCommand, argv = {}, api = {}) => {
   const regionInput = {
     type: 'input',
     name: 'region',
-    message: 'Enter your user\'s region (us, eu or cn):',
+    message: 'Please enter the region you would like to work in (us, eu or cn) - if not set, default is eu:',
     validate: function (value) {
       const flagList = ['us', 'cn', 'eu']
       if (flagList.indexOf(value) > -1) {
