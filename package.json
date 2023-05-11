@@ -1,6 +1,6 @@
 {
   "name": "towa-storyblok",
-  "version": "3.16.0",
+  "version": "3.16.1",
   "description": "A simple CLI to start Storyblok from your command line.",
   "repository": {
     "type": "git",
