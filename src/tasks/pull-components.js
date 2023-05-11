@@ -20,11 +20,11 @@ const getNameFromComponentGroups = (groups, uuid) => {
 /**
  * @method pullComponents
  * @param  {Object} api
- * @param  {Object} options { space: Number, separateFiles: Boolean, path: String }
+ * @param  {Object} options { fileName: string, separateFiles: Boolean, path: String }
  * @return {Promise<Object>}
  */
 const pullComponents = async (api, options) => {
-  const { space, separateFiles, path } = options
+  const { fileName, separateFiles, path } = options
 
   try {
     const componentGroups = await api.getComponentGroups()
@@ -43,7 +43,7 @@ const pullComponents = async (api, options) => {
 
     if (separateFiles) {
       for (const comp in components) {
-        const compFileName = `${components[comp].name}-${space}.json`
+        const compFileName = `${components[comp].name}-${fileName}.json`
         const data = JSON.stringify(components[comp], null, 2)
         saveFileFactory(compFileName, data, path)
       }
@@ -52,7 +52,7 @@ const pullComponents = async (api, options) => {
       if (presets.length === 0) return
 
       for (const preset in presets) {
-        const presetFileName = `${presets[preset].name}-${space}.json`
+        const presetFileName = `${presets[preset].name}-${fileName}.json`
         const data = JSON.stringify(presets[preset], null, 2)
         saveFileFactory(presetFileName, data, path)
       }
@@ -60,7 +60,7 @@ const pullComponents = async (api, options) => {
       return
     }
 
-    const file = `components.${space}.json`
+    const file = `components.${fileName}.json`
     const data = JSON.stringify({ components }, null, 2)
 
     console.log(`${chalk.green('✓')} We've saved your components in the file: ${file}`)
@@ -69,7 +69,7 @@ const pullComponents = async (api, options) => {
 
     if (presets.length === 0) return
 
-    const presetsFile = `presets.${space}.json`
+    const presetsFile = `presets.${fileName}.json`
     const presetsData = JSON.stringify({ presets }, null, 2)
 
     console.log(`${chalk.green('✓')} We've saved your presets in the file: ${presetsFile}`)
