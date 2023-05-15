@@ -7,24 +7,44 @@ const isUrl = source => source.indexOf('http') === 0
 
 /**
  * Get the data from a local or remote JSON file
- * @param {string} source the local path or remote url of the file
+ * @param {string} path the local path or remote url of the file
  * @returns {Promise<Object>} return the data from the source or an error
  */
-const getDataFromSource = async (source) => {
-  if (!source) {
+const getDataFromPath = async (path) => {
+  if (!path) {
     return {}
   }
+  const sources = path.split(',')
+  const isList = sources.length > 1
 
   try {
-    if (isUrl(source)) {
-      return (await axios.get(source)).data
+    if (isUrl(path)) {
+      return (await axios.get(path)).data
     } else {
-      return JSON.parse(fs.readFileSync(source, 'utf8'))
+      if (!isList) return JSON.parse(fs.readFileSync(sources[0], 'utf8'))
+
+      const data = []
+      sources.forEach((source) => {
+        data.push(JSON.parse(fs.readFileSync(source, 'utf8')))
+      })
+      return data
     }
   } catch (err) {
-    console.error(`${chalk.red('X')} Can not load json file from ${source}`)
+    console.error(`${chalk.red('X')} Can not load json file from ${path}`)
     return Promise.reject(err)
   }
+}
+
+/**
+ * Creat an array based in the content parameter and the key provided
+ * @param {object} content the data to create a list
+ * @param {string} key key to serch in the content
+ * @returns {Array} return the data from the source or an error
+ */
+const createContentList = (content, key) => {
+  if (content[key]) return content[key]
+  else if (Array.isArray(content)) return [...content]
+  else return [content]
 }
 
 /**
@@ -37,7 +57,8 @@ const getDataFromSource = async (source) => {
  */
 const deleteComponents = async (api, { source, reversed = false, dryRun = false }) => {
   try {
-    const sourceComponents = (await getDataFromSource(source)).components || []
+    const rawComponents = (await getDataFromPath(source)) || []
+    const sourceComponents = createContentList(rawComponents, 'components')
     if (!reversed) {
       return deleteAllComponents(api, sourceComponents, dryRun)
     }
@@ -71,19 +92,17 @@ const deleteAllComponents = async (api, components, dryrun) => {
  * @returns {Promise<void>}
  */
 const deleteComponentsReversed = async (api, components, spaceComponents, dryrun) => {
-  const unifiedComps = components.concat([...spaceComponents])
-  const toDelete = unifiedComps
-    .filter((value, index, self) =>
-      self.findIndex((o, i) => o.id === value.id && i !== index) < 0)
+  const toDeleteSpaceComponents = spaceComponents
+    .filter(spaceComponent => components.findIndex(o => o.name === spaceComponent.name) < 0)
   console.log(chalk.blue('-') + ' Deleting all components which do not appear in the given source.')
-  for (const c of toDelete) {
+  for (const c of toDeleteSpaceComponents) {
     await deleteComponentAndSkip(api, c, dryrun)
   }
 }
 
 const deleteComponentAndSkip = async (api, c, dryrun) => {
   try {
-    return await deleteComponent(api, { comp: c.id, dryrun: dryrun })
+    return await deleteComponent(api, { comp: c.name, dryrun: dryrun })
   } catch (e) {
     console.log(chalk.red('-') + ' Error deleting component ' + chalk.blue(c.name) + '! Skipped...')
   }
