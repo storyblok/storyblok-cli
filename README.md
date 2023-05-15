@@ -98,7 +98,7 @@ $ storyblok pull-components --space <SPACE_ID> # Will save files like components
 ```
 
 ```sh
-$ storyblok pull-components --space <SPACE_ID> --separate-files # Will save files like feature-1234.json grid-1234.json
+$ storyblok pull-components --space <SPACE_ID> --separate-files  --file-name production # Will save files like feature-production.json grid-production.json
 ```
 
 #### Options
@@ -106,6 +106,7 @@ $ storyblok pull-components --space <SPACE_ID> --separate-files # Will save file
 * `space`: your space id
 * `separate-files`: boolean flag to save components and presets in single files instead a file with all
 * `path`: the path to save your components and preset files
+* `file-name`(optional): a custom filename used to generate the component and present files, default is the space id
 
 ### push-components
 

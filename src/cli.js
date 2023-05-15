@@ -121,6 +121,7 @@ program
   .command(COMMANDS.PULL_COMPONENTS)
   .option('--sf, --separate-files [value]', 'Argument to create a single file for each component')
   .option('-p, --path <path>', 'Path to save the component files')
+  .option('-f, --file-name <fileName>', 'custom name to be used in file(s) name instead of space id')
   .description("Download your space's components schema as json")
   .action(async (options) => {
     console.log(`${chalk.blue('-')} Executing pull-components task`)
@@ -131,13 +132,15 @@ program
       process.exit(0)
     }
 
+    const fileName = options.fileName ? options.fileName : space
+
     try {
       if (!api.isAuthorized()) {
         await api.processLogin()
       }
 
       api.setSpaceId(space)
-      await tasks.pullComponents(api, { space, separateFiles, path })
+      await tasks.pullComponents(api, { fileName, separateFiles, path })
     } catch (e) {
       errorHandler(e, COMMANDS.PULL_COMPONENTS)
     }
