@@ -19,6 +19,9 @@ describe('testing deleteComponents', () => {
         const id = path.split('/')[1]
         return Promise.resolve({ data: { component: components[id] } })
       }),
+      getComponents: jest.fn(() => {
+        return components
+      }),
       delete: jest.fn(() => Promise.resolve())
     }
     return deleteComponents(api, { source, reversed: false }).then(() => {
@@ -29,18 +32,16 @@ describe('testing deleteComponents', () => {
   it('api.deleteComponents reverse', () => {
     const source = 'components.js'
     const components = FAKE_COMPONENTS()
-    const spy = jest.spyOn(fs, 'readFileSync').mockReturnValue(JSON.stringify({
-      components
-    }))
+    const copy = [...components]
+    copy.splice(2, 1)
+    const spy = jest.spyOn(fs, 'readFileSync').mockReturnValue(JSON.stringify([...copy]))
     const api = {
       get: jest.fn((path) => {
         const id = path.split('/')[1]
         return Promise.resolve({ data: { component: components[id] } })
       }),
       getComponents: jest.fn(() => {
-        const copy = [...components]
-        copy.splice(3, 1)
-        return copy
+        return components
       }),
       delete: jest.fn(() => Promise.resolve())
     }
