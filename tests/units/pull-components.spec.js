@@ -40,7 +40,7 @@ describe('testing pullComponents', () => {
     }
 
     const options = {
-      compFileName: SPACE
+      fileName: SPACE
     }
 
     const expectFileName = `components.${SPACE}.json`
@@ -71,7 +71,7 @@ describe('testing pullComponents', () => {
     }
 
     const options = {
-      space: SPACE
+      fileName: SPACE
     }
 
     const expectComponentFileName = `components.${SPACE}.json`
@@ -108,7 +108,7 @@ describe('testing pullComponents', () => {
     }
 
     const options = {
-      space: SPACE,
+      fileName: SPACE,
       separateFiles: true
     }
 
@@ -117,7 +117,7 @@ describe('testing pullComponents', () => {
         expect(fs.writeFile.mock.calls.length).toBe(FAKE_COMPONENTS().length)
 
         for (const comp in FAKE_COMPONENTS()) {
-          const compFileName = `${FAKE_COMPONENTS()[comp].name}-${SPACE}.json`
+          const fileName = `${FAKE_COMPONENTS()[comp].name}-${SPACE}.json`
           let data = FAKE_COMPONENTS()[comp]
           const [compPath, compData] = fs.writeFile.mock.calls[comp]
 
@@ -125,7 +125,7 @@ describe('testing pullComponents', () => {
             data = { ...FAKE_COMPONENTS()[comp], component_group_name: '' }
           }
 
-          expect(compPath).toBe(`./${compFileName}`)
+          expect(compPath).toBe(`./${fileName}`)
           expect(JSON.parse(compData)).toEqual(data)
         }
       })
