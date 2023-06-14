@@ -251,6 +251,9 @@ $ storyblok sync --type <COMMAND> --source <SPACE_ID> --target <SPACE_ID>
 * `filter`: sync stories based on the given filter. Required Options: Required options: `--keys`, `--operations`, `--values`
 * `keys`: Multiple keys should be separated by comma. Example: `--keys key1,key2`, `--keys key1`
 * `operations`: Operations to be used for filtering. Can be: `is`, `in`, `not_in`, `like`, `not_like`, `any_in_array`, `all_in_array`, `gt_date`, `lt_date`, `gt_int`, `lt_int`, `gt_float`, `lt_float`. Multiple operations should be separated by comma.
+* `components-groups`: Synchronize components based on their group UUIDs separated by commas. Example: `--components-groups ******-****`
+* `datasources-starts-with-slug`: Synchronize datasources that starts with the given slug. Example: `--datasources-starts-with-slug global-translations`
+* `datasources-starts-with-name`: Synchronize datasources that starts with the given name. Example: `--datasources-starts-with-name Translations`
 
 #### Examples
 
