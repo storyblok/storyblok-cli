@@ -277,6 +277,8 @@ program
   .option('--operations <OPERATIONS>', 'Operations to be used for filtering. Can be: is, in, not_in, like, not_like, any_in_array, all_in_array, gt_date, lt_date, gt_int, lt_int, gt_float, lt_float. Multiple operations should be separated by comma.')
   .option('--values <VALUES>', 'Values to be used for filtering. Any string or number. If you want to use multiple values, separate them with a comma. Multiple values should be separated by comma.')
   .option('--components-groups <UUIDs>', 'Synchronize components based on their group UUIDs separated by commas')
+  .option('--datasources-starts-with-slug <SLUG>', 'Synchronize datasources that starts with the given slug')
+  .option('--datasources-starts-with-name <NAME>', 'Synchronize datasources that starts with the given name')
   .action(async (options) => {
     console.log(`${chalk.blue('-')} Sync data between spaces\n`)
 
@@ -294,7 +296,9 @@ program
         keys,
         operations,
         values,
-        componentsGroups
+        componentsGroups,
+        datasourcesStartsWithSlug,
+        datasourcesStartsWithName
       } = options
 
       const _componentsGroups = componentsGroups ? componentsGroups.split(',') : null
@@ -316,7 +320,9 @@ program
         target,
         startsWith,
         filterQuery,
-        _componentsGroups
+        _componentsGroups,
+        datasourcesStartsWithSlug,
+        datasourcesStartsWithName
       })
 
       console.log('\n' + chalk.green('✓') + ' Sync data between spaces successfully completed')
