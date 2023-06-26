@@ -421,6 +421,24 @@ For view the CLI version
 $ storyblok -V # or --version
 ```
 
+### delete-datasources
+
+The delete-datasources command enables you to remove all datasources within the designated space. By utilizing the `--by-slug` option, you can filter the datasources based on their slugs, selectively deleting specific datasources. Similarly, the `--by-name` option functions in the same way, allowing you to filter and delete datasources based on their names.
+
+```sh
+$ storyblok delete-datasources --space-id <SPACE_ID> # Will delete all datasources
+```
+
+```sh
+$ storyblok delete-datasources --space-id <SPACE_ID> --by-slug global-translations   # Will only delete datasources where the slug starts with global-translations
+```
+
+#### Options
+
+* `space-id`: your space id
+* `by-slug`: Filter Datasources by slug
+* `by-name`: Filter Datasources by name
+
 ## Content migrations
 
 Content migrations are a convenient way to change fields of your content.
