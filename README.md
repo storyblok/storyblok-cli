@@ -251,6 +251,7 @@ $ storyblok sync --type <COMMAND> --source <SPACE_ID> --target <SPACE_ID>
 * `filter`: sync stories based on the given filter. Required Options: Required options: `--keys`, `--operations`, `--values`
 * `keys`: Multiple keys should be separated by comma. Example: `--keys key1,key2`, `--keys key1`
 * `operations`: Operations to be used for filtering. Can be: `is`, `in`, `not_in`, `like`, `not_like`, `any_in_array`, `all_in_array`, `gt_date`, `lt_date`, `gt_int`, `lt_int`, `gt_float`, `lt_float`. Multiple operations should be separated by comma.
+*`datasource-disable-dimensions-value-sync`: Enables syncing of datasources without their corresponding dimension values.
 
 #### Examples
 
