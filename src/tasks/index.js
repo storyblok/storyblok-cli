@@ -11,5 +11,6 @@ module.exports = {
   listSpaces: require('./list-spaces'),
   importFiles: require('./import/import'),
   deleteComponent: require('./delete-component'),
-  deleteComponents: require('./delete-components')
+  deleteComponents: require('./delete-components'),
+  deleteDatasources: require('./delete-datasources')
 }

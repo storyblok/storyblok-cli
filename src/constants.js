@@ -25,7 +25,8 @@ const COMMANDS = {
   SCAFFOLD: 'scaffold',
   SELECT: 'select',
   SPACES: 'spaces',
-  SYNC: 'sync'
+  SYNC: 'sync',
+  DELETE_DATASOURCES: 'delete-datasources'
 }
 
 module.exports = {
