@@ -282,11 +282,14 @@ program
 
       const {
         type,
+        target,
         source,
         componentsGroups
       } = options
 
       const _componentsGroups = componentsGroups ? componentsGroups.split(',') : null
+
+      const token = creds.get().token || null
 
       const _types = type.split(',') || []
       _types.forEach(_type => {
@@ -295,10 +298,10 @@ program
         }
       })
 
-      const token = creds.get().token || null
       await tasks.sync(_types, {
         api,
         token,
+        target,
         source,
         _componentsGroups
       })
