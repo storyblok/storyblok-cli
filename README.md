@@ -323,6 +323,10 @@ $ storyblok rollback-migration --space 1234 --component Product --field title
 * `space`: the space you get from the space settings area
 * `component`: component name. It needs to be a valid component
 * `field`: name of field
+* `publish` (optional): publish the content when update
+  * `all`: publish all stories, even if they have not yet been published
+  * `published`: only publish stories that already are published and don't have unpublished changes
+  * `published-with-changes`: publish stories that are published and have unpublished changes
 
 ### spaces
 

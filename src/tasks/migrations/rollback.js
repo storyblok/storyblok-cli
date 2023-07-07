@@ -7,14 +7,41 @@ const {
 } = require('./utils')
 
 /**
+ * @method isStoryPublishedWithoutChanges
+ * @param  {Object} story
+ * @return {Boolean}
+ */
+const isStoryPublishedWithoutChanges = story => {
+  return story.published && !story.unpublished_changes
+}
+
+/**
+ * @method isStoryWithUnpublishedChanges
+ * @param  {Object} story
+ * @return {Boolean}
+ */
+const isStoryWithUnpublishedChanges = story => {
+  return story.published && story.unpublished_changes
+}
+/**
+ * @typedef {'all'|'published'|'published-with-changes'} PublishOptions
+ *
+ * @typedef {Object} RunRollbackOptions
+ * @property {PublishOptions} publish
+ * /
+
+/**
  * @method rollbackMigration
  * @param  {Object}   api       api instance
  * @param  {String}   component name of the component to rollback
  * @param  {String}   field     name of the field to rollback
+ * @param  {RunRollbackOptions} options disable execution
  * @return {Promise}
  */
 
-const rollbackMigration = async (api, field, component) => {
+const rollbackMigration = async (api, field, component, options = {}) => {
+  const publish = options.publish || null
+
   if (!fs.existsSync(MIGRATIONS_ROLLBACK_DIRECTORY)) {
     console.log(`
         ${chalk.red('X')} To execute the rollback-migration command you need to have changed some component with the migrations commands.`
@@ -47,10 +74,25 @@ const rollbackMigration = async (api, field, component) => {
       console.log(
         `${chalk.blue('-')} Restoring data from "${chalk.blue(story.full_slug)}" ...`
       )
-      await api.put(`stories/${story.id}`, {
+      const storyData = await api.getSingleStory(story.id)
+      const payload = {
         story: { content: story.content },
         force_update: '1'
-      })
+      }
+
+      if (publish === 'published' && isStoryPublishedWithoutChanges(storyData)) {
+        payload.publish = '1'
+      }
+
+      if (publish === 'published-with-changes' && isStoryWithUnpublishedChanges(story)) {
+        payload.publish = '1'
+      }
+
+      if (publish === 'all') {
+        payload.publish = '1'
+      }
+
+      await api.put(`stories/${story.id}`, payload)
       console.log(
         `  ${chalk.blue('-')} ${story.full_slug} data has been restored!`
       )
