@@ -12,6 +12,12 @@ const SYNC_TYPES = [
   'datasources'
 ]
 
+const PUBLISH_TYPES = [
+  'all',
+  'published',
+  'published-with-changes'
+]
+
 const COMMANDS = {
   GENERATE_MIGRATION: 'generate-migration',
   IMPORT: 'import',
@@ -33,6 +39,7 @@ module.exports = {
   SIGNUP_URL,
   API_URL,
   SYNC_TYPES,
+  PUBLISH_TYPES,
   US_API_URL,
   CN_API_URL,
   COMMANDS

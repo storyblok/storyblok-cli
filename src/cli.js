@@ -13,7 +13,7 @@ const pkg = require('../package.json')
 
 const tasks = require('./tasks')
 const { getQuestions, lastStep, api, creds } = require('./utils')
-const { SYNC_TYPES, COMMANDS } = require('./constants')
+const { SYNC_TYPES, PUBLISH_TYPES, COMMANDS } = require('./constants')
 
 clear()
 console.log(chalk.cyan(figlet.textSync('storyblok')))
@@ -383,12 +383,7 @@ program
       process.exit(1)
     }
 
-    const publishOptionsAvailable = [
-      'all',
-      'published',
-      'published-with-changes'
-    ]
-    if (publish && !publishOptionsAvailable.includes(publish)) {
+    if (publish && !PUBLISH_TYPES.includes(publish)) {
       console.log(chalk.red('X') + ' Please provide a correct publish option: all, published, or published-with-changes')
       process.exit(1)
     }
@@ -429,12 +424,7 @@ program
       process.exit(1)
     }
 
-    const publishOptionsAvailable = [
-      'all',
-      'published',
-      'published-with-changes'
-    ]
-    if (publish && !publishOptionsAvailable.includes(publish)) {
+    if (publish && !PUBLISH_TYPES.includes(publish)) {
       console.log(chalk.red('X') + ' Please provide a correct publish option: all, published, or published-with-changes')
       process.exit(1)
     }
