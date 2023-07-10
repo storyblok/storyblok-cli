@@ -5,7 +5,7 @@ const inquirer = require('inquirer')
 
 const creds = require('./creds')
 const getQuestions = require('./get-questions')
-const { SIGNUP_URL, API_URL, US_API_URL, CN_API_URL } = require('../constants')
+const { SIGNUP_URL, API_URL, US_API_URL, CN_API_URL, DEFAULT_AGENT } = require('../constants')
 
 module.exports = {
   accessToken: '',
@@ -20,7 +20,10 @@ module.exports = {
       return new Storyblok({
         accessToken: this.accessToken,
         oauthToken: this.oauthToken,
-        region: this.region
+        region: this.region,
+        headers: {
+          ...DEFAULT_AGENT
+        }
       }, this.apiSwitcher(region))
     } catch (error) {
       throw new Error(error)
