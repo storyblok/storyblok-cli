@@ -280,7 +280,10 @@ module.exports = {
     const customClient = new Storyblok({
       accessToken: this.accessToken,
       oauthToken: this.oauthToken,
-      region
+      region,
+      headers: {
+        ...DEFAULT_AGENT
+      }
     }, this.apiSwitcher(region))
     return await customClient
       .get('spaces/', {})
