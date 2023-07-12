@@ -28,6 +28,11 @@ const COMMANDS = {
   SYNC: 'sync'
 }
 
+const DEFAULT_AGENT = {
+  SB_Agent: 'SB-CLI',
+  SB_Agent_Version: process.env.npm_package_version || '3.0.0'
+}
+
 module.exports = {
   LOGIN_URL,
   SIGNUP_URL,
@@ -35,5 +40,6 @@ module.exports = {
   SYNC_TYPES,
   US_API_URL,
   CN_API_URL,
-  COMMANDS
+  COMMANDS,
+  DEFAULT_AGENT
 }
