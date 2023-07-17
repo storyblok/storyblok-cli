@@ -1,6 +1,6 @@
 {
   "name": "storyblok",
-  "version": "3.15.0",
+  "version": "3.25.0",
   "description": "A simple CLI to start Storyblok from your command line.",
   "repository": {
     "type": "git",
@@ -47,7 +47,7 @@
     "xml-js": "^1.6.11"
   },
   "engines": {
-    "node": ">=10.0.0"
+    "node": ">=18.0.0"
   },
   "devDependencies": {
     "concat-stream": "^2.0.0",

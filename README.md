@@ -14,7 +14,7 @@ We added the `region` option upon login. If you are using the CLI, please `logou
 
 ## Installation
 
-Make sure you have Node `>= 9.11.0` installed.
+Make sure you have Node `>= 18.0.0` installed.
 
 ```sh
 $ npm i storyblok -g
