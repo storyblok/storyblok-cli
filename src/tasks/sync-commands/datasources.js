@@ -4,7 +4,7 @@ const api = require('../../utils/api')
 
 class SyncDatasources {
   /**
-   * @param {{ sourceSpaceId: string, targetSpaceId: string, oauthToken: string }} options
+   * @param {{ sourceSpaceId: string, targetSpaceId: string, oauthToken: string, datasourcesStartsWithSlug: string, datasourcesStartsWithName: string }} options
    */
   constructor (options) {
     this.targetDatasources = []
@@ -13,12 +13,30 @@ class SyncDatasources {
     this.targetSpaceId = options.targetSpaceId
     this.oauthToken = options.oauthToken
     this.client = api.getClient()
+    this.datasourcesStartsWithSlug = options.datasourcesStartsWithSlug
+    this.datasourcesStartsWithName = options.datasourcesStartsWithName
   }
 
   async sync () {
     try {
       this.targetDatasources = await this.client.getAll(`spaces/${this.targetSpaceId}/datasources`)
       this.sourceDatasources = await this.client.getAll(`spaces/${this.sourceSpaceId}/datasources`)
+
+      if (this.datasourcesStartsWithSlug) {
+        this.sourceDatasources = this.sourceDatasources.filter(datasource => datasource.slug.toLowerCase().startsWith(this.datasourcesStartsWithSlug.toLowerCase()));
+        const filteredSlugs = this.sourceDatasources.map(obj => obj.slug);
+        const formattedSlugs = filteredSlugs.join(', ');
+
+        console.log(`${chalk.blue('-')} Source datasources where slug starts with ${this.datasourcesStartsWithSlug}: ${formattedSlugs}`);
+      }
+  
+      if (this.datasourcesStartsWithName) {
+        this.sourceDatasources = this.sourceDatasources.filter(datasource => datasource.name.toLowerCase().startsWith(this.datasourcesStartsWithName.toLowerCase()));
+        const filteredNames = this.sourceDatasources.map(obj => obj.name);
+        const formattedNames = filteredNames.join(', ');
+
+        console.log(`${chalk.blue('-')} Source datasources where name starts with ${this.datasourcesStartsWithName}: ${formattedNames}`);
+      }
 
       console.log(
         `${chalk.blue('-')} In source space #${this.sourceSpaceId}: `
@@ -32,8 +50,10 @@ class SyncDatasources {
     } catch (err) {
       console.error(`An error ocurred when loading the datasources: ${err.message}`)
 
+      
       return Promise.reject(err)
     }
+  
 
     console.log(chalk.green('-') + ' Syncing datasources...')
     await this.addDatasources()

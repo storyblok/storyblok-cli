@@ -22,7 +22,6 @@ $ npm i storyblok -g
 
 ## Commands
 
-
 ### login
 
 Login to the Storyblok cli
@@ -30,27 +29,32 @@ Login to the Storyblok cli
 ```sh
 $ storyblok login
 ```
+
 #### Login options
 
 ##### Options for Login with email and password
-* `email`: your user's email address
-* `password`: your user's password
+
+- `email`: your user's email address
+- `password`: your user's password
 
 ##### Options for Login with token (Recomended to SSO user's but works with all user accounts)
-* `token`: your personal access token
+
+- `token`: your personal access token
 
 **Get your personal access token**
-* Go to [https://app.storyblok.com/#/me/account?tab=token](https://app.storyblok.com/#/me/account?tab=token) and click on Generate new token.
+
+- Go to [https://app.storyblok.com/#/me/account?tab=token](https://app.storyblok.com/#/me/account?tab=token) and click on Generate new token.
 
 **For Both login options you nedd to pass the region**
 
-* `region`: region you would like to work in. Please keep in mind that the region must match the region of your space. You can use `us`, `cn` or `eu`, if left empty, default is `eu`. This region flag will be used for the other cli's commands. 
+- `region`: region you would like to work in. Please keep in mind that the region must match the region of your space. You can use `us`, `cn` or `eu`, if left empty, default is `eu`. This region flag will be used for the other cli's commands.
 
 #### Login with token flag
+
 You can also add the token directly from the login’s command, like the example below:
 
 ```sh
-$ storyblok login --token <PERSONAL_ACCESS_TOKEN> --region eu 
+$ storyblok login --token <PERSONAL_ACCESS_TOKEN> --region eu
 ```
 
 ### logout
@@ -60,6 +64,7 @@ Logout from the Storyblok cli
 ```sh
 $ storyblok logout
 ```
+
 ### user
 
 Get the currently logged in user
@@ -67,7 +72,6 @@ Get the currently logged in user
 ```sh
 $ storyblok user
 ```
-
 
 ### select
 
@@ -87,7 +91,7 @@ $ storyblok pull-languages --space <SPACE_ID>
 
 #### Options
 
-* `space`: your space id
+- `space`: your space id
 
 ### pull-components
 
@@ -103,10 +107,10 @@ $ storyblok pull-components --space <SPACE_ID> --separate-files  --file-name pro
 
 #### Options
 
-* `space`: your space id
-* `separate-files`: boolean flag to save components and presets in single files instead a file with all
-* `path`: the path to save your components and preset files
-* `file-name`(optional): a custom filename used to generate the component and present files, default is the space id
+- `space`: your space id
+- `separate-files`: boolean flag to save components and presets in single files instead a file with all
+- `path`: the path to save your components and preset files
+- `file-name`(optional): a custom filename used to generate the component and present files, default is the space id
 
 ### push-components
 
@@ -118,7 +122,7 @@ $ storyblok push-components <SOURCE> --space <SPACE_ID> --presets-source <PRESET
 
 #### Parameters
 
-* `source`: can be a URL or path to JSON file, the path to a json file could be to a single or multiple files separated by comma, like `./pages-1234.json,../User/components/grid-1234.json`
+- `source`: can be a URL or path to JSON file, the path to a json file could be to a single or multiple files separated by comma, like `./pages-1234.json,../User/components/grid-1234.json`
 
 Using an **URL**
 
@@ -140,8 +144,8 @@ $ storyblok push-components ./page.json,../grid.json,./feature.json --space 6781
 
 #### Options
 
-* `space`: your space id
-* `presets-source` (optional): it can be a URL or path to JSON file with the presets
+- `space`: your space id
+- `presets-source` (optional): it can be a URL or path to JSON file with the presets
 
 #### Examples
 
@@ -166,14 +170,17 @@ storyblok delete-component <component> --space <SPACE_ID>
 ```
 
 #### Parameters
-* `component`: The name or id of the component
+
+- `component`: The name or id of the component
 
 #### Options
-* `space_id`: the space where the command should be executed.
+
+- `space_id`: the space where the command should be executed.
 
 #### Examples
 
 Delete a component on your space.
+
 ```sh
 storyblok delete-component 111111 --space 67819
 ```
@@ -192,7 +199,8 @@ storyblok delete-components <SOURCE> --space <SPACE_ID>
 ```
 
 #### Parameters
-* `source`: can be a URL or path to JSON file, the path to a json file could be to a single or multiple files separated by comma, like `./pages-1234.json,../User/components/grid-1234.json`
+
+- `source`: can be a URL or path to JSON file, the path to a json file could be to a single or multiple files separated by comma, like `./pages-1234.json,../User/components/grid-1234.json`
 
 Using an **URL**
 
@@ -213,23 +221,27 @@ $ storyblok push-components ./page.json,../grid.json,./feature.json --space 6781
 ```
 
 #### Options
-* `space_id`: the space where the command should be executed.
-* `reverse`: When passed as an argument, deletes only those components on your space that do not appear in the JSON.
-* `dryrun`: when passed as an argument, does not perform any changes on the given space.
+
+- `space_id`: the space where the command should be executed.
+- `reverse`: When passed as an argument, deletes only those components on your space that do not appear in the JSON.
+- `dryrun`: when passed as an argument, does not perform any changes on the given space.
 
 #### Examples
 
 Delete all components on a certain space that occur in your local JSON.
+
 ```sh
 storyblok delete-components ./components.json --space 67819
 ```
 
 Delete only those components which do not occur in your local json from your space.
+
 ```sh
 storyblok delete-components ./components.json --space 67819 --reverse
 ```
 
 To see the result in your console output but to not perform the command on your space, use the `--dryrun` argument.
+
 ```sh
 storyblok delete-components ./components.json --space 67819 --reverse --dryrun
 ```
@@ -244,9 +256,12 @@ $ storyblok sync --type <COMMAND> --source <SPACE_ID> --target <SPACE_ID>
 
 #### Options
 
-* `type`: describe the command type to execute. Can be: `folders`, `components`, `stories`, `datasources` or `roles`. It's possible pass multiple types separated by comma (`,`).
-* `source`: the source space to use to sync
-* `target`: the target space to use to sync
+- `type`: describe the command type to execute. Can be: `folders`, `components`, `stories`, `datasources` or `roles`. It's possible pass multiple types separated by comma (`,`).
+- `source`: the source space to use to sync
+- `target`: the target space to use to sync
+- `components-groups`: Synchronize components based on their group UUIDs separated by commas. Example: `--components-groups ******-****`
+- `datasources-starts-with-slug`: Synchronize datasources that starts with the given slug. Example: `--datasources-starts-with-slug global-translations`
+- `datasources-starts-with-name`: Synchronize datasources that starts with the given name. Example: `--datasources-starts-with-name Translations`
 
 #### Examples
 
@@ -274,13 +289,14 @@ Create a migration file (with the name `change_<COMPONENT>_<FIELD>.js`) inside t
 ```sh
 $ storyblok generate-migration --space <SPACE_ID> --component <COMPONENT_NAME> --field <FIELD>
 ```
+
 It's important to note that the `component` and `field` parameters are required and must be spelled exactly as they are in Storyblok. You can check the exact name by looking at the `Block library` inside your space.
 
 #### Options
 
-* `space`: space where the component is
-* `component`: component name. It needs to be a valid component
-* `field`: name of field
+- `space`: space where the component is
+- `component`: component name. It needs to be a valid component
+- `field`: name of field
 
 ### run-migration
 
@@ -298,15 +314,15 @@ $ storyblok run-migration --publish published --space 1234 --component article -
 
 #### Options
 
-* `space`: the space you get from the space settings area
-* `component`: component name. It needs to be a valid component
-* `field`: name of field
-* `dryrun`: when passed as an argument, does not perform the migration
-* `publish` (optional): publish the content when update
-  * `all`: publish all stories, even if they have not yet been published
-  * `published`: only publish stories that already are published and don't have unpublished changes
-  * `published-with-changes`: publish stories that are published and have unpublished changes
-* `publish-languages` (optional): publish specific languages. You can publish more than one language at a time by separating the languages by `,`
+- `space`: the space you get from the space settings area
+- `component`: component name. It needs to be a valid component
+- `field`: name of field
+- `dryrun`: when passed as an argument, does not perform the migration
+- `publish` (optional): publish the content when update
+  - `all`: publish all stories, even if they have not yet been published
+  - `published`: only publish stories that already are published and don't have unpublished changes
+  - `published-with-changes`: publish stories that are published and have unpublished changes
+- `publish-languages` (optional): publish specific languages. You can publish more than one language at a time by separating the languages by `,`
 
 ### rollback-migration
 
@@ -320,12 +336,11 @@ $ storyblok rollback-migration --space 1234 --component Product --field title
 
 #### options
 
-* `space`: the space you get from the space settings area
-* `component`: component name. It needs to be a valid component
-* `field`: name of field
+- `space`: the space you get from the space settings area
+- `component`: component name. It needs to be a valid component
+- `field`: name of field
 
 ### spaces
-
 
 List all spaces of the logged account
 
@@ -368,7 +383,7 @@ this-is-my-title;This is my title;"Lorem ipsum dolor sit amet";https://a.storybl
 A json file need to have following format:
 
 ```json
-[ 
+[
   {
     "path": "this-is-my-title",
     "title": "This is my title",
@@ -381,11 +396,11 @@ A json file need to have following format:
 
 #### Options
 
-* `file`: name of the file
-* `type`: name of the content type you want to use for the import
-* `space`: id of your space
-* `delimiter` (optional): delimiter of the `.cvs` files, only necessary if you are uploading a csv file (Default value is **;** )
-* `folder` (optional): id of the folder where you want to store the content in Storyblok
+- `file`: name of the file
+- `type`: name of the content type you want to use for the import
+- `space`: id of your space
+- `delimiter` (optional): delimiter of the `.cvs` files, only necessary if you are uploading a csv file (Default value is **;** )
+- `folder` (optional): id of the folder where you want to store the content in Storyblok
 
 ### Help
 
@@ -433,10 +448,9 @@ The created file will have the following content:
 module.exports = function (block) {
   // Example to change a string to boolean
   // block.subtitle = !!(block.subtitle)
-
   // Example to transfer content from other field
   // block.subtitle = block.other_field
-}
+};
 ```
 
 In the migration function you can manipulate the block variable to add or modify existing fields of the component.
@@ -496,8 +510,8 @@ Then let's update the default image field:
 
 ```js
 module.exports = function (block) {
-  block.image = block.image.replace('a.storyblok.com', 'my-custom-domain.com')
-}
+  block.image = block.image.replace("a.storyblok.com", "my-custom-domain.com");
+};
 ```
 
 Now you can execute the migration file:
@@ -507,7 +521,6 @@ $ storyblok run-migration --space 00000 --component product --field image --dryr
 ```
 
 #### 2. Transform a Markdown field into a Richtext field
-
 
 To transform a markdown or html field into a richtext field you first need to install a converter library.
 
@@ -521,16 +534,16 @@ Now check the path to the global node modules folder
 $ npm root -g
 ```
 
-Generate the migration with ```storyblok generate-migration --space 00000 --component blog --field intro``` and apply the transformation:
+Generate the migration with `storyblok generate-migration --space 00000 --component blog --field intro` and apply the transformation:
 
 ```js
-var richtextConverter = require('/usr/local/lib/node_modules/storyblok-markdown-richtext')
+var richtextConverter = require("/usr/local/lib/node_modules/storyblok-markdown-richtext");
 
 module.exports = function (block) {
-  if (typeof block.intro == 'string') {
-    block.intro = richtextConverter.markdownToRichtext(block.intro)
+  if (typeof block.intro == "string") {
+    block.intro = richtextConverter.markdownToRichtext(block.intro);
   }
-}
+};
 ```
 
 ## You're looking for a headstart?
