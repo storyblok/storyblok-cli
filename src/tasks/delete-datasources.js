@@ -34,7 +34,7 @@ const deleteDatasources = async (api, options) => {
     }
 
   } catch (e) {
-    console.error(`${chalk.red('X')} An error ocurred in pull-components task when load components data`)
+    console.error(`${chalk.red('X')} An error ocurred in delete-components task when deleting a datasource`)
     return Promise.reject(new Error(e))
   }
 }
