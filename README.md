@@ -272,6 +272,15 @@ $ storyblok sync --type components --source 00001 --target 00002
 # Sync components and stories from `00001` space to `00002` space
 $ storyblok sync --type components,stories --source 00001 --target 00002
 
+# Synchronize components based on their group UUIDs separated by commas
+$ storyblok sync --type components --source 00001 --target 00002 --components-groups xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx,xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+
+# Synchronize datasources that starts with the given slug
+$ storyblok sync --type datasources  --source 00001 --target 00002 --datasources-starts-with-slug global-translations
+
+# Synchronize datasources that starts with the given name (input is converted to lowercase)
+$ storyblok sync --type datasources  --source 00001 --target 00002 --datasources-starts-with-name Global Translations
+
 ```
 
 ### quickstart
