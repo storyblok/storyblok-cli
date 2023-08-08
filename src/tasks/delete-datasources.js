@@ -6,7 +6,7 @@ const chalk = require('chalk')
  * @param  {Object} options { fileName: string, separateFiles: Boolean, path: String }
  * @return {Promise<Object>}
  */
-const pullComponents = async (api, options) => {
+const deleteDatasources = async (api, options) => {
   const { byName, bySlug } = options
 
   try {
