@@ -525,7 +525,7 @@ program
 
     await tasks.deleteDatasources(api, { byName, bySlug })
   } catch (e) {
-    errorHandler(e, COMMANDS.PULL_COMPONENTS)
+    errorHandler(e, COMMANDS.DELETE_DATASOURCES)
   }
 })
 
