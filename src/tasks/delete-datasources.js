@@ -39,4 +39,4 @@ const deleteDatasources = async (api, options) => {
   }
 }
 
-module.exports = pullComponents
+module.exports = deleteDatasources
