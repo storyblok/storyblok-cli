@@ -9,6 +9,7 @@ class SyncDatasources {
   constructor (options) {
     this.targetDatasources = []
     this.sourceDatasources = []
+    this.allSourceDatasources = []
     this.sourceSpaceId = options.sourceSpaceId
     this.targetSpaceId = options.targetSpaceId
     this.oauthToken = options.oauthToken
@@ -20,22 +21,18 @@ class SyncDatasources {
   async sync () {
     try {
       this.targetDatasources = await this.client.getAll(`spaces/${this.targetSpaceId}/datasources`)
-      this.sourceDatasources = await this.client.getAll(`spaces/${this.sourceSpaceId}/datasources`)
+      this.allSourceDatasources = await this.client.getAll(`spaces/${this.sourceSpaceId}/datasources`)
 
       if (this.datasourcesStartsWithSlug) {
-        this.sourceDatasources = this.sourceDatasources.filter(datasource => datasource.slug.toLowerCase().startsWith(this.datasourcesStartsWithSlug.toLowerCase()));
-        const filteredSlugs = this.sourceDatasources.map(obj => obj.slug);
-        const formattedSlugs = filteredSlugs.join(', ');
-
-        console.log(`${chalk.blue('-')} Source datasources where slug starts with ${this.datasourcesStartsWithSlug}: ${formattedSlugs}`);
+        this.filterAndFormattedDatasources('slug', this.datasourcesStartsWithSlug)
       }
   
       if (this.datasourcesStartsWithName) {
-        this.sourceDatasources = this.sourceDatasources.filter(datasource => datasource.name.toLowerCase().startsWith(this.datasourcesStartsWithName.toLowerCase()));
-        const filteredNames = this.sourceDatasources.map(obj => obj.name);
-        const formattedNames = filteredNames.join(', ');
+        this.filterAndFormattedDatasources('name', this.datasourcesStartsWithName)
+      }
 
-        console.log(`${chalk.blue('-')} Source datasources where name starts with ${this.datasourcesStartsWithName}: ${formattedNames}`);
+      if (!this.datasourcesStartsWithName && !this.datasourcesStartsWithSlug) {
+        this.sourceDatasources = this.allSourceDatasources
       }
 
       console.log(
@@ -49,15 +46,22 @@ class SyncDatasources {
       console.log(`  - ${this.targetDatasources.length} datasources`)
     } catch (err) {
       console.error(`An error ocurred when loading the datasources: ${err.message}`)
-
       
       return Promise.reject(err)
     }
-  
-
+    
     console.log(chalk.green('-') + ' Syncing datasources...')
     await this.addDatasources()
     await this.updateDatasources()
+  }
+
+  async filterAndFormattedDatasources(datasourceKey, startsWith) {
+    const filteredDatasource = this.allSourceDatasources.filter((dataSource) => dataSource[datasourceKey].toLowerCase().startsWith(startsWith.toLowerCase()))
+    for (const datasource of filteredDatasource) {
+      this.sourceDatasources.push(datasource);
+    }
+    const filteredData = this.sourceDatasources.map(obj => obj[datasourceKey])
+    console.log(`${chalk.blue('-')} Source datasources where ${datasourceKey} starts with ${startsWith}: ${filteredData.join(', ')}`);
   }
 
   async getDatasourceEntries (spaceId, datasourceId, dimensionId = null) {
