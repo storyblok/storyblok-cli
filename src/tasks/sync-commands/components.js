@@ -112,7 +112,7 @@ class SyncComponents {
           await this.presetsLib.createPresets(componentPresets, componentCreated.id)
         }
       } catch (e) {
-        if (e.response && e.response.status && e.response.status === 422) {
+        if (e.response && e.response.status || e.status === 422) {
           console.log(
             `${chalk.yellow('-')} Component ${component.name} already exists, updating it...`
           )
