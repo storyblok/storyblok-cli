@@ -492,6 +492,30 @@ program
     }
   })
 
+  // delete-datasources
+program
+.command(COMMANDS.DELETE_DATASOURCES)
+.requiredOption('--space-id <SPACE_ID>', 'Space id')
+.option('--by-slug <SLUG>', 'Delete datasources by slug')
+.option('--by-name <name>', 'Delete datasources by name')
+.action(async (options) => {
+  console.log(`${chalk.blue('-')} Executing ${COMMANDS.DELETE_DATASOURCES} task`)
+
+  const { spaceId, bySlug, byName } = options
+
+  try {
+    if (!api.isAuthorized()) {
+      await api.processLogin()
+    }
+
+    api.setSpaceId(spaceId)
+
+    await tasks.deleteDatasources(api, { byName, bySlug })
+  } catch (e) {
+    errorHandler(e, COMMANDS.DELETE_DATASOURCES)
+  }
+})
+
 program.parse(process.argv)
 
 if (program.rawArgs.length <= 2) {

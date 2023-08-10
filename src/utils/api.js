@@ -238,6 +238,24 @@ module.exports = {
       .catch(err => Promise.reject(err))
   },
 
+  getDatasources () {
+    const client = this.getClient()
+
+    return client
+      .get(this.getPath('datasources'))
+      .then(data => data.data.datasources || [])
+      .catch(err => Promise.reject(err))
+  },
+
+  deleteDatasource (id) {
+    const client = this.getClient()
+
+    return client
+      .delete(this.getPath(`datasources/${id}`))
+      .catch(err => Promise.reject(err))
+  },
+
+
   post (path, props) {
     return this.sendRequest(path, 'post', props)
   },
