@@ -429,10 +429,7 @@ program
     const component = options.component || ''
     const space = program.space
     if (!space) {
-      console.log(
-        chalk.red('X') +
-          ' Please provide the space as argument --space YOUR_SPACE_ID.'
-      )
+      console.log(chalk.red('X') + ' Please provide the space as argument --space YOUR_SPACE_ID.')
       process.exit(1)
     }
 
@@ -445,11 +442,7 @@ program
 
       await tasks.rollbackMigration(api, field, component)
     } catch (e) {
-      console.log(
-        chalk.red('X') +
-          ' An error ocurred when run rollback-migration: ' +
-          e.message
-      )
+      console.log(chalk.red('X') + ' An error ocurred when run rollback-migration: ' +e.message)
       process.exit(1)
     }
   })
@@ -467,9 +460,7 @@ program
 
       await tasks.listSpaces(api, region)
     } catch (e) {
-      console.log(
-        chalk.red('X') + ' An error ocurred to listing spaces: ' + e.message
-      )
+      console.log(chalk.red('X') + ' An error ocurred to listing spaces: ' + e.message)
       process.exit(1)
     }
   })
@@ -480,14 +471,8 @@ program
   .description('Import data from other systems and relational databases.')
   .requiredOption('-f, --file <FILE_NAME>', 'Name of the file')
   .requiredOption('-t, --type <TYPE>', 'Type of the content')
-  .option(
-    '-fr, --folder <FOLDER_ID>',
-    '(Optional) This is a Id of folder in storyblok'
-  )
-  .option(
-    '-d, --delimiter <DELIMITER>',
-    'If you are using a csv file, put the file delimiter, the default is ";"'
-  )
+  .option('-fr, --folder <FOLDER_ID>', '(Optional) This is a Id of folder in storyblok')
+  .option('-d, --delimiter <DELIMITER>', 'If you are using a csv file, put the file delimiter, the default is ";"')
   .action(async (options) => {
     const space = program.space
 
@@ -497,23 +482,16 @@ program
       }
 
       if (!space) {
-        console.log(
-          chalk.red('X') +
-            ' Please provide the space as argument --space <SPACE_ID>.'
-        )
+        console.log(chalk.red('X') + ' Please provide the space as argument --space <SPACE_ID>.')
         return
       }
 
       api.setSpaceId(space)
       await tasks.importFiles(api, options)
 
-      console.log(
-        `${chalk.green('✓')} The import process was executed with success!`
-      )
+      console.log(`${chalk.green('✓')} The import process was executed with success!`)
     } catch (e) {
-      console.log(
-        chalk.red('X') + ' An error ocurred to import data : ' + e.message
-      )
+      console.log(chalk.red('X') + ' An error ocurred to import data : ' + e.message)
       process.exit(1)
     }
   })
@@ -526,18 +504,9 @@ if (program.rawArgs.length <= 2) {
 
 function errorHandler(e, command) {
   if (/404/.test(e.message)) {
-    console.log(
-      chalk.yellow('/!\\') +
-        ' If your space was created under US or CN region, you must provide the region us or cn upon login.'
-    )
+    console.log(chalk.yellow('/!\\') + ' If your space was created under US or CN region, you must provide the region us or cn upon login.')
   } else {
-    console.log(
-      chalk.red('X') +
-        ' An error occurred when executing the ' +
-        command +
-        ' task: ' +
-        e || e.message
-    )
+    console.log(chalk.red('X') + ' An error occurred when executing the ' + command + ' task: ' + e || e.message)
   }
   process.exit(1)
 }
