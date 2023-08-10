@@ -1,6 +1,7 @@
 const chalk = require('chalk')
 const axios = require('axios')
 const fs = require('fs')
+const isEmpty = require('lodash/isEmpty')
 const deleteComponent = require('./delete-component')
 
 const isUrl = source => source.indexOf('http') === 0
@@ -44,7 +45,7 @@ const getDataFromPath = async (path) => {
 const createContentList = (content, key) => {
   if (content[key]) return content[key]
   else if (Array.isArray(content)) return [...content]
-  else return [content]
+  else return !isEmpty(content) ? [content] : []
 }
 
 /**

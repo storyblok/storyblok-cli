@@ -2,6 +2,7 @@ const axios = require('axios')
 const fs = require('fs')
 const chalk = require('chalk')
 const PresetsLib = require('../utils/presets-lib')
+const isEmpty = require('lodash/isEmpty')
 
 const isUrl = source => source.indexOf('http') === 0
 
@@ -58,7 +59,7 @@ const getDataFromPath = async (path) => {
 const createContentList = (content, key) => {
   if (content[key]) return content[key]
   else if (Array.isArray(content)) return [...content]
-  else return [content]
+  else return !isEmpty(content) ? [content] : []
 }
 
 module.exports = async (api, { source, presetsSource }) => {
