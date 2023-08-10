@@ -4359,10 +4359,10 @@ static-extend@^0.1.1:
     define-property "^0.2.5"
     object-copy "^0.1.0"
 
-storyblok-js-client@^5.12.0:
-  version "5.12.0"
-  resolved "https://registry.yarnpkg.com/storyblok-js-client/-/storyblok-js-client-5.12.0.tgz#e8100296609d3574990bdb8a7cdf3b031125e193"
-  integrity sha512-g096AwVtRfs+epfvuiQlI4RDTRcn+/h+WxkWQd8rm95MnRzgZMo1LJcg9NQU8Hy172dvrcjH2+DBsPxw0NAoYw==
+storyblok-js-client@^5.14.0:
+  version "5.14.0"
+  resolved "https://registry.yarnpkg.com/storyblok-js-client/-/storyblok-js-client-5.14.0.tgz#7b88eb3fc874f1ae89e9c6afda7ca9aa85cf624c"
+  integrity sha512-ohG1ASiLludBMlyKsUPkqpy0JBSwtX4B9vUlWguWhjb1wgJMTBwX8sOdaSJlUl2hKYb2CONJsLMlMWSsvONriA==
 
 string-length@^4.0.1:
   version "4.0.2"
