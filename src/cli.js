@@ -505,7 +505,7 @@ program
     }
   })
 
-  // delete-components
+  // delete-datasources
 program
 .command(COMMANDS.DELETE_DATASOURCES)
 .requiredOption('--space-id <SPACE_ID>', 'Space id')
