@@ -299,9 +299,6 @@ program
           throw new Error(`The type ${_type} is not valid`)
         }
       })
-
-      const filterQuery = filter ? buildFilterQuery(keys, operations, values) : undefined
-      const token = creds.get().token || null
       
       await tasks.sync(_types, {
         api,
