@@ -78,6 +78,9 @@ module.exports = async (api, { source, presetsSource }) => {
 
 const push = async (api, components, presets = []) => {
   const presetsLib = new PresetsLib({ oauthToken: api.accessToken, targetSpaceId: api.spaceId })
+  const componentsPutPromisses = []
+  const componentsDefaultPresetPutPromisses = []
+
   try {
     const componentsGroups = await api.getComponentGroups()
     for (let i = 0; i < components.length; i++) {
@@ -161,9 +164,9 @@ const push = async (api, components, presets = []) => {
             }
           }
 
-          await api.put(`components/${id}`, {
+          componentsPutPromisses.push(await api.put(`components/${id}`, {
             component: components[i]
-          })
+          }))
 
           console.log(`${chalk.green('✓')} Component ${name} has been updated in Storyblok!`)
         } catch (e) {
@@ -185,9 +188,9 @@ const push = async (api, components, presets = []) => {
               if (defaultPresetInTarget) {
                 components[i].preset_id = defaultPresetInTarget.id
 
-                await api.put(`components/${componentRes.data.component.id}`, {
+                componentsDefaultPresetPutPromisses.push(await api.put(`components/${componentRes.data.component.id}`, {
                   component: components[i]
-                })
+                }))
               }
             }
           }
@@ -198,6 +201,9 @@ const push = async (api, components, presets = []) => {
         }
       }
     }
+
+    await Promise.all(componentsPutPromisses)
+    await Promise.all(componentsDefaultPresetPutPromisses)
 
     return Promise.resolve(true)
   } catch (e) {
