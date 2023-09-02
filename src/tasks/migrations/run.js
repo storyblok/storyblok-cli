@@ -7,26 +7,10 @@ const {
   processMigration,
   getStoriesByComponent,
   getNameOfMigrationFile,
-  createRollbackFile
+  createRollbackFile,
+  isStoryPublishedWithoutChanges,
+  isStoryWithUnpublishedChanges
 } = require('./utils')
-
-/**
- * @method isStoryPublishedWithoutChanges
- * @param  {Object} story
- * @return {Boolean}
- */
-const isStoryPublishedWithoutChanges = story => {
-  return story.published && !story.unpublished_changes
-}
-
-/**
- * @method isStoryWithUnpublishedChanges
- * @param  {Object} story
- * @return {Boolean}
- */
-const isStoryWithUnpublishedChanges = story => {
-  return story.published && story.unpublished_changes
-}
 
 /**
  * @typedef {'all'|'published'|'published-with-changes'} PublishOptions
