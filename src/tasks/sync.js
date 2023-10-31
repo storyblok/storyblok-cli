@@ -61,7 +61,8 @@ const SyncSpaces = {
 
     for (let i = 0; i < targetFolders.length; i++) {
       var folder = targetFolders[i]
-      if (this.folder && folder.full_slug !== this.folder) {
+      // filter stories by folder
+      if (this.folder && folder.full_slug === this.folder) {
         continue
       }
       folderMapping[folder.full_slug] = folder.id
