@@ -271,6 +271,8 @@ program
   .requiredOption('--type <TYPE>', 'Define what will be sync. Can be components, folders, stories, datasources or roles')
   .requiredOption('--source <SPACE_ID>', 'Source space id')
   .requiredOption('--target <SPACE_ID>', 'Target space id')
+  .option('--folder <FOLDERNAME>', 'Folder to be synched')
+  .option('--slug <SLUGNAME>', 'Slug to be synched')
   .option('--components-groups <UUIDs>', 'Synchronize components based on their group UUIDs separated by commas')
   .action(async (options) => {
     console.log(`${chalk.blue('-')} Sync data between spaces\n`)
@@ -303,7 +305,9 @@ program
         token,
         target,
         source,
-        _componentsGroups
+        _componentsGroups,
+        folder,
+        slug
       })
 
       console.log('\n' + chalk.green('✓') + ' Sync data between spaces successfully completed')

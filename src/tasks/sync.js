@@ -16,9 +16,17 @@ const SyncSpaces = {
     this.oauthToken = options.token
     this.client = api.getClient()
     this.componentsGroups = options._componentsGroups
+    //filter stories by folder
+    this.folder = options.folder
+    //filter stories by slug
+    this.slug = options.slug
   },
 
   async getStoryWithTranslatedSlugs (sourceStory, targetStory) {
+    /** if story option is set, use story only if it's identical to the slug of the slug provided in option */
+    if (this.slug && sourceStory.slug !== this.slug) {
+      return Promise.reject(new Error('Story slug does not match slug option'))
+    }
     const storyForPayload = { ...sourceStory }
     if (sourceStory.translated_slugs) {
       const sourceTranslatedSlugs = sourceStory.translated_slugs.map(s => {
@@ -53,6 +61,9 @@ const SyncSpaces = {
 
     for (let i = 0; i < targetFolders.length; i++) {
       var folder = targetFolders[i]
+      if (this.folder && folder.full_slug !== this.folder) {
+        continue
+      }
       folderMapping[folder.full_slug] = folder.id
     }
 
