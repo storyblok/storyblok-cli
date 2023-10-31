@@ -22,7 +22,6 @@ $ npm i storyblok -g
 
 ## Commands
 
-
 ### login
 
 Login to the Storyblok cli
@@ -30,27 +29,32 @@ Login to the Storyblok cli
 ```sh
 $ storyblok login
 ```
+
 #### Login options
 
 ##### Options for Login with email and password
+
 * `email`: your user's email address
 * `password`: your user's password
 
 ##### Options for Login with token (Recomended to SSO user's but works with all user accounts)
+
 * `token`: your personal access token
 
 **Get your personal access token**
+
 * Go to [https://app.storyblok.com/#/me/account?tab=token](https://app.storyblok.com/#/me/account?tab=token) and click on Generate new token.
 
 **For Both login options you nedd to pass the region**
 
-* `region`: region you would like to work in. Please keep in mind that the region must match the region of your space. You can use `us`, `cn` or `eu`, if left empty, default is `eu`. This region flag will be used for the other cli's commands. 
+* `region`: region you would like to work in. Please keep in mind that the region must match the region of your space. You can use `us`, `cn` or `eu`, if left empty, default is `eu`. This region flag will be used for the other cli's commands.
 
 #### Login with token flag
+
 You can also add the token directly from the login’s command, like the example below:
 
 ```sh
-$ storyblok login --token <PERSONAL_ACCESS_TOKEN> --region eu 
+$ storyblok login --token <PERSONAL_ACCESS_TOKEN> --region eu
 ```
 
 ### logout
@@ -60,6 +64,7 @@ Logout from the Storyblok cli
 ```sh
 $ storyblok logout
 ```
+
 ### user
 
 Get the currently logged in user
@@ -67,7 +72,6 @@ Get the currently logged in user
 ```sh
 $ storyblok user
 ```
-
 
 ### select
 
@@ -166,14 +170,17 @@ storyblok delete-component <component> --space <SPACE_ID>
 ```
 
 #### Parameters
+
 * `component`: The name or id of the component
 
 #### Options
+
 * `space_id`: the space where the command should be executed.
 
 #### Examples
 
 Delete a component on your space.
+
 ```sh
 storyblok delete-component 111111 --space 67819
 ```
@@ -192,6 +199,7 @@ storyblok delete-components <SOURCE> --space <SPACE_ID>
 ```
 
 #### Parameters
+
 * `source`: can be a URL or path to JSON file, the path to a json file could be to a single or multiple files separated by comma, like `./pages-1234.json,../User/components/grid-1234.json`
 
 Using an **URL**
@@ -213,6 +221,7 @@ $ storyblok push-components ./page.json,../grid.json,./feature.json --space 6781
 ```
 
 #### Options
+
 * `space_id`: the space where the command should be executed.
 * `reverse`: When passed as an argument, deletes only those components on your space that do not appear in the JSON.
 * `dryrun`: when passed as an argument, does not perform any changes on the given space.
@@ -220,16 +229,19 @@ $ storyblok push-components ./page.json,../grid.json,./feature.json --space 6781
 #### Examples
 
 Delete all components on a certain space that occur in your local JSON.
+
 ```sh
 storyblok delete-components ./components.json --space 67819
 ```
 
 Delete only those components which do not occur in your local json from your space.
+
 ```sh
 storyblok delete-components ./components.json --space 67819 --reverse
 ```
 
 To see the result in your console output but to not perform the command on your space, use the `--dryrun` argument.
+
 ```sh
 storyblok delete-components ./components.json --space 67819 --reverse --dryrun
 ```
@@ -247,6 +259,9 @@ $ storyblok sync --type <COMMAND> --source <SPACE_ID> --target <SPACE_ID>
 * `type`: describe the command type to execute. Can be: `folders`, `components`, `stories`, `datasources` or `roles`. It's possible pass multiple types separated by comma (`,`).
 * `source`: the source space to use to sync
 * `target`: the target space to use to sync
+* `components-groups`: Synchronize components based on their group UUIDs separated by commas. Example: `--components-groups ******-****`
+* `datasources-starts-with-slug`: Synchronize datasources that starts with the given slug. Example: `--datasources-starts-with-slug global-translations`
+* `datasources-starts-with-name`: Synchronize datasources that starts with the given name. Example: `--datasources-starts-with-name Translations`
 
 #### Examples
 
@@ -256,6 +271,15 @@ $ storyblok sync --type components --source 00001 --target 00002
 
 # Sync components and stories from `00001` space to `00002` space
 $ storyblok sync --type components,stories --source 00001 --target 00002
+
+# Synchronize components based on their group UUIDs separated by commas
+$ storyblok sync --type components --source 00001 --target 00002 --components-groups xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx,xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+
+# Synchronize datasources that starts with the given slug
+$ storyblok sync --type datasources  --source 00001 --target 00002 --datasources-starts-with-slug global-translations
+
+# Synchronize datasources that starts with the given name (input is converted to lowercase)
+$ storyblok sync --type datasources  --source 00001 --target 00002 --datasources-starts-with-name Global Translations
 
 ```
 
@@ -274,6 +298,7 @@ Create a migration file (with the name `change_<COMPONENT>_<FIELD>.js`) inside t
 ```sh
 $ storyblok generate-migration --space <SPACE_ID> --component <COMPONENT_NAME> --field <FIELD>
 ```
+
 It's important to note that the `component` and `field` parameters are required and must be spelled exactly as they are in Storyblok. You can check the exact name by looking at the `Block library` inside your space.
 
 #### Options
@@ -326,7 +351,6 @@ $ storyblok rollback-migration --space 1234 --component Product --field title
 
 ### spaces
 
-
 List all spaces of the logged account
 
 ```sh
@@ -368,7 +392,7 @@ this-is-my-title;This is my title;"Lorem ipsum dolor sit amet";https://a.storybl
 A json file need to have following format:
 
 ```json
-[ 
+[
   {
     "path": "this-is-my-title",
     "title": "This is my title",
@@ -451,10 +475,9 @@ The created file will have the following content:
 module.exports = function (block) {
   // Example to change a string to boolean
   // block.subtitle = !!(block.subtitle)
-
   // Example to transfer content from other field
   // block.subtitle = block.other_field
-}
+};
 ```
 
 In the migration function you can manipulate the block variable to add or modify existing fields of the component.
@@ -525,7 +548,6 @@ $ storyblok run-migration --space 00000 --component product --field image --dryr
 ```
 
 #### 2. Transform a Markdown field into a Richtext field
-
 
 To transform a markdown or html field into a richtext field you first need to install a converter library.
 

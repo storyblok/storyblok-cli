@@ -15,7 +15,9 @@ const SyncSpaces = {
     this.targetSpaceId = options.target
     this.oauthToken = options.token
     this.client = api.getClient()
-    this.componentsGroups = options._componentsGroups
+    this.componentsGroups = options._componentsGroups,
+    this.datasourcesStartsWithSlug = options.datasourcesStartsWithSlug,
+    this.datasourcesStartsWithName = options.datasourcesStartsWithName
   },
 
   async getStoryWithTranslatedSlugs (sourceStory, targetStory) {
@@ -247,7 +249,9 @@ const SyncSpaces = {
     const syncDatasourcesInstance = new SyncDatasources({
       sourceSpaceId: this.sourceSpaceId,
       targetSpaceId: this.targetSpaceId,
-      oauthToken: this.oauthToken
+      oauthToken: this.oauthToken,
+      datasourcesStartsWithSlug: this.datasourcesStartsWithSlug,
+      datasourcesStartsWithName: this.datasourcesStartsWithName
     })
 
     try {

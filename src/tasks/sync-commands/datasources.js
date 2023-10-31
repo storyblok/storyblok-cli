@@ -4,21 +4,36 @@ const api = require('../../utils/api')
 
 class SyncDatasources {
   /**
-   * @param {{ sourceSpaceId: string, targetSpaceId: string, oauthToken: string }} options
+   * @param {{ sourceSpaceId: string, targetSpaceId: string, oauthToken: string, datasourcesStartsWithSlug: string, datasourcesStartsWithName: string }} options
    */
   constructor (options) {
     this.targetDatasources = []
     this.sourceDatasources = []
+    this.allSourceDatasources = []
     this.sourceSpaceId = options.sourceSpaceId
     this.targetSpaceId = options.targetSpaceId
     this.oauthToken = options.oauthToken
     this.client = api.getClient()
+    this.datasourcesStartsWithSlug = options.datasourcesStartsWithSlug
+    this.datasourcesStartsWithName = options.datasourcesStartsWithName
   }
 
   async sync () {
     try {
       this.targetDatasources = await this.client.getAll(`spaces/${this.targetSpaceId}/datasources`)
-      this.sourceDatasources = await this.client.getAll(`spaces/${this.sourceSpaceId}/datasources`)
+      this.allSourceDatasources = await this.client.getAll(`spaces/${this.sourceSpaceId}/datasources`)
+
+      if (this.datasourcesStartsWithSlug) {
+        this.filterAndFormattedDatasources('slug', this.datasourcesStartsWithSlug)
+      }
+  
+      if (this.datasourcesStartsWithName) {
+        this.filterAndFormattedDatasources('name', this.datasourcesStartsWithName)
+      }
+
+      if (!this.datasourcesStartsWithName && !this.datasourcesStartsWithSlug) {
+        this.sourceDatasources = this.allSourceDatasources
+      }
 
       console.log(
         `${chalk.blue('-')} In source space #${this.sourceSpaceId}: `
@@ -31,13 +46,22 @@ class SyncDatasources {
       console.log(`  - ${this.targetDatasources.length} datasources`)
     } catch (err) {
       console.error(`An error ocurred when loading the datasources: ${err.message}`)
-
+      
       return Promise.reject(err)
     }
-
+    
     console.log(chalk.green('-') + ' Syncing datasources...')
     await this.addDatasources()
     await this.updateDatasources()
+  }
+
+  async filterAndFormattedDatasources(datasourceKey, startsWith) {
+    const filteredDatasource = this.allSourceDatasources.filter((dataSource) => dataSource[datasourceKey].toLowerCase().startsWith(startsWith.toLowerCase()))
+    for (const datasource of filteredDatasource) {
+      this.sourceDatasources.push(datasource);
+    }
+    const filteredData = this.sourceDatasources.map(obj => obj[datasourceKey])
+    console.log(`${chalk.blue('-')} Source datasources where ${datasourceKey} starts with ${startsWith}: ${filteredData.join(', ')}`);
   }
 
   async getDatasourceEntries (spaceId, datasourceId, dimensionId = null) {

@@ -24,16 +24,14 @@ console.log()
 
 // non-intrusive notify users if an update available
 const notifyOptions = {
-  isGlobal: true
+  isGlobal: true,
 }
 
-updateNotifier({ pkg })
-  .notify(notifyOptions)
+updateNotifier({ pkg }).notify(notifyOptions)
 
 program.version(pkg.version)
 
-program
-  .option('-s, --space [value]', 'space ID')
+program.option('-s, --space [value]', 'space ID')
 
 // login
 program
@@ -94,7 +92,7 @@ program
 // pull-languages
 program
   .command('pull-languages')
-  .description("Download your space's languages schema as json")
+  .description('Download your space\'s languages schema as json')
   .action(async () => {
     console.log(`${chalk.blue('-')} Executing pull-languages task`)
     const space = program.space
@@ -122,7 +120,7 @@ program
   .option('--sf, --separate-files [value]', 'Argument to create a single file for each component')
   .option('-p, --path <path>', 'Path to save the component files')
   .option('-f, --file-name <fileName>', 'custom name to be used in file(s) name instead of space id')
-  .description("Download your space's components schema as json")
+  .description('Download your space\'s components schema as json')
   .action(async (options) => {
     console.log(`${chalk.blue('-')} Executing pull-components task`)
     const space = program.space
@@ -150,7 +148,7 @@ program
 program
   .command(COMMANDS.PUSH_COMPONENTS + ' <source>')
   .option('-p, --presets-source <presetsSource>', 'Path to presets file')
-  .description("Download your space's components schema as json. The source parameter can be a URL to your JSON file or a path to it")
+  .description('Download your space\'s components schema as json. The source parameter can be a URL to your JSON file or a path to it')
   .action(async (source, options) => {
     console.log(`${chalk.blue('-')} Executing push-components task`)
     const space = program.space
@@ -272,6 +270,8 @@ program
   .requiredOption('--source <SPACE_ID>', 'Source space id')
   .requiredOption('--target <SPACE_ID>', 'Target space id')
   .option('--components-groups <UUIDs>', 'Synchronize components based on their group UUIDs separated by commas')
+  .option('--datasources-starts-with-slug <SLUG>', 'Synchronize datasources that starts with the given slug')
+  .option('--datasources-starts-with-name <NAME>', 'Synchronize datasources that starts with the given name')
   .action(async (options) => {
     console.log(`${chalk.blue('-')} Sync data between spaces\n`)
 
@@ -284,15 +284,19 @@ program
         type,
         target,
         source,
-        componentsGroups
+        componentsGroups,
+        datasourcesStartsWithSlug,
+        datasourcesStartsWithName,
       } = options
 
-      const _componentsGroups = componentsGroups ? componentsGroups.split(',') : null
+      const _componentsGroups = componentsGroups
+        ? componentsGroups.split(',')
+        : null
 
       const token = creds.get().token || null
 
       const _types = type.split(',') || []
-      _types.forEach(_type => {
+      _types.forEach((_type) => {
         if (!SYNC_TYPES.includes(_type)) {
           throw new Error(`The type ${_type} is not valid`)
         }
@@ -303,7 +307,9 @@ program
         token,
         target,
         source,
-        _componentsGroups
+        _componentsGroups,
+        datasourcesStartsWithSlug,
+        datasourcesStartsWithName,
       })
 
       console.log('\n' + chalk.green('✓') + ' Sync data between spaces successfully completed')
@@ -386,7 +392,7 @@ program
     const publishOptionsAvailable = [
       'all',
       'published',
-      'published-with-changes'
+      'published-with-changes',
     ]
     if (publish && !publishOptionsAvailable.includes(publish)) {
       console.log(chalk.red('X') + ' Please provide a correct publish option: all, published, or published-with-changes')
@@ -436,7 +442,7 @@ program
 
       await tasks.rollbackMigration(api, field, component)
     } catch (e) {
-      console.log(chalk.red('X') + ' An error ocurred when run rollback-migration: ' + e.message)
+      console.log(chalk.red('X') + ' An error ocurred when run rollback-migration: ' +e.message)
       process.exit(1)
     }
   })
@@ -483,9 +489,7 @@ program
       api.setSpaceId(space)
       await tasks.importFiles(api, options)
 
-      console.log(
-        `${chalk.green('✓')} The import process was executed with success!`
-      )
+      console.log(`${chalk.green('✓')} The import process was executed with success!`)
     } catch (e) {
       console.log(chalk.red('X') + ' An error ocurred to import data : ' + e.message)
       process.exit(1)
@@ -522,7 +526,7 @@ if (program.rawArgs.length <= 2) {
   program.help()
 }
 
-function errorHandler (e, command) {
+function errorHandler(e, command) {
   if (/404/.test(e.message)) {
     console.log(chalk.yellow('/!\\') + ' If your space was created under US or CN region, you must provide the region us or cn upon login.')
   } else {
