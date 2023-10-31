@@ -46,7 +46,7 @@ class SyncDatasources {
       const entriesFirstPage = await this.client.get(`spaces/${spaceId}/datasource_entries/?datasource_id=${datasourceId}${dimensionQuery}`)
       const entriesRequets = []
       for (let i = 2; i <= Math.ceil(entriesFirstPage.total / 25); i++) {
-        entriesRequets.push(await this.client.get(`spaces/${spaceId}/datasource_entries/?datasource_id=${datasourceId}&page=${i}`))
+        entriesRequets.push(await this.client.get(`spaces/${spaceId}/datasource_entries?datasource_id=${datasourceId}&page=${i}${dimensionQuery}`))
       }
       return entriesFirstPage.data.datasource_entries.concat(...(await Promise.all(entriesRequets)).map(r => r.data.datasource_entries))
     } catch (err) {
