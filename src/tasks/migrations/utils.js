@@ -318,6 +318,24 @@ const checkExistenceFilesInRollBackDirectory = (path, component, field) => {
   return Promise.resolve(file)
 }
 
+/**
+ * @method isStoryPublishedWithoutChanges
+ * @param  {Object} story
+ * @return {Boolean}
+ */
+const isStoryPublishedWithoutChanges = story => {
+  return story.published && !story.unpublished_changes
+}
+
+/**
+ * @method isStoryWithUnpublishedChanges
+ * @param  {Object} story
+ * @return {Boolean}
+ */
+const isStoryWithUnpublishedChanges = story => {
+  return story.published && story.unpublished_changes
+}
+
 module.exports = {
   getPathToFile,
   checkFileExists,
@@ -332,5 +350,7 @@ module.exports = {
   createRollbackFile,
   checkExistenceFilesInRollBackDirectory,
   urlTofRollbackMigrationFile,
-  getNameOfRollbackMigrationFile
+  getNameOfRollbackMigrationFile,
+  isStoryPublishedWithoutChanges,
+  isStoryWithUnpublishedChanges
 }

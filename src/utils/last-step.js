@@ -49,7 +49,7 @@ const lastStep = answers => {
     console.log(chalk.green('✓') + ' - The github repository ' + gitRepo + ' will be cloned now...')
 
     ghdownload(gitRepo, outputDir, async (err) => {
-      if(err) {
+      if (err) {
         if (err.code === 'ENOTEMPTY') {
           console.log(chalk.red('  Oh Snap! It seems that you already have a project with the name: ' + name))
           reject(new Error('This repository already has been cloned'))

@@ -13,7 +13,7 @@ const pkg = require('../package.json')
 
 const tasks = require('./tasks')
 const { getQuestions, lastStep, api, creds } = require('./utils')
-const { SYNC_TYPES, COMMANDS } = require('./constants')
+const { SYNC_TYPES, PUBLISH_TYPES, COMMANDS } = require('./constants')
 
 clear()
 console.log(chalk.cyan(figlet.textSync('storyblok')))
@@ -383,12 +383,7 @@ program
       process.exit(1)
     }
 
-    const publishOptionsAvailable = [
-      'all',
-      'published',
-      'published-with-changes'
-    ]
-    if (publish && !publishOptionsAvailable.includes(publish)) {
+    if (publish && !PUBLISH_TYPES.includes(publish)) {
       console.log(chalk.red('X') + ' Please provide a correct publish option: all, published, or published-with-changes')
       process.exit(1)
     }
@@ -418,12 +413,19 @@ program
   .description('Rollback-migration a migration file')
   .requiredOption('-c, --component <COMPONENT_NAME>', 'Name of the component')
   .requiredOption('-f, --field <FIELD_NAME>', 'Name of the component field')
+  .option('--publish <PUBLISH_OPTION>', 'Publish the content. It can be: all, published or published-with-changes')
   .action(async (options) => {
     const field = options.field || ''
     const component = options.component || ''
+    const publish = options.publish || null
     const space = program.space
     if (!space) {
       console.log(chalk.red('X') + ' Please provide the space as argument --space YOUR_SPACE_ID.')
+      process.exit(1)
+    }
+
+    if (publish && !PUBLISH_TYPES.includes(publish)) {
+      console.log(chalk.red('X') + ' Please provide a correct publish option: all, published, or published-with-changes')
       process.exit(1)
     }
 
@@ -434,7 +436,7 @@ program
 
       api.setSpaceId(space)
 
-      await tasks.rollbackMigration(api, field, component)
+      await tasks.rollbackMigration(api, field, component, { publish })
     } catch (e) {
       console.log(chalk.red('X') + ' An error ocurred when run rollback-migration: ' + e.message)
       process.exit(1)
