@@ -1,3 +1,4 @@
+const { REGIONS } = require('../constants')
 const getOptions = (subCommand, argv = {}, api = {}) => {
   let email = ''
   const moreOptions = [
@@ -6,17 +7,17 @@ const getOptions = (subCommand, argv = {}, api = {}) => {
     'push-components',
     'scaffold'
   ]
+  const regionsPrefixList = Object.keys(REGIONS)
   const regionInput = {
     type: 'input',
     name: 'region',
-    message: 'Please enter the region you would like to work in (us, eu or cn) - if not set, default is eu:',
+    message: `Please enter the region you would like to work in (${regionsPrefixList}) - if not set, default is eu:`,
     validate: function (value) {
-      const flagList = ['us', 'cn', 'eu']
-      if (flagList.indexOf(value) > -1) {
+      if (regionsPrefixList.indexOf(value) > -1) {
         return true
       }
 
-      return 'Please enter a valid region: us, eu or cn'
+      return `Please enter a valid region: ${regionsPrefixList}`
     }
   }
 

@@ -1,4 +1,4 @@
-const { LOGIN_URL, SIGNUP_URL } = require('../src/constants')
+const { USERS_ROUTES } = require('../src/constants')
 const { EMAIL_TEST, PASSWORD_TEST, TOKEN_TEST } = require('../tests/constants')
 
 const isCredCorrects = (email, pass) => {
@@ -9,7 +9,7 @@ const axios = {
   post: jest.fn((path, data) => {
     const { email, password } = data || {}
 
-    if (path === LOGIN_URL && isCredCorrects(email, password)) {
+    if (path === USERS_ROUTES.LOGIN && isCredCorrects(email, password)) {
       return Promise.resolve({
         data: {
           access_token: TOKEN_TEST
@@ -17,7 +17,7 @@ const axios = {
       })
     }
 
-    if (path === SIGNUP_URL && isCredCorrects(email, password)) {
+    if (path === USERS_ROUTES.SIGNUP && isCredCorrects(email, password)) {
       return Promise.resolve({
         data: {
           access_token: TOKEN_TEST

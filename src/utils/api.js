@@ -5,7 +5,7 @@ const inquirer = require('inquirer')
 
 const creds = require('./creds')
 const getQuestions = require('./get-questions')
-const { SIGNUP_URL, API_URL, US_API_URL, CN_API_URL, DEFAULT_AGENT } = require('../constants')
+const { REGIONS, USERS_ROUTES, DEFAULT_AGENT } = require('../constants')
 
 module.exports = {
   accessToken: '',
@@ -169,7 +169,7 @@ module.exports = {
   },
 
   signup (email, password, region = 'eu') {
-    return axios.post(SIGNUP_URL, {
+    return axios.post(USERS_ROUTES.SIGNUP, {
       email: email,
       password: password,
       region
@@ -310,12 +310,6 @@ module.exports = {
   },
 
   apiSwitcher (region) {
-    const apiList = {
-      us: US_API_URL,
-      cn: CN_API_URL,
-      eu: API_URL
-    }
-
-    return region ? apiList[region] : apiList[this.region]
+    return region ? REGIONS[region].apiEndpoint : REGIONS[this.region].apiEndpoint
   }
 }
