@@ -39,7 +39,7 @@ module.exports = {
   },
 
   async login (content) {
-    const { email, password, region } = content
+    const { email, password, region = 'eu' } = content
     try {
       const response = await axios.post(`${this.apiSwitcher(region)}users/login`, {
         email: email,

@@ -30,22 +30,27 @@ const DEFAULT_AGENT = {
 
 const REGIONS = {
   cn: {
+    key: 'cn',
     name: 'China',
     apiEndpoint: 'https://app.storyblokchina.cn/v1/'
   },
   eu: {
+    key: 'eu',
     name: 'Europe',
     apiEndpoint: 'https://api.storyblok.com/v1/'
   },
   us: {
+    key: 'us',
     name: 'United States',
     apiEndpoint: 'https://api-us.storyblok.com/v1/'
   },
   ca: {
+    key: 'ca',
     name: 'Canada',
     apiEndpoint: 'https://api-ca.storyblok.com/v1/'
   },
   ap: {
+    key: 'ap',
     name: 'Australia',
     apiEndpoint: 'https://api-ap.storyblok.com/v1/'
   }
