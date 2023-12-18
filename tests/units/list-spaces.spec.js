@@ -1,11 +1,6 @@
 const { listSpaces } = require('../../src/tasks/')
 const { FAKE_SPACES } = require('../constants')
-
-const REGION_FLAGS = {
-  UNITED_STATES: 'us',
-  EUROPE: 'eu',
-  CHINA: 'cn'
-}
+const { REGIONS } = require('../../src/constants')
 
 describe('Test spaces method', () => {
   it('Testing list-spaces funtion without api instance', async () => {
@@ -22,28 +17,36 @@ describe('Test spaces method', () => {
       getAllSpacesByRegion: jest.fn(() => Promise.resolve(FAKE_SPACES()))
     }
     expect(
-      await listSpaces(FAKE_API, REGION_FLAGS.CHINA)
+      await listSpaces(FAKE_API, REGIONS.cn.key)
     ).toEqual(FAKE_SPACES())
     expect(FAKE_API.getAllSpacesByRegion).toHaveBeenCalled()
   })
 
-  it('Testing list-spaces funtion for Europe and United States regions', async () => {
+  it('Testing list-spaces funtion for all regions', async () => {
     const FAKE_API = {
       getAllSpacesByRegion: jest.fn(() => Promise.resolve(FAKE_SPACES()))
     }
     const response = [
       {
-        key: REGION_FLAGS.EUROPE,
+        key: REGIONS.eu.key,
         res: [...FAKE_SPACES()]
       },
       {
-        key: REGION_FLAGS.UNITED_STATES,
+        key: REGIONS.us.key,
+        res: [...FAKE_SPACES()]
+      },
+      {
+        key: REGIONS.ca.key,
+        res: [...FAKE_SPACES()]
+      },
+      {
+        key: REGIONS.ap.key,
         res: [...FAKE_SPACES()]
       }
     ]
 
     expect(
-      await listSpaces(FAKE_API, REGION_FLAGS.EUROPE)
+      await listSpaces(FAKE_API, REGIONS.eu.key)
     ).toEqual(response)
   })
 })

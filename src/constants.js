@@ -1,9 +1,3 @@
-const API_URL = 'https://api.storyblok.com/v1/'
-const US_API_URL = 'https://api-us.storyblok.com/v1/'
-const CN_API_URL = 'https://app.storyblokchina.cn/v1/'
-const LOGIN_URL = `${API_URL}users/login`
-const SIGNUP_URL = `${API_URL}users/signup`
-
 const SYNC_TYPES = [
   'folders',
   'components',
@@ -34,13 +28,43 @@ const DEFAULT_AGENT = {
   SB_Agent_Version: process.env.npm_package_version || '3.0.0'
 }
 
+const REGIONS = {
+  cn: {
+    key: 'cn',
+    name: 'China',
+    apiEndpoint: 'https://app.storyblokchina.cn/v1/'
+  },
+  eu: {
+    key: 'eu',
+    name: 'Europe',
+    apiEndpoint: 'https://api.storyblok.com/v1/'
+  },
+  us: {
+    key: 'us',
+    name: 'United States',
+    apiEndpoint: 'https://api-us.storyblok.com/v1/'
+  },
+  ca: {
+    key: 'ca',
+    name: 'Canada',
+    apiEndpoint: 'https://api-ca.storyblok.com/v1/'
+  },
+  ap: {
+    key: 'ap',
+    name: 'Australia',
+    apiEndpoint: 'https://api-ap.storyblok.com/v1/'
+  }
+}
+
+const USERS_ROUTES = {
+  LOGIN: `${REGIONS.eu.apiEndpoint}users/login`,
+  SIGNUP: `${REGIONS.eu.apiEndpoint}users/signup`
+}
+
 module.exports = {
-  LOGIN_URL,
-  SIGNUP_URL,
-  API_URL,
   SYNC_TYPES,
-  US_API_URL,
-  CN_API_URL,
+  USERS_ROUTES,
   COMMANDS,
-  DEFAULT_AGENT
+  DEFAULT_AGENT,
+  REGIONS
 }

@@ -1,7 +1,7 @@
 const pushComponents = require('../../src/tasks/push-components')
 const Storyblok = require('storyblok-js-client')
 const api = require('../../src/utils/api')
-const { API_URL } = require('../../src/constants')
+const { REGIONS } = require('../../src/constants')
 
 jest.mock('fs')
 jest.unmock('axios')
@@ -10,7 +10,7 @@ const deleteDocComponent = async () => {
   if (process.env.STORYBLOK_TOKEN) {
     const client = new Storyblok({
       oauthToken: process.env.STORYBLOK_TOKEN
-    }, API_URL)
+    }, REGIONS.eu.apiEndpoint)
 
     try {
       const path = `spaces/${process.env.STORYBLOK_SPACE}/components`

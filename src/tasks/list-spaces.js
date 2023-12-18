@@ -1,4 +1,5 @@
 const chalk = require('chalk')
+const { REGIONS } = require('../constants')
 /**
  * @method listSpaces
  * @param api - Pass the api instance as a parameter
@@ -7,10 +8,7 @@ const chalk = require('chalk')
 
 const listSpaces = async (api, currentRegion) => {
   const isChinaEnv = currentRegion === 'cn'
-  const regionOptions = {
-    eu: 'Europe',
-    us: 'United States'
-  }
+
   console.log()
   console.log(chalk.green('✓') + ' Loading spaces...')
 
@@ -36,7 +34,8 @@ const listSpaces = async (api, currentRegion) => {
     return spaces
   } else {
     const spacesList = []
-    for (const key in regionOptions) {
+    for (const key in REGIONS) {
+      if (key === 'cn') continue
       spacesList.push(await api.getAllSpacesByRegion(key)
         .then((res) => {
           return {
@@ -51,8 +50,9 @@ const listSpaces = async (api, currentRegion) => {
       return []
     }
     spacesList.forEach(region => {
+      const regionName = REGIONS[region.key].name
       console.log()
-      console.log(`${chalk.blue(' -')} Spaces From ${regionOptions[region.key]} region:`)
+      console.log(`${chalk.blue(' -')} Spaces From ${regionName} region:`)
       region.res.forEach((space) => {
         console.log(`    ${space.name} (id: ${space.id})`)
       })

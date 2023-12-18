@@ -4,7 +4,7 @@ const path = require('path')
 const quickstart = require('../../src/tasks/quickstart')
 const Storyblok = require('storyblok-js-client')
 const api = require('../../src/utils/api')
-const { API_URL } = require('../../src/constants')
+const { REGIONS } = require('../../src/constants')
 
 jest.unmock('fs')
 jest.unmock('axios')
@@ -60,7 +60,7 @@ describe('testing quickstart()', () => {
 
       const client = new Storyblok({
         oauthToken: process.env.STORYBLOK_TOKEN
-      }, API_URL)
+      }, REGIONS.eu.apiEndpoint)
 
       const response = await client.get('spaces')
       const spaces = response.data.spaces
