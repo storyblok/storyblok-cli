@@ -239,7 +239,7 @@ storyblok delete-components ./components.json --space 67819 --reverse --dryrun
 Sync components, folder, roles, datasources or stories between spaces
 
 ```sh
-$ storyblok sync --type <COMMAND> --source <SPACE_ID> --target <SPACE_ID>
+$ storyblok sync --type <COMMAND> --source <SPACE_ID> --target <SPACE_ID> --target-region <REGIONE_CODE>
 ```
 
 #### Options
@@ -247,6 +247,7 @@ $ storyblok sync --type <COMMAND> --source <SPACE_ID> --target <SPACE_ID>
 * `type`: describe the command type to execute. Can be: `folders`, `components`, `stories`, `datasources` or `roles`. It's possible pass multiple types separated by comma (`,`).
 * `source`: the source space to use to sync
 * `target`: the target space to use to sync
+* `target-region`: (optional) the region code of the target space in case it's different from the one of the source
 
 #### Examples
 
