@@ -16,6 +16,8 @@ const SyncSpaces = {
     this.oauthToken = options.token
     this.client = api.getClient()
     this.componentsGroups = options._componentsGroups
+    this.targetRegion = options.targetRegion
+    this.targetClient = api.getClient({ region: this.targetRegion })
   },
 
   async getStoryWithTranslatedSlugs (sourceStory, targetStory) {
@@ -26,7 +28,7 @@ const SyncSpaces = {
         return s
       })
       if (targetStory) {
-        const storyData = await this.client.get('spaces/' + this.targetSpaceId + '/stories/' + targetStory.id)
+        const storyData = await this.targetClient.get('spaces/' + this.targetSpaceId + '/stories/' + targetStory.id)
         if (storyData.data.story && storyData.data.story.translated_slugs) {
           const targetTranslatedSlugs = storyData.data.story.translated_slugs
           sourceTranslatedSlugs.forEach(translation => {
@@ -44,7 +46,7 @@ const SyncSpaces = {
 
   async syncStories () {
     console.log(chalk.green('✓') + ' Syncing stories...')
-    const targetFolders = await this.client.getAll(`spaces/${this.targetSpaceId}/stories`, {
+    const targetFolders = await this.targetClient.getAll(`spaces/${this.targetSpaceId}/stories`, {
       folder_only: 1,
       sort_by: 'slug:asc'
     })
@@ -83,7 +85,7 @@ const SyncSpaces = {
       sourceStory.parent_id = folderId
 
       try {
-        const existingStory = await this.client.get('spaces/' + this.targetSpaceId + '/stories', { with_slug: all[i].full_slug })
+        const existingStory = await this.targetClient.get('spaces/' + this.targetSpaceId + '/stories', { with_slug: all[i].full_slug })
         const storyData = await this.getStoryWithTranslatedSlugs(sourceStory, existingStory.data.stories ? existingStory.data.stories[0] : null)
         const payload = {
           story: storyData,
@@ -93,14 +95,14 @@ const SyncSpaces = {
 
         let createdStory = null
         if (existingStory.data.stories.length === 1) {
-          createdStory = await this.client.put('spaces/' + this.targetSpaceId + '/stories/' + existingStory.data.stories[0].id, payload)
+          createdStory = await this.targetClient.put('spaces/' + this.targetSpaceId + '/stories/' + existingStory.data.stories[0].id, payload)
           console.log(chalk.green('✓') + ' Updated ' + existingStory.data.stories[0].full_slug)
         } else {
-          createdStory = await this.client.post('spaces/' + this.targetSpaceId + '/stories', payload)
+          createdStory = await this.targetClient.post('spaces/' + this.targetSpaceId + '/stories', payload)
           console.log(chalk.green('✓') + ' Created ' + sourceStory.full_slug)
         }
         if (createdStory.data.story.uuid !== sourceStory.uuid) {
-          await this.client.put('spaces/' + this.targetSpaceId + '/stories/' + createdStory.data.story.id + '/update_uuid', { uuid: sourceStory.uuid })
+          await this.targetClient.put('spaces/' + this.targetSpaceId + '/stories/' + createdStory.data.story.id + '/update_uuid', { uuid: sourceStory.uuid })
         }
       } catch (e) {
         console.error(
@@ -127,7 +129,7 @@ const SyncSpaces = {
       try {
         const folderResult = await this.client.get('spaces/' + this.sourceSpaceId + '/stories/' + folder.id)
         const sourceFolder = folderResult.data.story
-        const existingFolder = await this.client.get('spaces/' + this.targetSpaceId + '/stories', { with_slug: folder.full_slug })
+        const existingFolder = await this.targetClient.get('spaces/' + this.targetSpaceId + '/stories', { with_slug: folder.full_slug })
         const folderData = await this.getStoryWithTranslatedSlugs(sourceFolder, existingFolder.data.stories ? existingFolder.data.stories[0] : null)
         delete folderData.id
         delete folderData.created_at
@@ -138,7 +140,7 @@ const SyncSpaces = {
             const folderSlug = folder.full_slug.split('/')
             const parentFolderSlug = folderSlug.splice(0, folderSlug.length - 1).join('/')
 
-            const parentFolders = await this.client.get(`spaces/${this.targetSpaceId}/stories`, {
+            const parentFolders = await this.targetClient.get(`spaces/${this.targetSpaceId}/stories`, {
               with_slug: parentFolderSlug
             })
 
@@ -158,16 +160,17 @@ const SyncSpaces = {
         }
 
         let createdFolder = null
+        this.api
         if (existingFolder.data.stories.length === 1) {
           console.log(`Folder ${folder.name} already exists`)
-          createdFolder = await this.client.put('spaces/' + this.targetSpaceId + '/stories/' + existingFolder.data.stories[0].id, payload)
+          createdFolder = await this.targetClient.put('spaces/' + this.targetSpaceId + '/stories/' + existingFolder.data.stories[0].id, payload)
           console.log(chalk.green('✓') + ` Folder ${folder.name} updated`)
         } else {
-          createdFolder = await this.client.post('spaces/' + this.targetSpaceId + '/stories', payload)
+          createdFolder = await this.targetClient.post('spaces/' + this.targetSpaceId + '/stories', payload)
           console.log(chalk.green('✓') + ` Folder ${folder.name} created`)
         }
         if (createdFolder.data.story.uuid !== folder.uuid) {
-          await this.client.put('spaces/' + this.targetSpaceId + '/stories/' + createdFolder.data.story.id + '/update_uuid', { uuid: folder.uuid })
+          await this.targetClient.put('spaces/' + this.targetSpaceId + '/stories/' + createdFolder.data.story.id + '/update_uuid', { uuid: folder.uuid })
         }
 
         syncedFolders[folder.id] = createdFolder.data.story.id
@@ -182,13 +185,13 @@ const SyncSpaces = {
 
   async syncRoles () {
     console.log(chalk.green('✓') + ' Syncing roles...')
-    const existingFolders = await this.client.getAll(`spaces/${this.targetSpaceId}/stories`, {
+    const existingFolders = await this.targetClient.getAll(`spaces/${this.targetSpaceId}/stories`, {
       folder_only: 1,
       sort_by: 'slug:asc'
     })
 
     const roles = await this.client.get(`spaces/${this.sourceSpaceId}/space_roles`)
-    const existingRoles = await this.client.get(`spaces/${this.targetSpaceId}/space_roles`)
+    const existingRoles = await this.targetClient.get(`spaces/${this.targetSpaceId}/space_roles`)
 
     for (var i = 0; i < roles.data.space_roles.length; i++) {
       const spaceRole = roles.data.space_roles[i]
@@ -211,11 +214,11 @@ const SyncSpaces = {
         return role.role === spaceRole.role
       })
       if (existingRole.length) {
-        await this.client.put(`spaces/${this.targetSpaceId}/space_roles/${existingRole[0].id}`, {
+        await this.targetClient.put(`spaces/${this.targetSpaceId}/space_roles/${existingRole[0].id}`, {
           space_role: spaceRole
         })
       } else {
-        await this.client.post(`spaces/${this.targetSpaceId}/space_roles`, {
+        await this.targetClient.post(`spaces/${this.targetSpaceId}/space_roles`, {
           space_role: spaceRole
         })
       }
@@ -228,7 +231,8 @@ const SyncSpaces = {
       sourceSpaceId: this.sourceSpaceId,
       targetSpaceId: this.targetSpaceId,
       oauthToken: this.oauthToken,
-      componentsGroups: this.componentsGroups
+      componentsGroups: this.componentsGroups,
+      targetRegion: this.targetRegion
     })
 
     try {
@@ -247,7 +251,8 @@ const SyncSpaces = {
     const syncDatasourcesInstance = new SyncDatasources({
       sourceSpaceId: this.sourceSpaceId,
       targetSpaceId: this.targetSpaceId,
-      oauthToken: this.oauthToken
+      oauthToken: this.oauthToken,
+      targetRegion: this.targetRegion
     })
 
     try {

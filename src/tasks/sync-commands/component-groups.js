@@ -4,7 +4,7 @@ const api = require('../../utils/api')
 
 class SyncComponentGroups {
   /**
-   * @param {{ sourceSpaceId: string, targetSpaceId: string, oauthToken: string }} options
+   * @param {{ sourceSpaceId: string, targetSpaceId: string, oauthToken: string, targetRegion: string }} options
    */
   constructor (options) {
     this.sourceSpaceId = options.sourceSpaceId
@@ -15,6 +15,8 @@ class SyncComponentGroups {
     this.targetComponentGroups = []
 
     this.client = api.getClient()
+    this.targetRegion = options.targetRegion
+    this.targetClient = api.getClient({ region: this.targetRegion })
   }
 
   async init () {
@@ -22,11 +24,11 @@ class SyncComponentGroups {
 
     try {
       this.sourceComponentGroups = await this.getComponentGroups(
-        this.sourceSpaceId
+        this.sourceSpaceId, 'source'
       )
 
       this.targetComponentGroups = await this.getComponentGroups(
-        this.targetSpaceId
+        this.targetSpaceId, 'target'
       )
       return Promise.resolve(true)
     } catch (e) {
@@ -96,12 +98,13 @@ class SyncComponentGroups {
    * @method getComponentGroups
    * @return {Promise<Array>}
    */
-  async getComponentGroups (spaceId) {
+  async getComponentGroups (spaceId, spaceLabel) {
+    const client = spaceLabel === 'target' ? this.targetClient : this.client
     console.log(
       `${chalk.green('-')} Load component groups from space #${spaceId}`
     )
 
-    return this.client
+    return client
       .get(`spaces/${spaceId}/component_groups`)
       .then(response => response.data.component_groups || [])
       .catch(err => Promise.reject(err))
@@ -126,7 +129,7 @@ class SyncComponentGroups {
    */
   createComponentGroup (spaceId, componentGroupName) {
     return this
-      .client
+      .targetClient
       .post(`spaces/${spaceId}/component_groups`, {
         component_group: {
           name: componentGroupName

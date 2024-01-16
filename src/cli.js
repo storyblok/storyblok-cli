@@ -272,6 +272,7 @@ program
   .requiredOption('--source <SPACE_ID>', 'Source space id')
   .requiredOption('--target <SPACE_ID>', 'Target space id')
   .option('--components-groups <UUIDs>', 'Synchronize components based on their group UUIDs separated by commas')
+  .option('--target-region <REGION>', 'Region of the target space')
   .action(async (options) => {
     console.log(`${chalk.blue('-')} Sync data between spaces\n`)
 
@@ -284,7 +285,8 @@ program
         type,
         target,
         source,
-        componentsGroups
+        componentsGroups,
+        targetRegion
       } = options
 
       const _componentsGroups = componentsGroups ? componentsGroups.split(',') : null
@@ -303,7 +305,8 @@ program
         token,
         target,
         source,
-        _componentsGroups
+        _componentsGroups,
+        targetRegion
       })
 
       console.log('\n' + chalk.green('✓') + ' Sync data between spaces successfully completed')

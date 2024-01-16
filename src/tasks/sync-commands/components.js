@@ -7,7 +7,7 @@ const api = require('../../utils/api')
 
 class SyncComponents {
   /**
-   * @param {{ sourceSpaceId: string, targetSpaceId: string, oauthToken: string }} options
+   * @param {{ sourceSpaceId: string, targetSpaceId: string, oauthToken: string, targetRegion: string }} options
    */
   constructor (options) {
     this.sourcePresets = []
@@ -19,13 +19,16 @@ class SyncComponents {
     this.client = api.getClient()
     this.presetsLib = new PresetsLib({ oauthToken: options.oauthToken, targetSpaceId: this.targetSpaceId })
     this.componentsGroups = options.componentsGroups
+    this.targetRegion = options.targetRegion
+    this.targetClient = api.getClient({ region: this.targetRegion })
   }
 
   async sync () {
     const syncComponentGroupsInstance = new SyncComponentGroups({
       oauthToken: this.oauthToken,
       sourceSpaceId: this.sourceSpaceId,
-      targetSpaceId: this.targetSpaceId
+      targetSpaceId: this.targetSpaceId,
+      targetRegion: this.targetRegion
     })
 
     try {
@@ -35,8 +38,8 @@ class SyncComponents {
 
       console.log(`${chalk.green('-')} Syncing components...`)
       // load data from target and source spaces
-      this.sourceComponents = await this.getComponents(this.sourceSpaceId)
-      this.targetComponents = await this.getComponents(this.targetSpaceId)
+      this.sourceComponents = await this.getComponents(this.sourceSpaceId, 'source')
+      this.targetComponents = await this.getComponents(this.targetSpaceId, 'target')
 
       this.sourcePresets = await this.presetsLib.getPresets(this.sourceSpaceId)
 
@@ -148,12 +151,13 @@ class SyncComponents {
     }
   }
 
-  getComponents (spaceId) {
+  getComponents (spaceId, spaceLabel) {
+    const client = spaceLabel === 'target' ? this.targetClient : this.client
     console.log(
       `${chalk.green('-')} Load components from space #${spaceId}`
     )
-
-    return this.client.get(`spaces/${spaceId}/components`)
+    
+    return client.get(`spaces/${spaceId}/components`)
       .then(response => response.data.components || [])
   }
 
@@ -172,7 +176,7 @@ class SyncComponents {
     }
 
     return this
-      .client
+      .targetClient
       .post(`spaces/${spaceId}/components`, payload)
       .then(response => {
         const component = response.data.component || {}
@@ -195,7 +199,7 @@ class SyncComponents {
       )
     }
     return this
-      .client
+      .targetClient
       .put(`spaces/${spaceId}/components/${componentId}`, payload)
   }
 

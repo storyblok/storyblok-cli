@@ -13,18 +13,19 @@ module.exports = {
   spaceId: null,
   region: '',
 
-  getClient () {
-    const { region } = creds.get()
+  getClient ({region} = {}) {
+    const { region: credsRegion } = creds.get()
+    const _region = region || credsRegion
 
     try {
       return new Storyblok({
         accessToken: this.accessToken,
         oauthToken: this.oauthToken,
-        region: this.region,
+        region: _region,
         headers: {
           ...DEFAULT_AGENT
         }
-      }, this.apiSwitcher(region))
+      }, this.apiSwitcher(_region))
     } catch (error) {
       throw new Error(error)
     }

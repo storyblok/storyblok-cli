@@ -13,11 +13,13 @@ class SyncDatasources {
     this.targetSpaceId = options.targetSpaceId
     this.oauthToken = options.oauthToken
     this.client = api.getClient()
+    this.targetRegion = options.targetRegion
+    this.targetClient = api.getClient({ region: this.targetRegion })
   }
 
   async sync () {
     try {
-      this.targetDatasources = await this.client.getAll(`spaces/${this.targetSpaceId}/datasources`)
+      this.targetDatasources = await this.targetClient.getAll(`spaces/${this.targetSpaceId}/datasources`)
       this.sourceDatasources = await this.client.getAll(`spaces/${this.sourceSpaceId}/datasources`)
 
       console.log(
@@ -40,13 +42,14 @@ class SyncDatasources {
     await this.updateDatasources()
   }
 
-  async getDatasourceEntries (spaceId, datasourceId, dimensionId = null) {
+  async getDatasourceEntries (spaceId, spaceLabel, datasourceId, dimensionId = null) {
+    const client = spaceLabel === 'target' ? this.targetClient : this.client
     const dimensionQuery = dimensionId ? `&dimension=${dimensionId}` : ''
     try {
-      const entriesFirstPage = await this.client.get(`spaces/${spaceId}/datasource_entries/?datasource_id=${datasourceId}${dimensionQuery}`)
+      const entriesFirstPage = await client.get(`spaces/${spaceId}/datasource_entries/?datasource_id=${datasourceId}${dimensionQuery}`)
       const entriesRequets = []
       for (let i = 2; i <= Math.ceil(entriesFirstPage.total / 25); i++) {
-        entriesRequets.push(await this.client.get(`spaces/${spaceId}/datasource_entries?datasource_id=${datasourceId}&page=${i}${dimensionQuery}`))
+        entriesRequets.push(await client.get(`spaces/${spaceId}/datasource_entries?datasource_id=${datasourceId}&page=${i}${dimensionQuery}`))
       }
       return entriesFirstPage.data.datasource_entries.concat(...(await Promise.all(entriesRequets)).map(r => r.data.datasource_entries))
     } catch (err) {
@@ -58,7 +61,7 @@ class SyncDatasources {
 
   async addDatasourceEntry (entry, datasourceId) {
     try {
-      return this.client.post(`spaces/${this.targetSpaceId}/datasource_entries/`, {
+      return this.targetClient.post(`spaces/${this.targetSpaceId}/datasource_entries/`, {
         datasource_entry: {
           name: entry.name,
           value: entry.value,
@@ -74,7 +77,7 @@ class SyncDatasources {
 
   async updateDatasourceEntry (entry, newData, datasourceId) {
     try {
-      return this.client.put(`spaces/${this.targetSpaceId}/datasource_entries/${entry.id}`, {
+      return this.targetClient.put(`spaces/${this.targetSpaceId}/datasource_entries/${entry.id}`, {
         datasource_entry: {
           name: newData.name,
           value: newData.value,
@@ -90,8 +93,8 @@ class SyncDatasources {
 
   async syncDatasourceEntries (datasourceId, targetId) {
     try {
-      const sourceEntries = await this.getDatasourceEntries(this.sourceSpaceId, datasourceId)
-      const targetEntries = await this.getDatasourceEntries(this.targetSpaceId, targetId)
+      const sourceEntries = await this.getDatasourceEntries(this.sourceSpaceId, 'source', datasourceId)
+      const targetEntries = await this.getDatasourceEntries(this.targetSpaceId, 'target', targetId)
       const updateEntries = targetEntries.filter(e => sourceEntries.map(se => se.name).includes(e.name))
       const addEntries = sourceEntries.filter(e => !targetEntries.map(te => te.name).includes(e.name))
 
@@ -128,7 +131,7 @@ class SyncDatasources {
       try {
         console.log(`  ${chalk.green('-')} Creating datasource ${datasourcesToAdd[i].name} (${datasourcesToAdd[i].slug})`)
         /* Create the datasource */
-        const newDatasource = await this.client.post(`spaces/${this.targetSpaceId}/datasources`, {
+        const newDatasource = await this.targetClient.post(`spaces/${this.targetSpaceId}/datasources`, {
           name: datasourcesToAdd[i].name,
           slug: datasourcesToAdd[i].slug
         })
@@ -169,7 +172,7 @@ class SyncDatasources {
         /* Update the datasource */
         const sourceDatasource = this.sourceDatasources.find(d => d.slug === datasourcesToUpdate[i].slug)
 
-        await this.client.put(`spaces/${this.targetSpaceId}/datasources/${datasourcesToUpdate[i].id}`, {
+        await this.targetClient.put(`spaces/${this.targetSpaceId}/datasources/${datasourcesToUpdate[i].id}`, {
           name: sourceDatasource.name,
           slug: sourceDatasource.slug
         })
@@ -230,7 +233,7 @@ class SyncDatasources {
     }
 
     try {
-      return await this.client.put(`spaces/${this.targetSpaceId}/datasources/${datasource.id}`, {
+      return await this.targetClient.put(`spaces/${this.targetSpaceId}/datasources/${datasource.id}`, {
         ...datasource,
         ...payload
       })
@@ -245,9 +248,9 @@ class SyncDatasources {
     try {
       for (let index = 0; index < sourceDatasource.dimensions.length; index++) {
         const targetDimensionId = targetDatasource.dimensions[index].id
-        sourceEntriesPromisses.push(...await this.getDatasourceEntries(this.sourceSpaceId, sourceDatasource.id, sourceDatasource.dimensions[index].id))
+        sourceEntriesPromisses.push(...await this.getDatasourceEntries(this.sourceSpaceId, 'source', sourceDatasource.id, sourceDatasource.dimensions[index].id))
         targetEmptyEntriesPromisses.push(
-          ...await this.getDatasourceEntries(this.targetSpaceId, targetDatasource.id, targetDimensionId).then((res) => {
+          ...await this.getDatasourceEntries(this.targetSpaceId, 'target', targetDatasource.id, targetDimensionId).then((res) => {
             return res.map((entry) => {
               return {
                 ...entry,
@@ -292,7 +295,7 @@ class SyncDatasources {
 
   async syncDimensionEntryValues (dimensionId = null, datasourceEntryId = null, payload = null) {
     try {
-      await this.client.put(`spaces/${this.targetSpaceId}/datasource_entries/${datasourceEntryId}`, {
+      await this.targetClient.put(`spaces/${this.targetSpaceId}/datasource_entries/${datasourceEntryId}`, {
         datasource_entry: payload,
         dimension_id: dimensionId
       })
