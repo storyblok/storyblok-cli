@@ -36,6 +36,7 @@
     "fs-extra": "^9.0.1",
     "git-clone": "^0.1.0",
     "inquirer": "^7.3.2",
+    "json-schema-to-typescript": "^13.1.2",
     "lodash": "^4.17.21",
     "netrc": "0.1.4",
     "on-change": "^2.0.1",
