@@ -6,12 +6,14 @@ const api = require('./api')
 
 class PresetsLib {
   /**
-   * @param {{ oauthToken: string, targetSpaceId: int }} options
+   * @param {{ oauthToken: string, targetSpaceId: int, targetRegion: string }} options
    */
   constructor (options) {
     this.oauthToken = options.oauthToken
     this.client = api.getClient()
     this.targetSpaceId = options.targetSpaceId
+    this.targetRegion = options.targetRegion
+    this.targetClient = api.getClient({ region: this.targetRegion })
   }
 
   async createPresets (presets = [], componentId, method = 'post') {
@@ -23,7 +25,7 @@ class PresetsLib {
         const presetData = presets[i]
         const presetId = method === 'put' ? `/${presetData.id}` : ''
 
-        await this.client[method](`spaces/${this.targetSpaceId}/presets${presetId}`, {
+        await this.targetClient[method](`spaces/${this.targetSpaceId}/presets${presetId}`, {
           preset: {
             name: presetData.name,
             component_id: componentId,
@@ -49,11 +51,12 @@ class PresetsLib {
     })
   }
 
-  async getPresets (spaceId) {
+  async getPresets (spaceId, spaceLabel) {
     console.log(`${chalk.green('-')} Load presets from space #${spaceId}`)
+    const client = spaceLabel === 'target' ? this.targetClient : this.client
 
     try {
-      const response = await this.client.get(
+      const response = await client.get(
         `spaces/${spaceId}/presets`
       )
 
@@ -83,7 +86,7 @@ class PresetsLib {
 
   async getSamePresetFromTarget (spaceId, component, sourcePreset) {
     try {
-      const presetsInTarget = await this.getPresets(spaceId)
+      const presetsInTarget = await this.getPresets(spaceId, 'target')
       const componentPresets = this.getComponentPresets(component, presetsInTarget)
       const defaultPresetInTarget = componentPresets.find(preset => preset.name === sourcePreset.name)
       return defaultPresetInTarget
@@ -96,7 +99,7 @@ class PresetsLib {
   async uploadImageForPreset (image = '') {
     const imageName = last(image.split('/'))
 
-    return this.client
+    return this.targetClient
       .post(`spaces/${this.targetSpaceId}/assets`, {
         filename: imageName,
         asset_folder_id: null

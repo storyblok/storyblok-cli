@@ -41,7 +41,7 @@ class SyncComponents {
       this.sourceComponents = await this.getComponents(this.sourceSpaceId, 'source')
       this.targetComponents = await this.getComponents(this.targetSpaceId, 'target')
 
-      this.sourcePresets = await this.presetsLib.getPresets(this.sourceSpaceId)
+      this.sourcePresets = await this.presetsLib.getPresets(this.sourceSpaceId, 'source')
 
       console.log(
         `${chalk.blue('-')} In source space #${this.sourceSpaceId}, it were found: `
