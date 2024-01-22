@@ -12,5 +12,6 @@ module.exports = {
   importFiles: require('./import/import'),
   deleteComponent: require('./delete-component'),
   deleteComponents: require('./delete-components'),
-  deleteDatasources: require('./delete-datasources')
+  deleteDatasources: require('./delete-datasources'),
+  generateTypescriptTypedefs: require('./generate-typescript-typedefs.ts')
 }

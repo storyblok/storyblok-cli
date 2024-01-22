@@ -14,7 +14,8 @@ const COMMANDS = {
   SELECT: 'select',
   SPACES: 'spaces',
   SYNC: 'sync',
-  DELETE_DATASOURCES: 'delete-datasources'
+  DELETE_DATASOURCES: 'delete-datasources',
+  GENERATE_TYPESCRIPT_TYPEDEFS: 'generate-typescript-typedefs'
 }
 
 const DEFAULT_AGENT = {

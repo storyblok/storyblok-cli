@@ -12,11 +12,23 @@
     "node",
     "javascript"
   ],
-  "main": "src/cli.js",
+  "main": "./dist/cli.cjs",
+  "types": "./dist/cli.d.ts",
+  "files": [
+    "dist/**"
+  ],
   "bin": {
-    "storyblok": "src/cli.js"
+    "storyblok": "./dist/cli.cjs"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/cli.d.ts",
+      "require": "./dist/cli.cjs"
+    }
   },
   "scripts": {
+    "build": "unbuild",
+    "dev": "ts-node ./src/cli --",
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",
     "test:unit": "jest --silent",
@@ -61,7 +73,9 @@
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
     "jest": "^26.1.0",
-    "vite": "^5.0.11"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3",
+    "unbuild": "^2.0.0"
   },
   "release": {
     "branches": [

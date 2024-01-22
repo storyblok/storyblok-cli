@@ -523,6 +523,20 @@ program
     }
   })
 
+// generate typescript typedefs
+program
+  .command(COMMANDS.GENERATE_TYPESCRIPT_TYPEDEFS)
+  .option('--foo <FOO>', 'Foo option')
+  .action(async (options) => {
+    console.log(`${chalk.blue('-')} Executing ${COMMANDS.GENERATE_TYPESCRIPT_TYPEDEFS} task`)
+
+    try {
+      await tasks.generateTypescriptTypedefs()
+    } catch (e) {
+      errorHandler(e, COMMANDS.GENERATE_TYPESCRIPT_TYPEDEFS)
+    }
+  })
+
 program.parse(process.argv)
 
 if (program.rawArgs.length <= 2) {
