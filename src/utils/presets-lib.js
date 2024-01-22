@@ -37,6 +37,7 @@ class PresetsLib {
 
       console.log(`${chalk.green('✓')} ${presetsSize} presets sync`)
     } catch (e) {
+      console.log(e)
       console.error('An error ocurred while trying to save the presets ' + e.message)
 
       return Promise.reject(e)

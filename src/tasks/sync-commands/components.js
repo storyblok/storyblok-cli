@@ -17,9 +17,9 @@ class SyncComponents {
     this.targetSpaceId = options.targetSpaceId
     this.oauthToken = options.oauthToken
     this.client = api.getClient()
-    this.presetsLib = new PresetsLib({ oauthToken: options.oauthToken, targetSpaceId: this.targetSpaceId })
     this.componentsGroups = options.componentsGroups
     this.targetRegion = options.targetRegion
+    this.presetsLib = new PresetsLib({ oauthToken: options.oauthToken, targetSpaceId: this.targetSpaceId, targetRegion: this.targetRegion })
     this.targetClient = api.getClient({ region: this.targetRegion })
   }
 
