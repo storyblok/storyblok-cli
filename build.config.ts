@@ -2,12 +2,17 @@ import { defineBuildConfig } from 'unbuild'
 
 export default defineBuildConfig({
   declaration: true,
-  failOnWarn: false,
   rollup: {
     emitCJS: true,
+    inlineDependencies: true,
+    resolve: {
+      exportConditions: ['production', 'node'] as any,
+    },
   },
   entries: ['src/cli'],
   externals: [
+    '@nuxt/test-utils',
+    'fsevents',
     'node:url',
     'node:buffer',
     'node:path',

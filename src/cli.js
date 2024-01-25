@@ -526,12 +526,19 @@ program
 // generate typescript typedefs
 program
   .command(COMMANDS.GENERATE_TYPESCRIPT_TYPEDEFS)
-  .option('--foo <FOO>', 'Foo option')
-  .action(async (options) => {
+  .requiredOption('--source <PATH>', 'Path to the components JSON file')
+  .option('--target <PATH>', 'Path to the Typescript file that will be generated (default: xxx)')
+  .option('--titlePrefix <STRING>', ' (default: _storyblok)')
+  .option('--titleSuffix <STRING>', '')
+  // TS Compiler Options...
+  .option('--customTypeParser <PATH>', 'Path to a Parser for Custom Types')
+  .action((options) => {
     console.log(`${chalk.blue('-')} Executing ${COMMANDS.GENERATE_TYPESCRIPT_TYPEDEFS} task`)
 
+    const { source, target, titlePrefix, titleSuffix, customTypeParser } = options
+
     try {
-      await tasks.generateTypescriptTypedefs()
+      tasks.generateTypescriptTypedefs({ sourceFilePaths: source, destinationFilePath: target, titlePrefix, titleSuffix, customTypeParser })
     } catch (e) {
       errorHandler(e, COMMANDS.GENERATE_TYPESCRIPT_TYPEDEFS)
     }
