@@ -1,4 +1,4 @@
-const { ALL_REGIONS, EU_CODE } = require('@storyblok/region-helper')
+import { ALL_REGIONS, EU_CODE } from '@storyblok/region-helper'
 
 const getOptions = (subCommand, argv = {}, api = {}) => {
   let email = ''
@@ -314,4 +314,4 @@ const getOptions = (subCommand, argv = {}, api = {}) => {
   ]
 }
 
-module.exports = getOptions
+export default getOptions

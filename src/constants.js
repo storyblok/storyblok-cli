@@ -1,6 +1,12 @@
-const SYNC_TYPES = ['folders', 'components', 'roles', 'stories', 'datasources']
+export const SYNC_TYPES = [
+  'folders',
+  'components',
+  'roles',
+  'stories',
+  'datasources'
+]
 
-const COMMANDS = {
+export const COMMANDS = {
   GENERATE_MIGRATION: 'generate-migration',
   IMPORT: 'import',
   LOGIN: 'login',
@@ -18,13 +24,7 @@ const COMMANDS = {
   GENERATE_TYPESCRIPT_TYPEDEFS: 'generate-typescript-typedefs'
 }
 
-const DEFAULT_AGENT = {
+export const DEFAULT_AGENT = {
   SB_Agent: 'SB-CLI',
   SB_Agent_Version: process.env.npm_package_version || '3.0.0'
-}
-
-module.exports = {
-  SYNC_TYPES,
-  COMMANDS,
-  DEFAULT_AGENT
 }

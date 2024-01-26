@@ -1,10 +1,11 @@
-const onChange = require('on-change')
-const { isArray, isPlainObject, has, isEmpty, template, truncate } = require('lodash')
-const fs = require('fs-extra')
-const chalk = require('chalk')
+import onChange from 'on-change'
+import lodash from 'lodash'
+import fs from 'fs-extra'
+import chalk from 'chalk'
+import { parseError } from '../../utils'
+import migrationTemplate from '../templates/migration-file'
+const { isArray, isPlainObject, has, isEmpty, template, truncate } = lodash
 
-const { parseError } = require('../../utils')
-const migrationTemplate = require('../templates/migration-file')
 const MIGRATIONS_DIRECTORY = `${process.cwd()}/migrations`
 const MIGRATIONS_ROLLBACK_DIRECTORY = `${process.cwd()}/migrations/rollback`
 
@@ -21,7 +22,7 @@ const MIGRATIONS_ROLLBACK_DIRECTORY = `${process.cwd()}/migrations/rollback`
  * // ./migrations/change_teaser_subtitle.js
  * getPathToFile('change_teaser_subtitle.js', './migrations')
  */
-const getPathToFile = (fileName, migrationPath = null) => {
+export const getPathToFile = (fileName, migrationPath = null) => {
   const pathTo = isEmpty(migrationPath) ? MIGRATIONS_DIRECTORY : migrationPath
 
   return `${pathTo}/${fileName}`
@@ -36,7 +37,7 @@ const getPathToFile = (fileName, migrationPath = null) => {
  * @example
  * getNameOfMigrationFile('product', 'price') // change_product_price
  */
-const getNameOfMigrationFile = (component, field) => {
+export const getNameOfMigrationFile = (component, field) => {
   return `change_${component}_${field}.js`
 }
 
@@ -46,7 +47,7 @@ const getNameOfMigrationFile = (component, field) => {
  * @param  {String} component name of component
  * @return {Promise<Array>}
  */
-const getStoriesByComponent = async (api, componentName) => {
+export const getStoriesByComponent = async (api, componentName) => {
   try {
     const stories = await api.getStories({
       contain_component: componentName
@@ -67,7 +68,7 @@ const getStoriesByComponent = async (api, componentName) => {
  * @param  {String} component name of component
  * @return {Promise<Object>}
  */
-const getComponentsFromName = async (api, componentName) => {
+export const getComponentsFromName = async (api, componentName) => {
   try {
     const components = await api.getComponents()
 
@@ -94,7 +95,7 @@ const getComponentsFromName = async (api, componentName) => {
  * @param  {String} component name of component
  * @return {Promise<Boolean>}
  */
-const checkComponentExists = async (api, component) => {
+export const checkComponentExists = async (api, component) => {
   try {
     const componentData = await getComponentsFromName(api, component)
 
@@ -110,7 +111,7 @@ const checkComponentExists = async (api, component) => {
  * @param  {String} filePath
  * @return {Promise<Boolean>}
  */
-const checkFileExists = async (filePath) => fs.pathExists(filePath)
+export const checkFileExists = async (filePath) => fs.pathExists(filePath)
 
 /**
  * @method createMigrationFile
@@ -118,7 +119,7 @@ const checkFileExists = async (filePath) => fs.pathExists(filePath)
  * @param  {String} field    name of the field
  * @return {Promise<Boolean>}
  */
-const createMigrationFile = (fileName, field) => {
+export const createMigrationFile = (fileName, field) => {
   console.log(`${chalk.blue('-')} Creating the migration file in migrations folder`)
 
   // use lodash.template to replace the occurrences of fieldname
@@ -137,7 +138,7 @@ const createMigrationFile = (fileName, field) => {
  * @param  {String} type
  * @return {Array}
  */
-const getInquirerOptions = (type) => {
+export const getInquirerOptions = (type) => {
   if (type === 'file-exists') {
     return [{
       type: 'confirm',
@@ -155,7 +156,7 @@ const getInquirerOptions = (type) => {
  * @param  {unknown} value    updated value
  * @param  {unknown} oldValue previous value
  */
-const showMigrationChanges = (path, value, oldValue) => {
+export const showMigrationChanges = (path, value, oldValue) => {
   // It was created a new field
   if (oldValue === undefined) {
     // truncate the string with more than 30 characters
@@ -189,7 +190,7 @@ const showMigrationChanges = (path, value, oldValue) => {
  * @param  {String} storyFullSlug  the full slug of the containing story
  * @return {Promise<Boolean>}
  */
-const processMigration = async (content = {}, component = '', migrationFn, storyFullSlug) => {
+export const processMigration = async (content = {}, component = '', migrationFn, storyFullSlug) => {
   // I'm processing the component that I want
   if (content.component === component) {
     const watchedContent = onChange(
@@ -242,7 +243,7 @@ const processMigration = async (content = {}, component = '', migrationFn, story
  * @return {String}
  */
 
-const urlTofRollbackMigrationFile = (component, field) => {
+export const urlTofRollbackMigrationFile = (component, field) => {
   return `${MIGRATIONS_ROLLBACK_DIRECTORY}/${getNameOfRollbackMigrationFile(component, field)}`
 }
 
@@ -253,7 +254,7 @@ const urlTofRollbackMigrationFile = (component, field) => {
  * @return {String}
  */
 
-const getNameOfRollbackMigrationFile = (component, field) => {
+export const getNameOfRollbackMigrationFile = (component, field) => {
   return `rollback_${component}_${field}.json`
 }
 
@@ -263,7 +264,7 @@ const getNameOfRollbackMigrationFile = (component, field) => {
  * @return {Promise}
  */
 
-const createRollbackFile = async (stories, component, field) => {
+export const createRollbackFile = async (stories, component, field) => {
   try {
     if (!fs.existsSync(MIGRATIONS_ROLLBACK_DIRECTORY)) {
       fs.mkdir(MIGRATIONS_ROLLBACK_DIRECTORY)
@@ -299,7 +300,7 @@ const createRollbackFile = async (stories, component, field) => {
  * @return {Promisse<Array>}
  */
 
-const checkExistenceFilesInRollBackDirectory = (path, component, field) => {
+export const checkExistenceFilesInRollBackDirectory = (path, component, field) => {
   if (!fs.existsSync(path)) {
     console.log(`
         ${chalk.red('X')} The path for which the rollback files should be contained does not exist`
@@ -316,21 +317,4 @@ const checkExistenceFilesInRollBackDirectory = (path, component, field) => {
     }
   })
   return Promise.resolve(file)
-}
-
-module.exports = {
-  getPathToFile,
-  checkFileExists,
-  processMigration,
-  getInquirerOptions,
-  createMigrationFile,
-  checkComponentExists,
-  showMigrationChanges,
-  getStoriesByComponent,
-  getComponentsFromName,
-  getNameOfMigrationFile,
-  createRollbackFile,
-  checkExistenceFilesInRollBackDirectory,
-  urlTofRollbackMigrationFile,
-  getNameOfRollbackMigrationFile
 }

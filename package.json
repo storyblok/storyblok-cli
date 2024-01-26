@@ -12,19 +12,12 @@
     "node",
     "javascript"
   ],
-  "main": "./dist/cli.cjs",
-  "types": "./dist/cli.d.ts",
+  "main": "./dist/cli.mjs",
   "files": [
     "dist/**"
   ],
   "bin": {
-    "storyblok": "./dist/cli.cjs"
-  },
-  "exports": {
-    ".": {
-      "types": "./dist/cli.d.ts",
-      "require": "./dist/cli.cjs"
-    }
+    "storyblok": "./dist/cli.mjs"
   },
   "scripts": {
     "build": "unbuild",
@@ -81,5 +74,8 @@
     "branches": [
       "master"
     ]
+  },
+  "prettier": {
+    "printWidth": 120
   }
 }

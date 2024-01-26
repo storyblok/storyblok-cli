@@ -1,17 +1,33 @@
-module.exports = {
-  sync: require('./sync'),
-  scaffold: require('./scaffold'),
-  quickstart: require('./quickstart'),
-  pullComponents: require('./pull-components'),
-  pullLanguages: require('./pull-languages'),
-  pushComponents: require('./push-components'),
-  generateMigration: require('./migrations/generate'),
-  runMigration: require('./migrations/run'),
-  rollbackMigration: require('./migrations/rollback'),
-  listSpaces: require('./list-spaces'),
-  importFiles: require('./import/import'),
-  deleteComponent: require('./delete-component'),
-  deleteComponents: require('./delete-components'),
-  deleteDatasources: require('./delete-datasources'),
-  generateTypescriptTypedefs: require('./generate-typescript-typedefs.ts')
+import sync from './sync'
+import scaffold from './scaffold'
+import quickstart from './quickstart'
+import pullComponents from './pull-components'
+import pullLanguages from './pull-languages'
+import pushComponents from './push-components'
+import generateMigration from './migrations/generate'
+import runMigration from './migrations/run'
+import rollbackMigration from './migrations/rollback'
+import listSpaces from './list-spaces'
+import importFiles from './import/import'
+import deleteComponent from './delete-component'
+import deleteComponents from './delete-components'
+import deleteDatasources from './delete-datasources'
+import generateTypescriptTypedefs from './generate-typescript-typedefs'
+
+export default {
+  sync,
+  scaffold,
+  quickstart,
+  pullComponents,
+  pullLanguages,
+  pushComponents,
+  generateMigration,
+  runMigration,
+  rollbackMigration,
+  listSpaces,
+  importFiles,
+  deleteComponent,
+  deleteComponents,
+  deleteDatasources,
+  generateTypescriptTypedefs
 }

@@ -1,7 +1,7 @@
-var path = require('path')
-var fs = require('fs')
-var netrc = require('netrc')
-var os = require('os')
+import path from 'path'
+import fs from 'fs'
+import netrc from 'netrc'
+import os from 'os'
 
 var host = 'api.storyblok.com'
 
@@ -77,7 +77,7 @@ const set = function (email, token, region) {
   }
 }
 
-module.exports = {
+export default {
   set: set,
   get: get
 }

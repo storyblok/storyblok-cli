@@ -1,4 +1,4 @@
-const fs = require('fs')
+import fs from 'fs'
 
 const saveFileFactory = async (fileName, content, path = './') => {
   return new Promise((resolve, reject) => {
@@ -13,4 +13,4 @@ const saveFileFactory = async (fileName, content, path = './') => {
   })
 }
 
-module.exports = saveFileFactory
+export default saveFileFactory

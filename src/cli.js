@@ -1,20 +1,20 @@
 #!/usr/bin/env node
 
-const commander = require('commander')
+import commander from 'commander'
+import chalk from 'chalk'
+import clear from 'clear'
+import figlet from 'figlet'
+import inquirer from 'inquirer'
+import { ALL_REGIONS, EU_CODE, isRegion } from '@storyblok/region-helper'
+import updateNotifier from 'update-notifier'
+import fs from 'fs'
+import tasks from './tasks'
+import { getQuestions, lastStep, api, creds } from './utils'
+import { SYNC_TYPES, COMMANDS } from './constants'
+
+const rawPkg = fs.readFileSync('./package.json')
+const pkg = JSON.parse(rawPkg)
 const program = new commander.Command()
-
-const chalk = require('chalk')
-const clear = require('clear')
-const figlet = require('figlet')
-const inquirer = require('inquirer')
-const { ALL_REGIONS, EU_CODE, isRegion } = require('@storyblok/region-helper')
-
-const updateNotifier = require('update-notifier')
-const pkg = require('../package.json')
-
-const tasks = require('./tasks')
-const { getQuestions, lastStep, api, creds } = require('./utils')
-const { SYNC_TYPES, COMMANDS } = require('./constants')
 const allRegionsText = ALL_REGIONS.join(', ')
 
 clear()
@@ -528,8 +528,8 @@ program
   .command(COMMANDS.GENERATE_TYPESCRIPT_TYPEDEFS)
   .requiredOption('--source <PATH>', 'Path to the components JSON file')
   .option('--target <PATH>', 'Path to the Typescript file that will be generated (default: xxx)')
-  .option('--titlePrefix <STRING>', ' (default: _storyblok)')
-  .option('--titleSuffix <STRING>', '')
+  .option('--titlePrefix <STRING>', '')
+  .option('--titleSuffix <STRING>', ' (default: _storyblok)')
   // TS Compiler Options...
   .option('--customTypeParser <PATH>', 'Path to a Parser for Custom Types')
   .action((options) => {
