@@ -83,21 +83,16 @@ export const parseBlokSchemaObject = (
   }
 
   switch (schemaObject.type) {
-    case "text":
-      return { type: "string" };
     case "bloks":
       return { type: "array" };
-    case "number":
-      return { type: "string" };
-    case "image":
-      return { type: "string" };
     case "boolean":
       return { type: "boolean" };
-    case "textarea":
-      return { type: "string" };
-    case "markdown":
-      return { type: "string" };
     case "datetime":
+    case "image":
+    case "markdown":
+    case "number":
+    case "text":
+    case "textarea":
       return { type: "string" };
     default:
       return { type: "any" };
