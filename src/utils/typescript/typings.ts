@@ -32,7 +32,7 @@ export type {
   // ISbEventPayload,
 } from "storyblok-js-client";
 
-export type GenericType =
+export type ISbBlokSchemaObjectType =
   | "text"
   | "bloks"
   | "array"
@@ -74,61 +74,47 @@ export interface CliOptions {
   compilerOptions?: CompilerOptions;
 }
 
-export interface StoryblokSchemaElementOption {
+export interface ISbBlokSchemaObjectOption {
   _uid: string;
   name: string;
   value: string;
 }
 
-export interface StoryblokSchemaElement {
-  type: GenericType;
+export type ISbBlokSchemaObject = {
+  type: ISbBlokSchemaObjectType;
   pos: number;
   key: string;
   use_uuid?: boolean;
   source?: "internal" | "external" | "internal_stories" | "internal_languages";
-  options?: StoryblokSchemaElementOption[];
+  options?: ISbBlokSchemaObjectOption[];
   filter_content_type?: string[];
   restrict_components?: boolean;
   component_whitelist?: string[];
   component_group_whitelist?: string[];
   restrict_type?: "groups" | "";
   exclude_empty_option?: boolean;
-}
+};
 
-export interface StoryblokStory<TContent> {
-  name: string;
-  created_at: string;
-  published_at: string;
-  id: number;
-  uuid: string;
-  content: TContent;
-  slug: string;
-  full_slug: string;
-  sort_by_date: string | null;
-  position: number;
-  tag_list: string[];
-  is_startpage: boolean;
-  parent_id: number;
-  meta_data: any;
-  group_id: string;
-  first_published_at: string | null;
-  release_id?: number | null;
-  lang: string;
-  path?: string;
-  alternates: {
-    id: number;
-    name: string;
-    slug: string;
-    published: boolean;
-    full_slug: string;
-    is_folder: boolean;
-    parent_id: number;
-  }[];
-  default_full_slug: string;
-  translated_slugs: {
-    path: string;
-    name: string | null;
-    lang: string;
-  }[];
-  _stopResolving?: boolean;
-}
+export type BlokSchemaObjectTypeAnnotation =
+  | {
+      tsType: string | string[];
+    }
+  | {
+      type: string | string[];
+      enum: string[];
+    }
+  | {
+      type: string | string[];
+    }
+  | {
+      type: "array";
+      items: {
+        type: string | string[];
+      };
+    }
+  | {
+      type: "array";
+      items: {
+        enum: string[];
+      };
+    };
