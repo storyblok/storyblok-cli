@@ -272,6 +272,7 @@ program
   .requiredOption('--source <SPACE_ID>', 'Source space id')
   .requiredOption('--target <SPACE_ID>', 'Target space id')
   .option('--components-groups <UUIDs>', 'Synchronize components based on their group UUIDs separated by commas')
+  .option('--datasource-disable-dimensions-value-sync', 'Enables syncing of datasources without their corresponding dimension values.')
   .action(async (options) => {
     console.log(`${chalk.blue('-')} Sync data between spaces\n`)
 
@@ -284,7 +285,8 @@ program
         type,
         target,
         source,
-        componentsGroups
+        componentsGroups,
+        datasourceDisableDimensionsValueSync,
       } = options
 
       const _componentsGroups = componentsGroups ? componentsGroups.split(',') : null
@@ -297,13 +299,14 @@ program
           throw new Error(`The type ${_type} is not valid`)
         }
       })
-
+      
       await tasks.sync(_types, {
         api,
         token,
         target,
         source,
-        _componentsGroups
+        _componentsGroups, 
+        datasourceDisableDimensionsValueSync
       })
 
       console.log('\n' + chalk.green('✓') + ' Sync data between spaces successfully completed')

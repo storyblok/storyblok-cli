@@ -4,7 +4,7 @@ const api = require('../../utils/api')
 
 class SyncDatasources {
   /**
-   * @param {{ sourceSpaceId: string, targetSpaceId: string, oauthToken: string }} options
+   * @param {{ sourceSpaceId: string, targetSpaceId: string, oauthToken: string, datasourceDisableDimensionsValueSync: boolean }} options
    */
   constructor (options) {
     this.targetDatasources = []
@@ -13,6 +13,7 @@ class SyncDatasources {
     this.targetSpaceId = options.targetSpaceId
     this.oauthToken = options.oauthToken
     this.client = api.getClient()
+    this.datasourceDisableDimensionsValueSync = options.datasourceDisableDimensionsValueSync
   }
 
   async sync () {
@@ -139,11 +140,14 @@ class SyncDatasources {
           )
           const { data } = await this.createDatasourcesDimensions(datasourcesToAdd[i].dimensions, newDatasource.data.datasource)
           await this.syncDatasourceEntries(datasourcesToAdd[i].id, newDatasource.data.datasource.id)
-          console.log(
-            `    ${chalk.blue('-')} Sync dimensions values...`
-          )
-          await this.syncDatasourceDimensionsValues(datasourcesToAdd[i], data.datasource)
-          console.log(`  ${chalk.green('✓')} Created datasource ${datasourcesToAdd[i].name}`)
+          if (!this.datasourceDisableDimensionsValueSync) {
+            console.log(
+              `    ${chalk.blue('-')} Sync dimensions values...`
+            )
+            await this.syncDatasourceDimensionsValues(datasourcesToAdd[i], data.datasource)
+            
+            console.log(`  ${chalk.green('✓')} Created datasource ${datasourcesToAdd[i].name}`)
+          }
         } else {
           await this.syncDatasourceEntries(datasourcesToAdd[i].id, newDatasource.data.datasource.id)
           console.log(`  ${chalk.green('✓')} Created datasource ${datasourcesToAdd[i].name}`)
@@ -191,7 +195,9 @@ class SyncDatasources {
 
           await this.syncDatasourceEntries(sourceDatasource.id, datasourcesToUpdate[i].id)
 
-          await this.syncDatasourceDimensionsValues(sourceDatasource, datasourceToSyncDimensionsValues)
+          if (!this.datasourceDisableDimensionsValueSync) {
+            await this.syncDatasourceDimensionsValues(sourceDatasource, datasourceToSyncDimensionsValues)
+          }
           console.log(`${chalk.green('✓')} Updated datasource ${datasourcesToUpdate[i].name}`)
         } else {
           await this.syncDatasourceEntries(sourceDatasource.id, datasourcesToUpdate[i].id)

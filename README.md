@@ -247,6 +247,7 @@ $ storyblok sync --type <COMMAND> --source <SPACE_ID> --target <SPACE_ID>
 * `type`: describe the command type to execute. Can be: `folders`, `components`, `stories`, `datasources` or `roles`. It's possible pass multiple types separated by comma (`,`).
 * `source`: the source space to use to sync
 * `target`: the target space to use to sync
+*`datasource-disable-dimensions-value-sync`: Enables syncing of datasources without their corresponding dimension values.
 
 #### Examples
 
