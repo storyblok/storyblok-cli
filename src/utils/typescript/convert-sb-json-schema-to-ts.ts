@@ -2,7 +2,7 @@ import { compile, type JSONSchema } from "json-schema-to-typescript";
 import { TYPES, generate } from "./genericTypes";
 import chalk from "chalk";
 import fs from "fs";
-import { parseBlokSchemaObject } from "./parseBlokSchemaObject";
+import { parseBlokSchemaProperty } from "./parseBlokSchemaProperty";
 import { getTitle } from "./getTitle";
 
 // TOKENS
@@ -90,54 +90,52 @@ export const generateTSTypedefsFromComponentsJSONSchema = async (
   }
 
   /**
-   * This function maps schema of properties to a
+   * Map a component schema to a ???
    * @param schema
    * @param title
    * @returns
    */
-  const typeMapper = async (schema: JSONSchema = {}, title: string) => {
+  const typeMapper = async (componentSchema: JSONSchema = {}, title: string) => {
     const parseObj = {};
 
-    for (const key of Object.keys(schema)) {
-      // exclude tab-* elements as they are used in storybloks ui and do not affect the data structure
-      if (key.startsWith("tab-")) {
+    for await (const [schemaKey, schemaElement] of Object.entries(componentSchema)) {
+      // Schema keys that start with `tab-` are only used for describing tabs in the Storyblok UI.
+      // They should be ignored.
+      if (schemaKey.startsWith("tab-")) {
         continue;
       }
 
       const obj: JSONSchema = {};
-      const schemaElement = schema[key];
       const type = schemaElement.type;
+      const element = parseBlokSchemaProperty(schemaElement, options);
+      obj[schemaKey] = element;
 
-      // Generate type for storyblok-provided types
+      // Generate type for custom field
+      if (type === "custom") {
+        Object.assign(parseObj, typeof ctp === "function" ? ctp(schemaKey, schemaElement) : {});
+
+        continue;
+      }
+
+      // Generate type for field types provided by Storyblok
+
+      // Include Storyblok field type type definition, if needed
       if (TYPES.includes(type)) {
-        const ts = await generate(type, getTitle(type, options), {});
+        const blokName = getTitle(type, options);
+        const ts = await generate(type, blokName, {});
+        obj[schemaKey].tsType = blokName;
 
         if (ts) {
           typedefsFileStringsArray.push(ts);
         }
-        // Generate type for custom field
-      } else if (type === "custom") {
-        Object.assign(parseObj, {}); // defaultCustomMapper(key, schemaElement)
-
-        if (typeof ctp === "function") {
-          Object.assign(parseObj, ctp(key, schemaElement));
-        }
-
-        continue;
       }
-
-      const element = parseBlokSchemaObject(schemaElement, options);
-
-      if (!element) {
-        continue;
-      }
-
-      obj[key] = element;
 
       if (type === "multilink") {
         const excludedLinktypes = [];
         const baseType = getTitle(type, options);
 
+        // TODO: both email_link_type and asset_link_type are booleans that could also be undefined.
+        // Do we want to exclude link types also in those cases?
         if (!schemaElement.email_link_type) {
           excludedLinktypes.push('{ linktype?: "email" }');
         }
@@ -145,45 +143,40 @@ export const generateTSTypedefsFromComponentsJSONSchema = async (
           excludedLinktypes.push('{ linktype?: "asset" }');
         }
 
-        obj[key].tsType = excludedLinktypes.length
-          ? `Exclude<${baseType}, ${excludedLinktypes.join(" | ")}>`
-          : baseType;
-      } else if (TYPES.includes(type)) {
-        obj[key].tsType = getTitle(type, options);
-      } else if (type === "bloks") {
+        obj[schemaKey].tsType =
+          excludedLinktypes.length > 0 ? `Exclude<${baseType}, ${excludedLinktypes.join(" | ")}>` : baseType;
+      }
+
+      if (type === "bloks") {
         if (schemaElement.restrict_components) {
+          // Bloks restricted by groups
           if (schemaElement.restrict_type === "groups") {
             if (
               Array.isArray(schemaElement.component_group_whitelist) &&
-              schemaElement.component_group_whitelist.length
+              schemaElement.component_group_whitelist.length > 0
             ) {
-              let currentGroupElements: string[] = [];
-              schemaElement.component_group_whitelist.forEach((groupId: string) => {
-                const currentGroup = componentGroups.get(groupId);
-                if (Array.isArray(currentGroup)) {
-                  currentGroupElements = [...currentGroupElements, ...currentGroup];
-                } else {
-                  console.log("Group has no members: ", groupId);
-                }
-              });
-              if (currentGroupElements.length == 0) {
-                obj[key].tsType = `never[]`;
-              } else {
-                obj[key].tsType = `(${currentGroupElements.join(" | ")})[]`;
-              }
-            }
-          } else {
-            if (Array.isArray(schemaElement.component_whitelist) && schemaElement.component_whitelist.length) {
-              obj[key].tsType = `(${schemaElement.component_whitelist
-                .map((i: string) => getTitle(i, options))
-                .join(" | ")})[]`;
-            } else {
-              console.log("No whitelisted component found");
+              const currentGroupElements = schemaElement.component_group_whitelist.reduce(
+                (bloks: string[], groupUUID: string) => {
+                  const bloksInGroup = componentGroups.get(groupUUID);
+                  return bloksInGroup ? [...bloks, ...Array.from(bloksInGroup)] : bloks;
+                },
+                []
+              );
+
+              obj[schemaKey].tsType =
+                currentGroupElements.length > 0 ? `(${currentGroupElements.join(" | ")})[]` : `never[]`;
             }
           }
+
+          // Bloks restricted by 1-by-1 list
+          if (Array.isArray(schemaElement.component_whitelist) && schemaElement.component_whitelist.length > 0) {
+            obj[schemaKey].tsType = `(${schemaElement.component_whitelist
+              .map((name: string) => getTitle(name, options))
+              .join(" | ")})[]`;
+          }
         } else {
-          console.log("Type: bloks array but not whitelisted (will result in all elements):", title);
-          obj[key].tsType = `(${Array.from(componentNames).join(" | ")})[]`;
+          // All bloks can be slotted in this property (AKA no restrictions)
+          obj[schemaKey].tsType = `(${Array.from(componentNames).join(" | ")})[]`;
         }
       }
       Object.assign(parseObj, obj);

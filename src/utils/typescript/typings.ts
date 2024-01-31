@@ -32,7 +32,7 @@ export type {
   // ISbEventPayload,
 } from "storyblok-js-client";
 
-export type ISbBlokSchemaObjectType =
+export type ISbBlokSchemaPropertyType =
   | "text"
   | "bloks"
   | "array"
@@ -74,19 +74,19 @@ export interface CliOptions {
   compilerOptions?: CompilerOptions;
 }
 
-export interface ISbBlokSchemaObjectOption {
+export interface ISbBlokSchemaPropertyOption {
   _uid: string;
   name: string;
   value: string;
 }
 
-export type ISbBlokSchemaObject = {
-  type: ISbBlokSchemaObjectType;
+export type ISbBlokSchemaProperty = {
+  type: ISbBlokSchemaPropertyType;
   pos: number;
   key: string;
   use_uuid?: boolean;
   source?: "internal" | "external" | "internal_stories" | "internal_languages";
-  options?: ISbBlokSchemaObjectOption[];
+  options?: ISbBlokSchemaPropertyOption[];
   filter_content_type?: string[];
   restrict_components?: boolean;
   component_whitelist?: string[];
@@ -95,7 +95,7 @@ export type ISbBlokSchemaObject = {
   exclude_empty_option?: boolean;
 };
 
-export type BlokSchemaObjectTypeAnnotation =
+export type BlokSchemaPropertyTypeAnnotation =
   | {
       tsType: string | string[];
     }
