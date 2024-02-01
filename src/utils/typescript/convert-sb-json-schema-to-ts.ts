@@ -158,7 +158,9 @@ export const generateTSTypedefsFromComponentsJSONSchema = async (
               const currentGroupElements = schemaElement.component_group_whitelist.reduce(
                 (bloks: string[], groupUUID: string) => {
                   const bloksInGroup = componentGroups.get(groupUUID);
-                  return bloksInGroup ? [...bloks, ...Array.from(bloksInGroup)] : bloks;
+                  return bloksInGroup
+                    ? [...bloks, ...Array.from(bloksInGroup).map((blokName) => getTitle(blokName, options))]
+                    : bloks;
                 },
                 []
               );
@@ -174,10 +176,12 @@ export const generateTSTypedefsFromComponentsJSONSchema = async (
               .map((name: string) => getTitle(name, options))
               .join(" | ")})[]`;
           }
-        } else {
-          // All bloks can be slotted in this property (AKA no restrictions)
-          obj[schemaKey].tsType = `(${Array.from(componentNames).join(" | ")})[]`;
         }
+
+        // All bloks can be slotted in this property (AKA no restrictions)
+        obj[schemaKey].tsType = `(${Array.from(componentNames)
+          .map((blokName) => getTitle(blokName, options))
+          .join(" | ")})[]`;
       }
       Object.assign(parseObj, obj);
     }
