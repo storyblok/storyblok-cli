@@ -13,7 +13,7 @@ const typeFuncs: {
 const toGenerateWhitelist = Object.keys(typeFuncs);
 
 async function compileType(obj: JSONSchema, name: BasicType, compilerOptions: CompilerOptions) {
-  const ts = await compile(obj, name, compilerOptions);
+  const ts = await compile(obj, name, { bannerComment: "", ...compilerOptions });
   toGenerateWhitelist.splice(toGenerateWhitelist.indexOf(name), 1);
   return ts;
 }

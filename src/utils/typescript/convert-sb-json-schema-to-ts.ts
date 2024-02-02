@@ -26,9 +26,10 @@ export const generateTSTypedefsFromComponentsJSONSchema = async (
   options: GenerateTSTypedefsOptions
 ) => {
   console.log(chalk.green("✓") + " Generating TS typedefs ***");
+
   let ctp: any;
   if (options.customTypeParser) {
-    ctp = await import(options.customTypeParser);
+    ctp = await import(options.customTypeParser).then((data) => data.default);
   }
 
   const typedefsFileStringsArray = [`import type { ${storyDataTypeName} } from "storyblok";`];
@@ -81,7 +82,7 @@ export const generateTSTypedefsFromComponentsJSONSchema = async (
       };
 
       try {
-        const ts = await compile(obj, component.name, {} /*compilerOptions*/);
+        const ts = await compile(obj, component.name, { bannerComment: "" } /*compilerOptions*/);
         typedefsFileStringsArray.push(ts);
       } catch (e) {
         console.log("ERROR", e);
@@ -168,21 +169,22 @@ export const generateTSTypedefsFromComponentsJSONSchema = async (
               obj[schemaKey].tsType =
                 currentGroupElements.length > 0 ? `(${currentGroupElements.join(" | ")})[]` : `never[]`;
             }
+          } else {
+            // Bloks restricted by 1-by-1 list
+            if (Array.isArray(schemaElement.component_whitelist) && schemaElement.component_whitelist.length > 0) {
+              obj[schemaKey].tsType = `(${schemaElement.component_whitelist
+                .map((name: string) => getTitle(name, options))
+                .join(" | ")})[]`;
+            }
           }
-
-          // Bloks restricted by 1-by-1 list
-          if (Array.isArray(schemaElement.component_whitelist) && schemaElement.component_whitelist.length > 0) {
-            obj[schemaKey].tsType = `(${schemaElement.component_whitelist
-              .map((name: string) => getTitle(name, options))
-              .join(" | ")})[]`;
-          }
+        } else {
+          // All bloks can be slotted in this property (AKA no restrictions)
+          obj[schemaKey].tsType = `(${Array.from(componentNames)
+            .map((blokName) => getTitle(blokName, options))
+            .join(" | ")})[]`;
         }
-
-        // All bloks can be slotted in this property (AKA no restrictions)
-        obj[schemaKey].tsType = `(${Array.from(componentNames)
-          .map((blokName) => getTitle(blokName, options))
-          .join(" | ")})[]`;
       }
+
       Object.assign(parseObj, obj);
     }
 

@@ -708,7 +708,7 @@
       "name": "blog_entry",
       "display_name": "Blog Entry",
       "created_at": "2021-03-24T14:54:26.751Z",
-      "updated_at": "2023-08-10T08:14:07.063Z",
+      "updated_at": "2023-12-01T14:17:57.514Z",
       "id": 1430517,
       "schema": {
         "preview_image": {
@@ -764,13 +764,6 @@
           "type": "multilink",
           "pos": 6,
           "key": "copyright_link"
-        },
-        "redirect": {
-          "type": "multilink",
-          "description": "",
-          "pos": 7,
-          "display_name": "Redirect",
-          "key": "redirect_url"
         },
         "title": {
           "type": "text",
@@ -845,7 +838,6 @@
             "recommended_case_studies",
             "case_studies",
             "testing",
-            "redirect",
             "redirect_url"
           ],
           "pos": 13,
@@ -1667,7 +1659,7 @@
       "name": "codeblock",
       "display_name": null,
       "created_at": "2021-02-15T12:31:59.895Z",
-      "updated_at": "2023-01-02T09:52:18.079Z",
+      "updated_at": "2023-12-29T09:36:15.894Z",
       "id": 1346280,
       "schema": {
         "code": {
@@ -1799,7 +1791,8 @@
               "name": "GraphQL"
             }
           ],
-          "description": "Just set the language if you see the auto-detection is not working."
+          "description": "Just set the language if you see the auto-detection is not working.",
+          "exclude_empty_option": true
         }
       },
       "image": null,
@@ -3604,7 +3597,7 @@
       "name": "enterprise_case_study",
       "display_name": "Case Study",
       "created_at": "2021-05-03T10:32:13.908Z",
-      "updated_at": "2023-09-18T15:04:15.336Z",
+      "updated_at": "2023-12-01T14:18:17.127Z",
       "id": 1512185,
       "schema": {
         "layout": {
@@ -3623,10 +3616,6 @@
           "pos": 0,
           "display_name": "",
           "default_value": ""
-        },
-        "redirect": {
-          "type": "multilink",
-          "pos": 1
         },
         "name": {
           "type": "text",
@@ -3879,14 +3868,6 @@
           "type": "text",
           "description": "If no CTA is provided, the \"Download\" button will be displayed.",
           "pos": 35
-        },
-        "tab-65e4b5b0-b4d8-4bac-bdf1-21c2fcdf817b": {
-          "display_name": "Settings",
-          "keys": [
-            "redirect"
-          ],
-          "pos": 36,
-          "type": "tab"
         },
         "tracking_pixels": {
           "type": "options",
@@ -4642,7 +4623,7 @@
       "name": "enterprise_page",
       "display_name": "Enterprise Page",
       "created_at": "2020-07-14T13:45:01.820Z",
-      "updated_at": "2023-07-27T10:23:36.340Z",
+      "updated_at": "2023-12-01T14:15:54.269Z",
       "id": 1011771,
       "schema": {
         "hide_top_cta": {
@@ -4663,10 +4644,6 @@
           "source": "internal",
           "datasource_slug": "footer-types",
           "pos": 2
-        },
-        "redirect": {
-          "type": "multilink",
-          "pos": 3
         },
         "body": {
           "type": "bloks",
@@ -4741,7 +4718,6 @@
             "hide_top_cta",
             "header_colors",
             "header_font_color",
-            "redirect",
             "header_type"
           ],
           "pos": 13
@@ -10595,7 +10571,7 @@
       "name": "pricing_plan",
       "display_name": null,
       "created_at": "2023-10-10T10:40:19.648Z",
-      "updated_at": "2023-10-24T12:19:37.219Z",
+      "updated_at": "2024-01-16T17:17:54.838Z",
       "id": 4696353,
       "schema": {
         "name": {
@@ -10741,409 +10717,439 @@
           "key": "scheduling_and_releases",
           "pos": 25
         },
+        "scheduled_single_stories": {
+          "type": "text",
+          "pos": 26
+        },
         "pipeline_stages": {
           "type": "text",
           "key": "pipeline_stages",
-          "pos": 26
+          "pos": 27
         },
         "custom_metadata_fields": {
           "type": "text",
           "key": "custom_metadata_fields",
-          "pos": 27
+          "pos": 28
         },
         "sdk_access": {
           "type": "text",
           "display_name": "Access to SDKs",
           "key": "sdk_access",
-          "pos": 28
+          "pos": 29
         },
         "design_system_access": {
           "type": "text",
           "display_name": "Access to blok.ink",
           "key": "design_system_access",
-          "pos": 29
+          "pos": 30
         },
         "activity_log": {
           "type": "text",
           "display_name": "Activity log and usage data management",
           "key": "activity_log",
-          "pos": 30
+          "pos": 31
         },
         "asset_manager": {
           "type": "text",
           "display_name": "Web Digital Asset Manager (DAM)",
           "key": "asset_manager",
-          "pos": 31
+          "pos": 32
         },
         "asset_folders": {
           "type": "text",
           "key": "asset_folders",
-          "pos": 32
+          "pos": 33
         },
         "automatic_updates": {
           "type": "text",
           "key": "automatic_update",
-          "pos": 33
+          "pos": 34
         },
         "autosave": {
           "type": "text",
           "key": "autosave",
-          "pos": 34
+          "pos": 35
         },
         "clipboard_history": {
           "type": "text",
           "key": "clipboard_history",
-          "pos": 35
+          "pos": 36
         },
         "clone_projects": {
           "type": "text",
           "key": "clone_projects",
-          "pos": 36
+          "pos": 37
         },
         "content_delivery_api": {
           "type": "text",
           "display_name": "Content Delivery API",
           "key": "content_delivery_api",
-          "pos": 37
+          "pos": 38
         },
         "custom_field_types": {
           "type": "text",
           "key": "custom_field_types",
-          "pos": 38
+          "pos": 39
         },
         "datasources": {
           "type": "text",
           "key": "datasources",
-          "pos": 39
+          "pos": 40
         },
         "graphql": {
           "type": "text",
           "key": "graphql",
-          "pos": 40
+          "pos": 41
         },
         "image_optimization_service": {
           "type": "text",
           "key": "image_optimization_service",
-          "pos": 41
+          "pos": 42
         },
         "internationalization": {
           "type": "text",
           "key": "internationalization",
-          "pos": 42
+          "pos": 43
         },
         "management_api": {
           "type": "text",
           "display_name": "Management API",
           "key": "management_api",
-          "pos": 43
+          "pos": 44
         },
         "responsive_preview": {
           "type": "text",
           "key": "responsive_preview",
-          "pos": 44
+          "pos": 45
         },
         "search_query": {
           "type": "text",
           "key": "search_query",
-          "pos": 45
+          "pos": 46
         },
         "standard_workflows": {
           "type": "text",
           "key": "standard_workflows",
-          "pos": 46
+          "pos": 47
         },
         "documentation": {
           "type": "text",
           "key": "documentation",
-          "pos": 47
+          "pos": 48
         },
         "unlimited_languages": {
           "type": "text",
           "key": "unlimited_languages",
-          "pos": 48
+          "pos": 49
         },
         "visual_editor": {
           "type": "text",
           "key": "visual_editor",
-          "pos": 49
+          "pos": 50
         },
         "two_fa": {
           "type": "text",
           "display_name": "2 Factor Authentication (2FA)",
           "key": "two_fa",
-          "pos": 50
+          "pos": 51
         },
         "approval": {
           "type": "text",
           "key": "approval",
-          "pos": 51
+          "pos": 52
         },
         "access_control": {
           "type": "text",
           "display_name": "Fine Grained Access Control",
           "key": "access_control",
-          "pos": 52
+          "pos": 53
         },
         "replace_assets": {
           "type": "text",
           "key": "replace_assets",
-          "pos": 53
+          "pos": 54
         },
         "seo_meta_tags": {
           "type": "text",
           "display_name": "SEO Meta Tags",
           "key": "seo_meta_tags",
-          "pos": 54
+          "pos": 55
         },
         "task_manager": {
           "type": "text",
           "key": "task_manager",
-          "pos": 55
+          "pos": 56
         },
         "translatable_slugs": {
           "type": "text",
           "key": "translateable_slugs",
-          "pos": 56
+          "pos": 57
         },
         "webhook_secrets": {
           "type": "text",
           "key": "webhook_secrets",
-          "pos": 57
+          "pos": 58
         },
         "access_token_scopes": {
           "type": "text",
           "key": "access_token_scopes",
-          "pos": 58
+          "pos": 59
         },
         "advanced_paths": {
           "type": "text",
           "key": "advanced_paths",
-          "pos": 59
+          "pos": 60
         },
         "collaboration": {
           "type": "text",
           "key": "collaboration",
-          "pos": 60
+          "pos": 61
         },
         "field_comments": {
           "type": "text",
           "key": "field_comments",
-          "pos": 61
+          "pos": 62
         },
         "dimensions": {
           "type": "text",
           "key": "dimensions",
-          "pos": 62
+          "pos": 63
         },
         "forced_two_fa": {
           "type": "text",
           "display_name": "Forced 2FA",
           "key": "forced_two_fa",
-          "pos": 63
+          "pos": 64
         },
         "preview_and_editor": {
           "type": "text",
           "display_name": "Live experience preview and visual editor",
           "key": "preview_and_editor",
-          "pos": 64
+          "pos": 65
         },
         "content_authoring": {
           "type": "text",
           "display_name": "Content authoring and modeling",
           "key": "content_authoring",
-          "pos": 65
+          "pos": 66
         },
         "content_aggregation": {
           "type": "text",
           "display_name": "Content aggregation and experience assembly",
           "key": "content_aggregation",
-          "pos": 66
+          "pos": 67
         },
         "permissions": {
           "type": "text",
           "display_name": "Access and Permission controls",
           "key": "permissions",
-          "pos": 67
+          "pos": 68
         },
         "workflow_stages": {
           "type": "text",
           "display_name": "Workflow and Workflow Stages",
           "key": "workflow_stages",
-          "pos": 68
+          "pos": 69
         },
         "content_orchestrations": {
           "type": "text",
           "key": "content_orchestrations",
-          "pos": 69
+          "pos": 70
         },
         "experience_delivery": {
           "type": "text",
           "key": "experience_delivery",
-          "pos": 70
+          "pos": 71
         },
         "global_api_cdn": {
           "type": "text",
           "display_name": "Global API CDN included",
           "key": "global_api_cdn",
-          "pos": 71
+          "pos": 72
         },
         "global_asset_cdn": {
           "type": "text",
           "display_name": "Global Asset CDN included",
           "key": "global_asset_cdn",
-          "pos": 72
+          "pos": 73
         },
         "content_hub": {
           "type": "text",
           "key": "content_hub",
-          "pos": 73
+          "pos": 74
         },
         "open_source_sdks": {
           "type": "text",
           "display_name": "Open Source SDKs (Front-end development kits)",
           "key": "open_source_sdks",
-          "pos": 74
+          "pos": 75
         },
         "acitivity_log": {
           "type": "text",
           "key": "acitivity_log",
-          "pos": 75
+          "pos": 76
+        },
+        "vercel_integration": {
+          "type": "text",
+          "pos": 77
+        },
+        "netlify_integration": {
+          "type": "text",
+          "pos": 78
+        },
+        "semrush_integration": {
+          "type": "text",
+          "pos": 79
         },
         "cloudinary_integration": {
           "type": "text",
           "key": "cloudinary_integration",
-          "pos": 76
+          "pos": 80
         },
         "optimizely_integration": {
           "type": "text",
           "key": "optimizely_integration",
-          "pos": 77
-        },
-        "lokalise_integration": {
-          "type": "text",
-          "key": "lokalise_integration",
-          "pos": 78
+          "pos": 81
         },
         "language_export_and_import": {
           "type": "text",
           "key": "language_export_and_import",
-          "pos": 79
+          "pos": 82
         },
         "pipeline": {
           "type": "text",
           "display_name": "Pipeline / Content Staging",
           "key": "pipeline",
-          "pos": 80
+          "pos": 83
         },
         "shared_components": {
           "type": "text",
           "key": "shared_components",
-          "pos": 81
+          "pos": 84
         },
         "extended_activity_logs": {
           "type": "text",
           "key": "extended_activity_logs",
-          "pos": 82
+          "pos": 85
         },
         "sso": {
           "type": "text",
           "display_name": "Single Sign-On",
           "key": "sso",
-          "pos": 83
-        },
-        "ecommerce_integrations": {
-          "type": "text",
-          "key": "ecommerce_integrations",
-          "pos": 84
+          "pos": 86
         },
         "shopify_integration": {
           "type": "text",
           "key": "shopify_integration",
-          "pos": 85
+          "pos": 87
         },
         "saleor_integration": {
           "type": "text",
-          "pos": 86
+          "pos": 88
         },
         "centra_integration": {
           "type": "text",
-          "pos": 87
+          "pos": 89
         },
         "sylius_integration": {
           "type": "text",
-          "pos": 88
+          "pos": 90
         },
         "shopware_integration": {
           "type": "text",
-          "pos": 89
+          "pos": 91
         },
         "spryker_integration": {
           "type": "text",
-          "pos": 90
+          "pos": 92
         },
         "bigcommerce_integration": {
           "type": "text",
-          "pos": 91
+          "pos": 93
         },
         "commercelayer_integration": {
           "type": "text",
-          "pos": 92
+          "pos": 94
         },
         "commercetools_integration": {
           "type": "text",
-          "pos": 93
+          "pos": 95
         },
         "vendure_integration": {
           "type": "text",
-          "pos": 94
+          "pos": 96
         },
         "organization_analytics": {
           "type": "text",
           "key": "organization_analytics",
-          "pos": 95
+          "pos": 97
         },
         "wire_transfer_payment": {
           "type": "text",
           "key": "wire_transfer_payment",
-          "pos": 96
+          "pos": 98
         },
         "restricted_ip_address_range": {
           "type": "text",
           "display_name": "Restricted IP Address Range",
           "key": "restricted_ip_address_range",
-          "pos": 97
+          "pos": 99
         },
         "user_management": {
           "type": "text",
           "key": "user_management",
-          "pos": 98
+          "pos": 100
         },
         "customer_success_manager": {
           "type": "text",
           "display_name": "Named Customer Success Manager",
           "key": "customer_success_manager",
-          "pos": 99
+          "pos": 101
         },
         "security_audit": {
           "type": "text",
           "key": "security_audit",
-          "pos": 100
+          "pos": 102
         },
         "additional_data_centers": {
           "type": "text",
           "key": "additional_data_centers",
-          "pos": 101
+          "pos": 103
         },
         "extended_support_package": {
           "type": "text",
           "key": "extended_support_package",
-          "pos": 102
+          "pos": 104
         },
         "bring_your_own_cloud": {
           "type": "text",
           "display_name": "Bring your own Cloud (AWS/Azure/GCP)",
           "key": "bring_your_own_cloud",
-          "pos": 103
+          "pos": 105
+        },
+        "single_story_scheduling": {
+          "type": "text",
+          "pos": 106
+        },
+        "conditional_fields": {
+          "type": "text",
+          "pos": 107
+        },
+        "nacelle_integration": {
+          "type": "text",
+          "pos": 108
+        },
+        "smartling_integration": {
+          "type": "text",
+          "pos": 109
+        },
+        "bynder_integration": {
+          "type": "text",
+          "pos": 110
+        },
+        "sap_integration": {
+          "type": "text",
+          "pos": 111
         }
       },
       "image": null,
@@ -11330,7 +11336,7 @@
       "name": "root",
       "display_name": "Docs",
       "created_at": "2020-07-14T13:45:28.539Z",
-      "updated_at": "2023-05-26T10:50:14.069Z",
+      "updated_at": "2023-12-01T14:17:37.195Z",
       "id": 1011811,
       "schema": {
         "og_image": {
@@ -11340,11 +11346,6 @@
           ],
           "display_name": "Open Graph Image",
           "pos": 0
-        },
-        "redirect": {
-          "type": "multilink",
-          "pos": 1,
-          "show_anchor": false
         },
         "title": {
           "type": "text",
@@ -11376,14 +11377,6 @@
           "source": "internal_stories",
           "folder_slug": "",
           "pos": 5
-        },
-        "tab-63a003f0-05f1-4745-8ac0-365c5be90b53": {
-          "type": "tab",
-          "display_name": "Config",
-          "keys": [
-            "redirect"
-          ],
-          "pos": 6
         },
         "tab-e85a9ab4-45e7-4fb6-9082-0b3f15a7aa75": {
           "type": "tab",
@@ -11765,7 +11758,7 @@
       "name": "targeted_page",
       "display_name": "Targeted Page",
       "created_at": "2020-07-14T13:44:46.635Z",
-      "updated_at": "2023-09-21T14:14:18.628Z",
+      "updated_at": "2023-12-01T14:17:11.618Z",
       "id": 1011723,
       "schema": {
         "tab-2586dfb6-775e-4464-a65d-80699fb28004": {
@@ -11779,8 +11772,7 @@
             "category",
             "preview_image",
             "hide_date",
-            "topics",
-            "redirect"
+            "topics"
           ],
           "pos": 0,
           "type": "tab",
@@ -11983,9 +11975,6 @@
           "type": "boolean",
           "description": "Hide this entry from search engines and from the internal search",
           "pos": 19
-        },
-        "redirect": {
-          "type": "multilink"
         }
       },
       "image": null,
@@ -13112,74 +13101,6 @@
       "icon": null
     },
     {
-      "name": "text_map_logos",
-      "display_name": "Text and Map with Logos",
-      "created_at": "2021-09-24T16:03:35.420Z",
-      "updated_at": "2023-05-26T10:58:59.471Z",
-      "id": 1814421,
-      "schema": {
-        "headline": {
-          "type": "text",
-          "pos": 0,
-          "required": true,
-          "description": "This field may be used to render an H1 title"
-        },
-        "subheadline": {
-          "type": "text",
-          "pos": 1
-        },
-        "text": {
-          "type": "richtext",
-          "pos": 2,
-          "customize_toolbar": true,
-          "toolbar": [
-            "bold"
-          ],
-          "required": true
-        },
-        "ctas": {
-          "type": "bloks",
-          "restrict_components": true,
-          "component_whitelist": [
-            "enterprise_cta"
-          ],
-          "maximum": "2",
-          "pos": 3
-        },
-        "logos": {
-          "type": "multiasset",
-          "filetypes": [
-            "images"
-          ],
-          "pos": 4
-        },
-        "tab-0d06fb5d-83f0-4cd9-9a51-218b9dcbedf0": {
-          "type": "tab",
-          "display_name": "Images",
-          "keys": [
-            "illustration",
-            "position",
-            "illustration_side",
-            "custom_illustration",
-            "logos"
-          ],
-          "pos": 5
-        }
-      },
-      "image": null,
-      "preview_field": null,
-      "is_root": false,
-      "preview_tmpl": "<strong>{{headline}}</strong>\n<div>{{sub_headline}}</div>",
-      "is_nestable": true,
-      "all_presets": [],
-      "preset_id": null,
-      "real_name": "Text and Map with Logos",
-      "component_group_uuid": "740f2a8d-d049-49a2-a7be-f712e04827a2",
-      "color": null,
-      "icon": null,
-      "component_group_name": "Enterprise Body"
-    },
-    {
       "name": "text_quotes_illustration",
       "display_name": "Text, Quotes and Illustration",
       "created_at": "2021-01-26T16:52:16.959Z",
@@ -13561,25 +13482,6 @@
       "all_presets": [],
       "preset_id": null,
       "real_name": "CTA",
-      "component_group_uuid": null,
-      "color": null,
-      "icon": null
-    },
-    {
-      "name": "tutorials",
-      "display_name": null,
-      "created_at": "2020-07-14T13:45:29.125Z",
-      "updated_at": "2020-07-14T13:45:29.125Z",
-      "id": 1011813,
-      "schema": {},
-      "image": null,
-      "preview_field": null,
-      "is_root": false,
-      "preview_tmpl": null,
-      "is_nestable": true,
-      "all_presets": [],
-      "preset_id": null,
-      "real_name": "tutorials",
       "component_group_uuid": null,
       "color": null,
       "icon": null
