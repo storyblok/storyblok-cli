@@ -1,16 +1,16 @@
 import { TYPES } from "./genericTypes";
-import { getStoryTypeTitle } from "./getTitle";
+import { getStoryTypeTitle } from "./getBlokTypeName";
 import type { BlokSchemaPropertyTypeAnnotation, ISbBlokSchemaProperty } from "../../types";
 
 /**
  * Get the correct JSONSchema type annotation for the provided Blok schema property object
  * @param schemaProperty A Storyblok Blok `schema` property object, A.K.A. what you can find in a key of the `schema` property inside a components JSONSchema.
- * @param CLIOptions An instance of
+ * @param GenerateTypescriptTypedefsCLIOptions An instance of
  * @returns A BlokSchemaPropertyTypeAnnotation object
  */
 export const parseBlokSchemaProperty = (
   schemaProperty: ISbBlokSchemaProperty,
-  CLIOptions: any
+  GenerateTypescriptTypedefsCLIOptions: any
 ): BlokSchemaPropertyTypeAnnotation => {
   if (TYPES.includes(schemaProperty.type)) {
     return {
@@ -32,7 +32,7 @@ export const parseBlokSchemaProperty = (
     if (schemaProperty.filter_content_type) {
       return {
         tsType: `(${schemaProperty.filter_content_type
-          .map((type2) => getStoryTypeTitle(type2, CLIOptions))
+          .map((type2) => getStoryTypeTitle(type2, GenerateTypescriptTypedefsCLIOptions))
           // In this case schemaProperty.type can be `option` or `options`. In case of `options` the type should be an array
           .join(" | ")} | string )${schemaProperty.type === "options" ? "[]" : ""}`,
       };

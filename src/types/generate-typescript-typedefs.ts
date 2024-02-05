@@ -54,22 +54,22 @@ export type BasicType = "asset" | "multiasset" | "multilink" | "table" | "richte
 
 export type CompilerOptions = Partial<Options>;
 
-export interface StoryblokTsOptions {
-  componentsJson: {
-    components: JSONSchema[];
-  };
-  customTypeParser?: (key: string, options: JSONSchema) => void;
-  compilerOptions?: CompilerOptions;
-  path?: string;
-  titleSuffix?: string;
-  titlePrefix?: string;
-}
+// export interface StoryblokTsOptions {
+//   componentsJson: {
+//     components: JSONSchema[];
+//   };
+//   customTypeParser?: (key: string, options: JSONSchema) => void;
+//   compilerOptions?: CompilerOptions;
+//   path?: string;
+//   titleSuffix?: string;
+//   titlePrefix?: string;
+// }
 
-export interface CliOptions {
-  source: string;
-  target?: string;
-  titleSuffix?: string;
+export interface GenerateTypescriptTypedefsCLIOptions {
+  sourceFilePaths: string;
+  destinationFilePath?: string;
   titlePrefix?: string;
+  titleSuffix?: string;
   customTypeParser?: string;
   compilerOptions?: CompilerOptions;
 }

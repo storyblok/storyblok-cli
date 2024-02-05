@@ -3,18 +3,11 @@ import { TYPES, generate } from "./genericTypes";
 import chalk from "chalk";
 import fs from "fs";
 import { parseBlokSchemaProperty } from "./parseBlokSchemaProperty";
-import { getTitle } from "./getTitle";
+import { getBlokTypeName } from "./getBlokTypeName";
+import { GenerateTypescriptTypedefsCLIOptions } from "../../types";
 
 // TOKENS
 const storyDataTypeName = "ISbStoryData";
-
-type GenerateTSTypedefsOptions = {
-  sourceFilePaths: string;
-  destinationFilePath?: string;
-  titlePrefix?: string;
-  titleSuffix?: string;
-  customTypeParser?: string;
-};
 
 type ComponentGroupsAndNamesObject = {
   componentGroups: Map<string, Set<string>>;
@@ -23,7 +16,7 @@ type ComponentGroupsAndNamesObject = {
 
 export const generateTSTypedefsFromComponentsJSONSchema = async (
   componentsJSONSchema: JSONSchema[],
-  options: GenerateTSTypedefsOptions
+  options: GenerateTypescriptTypedefsCLIOptions
 ) => {
   console.log(chalk.green("✓") + " Generating TS typedefs ***");
 
@@ -35,7 +28,7 @@ export const generateTSTypedefsFromComponentsJSONSchema = async (
   const typedefsFileStringsArray = [`import type { ${storyDataTypeName} } from "storyblok";`];
 
   // Generate a Map with the components that have a parent group (groupname - Set(componentName)) and a Set with all the component names
-  const { componentGroups, componentNames } = componentsJSONSchema.reduce(
+  const { componentGroups, componentNames } = componentsJSONSchema.reduce<ComponentGroupsAndNamesObject>(
     (acc, currentComponent) => {
       if (currentComponent.component_group_uuid)
         acc.componentGroups.set(
@@ -48,7 +41,7 @@ export const generateTSTypedefsFromComponentsJSONSchema = async (
       acc.componentNames.add(currentComponent.name);
       return acc;
     },
-    { componentGroups: new Map(), componentNames: new Set() } as ComponentGroupsAndNamesObject
+    { componentGroups: new Map(), componentNames: new Set() }
   );
 
   async function generateTSFile() {
@@ -64,7 +57,7 @@ export const generateTSTypedefsFromComponentsJSONSchema = async (
         ["component", "_uid"]
       );
 
-      const title = getTitle(component.name, options);
+      const title = getBlokTypeName(component.name, options);
       const obj: JSONSchema = {
         $id: `#/${component.name}`,
         title,
@@ -122,7 +115,7 @@ export const generateTSTypedefsFromComponentsJSONSchema = async (
 
       // Include Storyblok field type type definition, if needed
       if (TYPES.includes(type)) {
-        const blokName = getTitle(type, options);
+        const blokName = getBlokTypeName(type, options);
         const ts = await generate(type, blokName, {});
         obj[schemaKey].tsType = blokName;
 
@@ -133,7 +126,7 @@ export const generateTSTypedefsFromComponentsJSONSchema = async (
 
       if (type === "multilink") {
         const excludedLinktypes = [];
-        const baseType = getTitle(type, options);
+        const baseType = getBlokTypeName(type, options);
 
         // TODO: both email_link_type and asset_link_type are booleans that could also be undefined.
         // Do we want to exclude link types also in those cases?
@@ -160,7 +153,7 @@ export const generateTSTypedefsFromComponentsJSONSchema = async (
                 (bloks: string[], groupUUID: string) => {
                   const bloksInGroup = componentGroups.get(groupUUID);
                   return bloksInGroup
-                    ? [...bloks, ...Array.from(bloksInGroup).map((blokName) => getTitle(blokName, options))]
+                    ? [...bloks, ...Array.from(bloksInGroup).map((blokName) => getBlokTypeName(blokName, options))]
                     : bloks;
                 },
                 []
@@ -173,14 +166,14 @@ export const generateTSTypedefsFromComponentsJSONSchema = async (
             // Bloks restricted by 1-by-1 list
             if (Array.isArray(schemaElement.component_whitelist) && schemaElement.component_whitelist.length > 0) {
               obj[schemaKey].tsType = `(${schemaElement.component_whitelist
-                .map((name: string) => getTitle(name, options))
+                .map((name: string) => getBlokTypeName(name, options))
                 .join(" | ")})[]`;
             }
           }
         } else {
           // All bloks can be slotted in this property (AKA no restrictions)
           obj[schemaKey].tsType = `(${Array.from(componentNames)
-            .map((blokName) => getTitle(blokName, options))
+            .map((blokName) => getBlokTypeName(blokName, options))
             .join(" | ")})[]`;
         }
       }

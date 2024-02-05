@@ -1,6 +1,6 @@
 import chalk from "chalk";
 import fs from "fs";
-import { generateTSTypedefsFromComponentsJSONSchema } from "../utils/typescript/convert-sb-json-schema-to-ts";
+import { generateTSTypedefsFromComponentsJSONSchema } from "../utils/typescript/convertJSONSchemaToTS";
 
 type GenerateTSTypedefsOptions = {
   sourceFilePaths: string;
