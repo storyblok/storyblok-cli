@@ -1,47 +1,48 @@
 import chalk from "chalk";
 import fs from "fs";
-import { generateTSTypedefsFromComponentsJSONSchema } from "../utils/typescript/convertJSONSchemaToTS";
+import { generateTSTypedefsFromComponentsJSONSchemas } from "../utils/typescript/convertJSONSchemaToTS";
+import { GenerateTypescriptTypedefsCLIOptions, JSONSchemaToTSOptions } from "../types";
 
-type GenerateTSTypedefsOptions = {
-  sourceFilePaths: string;
-  destinationFilePath?: string;
-  titlePrefix?: string;
-  titleSuffix?: string;
-  customTypeParser?: string;
-};
-type GenerateTSTypedefs = (options: GenerateTSTypedefsOptions) => void;
+type GenerateTSTypedefs = (options: GenerateTypescriptTypedefsCLIOptions) => void;
 
 const generateTypescriptTypedefs: GenerateTSTypedefs = ({
   sourceFilePaths,
   destinationFilePath = "./storyblok-component-types.d.ts",
-  titlePrefix,
-  titleSuffix = "_storyblok",
-  customTypeParser,
+  typeNamesPrefix,
+  typeNamesSuffix = "_storyblok",
+  customFieldTypesParserPath,
+  JSONSchemaToTSCustomOptions,
 }) => {
-  const getDataFromJSON = (path: string) => {
-    const sourceFilePathsArray = path.split(",");
+  const getJSONSchemasFromFiles = (paths: string[]) => {
     try {
-      const foo = sourceFilePathsArray.map((sourceFilePath) => JSON.parse(fs.readFileSync(sourceFilePath, "utf8")));
-      return foo;
+      return paths.map((sourceFilePath) => JSON.parse(fs.readFileSync(sourceFilePath, "utf8")));
     } catch (e) {
       console.error(
         `${chalk.red("X")} 
-        Could not load any JSON file from these paths ${sourceFilePathsArray}`
+        Could not load JSON files from the provided paths: ${paths}. Please check if those files exist.`
       );
       return null;
     }
   };
-  const componentsJSONSchemaArray = getDataFromJSON(sourceFilePaths)?.flatMap(
+
+  // Merge custom provided options to our defaults
+  const JSONSchemaToTSOptions: JSONSchemaToTSOptions = {
+    bannerComment: "",
+    ...JSONSchemaToTSCustomOptions,
+  };
+
+  const componentsJSONSchemaArray = getJSONSchemasFromFiles(sourceFilePaths)?.flatMap(
     (componentsJSONSchema) => componentsJSONSchema.components || componentsJSONSchema
   );
 
   componentsJSONSchemaArray &&
-    generateTSTypedefsFromComponentsJSONSchema(componentsJSONSchemaArray, {
+    generateTSTypedefsFromComponentsJSONSchemas(componentsJSONSchemaArray, {
       sourceFilePaths,
       destinationFilePath,
-      titlePrefix,
-      titleSuffix,
-      customTypeParser,
+      typeNamesPrefix,
+      typeNamesSuffix,
+      customFieldTypesParserPath,
+      JSONSchemaToTSCustomOptions: JSONSchemaToTSOptions,
     });
 };
 

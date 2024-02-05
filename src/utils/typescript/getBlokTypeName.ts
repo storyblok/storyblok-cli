@@ -5,6 +5,7 @@ const { camelCase, startCase } = lodash;
 const storyDataTypeName = "ISbStoryData";
 
 export const getBlokTypeName = (blokName: string, options: GenerateTypescriptTypedefsCLIOptions) =>
-  startCase(camelCase(`${options.titlePrefix ?? ""}${blokName}${options.titleSuffix}`)).replace(/ /g, "");
+  startCase(camelCase(`${options.typeNamesPrefix ?? ""}${blokName}${options.typeNamesSuffix}`)).replace(/ /g, "");
 
-export const getStoryTypeTitle = (t: string, options?: any) => `${storyDataTypeName}<${getBlokTypeName(t, options)}>`;
+export const getStoryType = (storyBlokName: string, options: GenerateTypescriptTypedefsCLIOptions) =>
+  `${storyDataTypeName}<${getBlokTypeName(storyBlokName, options)}>`;
