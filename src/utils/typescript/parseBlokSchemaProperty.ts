@@ -1,6 +1,6 @@
 import { TYPES } from "./genericTypes";
 import { getStoryTypeTitle } from "./getTitle";
-import type { BlokSchemaPropertyTypeAnnotation, ISbBlokSchemaProperty } from "./typings";
+import type { BlokSchemaPropertyTypeAnnotation, ISbBlokSchemaProperty } from "../../types";
 
 /**
  * Get the correct JSONSchema type annotation for the provided Blok schema property object

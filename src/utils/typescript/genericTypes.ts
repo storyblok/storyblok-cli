@@ -1,5 +1,5 @@
 import { compile, type JSONSchema } from "json-schema-to-typescript";
-import { BasicType, CompilerOptions } from "./typings";
+import { BasicType, CompilerOptions } from "../../types";
 
 const typeFuncs: {
   [k in BasicType]: (name: string, options: CompilerOptions) => Promise<string | undefined>;

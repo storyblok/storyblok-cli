@@ -61,7 +61,7 @@ export const generateTSTypedefsFromComponentsJSONSchema = async (
           }
           return acc;
         },
-        ["_uid", "component"]
+        ["component", "_uid"]
       );
 
       const title = getTitle(component.name, options);
