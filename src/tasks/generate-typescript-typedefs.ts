@@ -2,10 +2,11 @@ import chalk from "chalk";
 import fs from "fs";
 import { generateTSTypedefsFromComponentsJSONSchemas } from "../utils/typescript/convertJSONSchemaToTS";
 import { GenerateTypescriptTypedefsCLIOptions, JSONSchemaToTSOptions } from "../types";
+import { GenerateTypesFromJSONSchemas } from "../utils/typescript/generateTypesFromJSONSchema";
 
 type GenerateTSTypedefs = (options: GenerateTypescriptTypedefsCLIOptions) => void;
 
-const generateTypescriptTypedefs: GenerateTSTypedefs = ({
+const generateTypescriptTypedefs: GenerateTSTypedefs = async ({
   sourceFilePaths,
   destinationFilePath = "./storyblok-component-types.d.ts",
   typeNamesPrefix,
@@ -35,15 +36,28 @@ const generateTypescriptTypedefs: GenerateTSTypedefs = ({
     (componentsJSONSchema) => componentsJSONSchema.components || componentsJSONSchema
   );
 
-  componentsJSONSchemaArray &&
-    generateTSTypedefsFromComponentsJSONSchemas(componentsJSONSchemaArray, {
+  const foo =
+    componentsJSONSchemaArray &&
+    (await GenerateTypesFromJSONSchemas.init(componentsJSONSchemaArray, {
       sourceFilePaths,
       destinationFilePath,
       typeNamesPrefix,
       typeNamesSuffix,
       customFieldTypesParserPath,
       JSONSchemaToTSCustomOptions: JSONSchemaToTSOptions,
-    });
+    }));
+
+  (await foo?.generateTSFile())?.writeTypeDefs();
+
+  // componentsJSONSchemaArray &&
+  //   generateTSTypedefsFromComponentsJSONSchemas(componentsJSONSchemaArray, {
+  //     sourceFilePaths,
+  //     destinationFilePath,
+  //     typeNamesPrefix,
+  //     typeNamesSuffix,
+  //     customFieldTypesParserPath,
+  //     JSONSchemaToTSCustomOptions: JSONSchemaToTSOptions,
+  //   });
 };
 
 export default generateTypescriptTypedefs;

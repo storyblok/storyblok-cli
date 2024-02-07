@@ -1,5 +1,4 @@
 import type { ISbStoryData } from "storyblok";
-
 export interface RichtextStoryblok {
   type: string;
   content?: RichtextStoryblok[];
@@ -291,7 +290,7 @@ export interface BlogEntryStoryblok {
   category: (number | string)[];
   case_studies?: (ISbStoryData<EnterpriseCaseStudyStoryblok> | string)[];
   copyright_text?: string;
-  copyright_link?: Exclude<MultilinkStoryblok, { linktype?: "email" } | { linktype?: "asset" }>;
+  copyright_link?: Exclude<MultilinkStoryblok, {linktype?: "email"} | {linktype?: "asset"}>;
   title?: string;
   body?: (
     | AnnotatedImageStoryblok
@@ -366,7 +365,7 @@ export interface BoxesSliderBoxStoryblok {
   subheadline?: string;
   text?: RichtextStoryblok;
   image?: AssetStoryblok;
-  link?: Exclude<MultilinkStoryblok, { linktype?: "email" } | { linktype?: "asset" }>;
+  link?: Exclude<MultilinkStoryblok, {linktype?: "email"} | {linktype?: "asset"}>;
   background_color?: "" | "none" | "custom";
   background_custom_color?: {
     color: string;
@@ -410,7 +409,7 @@ export interface CaseStudiesRecapCategoryStoryblok {
 }
 
 export interface CaseStudyRecapItemStoryblok {
-  case_study_link: Exclude<MultilinkStoryblok, { linktype?: "email" } | { linktype?: "asset" }>;
+  case_study_link: Exclude<MultilinkStoryblok, {linktype?: "email"} | {linktype?: "asset"}>;
   company_logo: AssetStoryblok;
   cover_image: AssetStoryblok;
   payoff: string;
@@ -431,7 +430,7 @@ export interface CaseStudyRecapItemPerkStoryblok {
 export interface ChangelogStoryblok {
   effects?: ("" | "app" | "api" | "mapi" | "open-source" | "renderer" | "website" | "gapi")[];
   sprint_name?: string;
-  sprint_name_link?: Exclude<MultilinkStoryblok, { linktype?: "email" } | { linktype?: "asset" }>;
+  sprint_name_link?: Exclude<MultilinkStoryblok, {linktype?: "email"} | {linktype?: "asset"}>;
   image?: AssetStoryblok;
   items?: (ISbStoryData<FeatureItemStoryblok> | string)[];
   improvements_and_fixes?: RichtextStoryblok;
@@ -2083,7 +2082,7 @@ export interface CtaImageStoryblok {
   headline?: string;
   text?: string;
   button_text?: string;
-  link?: Exclude<MultilinkStoryblok, { linktype?: "email" } | { linktype?: "asset" }>;
+  link?: Exclude<MultilinkStoryblok, {linktype?: "email"} | {linktype?: "asset"}>;
   button_color?: "" | "button--white" | "button--dark-blue";
   text_color?: "" | "dark" | "white";
   link_new_tab?: boolean;
@@ -2186,7 +2185,7 @@ export interface CtaWithIconsStoryblok {
   headline?: string;
   text?: RichtextStoryblok;
   button_text?: string;
-  link?: Exclude<MultilinkStoryblok, { linktype?: "email" } | { linktype?: "asset" }>;
+  link?: Exclude<MultilinkStoryblok, {linktype?: "email"} | {linktype?: "asset"}>;
   new_tab?: boolean;
   list?: CtaWithIconsListItemStoryblok[];
   background_color?: {
@@ -2226,7 +2225,7 @@ export interface CustomBoxesGridBoxStoryblok {
   subheadline?: string;
   text?: string;
   button_text?: string;
-  link?: Exclude<MultilinkStoryblok, { linktype?: "email" } | { linktype?: "asset" }>;
+  link?: Exclude<MultilinkStoryblok, {linktype?: "email"} | {linktype?: "asset"}>;
   background_type?: "" | "color" | "image";
   background_color?: {
     color: string;
@@ -2244,7 +2243,7 @@ export interface CustomBoxesGridSmallBoxStoryblok {
   headline?: string;
   subheadline?: string;
   text?: string;
-  link?: Exclude<MultilinkStoryblok, { linktype?: "email" } | { linktype?: "asset" }>;
+  link?: Exclude<MultilinkStoryblok, {linktype?: "email"} | {linktype?: "asset"}>;
   link_new_tab?: boolean;
   alignment?: "" | " " | "center";
   background_image?: AssetStoryblok;
@@ -2279,7 +2278,7 @@ export interface CustomersLogosStoryblok {
   logos: MultiassetStoryblok;
   cta?: EnterpriseCtaStoryblok[];
   link_label?: string;
-  link_url?: Exclude<MultilinkStoryblok, { linktype?: "email" } | { linktype?: "asset" }>;
+  link_url?: Exclude<MultilinkStoryblok, {linktype?: "email"} | {linktype?: "asset"}>;
   _uid: string;
   component: "customers_logos";
   [k: string]: unknown;
@@ -2401,7 +2400,7 @@ export interface EnterpriseBoxStoryblok {
   headline?: string;
   text?: string;
   link_text?: string;
-  link?: Exclude<MultilinkStoryblok, { linktype?: "email" } | { linktype?: "asset" }>;
+  link?: Exclude<MultilinkStoryblok, {linktype?: "email"} | {linktype?: "asset"}>;
   _uid: string;
   component: "enterprise_box";
   [k: string]: unknown;
@@ -2630,7 +2629,7 @@ export interface EnterpriseCaseStudyReferencesStoryblok {
 export interface EnterpriseCtaStoryblok {
   text?: string;
   target?: "" | "_blank";
-  link?: Exclude<MultilinkStoryblok, { linktype?: "asset" }>;
+  link?: Exclude<MultilinkStoryblok, {linktype?: "asset"}>;
   color?:
     | ""
     | "e-button--white"
@@ -2658,7 +2657,7 @@ export interface EnterpriseCtaGroupStoryblok {
 export interface EnterpriseCtaGroupItemStoryblok {
   headline?: string;
   text?: string;
-  link?: Exclude<MultilinkStoryblok, { linktype?: "email" } | { linktype?: "asset" }>;
+  link?: Exclude<MultilinkStoryblok, {linktype?: "email"} | {linktype?: "asset"}>;
   icon?: string;
   icon_alt?: string;
   _uid: string;
@@ -2897,7 +2896,7 @@ export interface EnterprisePricingSectionStoryblok {
   feature_headline?: string;
   features?: string;
   cta_text?: string;
-  cta_link?: Exclude<MultilinkStoryblok, { linktype?: "email" } | { linktype?: "asset" }>;
+  cta_link?: Exclude<MultilinkStoryblok, {linktype?: "email"} | {linktype?: "asset"}>;
   _uid: string;
   component: "enterprise_pricing_section";
   [k: string]: unknown;
@@ -3083,7 +3082,7 @@ export interface EventStoryblok {
   meta_title?: string;
   meta_description?: string;
   enable_external_link?: boolean;
-  external_link?: Exclude<MultilinkStoryblok, { linktype?: "email" } | { linktype?: "asset" }>;
+  external_link?: Exclude<MultilinkStoryblok, {linktype?: "email"} | {linktype?: "asset"}>;
   noindex?: boolean;
   event_type?: "" | "storyblok_event" | "webinar";
   width?: "" | "default" | "wide";
@@ -3133,7 +3132,7 @@ export interface FaqOverviewStoryblok {
 }
 
 export interface FeaturedSearchResultStoryblok {
-  link?: Exclude<MultilinkStoryblok, { linktype?: "email" } | { linktype?: "asset" }>;
+  link?: Exclude<MultilinkStoryblok, {linktype?: "email"} | {linktype?: "asset"}>;
   _uid: string;
   component: "featured_search_result";
   [k: string]: unknown;
@@ -3379,7 +3378,7 @@ export interface GatedContentStoryblok {
   bulletpoints?: string;
   type?: "" | "download" | "redirect" | "content";
   download?: AssetStoryblok;
-  redirect_to?: Exclude<MultilinkStoryblok, { linktype?: "email" } | { linktype?: "asset" }>;
+  redirect_to?: Exclude<MultilinkStoryblok, {linktype?: "email"} | {linktype?: "asset"}>;
   tracking_pixel_url?: string;
   event_label?: string;
   use_custom_thank_you_message?: boolean;
@@ -3925,7 +3924,7 @@ export interface InContentGatedContentStoryblok {
   bulletpoints?: string;
   type?: "" | "download" | "redirect" | "content";
   download?: AssetStoryblok;
-  redirect_to?: Exclude<MultilinkStoryblok, { linktype?: "email" } | { linktype?: "asset" }>;
+  redirect_to?: Exclude<MultilinkStoryblok, {linktype?: "email"} | {linktype?: "asset"}>;
   tracking_pixel_url?: string;
   event_label?: string;
   body?: (
@@ -4212,7 +4211,7 @@ export interface InContentLinkBoardStoryblok {
 export interface InContentLinkBoardLinkStoryblok {
   headline?: string;
   teaser?: string;
-  link?: Exclude<MultilinkStoryblok, { linktype?: "email" } | { linktype?: "asset" }>;
+  link?: Exclude<MultilinkStoryblok, {linktype?: "email"} | {linktype?: "asset"}>;
   icon?: AssetStoryblok;
   icon_alt?: string;
   _uid: string;
@@ -4365,7 +4364,7 @@ export interface LinkBoardLinkStoryblok {
   icon_alt?: string;
   headline?: string;
   teaser?: string;
-  link?: Exclude<MultilinkStoryblok, { linktype?: "email" } | { linktype?: "asset" }>;
+  link?: Exclude<MultilinkStoryblok, {linktype?: "email"} | {linktype?: "asset"}>;
   _uid: string;
   component: "link_board_link";
   [k: string]: unknown;
@@ -4392,7 +4391,7 @@ export interface ListingCtaStoryblok {
   headline?: string;
   image?: AssetStoryblok;
   button_new_tab?: boolean;
-  button_link?: Exclude<MultilinkStoryblok, { linktype?: "email" } | { linktype?: "asset" }>;
+  button_link?: Exclude<MultilinkStoryblok, {linktype?: "email"} | {linktype?: "asset"}>;
   button_text?: string;
   text_align?: "" | "center" | "left";
   background_color?: {
@@ -4636,7 +4635,7 @@ export interface MainCardIconItemStoryblok {
 
 export interface MainCardStatItemStoryblok {
   cta_text?: string;
-  cta_link?: Exclude<MultilinkStoryblok, { linktype?: "email" } | { linktype?: "asset" }>;
+  cta_link?: Exclude<MultilinkStoryblok, {linktype?: "email"} | {linktype?: "asset"}>;
   headline?: string;
   text?: string;
   _uid: string;
@@ -4678,7 +4677,7 @@ export interface NavigationCategoryStoryblok {
   headline?: string;
   navigation_items?: NavigationItemStoryblok[];
   group_link_text?: string;
-  group_link?: Exclude<MultilinkStoryblok, { linktype?: "email" } | { linktype?: "asset" }>;
+  group_link?: Exclude<MultilinkStoryblok, {linktype?: "email"} | {linktype?: "asset"}>;
   _uid: string;
   component: "navigation_category";
   [k: string]: unknown;
@@ -4899,7 +4898,7 @@ export interface NavigationSidebarImageLinkStoryblok {
   image?: AssetStoryblok;
   subheadline?: string;
   headline?: string;
-  link?: Exclude<MultilinkStoryblok, { linktype?: "email" } | { linktype?: "asset" }>;
+  link?: Exclude<MultilinkStoryblok, {linktype?: "email"} | {linktype?: "asset"}>;
   new_tab?: boolean;
   _uid: string;
   component: "navigation_sidebar_image_link";
@@ -4920,7 +4919,7 @@ export interface NavigationSidebarImagesLinksItemStoryblok {
     [k: string]: unknown;
   };
   image?: AssetStoryblok;
-  link?: Exclude<MultilinkStoryblok, { linktype?: "email" } | { linktype?: "asset" }>;
+  link?: Exclude<MultilinkStoryblok, {linktype?: "email"} | {linktype?: "asset"}>;
   text: string;
   _uid: string;
   component: "navigation_sidebar_images_links_item";
@@ -4936,7 +4935,7 @@ export interface NavigationSidebarLinksStoryblok {
 
 export interface NavigationSidebarLinksLinkStoryblok {
   label?: string;
-  link?: Exclude<MultilinkStoryblok, { linktype?: "email" } | { linktype?: "asset" }>;
+  link?: Exclude<MultilinkStoryblok, {linktype?: "email"} | {linktype?: "asset"}>;
   new_tab?: boolean;
   _uid: string;
   component: "navigation_sidebar_links_link";
@@ -4945,7 +4944,7 @@ export interface NavigationSidebarLinksLinkStoryblok {
 
 export interface NestedCtaStoryblok {
   text?: string;
-  link?: Exclude<MultilinkStoryblok, { linktype?: "email" } | { linktype?: "asset" }>;
+  link?: Exclude<MultilinkStoryblok, {linktype?: "email"} | {linktype?: "asset"}>;
   target?: "" | "_blank";
   _uid: string;
   component: "nested_cta";
@@ -5150,7 +5149,7 @@ export interface NewsletterSectionStoryblok {
 }
 
 export interface PageStoryblok {
-  redirect?: Exclude<MultilinkStoryblok, { linktype?: "email" } | { linktype?: "asset" }>;
+  redirect?: Exclude<MultilinkStoryblok, {linktype?: "email"} | {linktype?: "asset"}>;
   body?: (
     | AnnotatedImageStoryblok
     | AppsStoryblok
@@ -5504,7 +5503,7 @@ export interface PersonalisedContentStoryblok {
 }
 
 export interface PressEntryStoryblok {
-  source_link?: Exclude<MultilinkStoryblok, { linktype?: "email" } | { linktype?: "asset" }>;
+  source_link?: Exclude<MultilinkStoryblok, {linktype?: "email"} | {linktype?: "asset"}>;
   source_name?: string;
   preview_image?: AssetStoryblok;
   _uid: string;
@@ -5525,7 +5524,7 @@ export interface PricingPlanStoryblok {
     color: string;
     [k: string]: unknown;
   };
-  cta_link?: Exclude<MultilinkStoryblok, { linktype?: "email" } | { linktype?: "asset" }>;
+  cta_link?: Exclude<MultilinkStoryblok, {linktype?: "email"} | {linktype?: "asset"}>;
   cta_text?: string;
   monthly_costs?: string;
   spaces_included?: string;
@@ -6298,7 +6297,7 @@ export interface SingleQuoteStoryblok {
 }
 
 export interface StackblitzButtonStoryblok {
-  link: Exclude<MultilinkStoryblok, { linktype?: "email" } | { linktype?: "asset" }>;
+  link: Exclude<MultilinkStoryblok, {linktype?: "email"} | {linktype?: "asset"}>;
   text?: string;
   _uid: string;
   component: "stackblitz_button";
@@ -6577,7 +6576,7 @@ export interface TechLogosStoryblok {
 
 export interface TechLogosLogoStoryblok {
   image?: AssetStoryblok;
-  link?: Exclude<MultilinkStoryblok, { linktype?: "email" } | { linktype?: "asset" }>;
+  link?: Exclude<MultilinkStoryblok, {linktype?: "email"} | {linktype?: "asset"}>;
   _uid: string;
   component: "tech_logos_logo";
   [k: string]: unknown;
@@ -6644,7 +6643,7 @@ export interface TextIllustrationGridItemStoryblok {
     [k: string]: unknown;
   };
   link_text?: string;
-  link?: Exclude<MultilinkStoryblok, { linktype?: "email" } | { linktype?: "asset" }>;
+  link?: Exclude<MultilinkStoryblok, {linktype?: "email"} | {linktype?: "asset"}>;
   sub_headline_font_style?: ("" | "normal" | "italic" | "bold")[];
   _uid: string;
   component: "text_illustration_grid_item";
@@ -6680,7 +6679,7 @@ export interface TextImagesTextCirclesStoryblok {
 
 export interface TextLinkStoryblok {
   text?: string;
-  link?: Exclude<MultilinkStoryblok, { linktype?: "email" } | { linktype?: "asset" }>;
+  link?: Exclude<MultilinkStoryblok, {linktype?: "email"} | {linktype?: "asset"}>;
   new_tab?: boolean;
   _uid: string;
   component: "text_link";
@@ -6901,7 +6900,7 @@ export interface TextLogosLinksGroupStoryblok {
     | WhitepapersListingStoryblok
   )[];
   link_text?: string;
-  link?: Exclude<MultilinkStoryblok, { linktype?: "email" } | { linktype?: "asset" }>;
+  link?: Exclude<MultilinkStoryblok, {linktype?: "email"} | {linktype?: "asset"}>;
   _uid: string;
   component: "text_logos_links_group";
   [k: string]: unknown;
@@ -6950,7 +6949,7 @@ export interface TextQuotesIllustrationStoryblok {
 
 export interface TextQuotesIllustrationLinkStoryblok {
   text?: string;
-  link?: Exclude<MultilinkStoryblok, { linktype?: "email" } | { linktype?: "asset" }>;
+  link?: Exclude<MultilinkStoryblok, {linktype?: "email"} | {linktype?: "asset"}>;
   open_in?: "" | "_blank";
   _uid: string;
   component: "text_quotes_illustration_link";
