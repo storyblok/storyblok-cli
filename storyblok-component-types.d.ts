@@ -613,6 +613,7 @@ export interface ChangelogStoryblok {
     | VideoTranscriptStoryblok
     | VideoTranscriptChapterStoryblok
     | WhitepapersListingStoryblok
+    | TestStoryblok
   )[];
   og_image?: AssetStoryblok;
   og_description?: string;
@@ -864,6 +865,7 @@ export interface ConfigurationStoryblok {
     | VideoTranscriptStoryblok
     | VideoTranscriptChapterStoryblok
     | WhitepapersListingStoryblok
+    | TestStoryblok
   )[];
   show_about?: boolean;
   startpage_cta_text?: string;
@@ -1050,6 +1052,7 @@ export interface ConfigurationStoryblok {
     | VideoTranscriptStoryblok
     | VideoTranscriptChapterStoryblok
     | WhitepapersListingStoryblok
+    | TestStoryblok
   )[];
   commerce_docu?: (
     | AnnotatedImageStoryblok
@@ -1230,6 +1233,7 @@ export interface ConfigurationStoryblok {
     | VideoTranscriptStoryblok
     | VideoTranscriptChapterStoryblok
     | WhitepapersListingStoryblok
+    | TestStoryblok
   )[];
   Documentation?: unknown;
   editor_guides_docu?: (
@@ -1411,6 +1415,7 @@ export interface ConfigurationStoryblok {
     | VideoTranscriptStoryblok
     | VideoTranscriptChapterStoryblok
     | WhitepapersListingStoryblok
+    | TestStoryblok
   )[];
   image_service_docu?: (
     | AnnotatedImageStoryblok
@@ -1591,6 +1596,7 @@ export interface ConfigurationStoryblok {
     | VideoTranscriptStoryblok
     | VideoTranscriptChapterStoryblok
     | WhitepapersListingStoryblok
+    | TestStoryblok
   )[];
   Startpage?: unknown;
   startpage_images?: (
@@ -1772,6 +1778,7 @@ export interface ConfigurationStoryblok {
     | VideoTranscriptStoryblok
     | VideoTranscriptChapterStoryblok
     | WhitepapersListingStoryblok
+    | TestStoryblok
   )[];
   documentation_navigation?: (
     | AnnotatedImageStoryblok
@@ -1952,6 +1959,7 @@ export interface ConfigurationStoryblok {
     | VideoTranscriptStoryblok
     | VideoTranscriptChapterStoryblok
     | WhitepapersListingStoryblok
+    | TestStoryblok
   )[];
   seo?: unknown;
   _uid: string;
@@ -3576,6 +3584,7 @@ export interface GatedContentStoryblok {
     | VideoTranscriptStoryblok
     | VideoTranscriptChapterStoryblok
     | WhitepapersListingStoryblok
+    | TestStoryblok
   )[];
   artwork?: AssetStoryblok;
   teaser_text?: string;
@@ -3908,6 +3917,7 @@ export interface InContentEventRegistrationStoryblok {
     | VideoTranscriptStoryblok
     | VideoTranscriptChapterStoryblok
     | WhitepapersListingStoryblok
+    | TestStoryblok
   )[];
   _uid: string;
   component: "in_content_event_registration";
@@ -4186,6 +4196,7 @@ export interface InContentGatedContentStoryblok {
     | VideoTranscriptStoryblok
     | VideoTranscriptChapterStoryblok
     | WhitepapersListingStoryblok
+    | TestStoryblok
   )[];
   _uid: string;
   component: "in_content_gated_content";
@@ -4606,6 +4617,7 @@ export interface LogogroupStoryblok {
     | VideoTranscriptStoryblok
     | VideoTranscriptChapterStoryblok
     | WhitepapersListingStoryblok
+    | TestStoryblok
   )[];
   _uid: string;
   component: "logogroup";
@@ -4883,6 +4895,7 @@ export interface NavigationMenuStoryblok {
     | VideoTranscriptStoryblok
     | VideoTranscriptChapterStoryblok
     | WhitepapersListingStoryblok
+    | TestStoryblok
   )[];
   nav_sidebar?: (
     | NavigationSidebarImagesLinksStoryblok
@@ -5131,6 +5144,7 @@ export interface NewsletterFormStoryblok {
     | VideoTranscriptStoryblok
     | VideoTranscriptChapterStoryblok
     | WhitepapersListingStoryblok
+    | TestStoryblok
   )[];
   _uid: string;
   component: "newsletter_form";
@@ -5329,6 +5343,7 @@ export interface PageStoryblok {
     | VideoTranscriptStoryblok
     | VideoTranscriptChapterStoryblok
     | WhitepapersListingStoryblok
+    | TestStoryblok
   )[];
   meta_description?: string;
   internal_search_keywords?: string;
@@ -5830,6 +5845,7 @@ export interface RoadmapStoryblok {
     | VideoTranscriptStoryblok
     | VideoTranscriptChapterStoryblok
     | WhitepapersListingStoryblok
+    | TestStoryblok
   )[];
   _uid: string;
   component: "roadmap";
@@ -6044,6 +6060,7 @@ export interface RootStoryblok {
     | VideoTranscriptStoryblok
     | VideoTranscriptChapterStoryblok
     | WhitepapersListingStoryblok
+    | TestStoryblok
   )[];
   previous?: unknown;
   next?: unknown;
@@ -6247,6 +6264,7 @@ export interface ScrollableTabsTabStoryblok {
     | VideoTranscriptStoryblok
     | VideoTranscriptChapterStoryblok
     | WhitepapersListingStoryblok
+    | TestStoryblok
   )[];
   _uid: string;
   component: "scrollable_tabs_tab";
@@ -6552,6 +6570,7 @@ export interface TeaserStoryblok {
     | VideoTranscriptStoryblok
     | VideoTranscriptChapterStoryblok
     | WhitepapersListingStoryblok
+    | TestStoryblok
   )[];
   _uid: string;
   component: "teaser";
@@ -6898,6 +6917,7 @@ export interface TextLogosLinksGroupStoryblok {
     | VideoTranscriptStoryblok
     | VideoTranscriptChapterStoryblok
     | WhitepapersListingStoryblok
+    | TestStoryblok
   )[];
   link_text?: string;
   link?: Exclude<MultilinkStoryblok, {linktype?: "email"} | {linktype?: "asset"}>;
@@ -7044,5 +7064,22 @@ export interface WhitepapersListingStoryblok {
   ctas?: ListingCtaStoryblok[];
   _uid: string;
   component: "whitepapers_listing";
+  [k: string]: unknown;
+}
+
+export interface TestStoryblok {
+  image?: string;
+  given_name?: string;
+  family_name?: string;
+  about?: string;
+  email?: string;
+  cta?: TextLogosLinksStoryblok[];
+  instagram_account?: string;
+  linkedin_account?: string;
+  discord_account?: string;
+  twitter_account?: string;
+  github_account?: string;
+  _uid: string;
+  component: "test";
   [k: string]: unknown;
 }

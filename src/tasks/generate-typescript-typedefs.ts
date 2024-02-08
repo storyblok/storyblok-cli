@@ -1,7 +1,6 @@
 import chalk from "chalk";
 import fs from "fs";
-import { generateTSTypedefsFromComponentsJSONSchemas } from "../utils/typescript/convertJSONSchemaToTS";
-import { GenerateTypescriptTypedefsCLIOptions, JSONSchemaToTSOptions } from "../types";
+import type { GenerateTypescriptTypedefsCLIOptions, JSONSchemaToTSOptions } from "../types";
 import { GenerateTypesFromJSONSchemas } from "../utils/typescript/generateTypesFromJSONSchema";
 
 type GenerateTSTypedefs = (options: GenerateTypescriptTypedefsCLIOptions) => void;
@@ -36,28 +35,19 @@ const generateTypescriptTypedefs: GenerateTSTypedefs = async ({
     (componentsJSONSchema) => componentsJSONSchema.components || componentsJSONSchema
   );
 
-  const foo =
-    componentsJSONSchemaArray &&
-    (await GenerateTypesFromJSONSchemas.init(componentsJSONSchemaArray, {
+  if (componentsJSONSchemaArray && componentsJSONSchemaArray.length > 0) {
+    const generator = await GenerateTypesFromJSONSchemas.init(componentsJSONSchemaArray, {
       sourceFilePaths,
       destinationFilePath,
       typeNamesPrefix,
       typeNamesSuffix,
       customFieldTypesParserPath,
       JSONSchemaToTSCustomOptions: JSONSchemaToTSOptions,
-    }));
+    });
 
-  (await foo?.generateTSFile())?.writeTypeDefs();
-
-  // componentsJSONSchemaArray &&
-  //   generateTSTypedefsFromComponentsJSONSchemas(componentsJSONSchemaArray, {
-  //     sourceFilePaths,
-  //     destinationFilePath,
-  //     typeNamesPrefix,
-  //     typeNamesSuffix,
-  //     customFieldTypesParserPath,
-  //     JSONSchemaToTSCustomOptions: JSONSchemaToTSOptions,
-  //   });
+    await generator.generateTSFile();
+    generator.writeTypeDefs();
+  }
 };
 
 export default generateTypescriptTypedefs;
