@@ -531,15 +531,29 @@ program
   .option('--target, --destinationFilePath <PATH>', 'Path to the Typescript file that will be generated (default: `storyblok-component-types.d.ts`)')
   .option('--titlePrefix, --typeNamesPrefix <STRING>', 'A prefix that will be prepended to all the names of the bloks')
   .option('--titleSuffix, --typeNamesSuffix <STRING>', 'A suffix that will be appended to all the names of bloks (default: `_storyblok`)')
-  .option('--compilerOptions, --JSONSchemaToTSCustomOptions <STRING>', 'A list of options supported by json-schema-to-typescript')
+  .option('--compilerOptions, --JSONSchemaToTSOptionsPath <PATH>', 'Path to a JSON file with a list of options supported by json-schema-to-typescript')
   .option('--customTypeParser, --customFieldTypesParserPath <PATH>', 'Path to the parser file for Custom Field Types')
   .action((options) => {
     console.log(`${chalk.blue('-')} Executing ${COMMANDS.GENERATE_TYPESCRIPT_TYPEDEFS} task`)
 
-    const { sourceFilePaths, destinationFilePath, typeNamesPrefix, typeNamesSuffix, customFieldTypesParserPath, JSONSchemaToTSCustomOptions } = options
+    const {
+      sourceFilePaths,
+      destinationFilePath,
+      typeNamesPrefix,
+      typeNamesSuffix,
+      customFieldTypesParserPath,
+      JSONSchemaToTSOptionsPath
+    } = options
 
     try {
-      tasks.generateTypescriptTypedefs({ sourceFilePaths, destinationFilePath, typeNamesPrefix, typeNamesSuffix, customFieldTypesParserPath, JSONSchemaToTSCustomOptions })
+      tasks.generateTypescriptTypedefs({
+        sourceFilePaths,
+        destinationFilePath,
+        typeNamesPrefix,
+        typeNamesSuffix,
+        customFieldTypesParserPath,
+        JSONSchemaToTSOptionsPath
+      })
     } catch (e) {
       errorHandler(e, COMMANDS.GENERATE_TYPESCRIPT_TYPEDEFS)
     }
