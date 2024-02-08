@@ -19,15 +19,6 @@ export interface AnnotatedImageStoryblok {
   height?: string;
   browser_bar?: "" | "dark" | "light";
   browser_bar_address?: string;
-  source?: {
-    image: string;
-    mapNodes: {
-      x?: number;
-      y?: number;
-      direction?: "right" | "left" | "top" | "bottom" | "top-right" | "top-left" | "bottom-right" | "bottom-left";
-    }[];
-    [k: string]: unknown;
-  };
   alt?: string;
   link?: string;
   caption?: RichtextStoryblok;
@@ -61,10 +52,6 @@ export interface AppStoreBannerStoryblok {
   image: AssetStoryblok;
   cta: EnterpriseCtaStoryblok[];
   enable_background_color?: boolean;
-  background_color?: {
-    color: string;
-    [k: string]: unknown;
-  };
   headline_size: "" | "default" | "small";
   _uid: string;
   component: "app_store_banner";
@@ -101,10 +88,6 @@ export interface BannerStoryblok {
   headline?: string;
   description?: RichtextStoryblok;
   image?: AssetStoryblok;
-  background_color?: {
-    color: string;
-    [k: string]: unknown;
-  };
   _uid: string;
   component: "banner";
   [k: string]: unknown;
@@ -367,10 +350,6 @@ export interface BoxesSliderBoxStoryblok {
   image?: AssetStoryblok;
   link?: Exclude<MultilinkStoryblok, {linktype?: "email"} | {linktype?: "asset"}>;
   background_color?: "" | "none" | "custom";
-  background_custom_color?: {
-    color: string;
-    [k: string]: unknown;
-  };
   _uid: string;
   component: "boxes_slider_box";
   [k: string]: unknown;
@@ -2082,10 +2061,6 @@ export interface CookieSettingsStoryblok {
 }
 
 export interface CtaImageStoryblok {
-  background_color?: {
-    color: string;
-    [k: string]: unknown;
-  };
   image?: AssetStoryblok;
   headline?: string;
   text?: string;
@@ -2196,10 +2171,6 @@ export interface CtaWithIconsStoryblok {
   link?: Exclude<MultilinkStoryblok, {linktype?: "email"} | {linktype?: "asset"}>;
   new_tab?: boolean;
   list?: CtaWithIconsListItemStoryblok[];
-  background_color?: {
-    color: string;
-    [k: string]: unknown;
-  };
   button_color?: "" | "button--white" | "button--dark-blue";
   text_color?: "" | "dark" | "white";
   _uid: string;
@@ -2235,10 +2206,6 @@ export interface CustomBoxesGridBoxStoryblok {
   button_text?: string;
   link?: Exclude<MultilinkStoryblok, {linktype?: "email"} | {linktype?: "asset"}>;
   background_type?: "" | "color" | "image";
-  background_color?: {
-    color: string;
-    [k: string]: unknown;
-  };
   background_image?: AssetStoryblok;
   _uid: string;
   component: "custom_boxes_grid_box";
@@ -2678,10 +2645,6 @@ export interface EnterpriseCtaSectionStoryblok {
   background_image?: AssetStoryblok;
   headline_size?: "" | " " | "large";
   inner_spacing?: "" | " " | "medium";
-  background_custom_color?: {
-    color: string;
-    [k: string]: unknown;
-  };
   anchor?: string;
   headline?: string;
   text?: string;
@@ -2876,10 +2839,6 @@ export interface EnterprisePricingStoryblok {
 export interface EnterprisePricingBoxStoryblok {
   color?: "" | "primary-ink" | "primary-blue" | "secondary-ink";
   most_popular?: boolean;
-  underlined_text_color?: {
-    color: string;
-    [k: string]: unknown;
-  };
   title?: string;
   subtitle?: string;
   price?: string;
@@ -2920,10 +2879,6 @@ export interface EnterpriseQuoteReferencesStoryblok {
 export interface EnterpriseQuoteReferenceSliderStoryblok {
   enable_custom_background?: boolean;
   enable_transparent_background?: boolean;
-  custom_background?: {
-    color: string;
-    [k: string]: unknown;
-  };
   headline?: string;
   quotes?: (ISbStoryData<QuoteStoryblok> | string)[];
   _uid: string;
@@ -2948,10 +2903,6 @@ export interface EnterpriseSingleBoxImageStoryblok {
   image?: AssetStoryblok;
   colored_background?: boolean;
   custom_background?: boolean;
-  background_color?: {
-    color: string;
-    [k: string]: unknown;
-  };
   _uid: string;
   component: "enterprise_single_box_image";
   [k: string]: unknown;
@@ -4405,10 +4356,6 @@ export interface ListingCtaStoryblok {
   button_link?: Exclude<MultilinkStoryblok, {linktype?: "email"} | {linktype?: "asset"}>;
   button_text?: string;
   text_align?: "" | "center" | "left";
-  background_color?: {
-    color: string;
-    [k: string]: unknown;
-  };
   _uid: string;
   component: "listing_cta";
   [k: string]: unknown;
@@ -4417,19 +4364,11 @@ export interface ListingCtaStoryblok {
 export interface ListWithImageStoryblok {
   image_position?: "" | "bottom-right";
   enable_background_color?: boolean;
-  background_color?: {
-    color: string;
-    [k: string]: unknown;
-  };
   headline: string;
   subheadline?: string;
   list?: RichtextStoryblok;
   image?: AssetStoryblok;
   enable_image_background_color?: boolean;
-  image_background_color?: {
-    color: string;
-    [k: string]: unknown;
-  };
   cta?: EnterpriseCtaStoryblok[];
   _uid: string;
   component: "list_with_image";
@@ -4663,10 +4602,6 @@ export interface MainCardWithStatsStoryblok {
   items: MainCardStatItemStoryblok[];
   background?: "" | "blue-logo" | "blue-map" | "grey" | "gradient" | "custom";
   sub_headline_font_style?: ("" | "normal" | "italic" | "bold")[];
-  custom_background_color?: {
-    color: string;
-    [k: string]: unknown;
-  };
   _uid: string;
   component: "main_card_with_stats";
   [k: string]: unknown;
@@ -4927,10 +4862,6 @@ export interface NavigationSidebarImagesLinksStoryblok {
 }
 
 export interface NavigationSidebarImagesLinksItemStoryblok {
-  background_color?: {
-    color: string;
-    [k: string]: unknown;
-  };
   image?: AssetStoryblok;
   link?: Exclude<MultilinkStoryblok, {linktype?: "email"} | {linktype?: "asset"}>;
   text: string;
@@ -5371,10 +5302,6 @@ export interface PageIntroStoryblok {
   background_color?: "" | "light-grey" | "custom" | "gradient";
   headline_size?: "" | "default" | "large";
   description_color?: "" | "grey" | "dark";
-  custom_background_color?: {
-    color: string;
-    [k: string]: unknown;
-  };
   custom_spacing_bottom?: string;
   enable_animation?: boolean;
   video_url?: string;
@@ -5401,10 +5328,6 @@ export interface PartnerStoryblok {
   featured?: boolean;
   logo?: AssetStoryblok;
   logo_background_color?: "" | "default" | "custom";
-  custom_background_color?: {
-    color: string;
-    [k: string]: unknown;
-  };
   company_size?: number | string;
   partner_id: string;
   categories?: (number | string)[];
@@ -5535,10 +5458,6 @@ export interface PressListingStoryblok {
 
 export interface PricingPlanStoryblok {
   name?: string;
-  plan_color?: {
-    color: string;
-    [k: string]: unknown;
-  };
   cta_link?: Exclude<MultilinkStoryblok, {linktype?: "email"} | {linktype?: "asset"}>;
   cta_text?: string;
   monthly_costs?: string;
@@ -6305,10 +6224,6 @@ export interface SingleQuoteStoryblok {
   image: string;
   logo?: AssetStoryblok;
   enable_custom_background?: boolean;
-  custom_background?: {
-    color: string;
-    [k: string]: unknown;
-  };
   _uid: string;
   component: "single_quote";
   [k: string]: unknown;
@@ -6604,10 +6519,6 @@ export interface TechLogosLogoStoryblok {
 export interface TechnologyPartnerStoryblok {
   logo?: AssetStoryblok;
   logo_background_color?: "" | "default" | "custom";
-  custom_background_color?: {
-    color: string;
-    [k: string]: unknown;
-  };
   category?: number | string;
   body?: (EnterpriseTextStoryblok | BlocksGroupStoryblok)[];
   short_description?: string;
@@ -6652,15 +6563,7 @@ export interface TextIllustrationGridItemStoryblok {
   text: RichtextStoryblok;
   size?: "" | "small" | "medium" | "full-width";
   background_color?: "" | " " | "custom";
-  background_custom_color?: {
-    color: string;
-    [k: string]: unknown;
-  };
   accent_color?: "" | " " | "custom";
-  accent_custom_color?: {
-    color: string;
-    [k: string]: unknown;
-  };
   link_text?: string;
   link?: Exclude<MultilinkStoryblok, {linktype?: "email"} | {linktype?: "asset"}>;
   sub_headline_font_style?: ("" | "normal" | "italic" | "bold")[];
@@ -6718,15 +6621,7 @@ export interface TextLogosLinksStoryblok {
   headline_size?: "" | " " | "large";
   enable_background_pattern?: boolean;
   background_color?: "" | "custom";
-  background_custom_color?: {
-    color: string;
-    [k: string]: unknown;
-  };
   accent_color?: "" | "custom";
-  accent_custom_color?: {
-    color: string;
-    [k: string]: unknown;
-  };
   logos_groups?: TextLogosLinksGroupStoryblok[];
   image?: ImageStoryblok[];
   cta?: EnterpriseCtaStoryblok[];
@@ -6929,10 +6824,6 @@ export interface TextLogosLinksGroupStoryblok {
 export interface TextLogosLinksLogoStoryblok {
   image?: AssetStoryblok;
   image_alt?: string;
-  background_color?: {
-    color: string;
-    [k: string]: unknown;
-  };
   _uid: string;
   component: "text_logos_links_logo";
   [k: string]: unknown;
@@ -6940,15 +6831,7 @@ export interface TextLogosLinksLogoStoryblok {
 
 export interface TextQuotesIllustrationStoryblok {
   background_color?: "" | " " | "custom";
-  background_custom_color?: {
-    color: string;
-    [k: string]: unknown;
-  };
   accent_color?: "" | " " | "custom";
-  accent_custom_color?: {
-    color: string;
-    [k: string]: unknown;
-  };
   background_decoration?: "" | " " | "circle" | "circle-vertically-centered";
   spacing_size?: "" | "small" | "medium" | " ";
   compact?: boolean;

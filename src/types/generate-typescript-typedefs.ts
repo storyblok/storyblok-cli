@@ -46,7 +46,7 @@ export interface GenerateTypescriptTypedefsCLIOptions {
   typeNamesPrefix?: string;
   typeNamesSuffix?: string;
   customFieldTypesParserPath?: string;
-  JSONSchemaToTSOptionsPath?: string; // JSONSchemaToTSOptions;
+  JSONSchemaToTSOptionsPath?: string;
 }
 
 export interface ISbBlokPropertySchemaOption {
