@@ -52,9 +52,9 @@ const generateTypescriptTypedefs: GenerateTSTypedefs = async ({
     JSONSchemaToTSOptionsPath && getJSONSchemaToTSOptionsFromPath(JSONSchemaToTSOptionsPath);
 
   // Merge custom provided options to our defaults
-  // https://www.npmjs.com/package/json-schema-to-typescript#options
   const JSONSchemaToTSOptions: JSONSchemaToTSOptions = {
-    bannerComment: "",
+    bannerComment: "", // Remove much noise from the Typedefs file
+    unknownAny: false, // Smoother transition from a non-TS codebase to a TS codebase
     ...JSONSchemaToTSCustomOptions,
   };
 
