@@ -5,7 +5,10 @@ import type {
   ComponentPropertyTypeAnnotation,
   ComponentPropertySchema,
   StoryblokProvidedPropertyType,
-  JSONSchemaToTSOptions,
+  CustomTypeParser,
+  GenerateTSTypedefsFromComponentsJSONSchemasOptions,
+  GetStoryblokProvidedPropertyTypeSchemaFn,
+  ComponentGroupsAndNamesObject,
 } from "../../types";
 import {
   getAssetJSONSchema,
@@ -39,24 +42,6 @@ const { camelCase, startCase } = lodash;
  * `Storyblok-provided property types`
  * It describes those field types provided out of the box from Storyblok itself which have a predefined JSON Schema that is going to be rendered every time a property of that type is used in any component
  */
-
-type GenerateTSTypedefsFromComponentsJSONSchemasOptions = {
-  sourceFilePaths: string[];
-  destinationFilePath: string;
-  typeNamesPrefix?: string;
-  typeNamesSuffix?: string;
-  customFieldTypesParserPath?: string;
-  JSONSchemaToTSCustomOptions: JSONSchemaToTSOptions;
-};
-
-type CustomTypeParser = (_typeName: string, _schema: ComponentPropertySchema) => Record<string, any>;
-
-type GetStoryblokProvidedPropertyTypeSchemaFn = (title: string) => JSONSchema;
-
-type ComponentGroupsAndNamesObject = {
-  componentGroups: Map<string, Set<string>>;
-  componentNames: Set<string>;
-};
 
 export class GenerateTypesFromJSONSchemas {
   #STORY_TYPE = "ISbStoryData";

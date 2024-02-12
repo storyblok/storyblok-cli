@@ -1,4 +1,4 @@
-import type { Options } from "json-schema-to-typescript";
+import type { JSONSchema, Options } from "json-schema-to-typescript";
 export type {
   ISbConfig, // previously StoryblokConfig
   ISbCache, // previously StoryblokCache
@@ -96,3 +96,21 @@ export type ComponentPropertyTypeAnnotation =
         enum: string[];
       };
     };
+
+export type GenerateTSTypedefsFromComponentsJSONSchemasOptions = {
+  sourceFilePaths: string[];
+  destinationFilePath: string;
+  typeNamesPrefix?: string;
+  typeNamesSuffix?: string;
+  customFieldTypesParserPath?: string;
+  JSONSchemaToTSCustomOptions: JSONSchemaToTSOptions;
+};
+
+export type CustomTypeParser = (_typeName: string, _schema: ComponentPropertySchema) => Record<string, any>;
+
+export type GetStoryblokProvidedPropertyTypeSchemaFn = (title: string) => JSONSchema;
+
+export type ComponentGroupsAndNamesObject = {
+  componentGroups: Map<string, Set<string>>;
+  componentNames: Set<string>;
+};
