@@ -17,6 +17,7 @@ import {
   getRichtextJSONSchema,
   getTableJSONSchema,
 } from "./storyblokProvidedPropertyTypes";
+import { resolve } from "path";
 
 const { camelCase, startCase } = lodash;
 
@@ -111,10 +112,10 @@ export class GenerateTypesFromJSONSchemas {
   static async #loadCustomFieldTypeParser(path?: string): Promise<CustomTypeParser | null> {
     if (path) {
       try {
-        const customTypeParser = await import(path);
+        const customTypeParser = await import(resolve(path));
         return customTypeParser.default;
       } catch (e) {
-        // TODO: log error
+        console.error(e);
         return null;
       }
     }

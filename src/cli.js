@@ -527,10 +527,10 @@ program
 program
   .command(COMMANDS.GENERATE_TYPESCRIPT_TYPEDEFS)
   // Providing backward-compatible flags with Storyblok Generate TS https://github.com/dohomi/storyblok-generate-ts
-  .requiredOption('--source, --sourceFilePaths <PATH>', 'Path(s) to the components JSON file(s) as comma separated values', (paths, _previous) => paths.split(','))
+  .requiredOption('--source, --sourceFilePaths <PATHS>', 'Path(s) to the components JSON file(s) as comma separated values', (paths, _previous) => paths.split(','))
   .option('--target, --destinationFilePath <PATH>', 'Path to the Typescript file that will be generated (default: `storyblok-component-types.d.ts`)')
-  .option('--titlePrefix, --typeNamesPrefix <STRING>', 'A prefix that will be prepended to all the names of the bloks')
-  .option('--titleSuffix, --typeNamesSuffix <STRING>', 'A suffix that will be appended to all the names of bloks (default: `_storyblok`)')
+  .option('--titlePrefix, --typeNamesPrefix <STRING>', 'A prefix that will be prepended to all the names of the generated types')
+  .option('--titleSuffix, --typeNamesSuffix <STRING>', 'A suffix that will be appended to all the names of the generated types (*default*: `Storyblok`)')
   .option('--compilerOptions, --JSONSchemaToTSOptionsPath <PATH>', 'Path to a JSON file with a list of options supported by json-schema-to-typescript')
   .option('--customTypeParser, --customFieldTypesParserPath <PATH>', 'Path to the parser file for Custom Field Types')
   .action((options) => {

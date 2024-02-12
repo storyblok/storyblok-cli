@@ -10,7 +10,7 @@ const generateTypescriptTypedefs: GenerateTSTypedefs = async ({
   sourceFilePaths,
   destinationFilePath = "./storyblok-component-types.d.ts",
   typeNamesPrefix,
-  typeNamesSuffix = "_storyblok",
+  typeNamesSuffix = "Storyblok",
   customFieldTypesParserPath,
   JSONSchemaToTSOptionsPath,
 }) => {

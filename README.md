@@ -554,6 +554,44 @@ module.exports = function (block) {
 }
 ```
 
+## Typescript
+It is possible to generate Typescript type definitions for your Storyblok components. The type definitions are based on the components' JSON Schema that can be retrieved with the [pull-components](#pull-components) command.
+
+### generate-typescript-typedefs
+
+Generate a file with the type definitions for the specified components' JSON Schemas.
+
+```sh
+$ storyblok generate-typescript-typedefs
+  --sourceFilePaths <PATHS>
+  --destinationFilePath <PATH>
+  --typeNamesPrefix <STRING>
+  --typeNamesSuffix <STRING>
+  --JSONSchemaToTSOptionsPath <PATH>
+  --customFieldTypesParserPath <PATH>
+```
+
+#### Options
+
+* `sourceFilePaths` <sub>(alias `source`)</sub> : Path(s) to the components JSON file(s) as comma separated values
+* `destinationFilePath` <sub>(alias `target`) *optional*</sub> : Path to the Typescript file that will be generated (*default*: `storyblok-component-types.d.ts`)
+* `typeNamesPrefix` <sub>(alias `titlePrefix`) *optional*</sub> : A prefix that will be prepended to all the names of the generated types
+* `typeNamesSuffix` <sub>(alias `titleSuffix`) *optional*</sub> : A suffix that will be appended to all the names of the generated types (*default*: `Storyblok`)
+* `JSONSchemaToTSOptionsPath` <sub>(alias `compilerOptions`) *optional*</sub> : Path to a JSON file with a list of options supported by `json-schema-to-typescript`
+* `customFieldTypesParserPath` <sub>(alias `customTypeParser`) *optional*</sub> : Path to the parser file for Custom Field Types
+
+#### Examples
+
+```sh
+# Sync components from `00001` space to `00002` space
+$ storyblok sync --type components --source 00001 --target 00002
+
+# Sync components and stories from `00001` space to `00002` space
+$ storyblok sync --type components,stories --source 00001 --target 00002
+
+```
+
+
 ## You're looking for a headstart?
 
 Check out our guides for client side apps (VueJS, Angular, React, ...), static site (Jekyll, NuxtJs, ...), dynamic site examples (Node, PHP, Python, Laravel, ...) on our [Getting Started](https://www.storyblok.com/getting-started) page.
