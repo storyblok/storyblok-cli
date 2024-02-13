@@ -21,15 +21,6 @@ export interface AnnotatedImageStoryblok {
   height?: string;
   browser_bar?: "" | "dark" | "light";
   browser_bar_address?: string;
-  source?: {
-    image: string;
-    mapNodes: {
-      x?: number;
-      y?: number;
-      direction?: "right" | "left" | "top" | "bottom" | "top-right" | "top-left" | "bottom-right" | "bottom-left";
-    }[];
-    [k: string]: any;
-  };
   alt?: string;
   link?: string;
   caption?: RichtextStoryblok;
