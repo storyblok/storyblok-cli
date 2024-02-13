@@ -583,13 +583,61 @@ $ storyblok generate-typescript-typedefs
 #### Examples
 
 ```sh
-# Sync components from `00001` space to `00002` space
-$ storyblok sync --type components --source 00001 --target 00002
+# Generate typedefs for the components retrieved for the space `12345` via the `storyblok pull-components` command
+$ storyblok generate-typescript-typedefs --sourceFilePaths ./components.12345.json
 
-# Sync components and stories from `00001` space to `00002` space
-$ storyblok sync --type components,stories --source 00001 --target 00002
+# Generate typedefs for multiple components sources
+$ storyblok generate-typescript-typedefs --sourceFilePaths ./fooComponent-12345.json,./barComponent-12345.json
+
+# Custom path for the typedefs file
+$ storyblok generate-typescript-typedefs --sourceFilePaths ./components.12345.json --destinationFilePath ./types/my-custom-type-file.d.ts
+
+# Provide customized options for the JSON-schema-to-typescript lib
+$ storyblok generate-typescript-typedefs --sourceFilePaths ./components.12345.json --JSONSchemaToTSOptionsPath ./PathToJSONFileWithCustomOptions.json
+
+# Provide a custom field types parser
+$ storyblok generate-typescript-typedefs --sourceFilePaths ./components.12345.json --customFieldTypesParserPath ./customFieldTypesParser.js
 
 ```
+
+##### JSON Schema to Typescript options
+This script uses the `json-schema-to-typescript` library under the hood. Values of the [JSON Schema to Typescript options](https://www.npmjs.com/package/json-schema-to-typescript#options) can be customized providing a JSON file to the `JSONSchemaToTSOptionsPath`.
+
+The default values used for the `storyblok generate-typescript-typedefs` command are the same defaults for the library except for two properties:
+* `bannerComment` - The default value is `""` to remove noise from the generated Typedefs file
+* `unknownAny` - The default value is `false` because it can help a smoother Typescript adoption on a JS project
+
+Example `JSONSchemaToTSOptions` JSON file to remove `additionalProperties` from the generated type definitions:
+
+```json
+{
+  "additionalProperties": false,
+}
+```
+
+##### Custom Field Types parser
+Storyblok [Custom Field Types](https://www.storyblok.com/docs/plugins/field-plugins/introduction) do not have inherent JSONSchema definitions. To overcome this issue, you can provide a path to a script exporting a parser function that should render a [JSONSchema Node](https://json-schema.org/learn/getting-started-step-by-step#define-properties) for each of your Custom Field Types. The parser function should be exported as a default export, like in the following example:
+```js
+export default function (key, obj) {
+  switch (obj.field_type) {
+    case 'my-custom-field-type-name':
+      return {
+        [key]: {
+          type: 'object',
+          properties: {
+            color: { type: 'string' }
+          },
+          required: ['color']
+        }
+      }
+    default:
+      return {}
+  }
+}
+```
+
+
+
 
 
 ## You're looking for a headstart?
