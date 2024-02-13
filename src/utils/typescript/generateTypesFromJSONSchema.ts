@@ -22,6 +22,10 @@ import { resolve } from "path";
 const { camelCase, startCase } = lodash;
 
 /**
+ * This class handles the generation of Typescript type definitions based on Storyblok components JSON Schemas.
+ * To initialize this class, call the async static method `init`.
+ *
+ *
  * DISAMBIGUATION GLOSSARY
  *
  * `Component`
