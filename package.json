@@ -19,6 +19,7 @@
   "bin": {
     "storyblok": "./dist/cli.mjs"
   },
+  "type": "module",
   "scripts": {
     "build": "unbuild",
     "dev": "npm run build && ./dist/cli.mjs",
