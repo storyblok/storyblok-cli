@@ -11,11 +11,13 @@ const SyncSpaces = {
   init (options) {
     const { api } = options
     console.log(chalk.green('✓') + ' Loading options')
+    this.client = api.getClient()
     this.sourceSpaceId = options.source
     this.targetSpaceId = options.target
     this.oauthToken = options.token
-    this.client = api.getClient()
     this.componentsGroups = options._componentsGroups
+    this.startsWith = options.startsWith
+    this.filterQuery = options.filterQuery
   },
 
   async getStoryWithTranslatedSlugs (sourceStory, targetStory) {
@@ -42,8 +44,7 @@ const SyncSpaces = {
     return storyForPayload
   },
 
-  async syncStories () {
-    console.log(chalk.green('✓') + ' Syncing stories...')
+  async getTargetFolders () {
     const targetFolders = await this.client.getAll(`spaces/${this.targetSpaceId}/stories`, {
       folder_only: 1,
       sort_by: 'slug:asc'
@@ -51,31 +52,68 @@ const SyncSpaces = {
 
     const folderMapping = {}
 
-    for (let i = 0; i < targetFolders.length; i++) {
-      var folder = targetFolders[i]
+    for (const folder of targetFolders) {
       folderMapping[folder.full_slug] = folder.id
     }
 
-    const all = await this.client.getAll(`spaces/${this.sourceSpaceId}/stories`, {
-      story_only: 1
+    return folderMapping
+  },
+
+  async updateStoriesAndFolders (data, targetContent = null, sourceContent = null, isFolder = false) {
+    let createdStory = null
+    const contentName = sourceContent.name
+    const contentTypeName = isFolder ? 'Folder' : 'Story'
+    const payload = {
+      story: data,
+      force_update: '1',
+      ...(!isFolder && sourceContent.published ? { publish: 1 } : {})
+    }
+
+    if (targetContent) {
+      console.log(`${chalk.yellow('-')} ${contentTypeName} ${contentName} already exists`)
+      createdStory = await this.client.put(`spaces/${this.targetSpaceId}/stories/${targetContent.id}`, payload)
+      console.log(`${chalk.green('✓')} ${contentTypeName} ${targetContent.full_slug} updated`)
+    } else {
+      createdStory = await this.client.post(`spaces/${this.targetSpaceId}/stories`, payload)
+      console.log(`${chalk.green('✓')} ${contentTypeName} ${sourceContent.full_slug} created`)
+    }
+
+    createdStory = createdStory.data.story
+
+    if (createdStory.uuid !== sourceContent.uuid) {
+      await this.client.put(`spaces/${this.targetSpaceId}/stories/${createdStory.id}/update_uuid`, { uuid: sourceContent.uuid })
+    }
+
+    return createdStory
+  },
+
+  async syncStories () {
+    console.log(chalk.green('✓') + ' Syncing stories...')
+
+    const folderMapping = { ...await this.getTargetFolders() }
+
+    const allStories = await this.client.getAll(`spaces/${this.sourceSpaceId}/stories`, {
+      story_only: 1,
+      ...(this.startsWith ? { starts_with: this.startsWith } : {}),
+      ...(this.filterQuery ? { filter_query: this.filterQuery } : {})
     })
 
-    for (let i = 0; i < all.length; i++) {
-      console.log(chalk.green('✓') + ' Starting update ' + all[i].full_slug)
+    for (const story of allStories) {
+      console.log(chalk.green('✓') + ' Starting update ' + story.full_slug)
 
-      const { data } = await this.client.get('spaces/' + this.sourceSpaceId + '/stories/' + all[i].id)
+      const { data } = await this.client.get(`spaces/${this.sourceSpaceId}/stories/${story.id}`)
       const sourceStory = data.story
       const slugs = sourceStory.full_slug.split('/')
       let folderId = 0
 
       if (slugs.length > 1) {
         slugs.pop()
-        var folderSlug = slugs.join('/')
+        const folderSlug = slugs.join('/')
 
         if (folderMapping[folderSlug]) {
           folderId = folderMapping[folderSlug]
         } else {
-          console.error(chalk.red('X') + 'The folder does not exist ' + folderSlug)
+          console.error(`${chalk.red('X')} The folder does not exist ${folderSlug}`)
           continue
         }
       }
@@ -83,52 +121,36 @@ const SyncSpaces = {
       sourceStory.parent_id = folderId
 
       try {
-        const existingStory = await this.client.get('spaces/' + this.targetSpaceId + '/stories', { with_slug: all[i].full_slug })
-        const storyData = await this.getStoryWithTranslatedSlugs(sourceStory, existingStory.data.stories ? existingStory.data.stories[0] : null)
-        const payload = {
-          story: storyData,
-          force_update: '1',
-          ...(sourceStory.published ? { publish: 1 } : {})
-        }
-
-        let createdStory = null
-        if (existingStory.data.stories.length === 1) {
-          createdStory = await this.client.put('spaces/' + this.targetSpaceId + '/stories/' + existingStory.data.stories[0].id, payload)
-          console.log(chalk.green('✓') + ' Updated ' + existingStory.data.stories[0].full_slug)
-        } else {
-          createdStory = await this.client.post('spaces/' + this.targetSpaceId + '/stories', payload)
-          console.log(chalk.green('✓') + ' Created ' + sourceStory.full_slug)
-        }
-        if (createdStory.data.story.uuid !== sourceStory.uuid) {
-          await this.client.put('spaces/' + this.targetSpaceId + '/stories/' + createdStory.data.story.id + '/update_uuid', { uuid: sourceStory.uuid })
-        }
+        const { data } = await this.client.get('spaces/' + this.targetSpaceId + '/stories', { with_slug: story.full_slug })
+        const existingStory = data.stories[0]
+        const storyData = await this.getStoryWithTranslatedSlugs(sourceStory, existingStory ? existingStory[0] : null)
+        await this.updateStoriesAndFolders(storyData, existingStory, sourceStory)
       } catch (e) {
         console.error(
-          chalk.red('X') + ` Story ${all[i].name} Sync failed: ${e.message}`
+          chalk.red('X') + ` Story ${story.name} Sync failed: ${e.message}`
         )
         console.log(e)
       }
     }
 
-    return Promise.resolve(all)
+    return Promise.resolve(allStories)
   },
 
   async syncFolders () {
     console.log(chalk.green('✓') + ' Syncing folders...')
+
     const sourceFolders = await this.client.getAll(`spaces/${this.sourceSpaceId}/stories`, {
       folder_only: 1,
       sort_by: 'slug:asc'
     })
     const syncedFolders = {}
 
-    for (var i = 0; i < sourceFolders.length; i++) {
-      const folder = sourceFolders[i]
-
+    for (const folder of sourceFolders) {
       try {
-        const folderResult = await this.client.get('spaces/' + this.sourceSpaceId + '/stories/' + folder.id)
-        const sourceFolder = folderResult.data.story
-        const existingFolder = await this.client.get('spaces/' + this.targetSpaceId + '/stories', { with_slug: folder.full_slug })
-        const folderData = await this.getStoryWithTranslatedSlugs(sourceFolder, existingFolder.data.stories ? existingFolder.data.stories[0] : null)
+        const folderResult = await this.client.get(`spaces/${this.sourceSpaceId}/stories/${folder.id}`)
+        const { data } = await this.client.get(`spaces/${this.targetSpaceId}/stories`, { with_slug: folder.full_slug })
+        const existingFolder = data.stories[0] || null
+        const folderData = await this.getStoryWithTranslatedSlugs(folderResult.data.story, existingFolder)
         delete folderData.id
         delete folderData.created_at
 
@@ -152,25 +174,7 @@ const SyncSpaces = {
           }
         }
 
-        const payload = {
-          story: folderData,
-          force_update: '1'
-        }
-
-        let createdFolder = null
-        if (existingFolder.data.stories.length === 1) {
-          console.log(`Folder ${folder.name} already exists`)
-          createdFolder = await this.client.put('spaces/' + this.targetSpaceId + '/stories/' + existingFolder.data.stories[0].id, payload)
-          console.log(chalk.green('✓') + ` Folder ${folder.name} updated`)
-        } else {
-          createdFolder = await this.client.post('spaces/' + this.targetSpaceId + '/stories', payload)
-          console.log(chalk.green('✓') + ` Folder ${folder.name} created`)
-        }
-        if (createdFolder.data.story.uuid !== folder.uuid) {
-          await this.client.put('spaces/' + this.targetSpaceId + '/stories/' + createdFolder.data.story.id + '/update_uuid', { uuid: folder.uuid })
-        }
-
-        syncedFolders[folder.id] = createdFolder.data.story.id
+        await this.updateStoriesAndFolders(folderData, existingFolder, folder, true)
       } catch (e) {
         console.error(
           chalk.red('X') + ` Folder ${folder.name} Sync failed: ${e.message}`
