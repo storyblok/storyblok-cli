@@ -11,11 +11,13 @@ const SyncSpaces = {
   init (options) {
     const { api } = options
     console.log(chalk.green('✓') + ' Loading options')
+    this.client = api.getClient()
     this.sourceSpaceId = options.source
     this.targetSpaceId = options.target
     this.oauthToken = options.token
-    this.client = api.getClient()
     this.componentsGroups = options._componentsGroups
+    this.startsWith = options.startsWith
+    this.filterQuery = options.filterQuery
   },
 
   async getStoryWithTranslatedSlugs (sourceStory, targetStory) {
@@ -57,7 +59,9 @@ const SyncSpaces = {
     }
 
     const all = await this.client.getAll(`spaces/${this.sourceSpaceId}/stories`, {
-      story_only: 1
+      story_only: 1,
+      ...(this.startsWith ? { starts_with: this.startsWith } : {}),
+      ...(this.filterQuery ? { filter_query: this.filterQuery } : {})
     })
 
     for (let i = 0; i < all.length; i++) {
