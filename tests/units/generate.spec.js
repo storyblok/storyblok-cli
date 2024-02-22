@@ -9,12 +9,8 @@ import templateFile from '../../src/tasks/templates/migration-file'
 const templateFileData = templateFile.replace(/{{ fieldname }}/g, 'subtitle')
 
 jest.mock('fs-extra')
-jest.spyOn(fs, 'pathExists')
-jest.spyOn(fs, 'outputFile')
-
-afterEach(() => {
-  jest.clearAllMocks()
-})
+const spyPathExists = jest.spyOn(fs, 'pathExists')
+const spyOutputFile = jest.spyOn(fs, 'outputFile')
 
 const getPath = fileName => `${process.cwd()}/migrations/${fileName}`
 
@@ -35,9 +31,11 @@ describe('testing generateMigration', () => {
 
     afterEach(() => {
       inquirer.prompt = backup
+      jest.clearAllMocks()
     })
 
     it('It returns correctly fileName and created properties when the file does not exists', async () => {
+      spyOutputFile.mockResolvedValue(true)
       const data = await generateMigration(FAKE_API, 'teaser', 'subtitle')
 
       expect(data.fileName).toBe(FILE_NAME)
@@ -45,6 +43,7 @@ describe('testing generateMigration', () => {
     })
 
     it('It checks if the file exists', async () => {
+      spyOutputFile.mockResolvedValue(true)
       const filePath = getPath(FILE_NAME)
 
       await generateMigration(FAKE_API, 'teaser', 'subtitle')
@@ -55,6 +54,7 @@ describe('testing generateMigration', () => {
     })
 
     it('It create the file correctly', async () => {
+      spyOutputFile.mockResolvedValue(true)
       const filePath = getPath(FILE_NAME)
 
       await generateMigration(FAKE_API, 'teaser', 'subtitle')
@@ -85,9 +85,11 @@ describe('testing generateMigration', () => {
 
     afterEach(() => {
       inquirer.prompt = backup
+      jest.clearAllMocks()
     })
 
     it('It does not overwrite the migration file', async () => {
+      spyPathExists.mockReturnValue(true)
       const data = await generateMigration(FAKE_API, 'teaser', 'subtitle')
 
       expect(data.fileName).toBe(FILE_NAME)
@@ -95,16 +97,18 @@ describe('testing generateMigration', () => {
     })
 
     it('It checks if the file exists', async () => {
+      spyPathExists.mockReturnValue(true)
       const filePath = getPath(FILE_NAME)
 
       await generateMigration(FAKE_API, 'teaser', 'subtitle')
       // call once
-      expect(FAKE_API.getComponents.mock.calls.length).toBe(1)
+      expect(spyPathExists).toHaveBeenCalledTimes(1)
       // the first call receives the file path
-      expect(fs.pathExists.mock.calls[0][0]).toBe(filePath)
+      expect(spyPathExists.mock.calls[0][0]).toBe(filePath)
     })
 
     it('It does not create the file', async () => {
+      spyPathExists.mockReturnValue(true)
       await generateMigration(FAKE_API, 'teaser', 'subtitle')
       // don't call
       expect(fs.outputFile.mock.calls.length).toBe(0)
@@ -121,9 +125,12 @@ describe('testing generateMigration', () => {
 
     afterEach(() => {
       inquirer.prompt = backup
+      jest.clearAllMocks()
     })
 
     it('It does overwrite the migration file', async () => {
+      spyPathExists.mockReturnValue(false)
+      spyOutputFile.mockResolvedValue(true)
       const data = await generateMigration(FAKE_API, 'teaser', 'subtitle')
 
       expect(data.fileName).toBe(FILE_NAME)
@@ -141,6 +148,8 @@ describe('testing generateMigration', () => {
     })
 
     it('It does create the file', async () => {
+      spyPathExists.mockReturnValue(false)
+      spyOutputFile.mockResolvedValue(true)
       const filePath = getPath(FILE_NAME)
 
       await generateMigration(FAKE_API, 'teaser', 'subtitle')
