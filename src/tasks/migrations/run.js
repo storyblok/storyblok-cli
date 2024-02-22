@@ -59,7 +59,7 @@ const runMigration = async (api, component, field, options = {}) => {
     console.log(
       `${chalk.blue('-')} Getting the user defined migration function`
     )
-    const migrationFn = await import(pathToFile);
+    const migrationFn = (await import(pathToFile)).default;
 
     if (typeof migrationFn !== 'function') {
       throw new Error("The migration file doesn't export a function")

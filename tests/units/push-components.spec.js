@@ -1,8 +1,10 @@
-const pushComponents = require('../../src/tasks/push-components')
-const Storyblok = require('storyblok-js-client')
-const api = require('../../src/utils/api')
-const { getRegionApiEndpoint } = require('../../src/utils/region')
-const { EU_CODE } = require('@storyblok/region-helper')
+import pushComponents from '../../src/tasks/push-components'
+import Storyblok from 'storyblok-js-client'
+import api from '../../src/utils/api'
+import { getRegionApiEndpoint } from '../../src/utils/region'
+import { EU_CODE } from '@storyblok/region-helper'
+
+import { jest } from '@jest/globals'
 
 jest.mock('fs')
 jest.unmock('axios')

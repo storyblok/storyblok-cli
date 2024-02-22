@@ -1,12 +1,20 @@
-const inquirer = require('inquirer')
-const fs = require('fs-extra')
+import inquirer from 'inquirer'
+import fs from 'fs-extra'
+import { jest } from '@jest/globals'
 
-const { FAKE_COMPONENTS } = require('../constants')
-const generateMigration = require('../../src/tasks/migrations/generate')
-const templateFile = require('../../src/tasks/templates/migration-file')
+import { FAKE_COMPONENTS } from '../constants'
+import generateMigration from '../../src/tasks/migrations/generate'
+import templateFile from '../../src/tasks/templates/migration-file'
+
 const templateFileData = templateFile.replace(/{{ fieldname }}/g, 'subtitle')
 
 jest.mock('fs-extra')
+jest.spyOn(fs, 'pathExists')
+jest.spyOn(fs, 'outputFile')
+
+afterEach(() => {
+  jest.clearAllMocks()
+})
 
 const getPath = fileName => `${process.cwd()}/migrations/${fileName}`
 
@@ -18,50 +26,44 @@ const FILE_NAME = 'change_teaser_subtitle.js'
 
 describe('testing generateMigration', () => {
   describe('when migration file does not exists', () => {
+    let backup
+
     beforeEach(() => {
-      require('fs-extra').__clearMockFiles()
+      backup = inquirer.prompt
+      inquirer.prompt = () => Promise.resolve({ choice: true })
     })
 
     afterEach(() => {
-      jest.clearAllMocks()
+      inquirer.prompt = backup
     })
 
     it('It returns correctly fileName and created properties when the file does not exists', async () => {
-      return generateMigration(FAKE_API, 'teaser', 'subtitle')
-        .then(data => {
-          expect(data.fileName).toBe(FILE_NAME)
+      const data = await generateMigration(FAKE_API, 'teaser', 'subtitle')
 
-          expect(data.created).toBe(true)
-        })
+      expect(data.fileName).toBe(FILE_NAME)
+      expect(data.created).toBe(true)
     })
 
     it('It checks if the file exists', async () => {
       const filePath = getPath(FILE_NAME)
 
-      return generateMigration(FAKE_API, 'teaser', 'subtitle')
-        .then(() => {
-          // call once
-          expect(FAKE_API.getComponents.mock.calls.length).toBe(1)
-
-          // the first call receives the file path
-          expect(fs.pathExists.mock.calls[0][0]).toBe(filePath)
-        })
+      await generateMigration(FAKE_API, 'teaser', 'subtitle')
+      // call once
+      expect(FAKE_API.getComponents.mock.calls.length).toBe(1)
+      // the first call receives the file path
+      expect(fs.pathExists.mock.calls[0][0]).toBe(filePath)
     })
 
     it('It create the file correctly', async () => {
       const filePath = getPath(FILE_NAME)
 
-      return generateMigration(FAKE_API, 'teaser', 'subtitle')
-        .then(() => {
-          // call once
-          expect(fs.outputFile.mock.calls.length).toBe(1)
-
-          // the first call receives the file argument
-          expect(fs.outputFile.mock.calls[0][0]).toBe(filePath)
-
-          // the first call receives a string with template
-          expect(fs.outputFile.mock.calls[0][1]).toBe(templateFileData)
-        })
+      await generateMigration(FAKE_API, 'teaser', 'subtitle')
+      // call once
+      expect(fs.outputFile.mock.calls.length).toBe(1)
+      // the first call receives the file argument
+      expect(fs.outputFile.mock.calls[0][0]).toBe(filePath)
+      // the first call receives a string with template
+      expect(fs.outputFile.mock.calls[0][1]).toBe(templateFileData)
     })
   })
 
@@ -77,49 +79,35 @@ describe('testing generateMigration', () => {
     let backup
 
     beforeEach(() => {
-      require('fs-extra').__clearMockFiles()
-      require('fs-extra').__setMockFiles({
-        [getPath(FILE_NAME)]: templateFile
-      })
-
       backup = inquirer.prompt
       inquirer.prompt = () => Promise.resolve({ choice: false })
     })
 
     afterEach(() => {
-      jest.clearAllMocks()
-
       inquirer.prompt = backup
     })
 
     it('It does not overwrite the migration file', async () => {
-      return generateMigration(FAKE_API, 'teaser', 'subtitle')
-        .then(data => {
-          expect(data.fileName).toBe(FILE_NAME)
+      const data = await generateMigration(FAKE_API, 'teaser', 'subtitle')
 
-          expect(data.created).toBe(false)
-        })
+      expect(data.fileName).toBe(FILE_NAME)
+      expect(data.created).toBe(false)
     })
 
     it('It checks if the file exists', async () => {
       const filePath = getPath(FILE_NAME)
 
-      return generateMigration(FAKE_API, 'teaser', 'subtitle')
-        .then(() => {
-          // call once
-          expect(FAKE_API.getComponents.mock.calls.length).toBe(1)
-
-          // the first call receives the file path
-          expect(fs.pathExists.mock.calls[0][0]).toBe(filePath)
-        })
+      await generateMigration(FAKE_API, 'teaser', 'subtitle')
+      // call once
+      expect(FAKE_API.getComponents.mock.calls.length).toBe(1)
+      // the first call receives the file path
+      expect(fs.pathExists.mock.calls[0][0]).toBe(filePath)
     })
 
     it('It does not create the file', async () => {
-      return generateMigration(FAKE_API, 'teaser', 'subtitle')
-        .then(() => {
-          // don't call
-          expect(fs.outputFile.mock.calls.length).toBe(0)
-        })
+      await generateMigration(FAKE_API, 'teaser', 'subtitle')
+      // don't call
+      expect(fs.outputFile.mock.calls.length).toBe(0)
     })
   })
 
@@ -127,57 +115,41 @@ describe('testing generateMigration', () => {
     let backup
 
     beforeEach(() => {
-      require('fs-extra').__clearMockFiles()
-      require('fs-extra').__setMockFiles({
-        [getPath(FILE_NAME)]: templateFile
-      })
-
       backup = inquirer.prompt
       inquirer.prompt = () => Promise.resolve({ choice: true })
     })
 
     afterEach(() => {
-      jest.clearAllMocks()
-
       inquirer.prompt = backup
     })
 
     it('It does overwrite the migration file', async () => {
-      return generateMigration(FAKE_API, 'teaser', 'subtitle')
-        .then(data => {
-          expect(data.fileName).toBe(FILE_NAME)
+      const data = await generateMigration(FAKE_API, 'teaser', 'subtitle')
 
-          expect(data.created).toBe(true)
-        })
+      expect(data.fileName).toBe(FILE_NAME)
+      expect(data.created).toBe(true)
     })
 
     it('It checks if the file exists', async () => {
       const filePath = getPath(FILE_NAME)
 
-      return generateMigration(FAKE_API, 'teaser', 'subtitle')
-        .then(() => {
-          // call once
-          expect(FAKE_API.getComponents.mock.calls.length).toBe(1)
-
-          // the first call receives the file path
-          expect(fs.pathExists.mock.calls[0][0]).toBe(filePath)
-        })
+      await generateMigration(FAKE_API, 'teaser', 'subtitle')
+      // call once
+      expect(FAKE_API.getComponents.mock.calls.length).toBe(1)
+      // the first call receives the file path
+      expect(fs.pathExists.mock.calls[0][0]).toBe(filePath)
     })
 
     it('It does create the file', async () => {
       const filePath = getPath(FILE_NAME)
 
-      return generateMigration(FAKE_API, 'teaser', 'subtitle')
-        .then(() => {
-          // call once
-          expect(fs.outputFile.mock.calls.length).toBe(1)
-
-          // the first call receives the file argument
-          expect(fs.outputFile.mock.calls[0][0]).toBe(filePath)
-
-          // the first call receives a string with template
-          expect(fs.outputFile.mock.calls[0][1]).toBe(templateFileData)
-        })
+      await generateMigration(FAKE_API, 'teaser', 'subtitle')
+      // call once
+      expect(fs.outputFile.mock.calls.length).toBe(1)
+      // the first call receives the file argument
+      expect(fs.outputFile.mock.calls[0][0]).toBe(filePath)
+      // the first call receives a string with template
+      expect(fs.outputFile.mock.calls[0][1]).toBe(templateFileData)
     })
   })
 })

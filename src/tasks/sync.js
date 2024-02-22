@@ -230,7 +230,7 @@ const SyncSpaces = {
       oauthToken: this.oauthToken,
       componentsGroups: this.componentsGroups
     })
-
+    
     try {
       await syncComponentsInstance.sync()
     } catch (e) {

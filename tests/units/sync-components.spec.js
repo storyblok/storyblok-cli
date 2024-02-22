@@ -1,7 +1,9 @@
-const sync = require('../../src/tasks/sync')
-const PresetsLib = jest.requireActual('../../src/utils/presets-lib')
-const { TOKEN_TEST, EMAIL_TEST, REGION_TEST, FAKE_COMPONENTS } = require('../constants')
-const creds = require('../../src/utils/creds')
+import sync from '../../src/tasks/sync'
+import { TOKEN_TEST, EMAIL_TEST, REGION_TEST, FAKE_COMPONENTS } from '../constants'
+import creds from '../../src/utils/creds'
+import { jest } from '@jest/globals'
+import Storyblok from 'storyblok-js-client'
+import PresetsLib from '../../src/utils/presets-lib'
 
 const FAKE_COMPONENTS_TO_TEST = {
   '001': {
@@ -115,7 +117,7 @@ const FAKE_PRESETS = {
 
 const extractSpace = path => path.split('/')[1]
 
-const mockGetRequest = jest.fn((path) => {
+const mockGetRequest = (path) => {
   if (
     path === 'spaces/001/component_groups' ||
     path === 'spaces/002/component_groups'
@@ -135,9 +137,9 @@ const mockGetRequest = jest.fn((path) => {
   }
 
   return Promise.reject(new Error('Error on get mock'))
-})
+}
 
-const mockPostRequest = jest.fn((path, payload) => {
+const mockPostRequest = (path, payload) => {
   if (path === 'spaces/002/component_groups') {
     return Promise.resolve({
       data: {
@@ -170,47 +172,38 @@ const mockPostRequest = jest.fn((path, payload) => {
   }
 
   return Promise.resolve(true)
-})
+}
 
-const mockPutRequest = jest.fn((path, payload) => {
+const mockPutRequest = (path, payload) => {
   return Promise.resolve(true)
-})
+}
 
-jest.mock('storyblok-js-client', () => {
-  return jest.fn().mockImplementation(() => {
-    return {
-      get: mockGetRequest,
-      post: mockPostRequest,
-      put: mockPutRequest
-    }
-  })
-})
+const spyGet = jest.spyOn(Storyblok.prototype, 'get').mockImplementation(mockGetRequest)
+const spyPost = jest.spyOn(Storyblok.prototype, 'post').mockImplementation(mockPostRequest)
+const spyPut = jest.spyOn(Storyblok.prototype, 'put').mockImplementation(mockPutRequest)
 
-const mockGetPresets = jest.fn((spaceId) => {
+// jest.mock('../../src/utils/presets-lib', () => {
+//   const originalModule = jest.requireActual('../../src/utils/presets-lib')
+
+//   return {
+//     __esModule: true,
+//     getPresets: mockGetPresets,
+//     getComponentPresets: jest.fn((component, presets) => {
+//       return originalModule.getComponentPresets(component, presets)
+//     }),
+//     createPresets: mockCreatePresets,
+//     filterPresetsFromTargetComponent: jest.fn((presets, targetPresets) => {
+//       return originalModule.filterPresetsFromTargetComponent(presets, targetPresets)
+//     })
+//   }
+// })
+
+const spyGetPresets = jest.spyOn(PresetsLib.prototype, 'getPresets').mockImplementation((spaceId) => {
   return Promise.resolve(FAKE_PRESETS[spaceId].data.presets)
 })
 
-const mockGetComponentPresets = jest.fn((component, presets) => {
-  return PresetsLib.prototype.getComponentPresets(component, presets)
-})
-
-const mockFilterPresetsFromTargetComponent = jest.fn((presets, targetPresets) => {
-  return PresetsLib.prototype.filterPresetsFromTargetComponent(presets, targetPresets)
-})
-
-const mockCreatePresets = jest.fn((presets = [], componentId, method = 'post') => {
+const spyCreatePresets = jest.spyOn(PresetsLib.prototype, 'createPresets').mockImplementation((presets = [], componentId, method = 'post') => {
   return Promise.resolve(true)
-})
-
-jest.mock('../../src/utils/presets-lib', () => {
-  return jest.fn().mockImplementation(() => {
-    return {
-      getPresets: mockGetPresets,
-      getComponentPresets: mockGetComponentPresets,
-      createPresets: mockCreatePresets,
-      filterPresetsFromTargetComponent: mockFilterPresetsFromTargetComponent
-    }
-  })
 })
 
 const SOURCE_SPACE_TEST = '001'
@@ -234,20 +227,20 @@ describe('testing syncComponents', () => {
 
   it('shoud be get the all data correctly', () => {
     // it must be get each component group
-    expect(mockGetRequest).toHaveBeenCalledWith('spaces/001/component_groups')
-    expect(mockGetRequest).toHaveBeenCalledWith('spaces/002/component_groups')
+    expect(spyGet).toHaveBeenCalledWith('spaces/001/component_groups')
+    expect(spyGet).toHaveBeenCalledWith('spaces/002/component_groups')
 
     // it must be get components and presets
-    expect(mockGetRequest).toHaveBeenCalledWith('spaces/001/components')
-    expect(mockGetRequest).toHaveBeenCalledWith('spaces/002/components')
+    expect(spyGet).toHaveBeenCalledWith('spaces/001/components')
+    expect(spyGet).toHaveBeenCalledWith('spaces/002/components')
 
     // it must be get presets
-    expect(mockGetPresets).toHaveBeenCalledWith('001')
+    expect(spyGetPresets).toHaveBeenCalledWith('001')
   })
 
   it('shoud be create the General component_groups correctly', () => {
     // it must be get each component group
-    expect(mockPostRequest).toHaveBeenCalledWith(
+    expect(spyPost).toHaveBeenCalledWith(
       'spaces/002/component_groups',
       {
         component_group: {
@@ -259,7 +252,7 @@ describe('testing syncComponents', () => {
 
   it('shoud be try to create teaser component, but it will fail and execute the put to update it', () => {
     // it must be get each component group
-    expect(mockPutRequest).toHaveBeenCalledWith(
+    expect(spyPut).toHaveBeenCalledWith(
       'spaces/002/components/0',
       {
         component: {
@@ -287,7 +280,7 @@ describe('testing syncComponents', () => {
 
   it('shoud be create the presets for specific components correctly', () => {
     // it must be get each component group
-    expect(mockCreatePresets).toHaveBeenCalledWith(
+    expect(spyCreatePresets).toHaveBeenCalledWith(
       [{
         id: '01',
         name: 'Hero Variant 1',
@@ -309,7 +302,7 @@ describe('testing syncComponents', () => {
   })
 
   it('shoud be create components related to group correctly', () => {
-    expect(mockPostRequest).toHaveBeenCalledWith(
+    expect(spyPost).toHaveBeenCalledWith(
       'spaces/002/components',
       {
         component: {
@@ -335,7 +328,7 @@ describe('testing syncComponents', () => {
   })
 
   it('shoud be create components with correct schema', () => {
-    expect(mockPostRequest).toHaveBeenCalledWith(
+    expect(spyPost).toHaveBeenCalledWith(
       'spaces/002/components',
       {
         component: {
