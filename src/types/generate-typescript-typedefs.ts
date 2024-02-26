@@ -1,26 +1,5 @@
 import type { JSONSchema, Options } from "json-schema-to-typescript";
-export type {
-  ISbConfig, // previously StoryblokConfig
-  ISbCache, // previously StoryblokCache
-  ISbResult, // previously StoryblokResult
-  ISbResponse,
-  ISbError,
-  ISbNode,
-  ISbSchema,
-  ThrottleFn,
-  AsyncFn,
-  ArrayFn,
-  ISbContentMangmntAPI,
-  ISbManagmentApiResult, // previously StoryblokManagmentApiResult
-  ISbStories, // previously Stories
-  ISbStory, // previously Story
-  ISbDimensions,
-  ISbStoryData, // previously StoryData
-  ISbAlternateObject, // previously AlternateObject
-  ISbStoriesParams, // previously StoriesParams
-  ISbStoryParams, // previously StoryParams
-  ISbRichtext, // previously Richtext
-} from "storyblok-js-client";
+export type { ISbStoryData } from "storyblok-js-client";
 
 export type StoryblokProvidedPropertyType = "asset" | "multiasset" | "multilink" | "table" | "richtext";
 

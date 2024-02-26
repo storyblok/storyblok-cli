@@ -1,7 +1,7 @@
 import { defineBuildConfig } from "unbuild";
 
 export default defineBuildConfig({
-  declaration: false,
+  declaration: true,
   rollup: {
     inlineDependencies: true,
     resolve: {
