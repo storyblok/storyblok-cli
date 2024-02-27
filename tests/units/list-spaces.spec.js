@@ -1,6 +1,5 @@
 const { listSpaces } = require('../../src/tasks/')
 const { FAKE_SPACES } = require('../constants')
-const { REGIONS } = require('../../src/constants')
 
 describe('Test spaces method', () => {
   it('Testing list-spaces funtion without api instance', async () => {
@@ -17,7 +16,7 @@ describe('Test spaces method', () => {
       getAllSpacesByRegion: jest.fn(() => Promise.resolve(FAKE_SPACES()))
     }
     expect(
-      await listSpaces(FAKE_API, REGIONS.cn.key)
+      await listSpaces(FAKE_API, 'cn')
     ).toEqual(FAKE_SPACES())
     expect(FAKE_API.getAllSpacesByRegion).toHaveBeenCalled()
   })
@@ -28,25 +27,25 @@ describe('Test spaces method', () => {
     }
     const response = [
       {
-        key: REGIONS.eu.key,
+        key: 'eu',
         res: [...FAKE_SPACES()]
       },
       {
-        key: REGIONS.us.key,
+        key: 'us',
         res: [...FAKE_SPACES()]
       },
       {
-        key: REGIONS.ca.key,
+        key: 'ap',
         res: [...FAKE_SPACES()]
       },
       {
-        key: REGIONS.ap.key,
+        key: 'ca',
         res: [...FAKE_SPACES()]
       }
     ]
 
     expect(
-      await listSpaces(FAKE_API, REGIONS.eu.key)
+      await listSpaces(FAKE_API, 'eu')
     ).toEqual(response)
   })
 })

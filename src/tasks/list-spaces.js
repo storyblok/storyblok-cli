@@ -1,4 +1,5 @@
 const chalk = require('chalk')
+const { ALL_REGIONS } = require('@storyblok/region-helper')
 const { REGIONS } = require('../constants')
 /**
  * @method listSpaces
@@ -6,6 +7,7 @@ const { REGIONS } = require('../constants')
  * @return {Promise}
  */
 
+// TODO: test
 const listSpaces = async (api, currentRegion) => {
   const isChinaEnv = currentRegion === 'cn'
 
@@ -34,7 +36,7 @@ const listSpaces = async (api, currentRegion) => {
     return spaces
   } else {
     const spacesList = []
-    for (const key in REGIONS) {
+    for (const key of ALL_REGIONS) {
       if (key === 'cn') continue
       spacesList.push(await api.getAllSpacesByRegion(key)
         .then((res) => {
@@ -50,6 +52,7 @@ const listSpaces = async (api, currentRegion) => {
       return []
     }
     spacesList.forEach(region => {
+      // todo: ADAPT once adding name
       const regionName = REGIONS[region.key].name
       console.log()
       console.log(`${chalk.blue(' -')} Spaces From ${regionName} region:`)

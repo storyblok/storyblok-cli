@@ -7,6 +7,7 @@ const chalk = require('chalk')
 const clear = require('clear')
 const figlet = require('figlet')
 const inquirer = require('inquirer')
+const { ALL_REGIONS } = require('@storyblok/region-helper')
 
 const updateNotifier = require('update-notifier')
 const pkg = require('../package.json')
@@ -14,6 +15,7 @@ const pkg = require('../package.json')
 const tasks = require('./tasks')
 const { getQuestions, lastStep, api, creds } = require('./utils')
 const { SYNC_TYPES, COMMANDS } = require('./constants')
+const allRegionsText = ALL_REGIONS.join(', ')
 
 clear()
 console.log(chalk.cyan(figlet.textSync('storyblok')))
@@ -39,9 +41,9 @@ program
 program
   .command(COMMANDS.LOGIN)
   .description('Login to the Storyblok cli')
-  .option('-t, --token <token>', 'Token to login directly without questions, like for CI enviroments')
-  .option('-r, --region <region>', 'The region you would like to work in. Please keep in mind that the region must match the region of your space. You can use us, cn or eu, if left empty, default is eu. This region flag will be used for the other cli\'s commands')
-  .action(async (options) => {
+  .option('-t, --token <token>', 'Token to login directly without questions, like for CI environments')
+  .option('-r, --region <region>', `The region you would like to work in. Please keep in mind that the region must match the region of your space. This region flag will be used for the other cli's commands. You can use the values: ${allRegionsText}.`, 'eu')
+  .action(async (options) => { // TODO: add region validation
     const { token, region } = options
 
     if (api.isAuthorized()) {

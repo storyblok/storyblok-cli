@@ -1,4 +1,5 @@
-const { REGIONS } = require('../constants')
+const { ALL_REGIONS } = require('@storyblok/region-helper')
+
 const getOptions = (subCommand, argv = {}, api = {}) => {
   let email = ''
   const moreOptions = [
@@ -7,17 +8,16 @@ const getOptions = (subCommand, argv = {}, api = {}) => {
     'push-components',
     'scaffold'
   ]
-  const regionsPrefixList = Object.keys(REGIONS)
   const regionInput = {
     type: 'input',
     name: 'region',
-    message: `Please enter the region you would like to work in (${regionsPrefixList}) - if not set, default is eu:`,
+    message: `Please enter the region you would like to work in (${ALL_REGIONS}) - if not set, default is eu:`,
     validate: function (value) {
-      if (regionsPrefixList.indexOf(value) > -1) {
+      if (ALL_REGIONS.indexOf(value) > -1) {
         return true
       }
 
-      return `Please enter a valid region: ${regionsPrefixList}`
+      return `Please enter a valid region: ${ALL_REGIONS}`
     }
   }
 

@@ -1,10 +1,5 @@
-const SYNC_TYPES = [
-  'folders',
-  'components',
-  'roles',
-  'stories',
-  'datasources'
-]
+const { getRegionUrl } = require('@storyblok/region-helper')
+const SYNC_TYPES = ['folders', 'components', 'roles', 'stories', 'datasources']
 
 const COMMANDS = {
   GENERATE_MIGRATION: 'generate-migration',
@@ -30,35 +25,28 @@ const DEFAULT_AGENT = {
 
 const REGIONS = {
   cn: {
-    key: 'cn',
-    name: 'China',
-    apiEndpoint: 'https://app.storyblokchina.cn/v1/'
+    name: 'China'
   },
   eu: {
-    key: 'eu',
-    name: 'Europe',
-    apiEndpoint: 'https://api.storyblok.com/v1/'
+    name: 'Europe'
   },
   us: {
-    key: 'us',
-    name: 'United States',
-    apiEndpoint: 'https://api-us.storyblok.com/v1/'
+    name: 'United States'
   },
   ca: {
-    key: 'ca',
-    name: 'Canada',
-    apiEndpoint: 'https://api-ca.storyblok.com/v1/'
+    name: 'Canada'
   },
   ap: {
-    key: 'ap',
-    name: 'Australia',
-    apiEndpoint: 'https://api-ap.storyblok.com/v1/'
+    name: 'Australia'
   }
 }
 
+const getRegionApiEndpoint = (region) => `${getRegionUrl(region)}/v1/`
+
+// todo: FIND OUT IF THIS WORKS WITH us
 const USERS_ROUTES = {
-  LOGIN: `${REGIONS.eu.apiEndpoint}users/login`,
-  SIGNUP: `${REGIONS.eu.apiEndpoint}users/signup`
+  LOGIN: `${getRegionApiEndpoint('usa')}users/login`,
+  SIGNUP: `${getRegionApiEndpoint('eu')}users/signup`
 }
 
 module.exports = {
@@ -66,5 +54,6 @@ module.exports = {
   USERS_ROUTES,
   COMMANDS,
   DEFAULT_AGENT,
-  REGIONS
+  REGIONS,
+  getRegionApiEndpoint
 }

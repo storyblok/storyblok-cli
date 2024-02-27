@@ -5,7 +5,7 @@ const inquirer = require('inquirer')
 
 const creds = require('./creds')
 const getQuestions = require('./get-questions')
-const { REGIONS, USERS_ROUTES, DEFAULT_AGENT } = require('../constants')
+const { getRegionApiEndpoint, USERS_ROUTES, DEFAULT_AGENT } = require('../constants')
 
 module.exports = {
   accessToken: '',
@@ -255,7 +255,6 @@ module.exports = {
       .catch(err => Promise.reject(err))
   },
 
-
   post (path, props) {
     return this.sendRequest(path, 'post', props)
   },
@@ -310,6 +309,6 @@ module.exports = {
   },
 
   apiSwitcher (region) {
-    return region ? REGIONS[region].apiEndpoint : REGIONS[this.region].apiEndpoint
+    return region ? getRegionApiEndpoint(region) : getRegionApiEndpoint(this.region)
   }
 }
