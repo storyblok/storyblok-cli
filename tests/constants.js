@@ -1,7 +1,8 @@
+const { EU_CODE } = require('@storyblok/region-helper')
 const EMAIL_TEST = 'test@storyblok.com'
 const PASSWORD_TEST = 'test'
 const TOKEN_TEST = 'storyblok1234'
-const REGION_TEST = 'eu'
+const REGION_TEST = EU_CODE
 
 // use functions to always returns 'new' data
 const FAKE_COMPONENTS = () => [

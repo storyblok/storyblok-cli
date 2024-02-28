@@ -6,6 +6,7 @@ const inquirer = require('inquirer')
 const creds = require('./creds')
 const getQuestions = require('./get-questions')
 const { getRegionApiEndpoint, USERS_ROUTES, DEFAULT_AGENT } = require('../constants')
+const { EU_CODE } = require('@storyblok/region-helper')
 
 module.exports = {
   accessToken: '',
@@ -39,7 +40,7 @@ module.exports = {
   },
 
   async login (content) {
-    const { email, password, region = 'eu' } = content
+    const { email, password, region = EU_CODE } = content
     try {
       const response = await axios.post(`${this.apiSwitcher(region)}users/login`, {
         email: email,
@@ -96,7 +97,7 @@ module.exports = {
     }
   },
 
-  persistCredentials (email, token = null, region = 'eu') {
+  persistCredentials (email, token = null, region = EU_CODE) {
     if (token) {
       this.oauthToken = token
       creds.set(email, token, region)
@@ -168,7 +169,7 @@ module.exports = {
     creds.set(null)
   },
 
-  signup (email, password, region = 'eu') {
+  signup (email, password, region = EU_CODE) {
     return axios.post(USERS_ROUTES.SIGNUP, {
       email: email,
       password: password,

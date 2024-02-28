@@ -7,7 +7,7 @@ const chalk = require('chalk')
 const clear = require('clear')
 const figlet = require('figlet')
 const inquirer = require('inquirer')
-const { ALL_REGIONS } = require('@storyblok/region-helper')
+const { ALL_REGIONS, EU_CODE } = require('@storyblok/region-helper')
 
 const updateNotifier = require('update-notifier')
 const pkg = require('../package.json')
@@ -42,7 +42,7 @@ program
   .command(COMMANDS.LOGIN)
   .description('Login to the Storyblok cli')
   .option('-t, --token <token>', 'Token to login directly without questions, like for CI environments')
-  .option('-r, --region <region>', `The region you would like to work in. Please keep in mind that the region must match the region of your space. This region flag will be used for the other cli's commands. You can use the values: ${allRegionsText}.`, 'eu')
+  .option('-r, --region <region>', `The region you would like to work in. Please keep in mind that the region must match the region of your space. This region flag will be used for the other cli's commands. You can use the values: ${allRegionsText}.`, EU_CODE)
   .action(async (options) => { // TODO: add region validation
     const { token, region } = options
 

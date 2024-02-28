@@ -1,4 +1,4 @@
-const { getRegionUrl } = require('@storyblok/region-helper')
+const { getRegionBaseUrl, EU_CODE } = require('@storyblok/region-helper')
 const SYNC_TYPES = ['folders', 'components', 'roles', 'stories', 'datasources']
 
 const COMMANDS = {
@@ -23,30 +23,12 @@ const DEFAULT_AGENT = {
   SB_Agent_Version: process.env.npm_package_version || '3.0.0'
 }
 
-const REGIONS = {
-  cn: {
-    name: 'China'
-  },
-  eu: {
-    name: 'Europe'
-  },
-  us: {
-    name: 'United States'
-  },
-  ca: {
-    name: 'Canada'
-  },
-  ap: {
-    name: 'Australia'
-  }
-}
-
-const getRegionApiEndpoint = (region) => `${getRegionUrl(region)}/v1/`
+const getRegionApiEndpoint = (region) => `${getRegionBaseUrl(region)}/v1/`
 
 // todo: FIND OUT IF THIS WORKS WITH us
 const USERS_ROUTES = {
-  LOGIN: `${getRegionApiEndpoint('usa')}users/login`,
-  SIGNUP: `${getRegionApiEndpoint('eu')}users/signup`
+  LOGIN: `${getRegionApiEndpoint(EU_CODE)}users/login`,
+  SIGNUP: `${getRegionApiEndpoint(EU_CODE)}users/signup`
 }
 
 module.exports = {
@@ -54,6 +36,5 @@ module.exports = {
   USERS_ROUTES,
   COMMANDS,
   DEFAULT_AGENT,
-  REGIONS,
   getRegionApiEndpoint
 }

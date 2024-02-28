@@ -1,5 +1,6 @@
 const { listSpaces } = require('../../src/tasks/')
 const { FAKE_SPACES } = require('../constants')
+const { EU_CODE, US_CODE, AP_CODE, CA_CODE, CN_CODE } = require('@storyblok/region-helper')
 
 describe('Test spaces method', () => {
   it('Testing list-spaces funtion without api instance', async () => {
@@ -16,7 +17,7 @@ describe('Test spaces method', () => {
       getAllSpacesByRegion: jest.fn(() => Promise.resolve(FAKE_SPACES()))
     }
     expect(
-      await listSpaces(FAKE_API, 'cn')
+      await listSpaces(FAKE_API, CN_CODE)
     ).toEqual(FAKE_SPACES())
     expect(FAKE_API.getAllSpacesByRegion).toHaveBeenCalled()
   })
@@ -27,25 +28,25 @@ describe('Test spaces method', () => {
     }
     const response = [
       {
-        key: 'eu',
+        key: EU_CODE,
         res: [...FAKE_SPACES()]
       },
       {
-        key: 'us',
+        key: US_CODE,
         res: [...FAKE_SPACES()]
       },
       {
-        key: 'ap',
+        key: AP_CODE,
         res: [...FAKE_SPACES()]
       },
       {
-        key: 'ca',
+        key: CA_CODE,
         res: [...FAKE_SPACES()]
       }
     ]
 
     expect(
-      await listSpaces(FAKE_API, 'eu')
+      await listSpaces(FAKE_API, EU_CODE)
     ).toEqual(response)
   })
 })

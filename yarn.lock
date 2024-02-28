@@ -559,10 +559,10 @@
   dependencies:
     "@sinonjs/commons" "^1.7.0"
 
-"@storyblok/region-helper@0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@storyblok/region-helper/-/region-helper-0.2.0.tgz#ea3b244938850910ed1d7c706b2f730985067155"
-  integrity sha512-LOSFgAiHTmxuBsrjkpTwCk5ZGKmMVmxfmxv8Mi305RtT/o7JOZrjZXnP7kLbLu7m0F18wVVGFmS6XJqbFhBfcA==
+"@storyblok/region-helper@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@storyblok/region-helper/-/region-helper-1.0.0.tgz#5a75506a264b728da640b3c2e85680bec6cd6a1a"
+  integrity sha512-02B4J3XzD6CLK8DAQbK63fSar8oGYqBJxdx+7Ya0C3uJwMU5DzOMix6ShtUo1iDSd9rOl8aA5wDoCC0wh0YHMw==
 
 "@szmarczak/http-timer@^1.1.2":
   version "1.1.2"
