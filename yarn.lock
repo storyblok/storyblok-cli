@@ -4998,10 +4998,10 @@ stack-utils@^2.0.3:
   dependencies:
     escape-string-regexp "^2.0.0"
 
-storyblok-js-client@^5.14.0:
-  version "5.14.0"
-  resolved "https://registry.npmjs.org/storyblok-js-client/-/storyblok-js-client-5.14.0.tgz"
-  integrity sha512-ohG1ASiLludBMlyKsUPkqpy0JBSwtX4B9vUlWguWhjb1wgJMTBwX8sOdaSJlUl2hKYb2CONJsLMlMWSsvONriA==
+storyblok-js-client@^6.7.1:
+  version "6.7.1"
+  resolved "https://registry.yarnpkg.com/storyblok-js-client/-/storyblok-js-client-6.7.1.tgz#9b9ac8221d7e16dc9e63e5ddf547c1493d3f9cae"
+  integrity sha512-VOobZkor6BESji2MJUuO5jTIZeCWMUMR2LZtdSEEAtUDUfKwA88lGqDVMQqtWZ8nD7NzhZ6S7qvdv5Or9HZXRw==
 
 string-length@^4.0.1:
   version "4.0.2"
