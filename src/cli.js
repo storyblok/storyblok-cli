@@ -526,7 +526,8 @@ if (program.rawArgs.length <= 2) {
 
 function errorHandler (e, command) {
   if (/404/.test(e.message)) {
-    console.log(chalk.yellow('/!\\') + ' If your space was created under US, CA, AP or CN region, you must provide the region us, ca, ap or cn upon login.')
+    const allRegionsButDefault = ALL_REGIONS.filter(region => region !== EU_CODE).join(' ,')
+    console.log(chalk.yellow('/!\\') + ` If your space was not created under ${EU_CODE} region, you must provide the region (${allRegionsButDefault}) upon login.`)
   } else {
     console.log(chalk.red('X') + ' An error occurred when executing the ' + command + ' task: ' + e || e.message)
   }
