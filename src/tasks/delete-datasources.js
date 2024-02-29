@@ -13,26 +13,25 @@ const deleteDatasources = async (api, options) => {
     let datasources = await api.getDatasources()
 
     if (bySlug) {
-      datasources = datasources.filter(datasource => datasource.slug.toLowerCase().startsWith(bySlug.toLowerCase()));
-      const filteredSlugs = datasources.map(obj => obj.slug);
-      const formattedSlugs = filteredSlugs.join(', ');
+      datasources = datasources.filter(datasource => datasource.slug.toLowerCase().startsWith(bySlug.toLowerCase()))
+      const filteredSlugs = datasources.map(obj => obj.slug)
+      const formattedSlugs = filteredSlugs.join(', ')
 
-      console.log(`${chalk.blue('-')} Datasources where slug starts with ${bySlug}: ${formattedSlugs}`);
+      console.log(`${chalk.blue('-')} Datasources where slug starts with ${bySlug}: ${formattedSlugs}`)
     }
 
     if (byName) {
-      datasources = datasources.filter(datasource => datasource.name.toLowerCase().startsWith(byName.toLowerCase()));
-      const filteredNames = datasources.map(obj => obj.name);
-      const formattedNames = filteredNames.join(', ');
+      datasources = datasources.filter(datasource => datasource.name.toLowerCase().startsWith(byName.toLowerCase()))
+      const filteredNames = datasources.map(obj => obj.name)
+      const formattedNames = filteredNames.join(', ')
 
-      console.log(`${chalk.blue('-')} Datasources where name starts with ${byName}: ${formattedNames}`);
+      console.log(`${chalk.blue('-')} Datasources where name starts with ${byName}: ${formattedNames}`)
     }
 
     for (const datasource of datasources) {
       console.log(`${chalk.blue('-')} Deleting ${datasource.name}`)
       await api.deleteDatasource(datasource.id)
     }
-
   } catch (e) {
     console.error(`${chalk.red('X')} An error ocurred in delete-components task when deleting a datasource`)
     return Promise.reject(new Error(e))

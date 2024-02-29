@@ -73,10 +73,10 @@ class SyncComponents {
 
       if (this.componentsGroups && !this.componentsGroups.includes(sourceGroupUuid)) {
         console.log(
-          chalk.yellow("-") +
+          chalk.yellow('-') +
             ` Component ${component.name} does not belong to the ${this.componentsGroups} group(s).`
-        );
-        continue;
+        )
+        continue
       }
 
       // if the component belongs to a group
@@ -112,7 +112,7 @@ class SyncComponents {
           await this.presetsLib.createPresets(componentPresets, componentCreated.id)
         }
       } catch (e) {
-        if (e.response && e.response.status || e.status === 422) {
+        if ((e.response && e.response.status) || e.status === 422) {
           console.log(
             `${chalk.yellow('-')} Component ${component.name} already exists, updating it...`
           )
@@ -217,7 +217,10 @@ class SyncComponents {
     return Object.keys(sourceSchema).reduce((acc, key) => {
       // handle blocks separately
       const sourceSchemaItem = sourceSchema[key]
-      if (sourceSchemaItem?.type === 'bloks' || sourceSchemaItem?.type === 'richtext') {
+      const isBloksType = sourceSchemaItem && sourceSchemaItem.type === 'bloks'
+      const isRichtextType = sourceSchemaItem && sourceSchemaItem.type === 'richtext'
+
+      if (isBloksType || isRichtextType) {
         acc[key] = this.mergeBloksSchema(sourceSchemaItem)
         return acc
       }
