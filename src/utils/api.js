@@ -5,7 +5,8 @@ const inquirer = require('inquirer')
 
 const creds = require('./creds')
 const getQuestions = require('./get-questions')
-const { getRegionApiEndpoint, USERS_ROUTES, DEFAULT_AGENT } = require('../constants')
+const { USERS_ROUTES, DEFAULT_AGENT } = require('../constants')
+const { getRegionApiEndpoint } = require('./region')
 const { EU_CODE } = require('@storyblok/region-helper')
 
 module.exports = {

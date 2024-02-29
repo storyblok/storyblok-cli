@@ -36,11 +36,11 @@ describe('Test spaces method', () => {
         res: [...FAKE_SPACES()]
       },
       {
-        key: AP_CODE,
+        key: CA_CODE,
         res: [...FAKE_SPACES()]
       },
       {
-        key: CA_CODE,
+        key: AP_CODE,
         res: [...FAKE_SPACES()]
       }
     ]

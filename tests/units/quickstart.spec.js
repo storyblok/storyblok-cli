@@ -4,7 +4,7 @@ const path = require('path')
 const quickstart = require('../../src/tasks/quickstart')
 const Storyblok = require('storyblok-js-client')
 const api = require('../../src/utils/api')
-const { getRegionApiEndpoint } = require('../../src/constants')
+const { getRegionApiEndpoint } = require('../../src/utils/region')
 const { EU_CODE } = require('@storyblok/region-helper')
 
 jest.unmock('fs')

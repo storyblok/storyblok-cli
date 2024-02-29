@@ -3,7 +3,7 @@ const fs = require('fs')
 const scaffold = require('../../src/tasks/scaffold')
 const Storyblok = require('storyblok-js-client')
 const api = require('../../src/utils/api')
-const { getRegionApiEndpoint } = require('../../src/constants')
+const { getRegionApiEndpoint } = require('../../src/utils/region')
 const { EU_CODE } = require('@storyblok/region-helper')
 
 jest.mock('fs')
