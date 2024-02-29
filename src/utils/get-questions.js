@@ -1,4 +1,4 @@
-const { ALL_REGIONS } = require('@storyblok/region-helper')
+const { ALL_REGIONS, EU_CODE } = require('@storyblok/region-helper')
 
 const getOptions = (subCommand, argv = {}, api = {}) => {
   let email = ''
@@ -11,7 +11,8 @@ const getOptions = (subCommand, argv = {}, api = {}) => {
   const regionInput = {
     type: 'input',
     name: 'region',
-    message: `Please enter the region you would like to work in (${ALL_REGIONS}) - if not set, default is eu:`,
+    message: `Please enter the region you would like to work in (${ALL_REGIONS}):`,
+    default: EU_CODE,
     validate: function (value) {
       if (ALL_REGIONS.indexOf(value) > -1) {
         return true
