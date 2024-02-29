@@ -1,5 +1,4 @@
-const { USERS_ROUTES } = require('../src/constants')
-const { EMAIL_TEST, PASSWORD_TEST, TOKEN_TEST } = require('../tests/constants')
+const { USERS_ROUTES, EMAIL_TEST, PASSWORD_TEST, TOKEN_TEST } = require('../tests/constants')
 
 const isCredCorrects = (email, pass) => {
   return email === EMAIL_TEST && pass === PASSWORD_TEST

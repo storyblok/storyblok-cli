@@ -5,7 +5,7 @@ const inquirer = require('inquirer')
 
 const creds = require('./creds')
 const getQuestions = require('./get-questions')
-const { USERS_ROUTES, DEFAULT_AGENT } = require('../constants')
+const { DEFAULT_AGENT } = require('../constants')
 const { getRegionApiEndpoint } = require('./region')
 const { EU_CODE } = require('@storyblok/region-helper')
 
@@ -171,7 +171,7 @@ module.exports = {
   },
 
   signup (email, password, region = EU_CODE) {
-    return axios.post(USERS_ROUTES.SIGNUP, {
+    return axios.post(`${this.apiSwitcher(region)}users/signup`, {
       email: email,
       password: password,
       region
