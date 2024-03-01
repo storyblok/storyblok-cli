@@ -6,7 +6,6 @@ const { ALL_REGIONS, getRegionName, CN_CODE } = require('@storyblok/region-helpe
  * @return {Promise}
  */
 
-// TODO: test
 const listSpaces = async (api, currentRegion) => {
   const isChinaEnv = currentRegion === CN_CODE
 
