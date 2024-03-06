@@ -7,6 +7,7 @@ const chalk = require('chalk')
 const clear = require('clear')
 const figlet = require('figlet')
 const inquirer = require('inquirer')
+const { ALL_REGIONS, EU_CODE, isRegion } = require('@storyblok/region-helper')
 
 const updateNotifier = require('update-notifier')
 const pkg = require('../package.json')
@@ -14,6 +15,7 @@ const pkg = require('../package.json')
 const tasks = require('./tasks')
 const { getQuestions, lastStep, api, creds } = require('./utils')
 const { SYNC_TYPES, COMMANDS } = require('./constants')
+const allRegionsText = ALL_REGIONS.join(', ')
 
 clear()
 console.log(chalk.cyan(figlet.textSync('storyblok')))
@@ -39,13 +41,18 @@ program
 program
   .command(COMMANDS.LOGIN)
   .description('Login to the Storyblok cli')
-  .option('-t, --token <token>', 'Token to login directly without questions, like for CI enviroments')
-  .option('-r, --region <region>', 'The region you would like to work in. Please keep in mind that the region must match the region of your space. You can use us, cn or eu, if left empty, default is eu. This region flag will be used for the other cli\'s commands')
+  .option('-t, --token <token>', 'Token to login directly without questions, like for CI environments')
+  .option('-r, --region <region>', `The region you would like to work in. Please keep in mind that the region must match the region of your space. This region flag will be used for the other cli's commands. You can use the values: ${allRegionsText}.`, EU_CODE)
   .action(async (options) => {
     const { token, region } = options
 
     if (api.isAuthorized()) {
       console.log(chalk.green('✓') + ' The user has been already logged. If you want to change the logged user, you must logout and login again')
+      return
+    }
+
+    if (!isRegion(region)) {
+      console.log(chalk.red('X') + `The provided region ${region} is not valid. Please use one of the following: ${allRegionsText}`)
       return
     }
 
@@ -524,7 +531,8 @@ if (program.rawArgs.length <= 2) {
 
 function errorHandler (e, command) {
   if (/404/.test(e.message)) {
-    console.log(chalk.yellow('/!\\') + ' If your space was created under US, CA, AP or CN region, you must provide the region us, ca, ap or cn upon login.')
+    const allRegionsButDefault = ALL_REGIONS.filter(region => region !== EU_CODE).join(' ,')
+    console.log(chalk.yellow('/!\\') + ` If your space was not created under ${EU_CODE} region, you must provide the region (${allRegionsButDefault}) upon login.`)
   } else {
     console.log(chalk.red('X') + ' An error occurred when executing the ' + command + ' task: ' + e || e.message)
   }

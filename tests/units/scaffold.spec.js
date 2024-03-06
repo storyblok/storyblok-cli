@@ -3,7 +3,8 @@ const fs = require('fs')
 const scaffold = require('../../src/tasks/scaffold')
 const Storyblok = require('storyblok-js-client')
 const api = require('../../src/utils/api')
-const { REGIONS } = require('../../src/constants')
+const { getRegionApiEndpoint } = require('../../src/utils/region')
+const { EU_CODE } = require('@storyblok/region-helper')
 
 jest.mock('fs')
 jest.unmock('axios')
@@ -12,7 +13,7 @@ const deleteTestComponent = async () => {
   if (process.env.STORYBLOK_TOKEN) {
     const client = new Storyblok({
       oauthToken: process.env.STORYBLOK_TOKEN
-    }, REGIONS.eu.apiEndpoint)
+    }, getRegionApiEndpoint(EU_CODE))
 
     try {
       const path = `spaces/${process.env.STORYBLOK_SPACE}/components`

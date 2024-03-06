@@ -1,6 +1,7 @@
 const sync = require('../../src/tasks/sync')
 const Storyblok = require('storyblok-js-client')
-const { REGIONS } = require('../../src/constants')
+const { getRegionApiEndpoint } = require('../../src/utils/region')
+const { EU_CODE } = require('@storyblok/region-helper')
 
 jest.unmock('axios')
 
@@ -32,7 +33,7 @@ describe('testing sync function', () => {
 
         const client = new Storyblok({
           oauthToken: process.env.STORYBLOK_TOKEN
-        }, REGIONS.eu.apiEndpoint)
+        }, getRegionApiEndpoint(EU_CODE))
 
         const sourceStories = await getData(
           client,

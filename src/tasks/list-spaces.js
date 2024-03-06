@@ -1,5 +1,5 @@
 const chalk = require('chalk')
-const { REGIONS } = require('../constants')
+const { ALL_REGIONS, getRegionName, CN_CODE } = require('@storyblok/region-helper')
 /**
  * @method listSpaces
  * @param api - Pass the api instance as a parameter
@@ -7,7 +7,7 @@ const { REGIONS } = require('../constants')
  */
 
 const listSpaces = async (api, currentRegion) => {
-  const isChinaEnv = currentRegion === 'cn'
+  const isChinaEnv = currentRegion === CN_CODE
 
   console.log()
   console.log(chalk.green('✓') + ' Loading spaces...')
@@ -34,8 +34,8 @@ const listSpaces = async (api, currentRegion) => {
     return spaces
   } else {
     const spacesList = []
-    for (const key in REGIONS) {
-      if (key === 'cn') continue
+    for (const key of ALL_REGIONS) {
+      if (key === CN_CODE) continue
       spacesList.push(await api.getAllSpacesByRegion(key)
         .then((res) => {
           return {
@@ -50,9 +50,8 @@ const listSpaces = async (api, currentRegion) => {
       return []
     }
     spacesList.forEach(region => {
-      const regionName = REGIONS[region.key].name
       console.log()
-      console.log(`${chalk.blue(' -')} Spaces From ${regionName} region:`)
+      console.log(`${chalk.blue(' -')} Spaces From ${getRegionName(region.key)} region:`)
       region.res.forEach((space) => {
         console.log(`    ${space.name} (id: ${space.id})`)
       })

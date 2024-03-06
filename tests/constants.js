@@ -1,7 +1,9 @@
+const { getRegionApiEndpoint } = require('../src/utils/region')
+const { EU_CODE } = require('@storyblok/region-helper')
 const EMAIL_TEST = 'test@storyblok.com'
 const PASSWORD_TEST = 'test'
 const TOKEN_TEST = 'storyblok1234'
-const REGION_TEST = 'eu'
+const REGION_TEST = EU_CODE
 
 // use functions to always returns 'new' data
 const FAKE_COMPONENTS = () => [
@@ -289,9 +291,15 @@ const FAKE_PRESET = () => ({
   description: 'page preset'
 })
 
+const USERS_ROUTES = {
+  LOGIN: `${getRegionApiEndpoint(EU_CODE)}users/login`,
+  SIGNUP: `${getRegionApiEndpoint(EU_CODE)}users/signup`
+}
+
 module.exports = {
   EMAIL_TEST,
   TOKEN_TEST,
+  USERS_ROUTES,
   FAKE_STORIES,
   PASSWORD_TEST,
   FAKE_COMPONENTS,

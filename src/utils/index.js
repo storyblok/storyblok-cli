@@ -6,5 +6,6 @@ module.exports = {
   capitalize: require('./capitalize'),
   findByProperty: require('./find-by-property'),
   parseError: require('./parse-error'),
+  region: require('./region'),
   saveFileFactory: require('./save-file-factory')
 }
