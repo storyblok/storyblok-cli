@@ -2,7 +2,7 @@ import axios from 'axios'
 import api from '../../src/utils/api'
 import creds from '../../src/utils/creds'
 import { EMAIL_TEST, TOKEN_TEST, PASSWORD_TEST } from '../constants'
-import { USERS_ROUTES } from '../../src/constants'
+import { USERS_ROUTES } from '../constants'
 import { jest } from '@jest/globals'
 
 const isCredCorrects = (email, pass) => {
