@@ -182,22 +182,6 @@ const spyGet = jest.spyOn(Storyblok.prototype, 'get').mockImplementation(mockGet
 const spyPost = jest.spyOn(Storyblok.prototype, 'post').mockImplementation(mockPostRequest)
 const spyPut = jest.spyOn(Storyblok.prototype, 'put').mockImplementation(mockPutRequest)
 
-// jest.mock('../../src/utils/presets-lib', () => {
-//   const originalModule = jest.requireActual('../../src/utils/presets-lib')
-
-//   return {
-//     __esModule: true,
-//     getPresets: mockGetPresets,
-//     getComponentPresets: jest.fn((component, presets) => {
-//       return originalModule.getComponentPresets(component, presets)
-//     }),
-//     createPresets: mockCreatePresets,
-//     filterPresetsFromTargetComponent: jest.fn((presets, targetPresets) => {
-//       return originalModule.filterPresetsFromTargetComponent(presets, targetPresets)
-//     })
-//   }
-// })
-
 const spyGetPresets = jest.spyOn(PresetsLib.prototype, 'getPresets').mockImplementation((spaceId) => {
   return Promise.resolve(FAKE_PRESETS[spaceId].data.presets)
 })
