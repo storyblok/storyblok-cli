@@ -421,6 +421,10 @@ export class GenerateTypesFromJSONSchemas {
       camelCase(`${this.#options.typeNamesPrefix ?? ""}${componentName}${this.#options.typeNamesSuffix}`)
     ).replace(/ /g, "");
 
+    /**
+     * A TS identifier cannot start with a number > add an underscore in that case
+     * TODO: add some logic to handle other edge cases, such as JS/TS reserved keywords as blok names (i.e. if a blok is named `string`, the resulting type would be `String`, if no suffix is provided)
+     */
     const isFirstCharacterNumber = !isNaN(parseInt(componentType.charAt(0)));
     return isFirstCharacterNumber ? `_${componentType}` : componentType;
   }
