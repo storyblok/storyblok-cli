@@ -417,9 +417,12 @@ export class GenerateTypesFromJSONSchemas {
    * @returns A string with the Type name in PascalCase, as for Typescript standards
    */
   #getComponentType(componentName: string) {
-    return startCase(
+    const componentType = startCase(
       camelCase(`${this.#options.typeNamesPrefix ?? ""}${componentName}${this.#options.typeNamesSuffix}`)
     ).replace(/ /g, "");
+
+    const isFirstCharacterNumber = !isNaN(parseInt(componentType.charAt(0)));
+    return isFirstCharacterNumber ? `_${componentType}` : componentType;
   }
 
   /**
