@@ -1,6 +1,6 @@
-import chalk from 'chalk'
-import { findByProperty } from '../../utils'
-import api from '../../utils/api'
+const chalk = require('chalk')
+const { findByProperty } = require('../../utils')
+const api = require('../../utils/api')
 
 class SyncComponentGroups {
   /**
@@ -137,4 +137,4 @@ class SyncComponentGroups {
   }
 }
 
-export default SyncComponentGroups
+module.exports = SyncComponentGroups

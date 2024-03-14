@@ -9,4 +9,4 @@ const findByProperty = (collection, property, value) => {
   return collection.filter(item => item[property] === value)[0] || {}
 }
 
-export default findByProperty
+module.exports = findByProperty

@@ -1,15 +1,11 @@
-import fs from 'fs'
-import path from 'path'
-import quickstart from '../../src/tasks/quickstart'
-import Storyblok from 'storyblok-js-client'
-import api from '../../src/utils/api'
-import { jest } from '@jest/globals'
-import { dirname } from 'node:path'
-import { fileURLToPath } from 'node:url'
-import { getRegionApiEndpoint } from '../../src/utils/region'
-import { EU_CODE } from '@storyblok/region-helper'
+const fs = require('fs')
+const path = require('path')
 
-const __dirname = dirname(fileURLToPath(import.meta.url))
+const quickstart = require('../../src/tasks/quickstart')
+const Storyblok = require('storyblok-js-client')
+const api = require('../../src/utils/api')
+const { getRegionApiEndpoint } = require('../../src/utils/region')
+const { EU_CODE } = require('@storyblok/region-helper')
 
 jest.unmock('fs')
 jest.unmock('axios')

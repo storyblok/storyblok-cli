@@ -1,5 +1,5 @@
 // this file is an example of a file that does not exports a function
 
-export default {
+module.exports = {
   name: 'Storyblok'
 }

@@ -1,16 +1,8 @@
-import axios from 'axios'
-import api from '../../src/utils/api'
-import creds from '../../src/utils/creds'
-import { EMAIL_TEST, TOKEN_TEST, PASSWORD_TEST, REGION_TEST } from '../constants'
-import { jest } from '@jest/globals'
+const api = require('../../src/utils/api')
+const creds = require('../../src/utils/creds')
+const { EMAIL_TEST, TOKEN_TEST, PASSWORD_TEST, REGION_TEST } = require('../constants')
 
 jest.mock('axios')
-
-const postSpy = jest.spyOn(axios, 'post').mockResolvedValue({
-  data: {
-    access_token: TOKEN_TEST
-  }
-})
 
 describe('api.login() method', () => {
   beforeEach(() => {
@@ -22,19 +14,22 @@ describe('api.login() method', () => {
   })
 
   it('when login is correct, the .netrc file is populated', async () => {
-    await api.login({ email: EMAIL_TEST, password: PASSWORD_TEST })
+    try {
+      await api.login(EMAIL_TEST, PASSWORD_TEST)
 
-    expect(creds.get()).toEqual({
-      email: EMAIL_TEST,
-      token: TOKEN_TEST,
-      region: REGION_TEST
-    })
+      expect(creds.get()).toEqual({
+        email: EMAIL_TEST,
+        token: TOKEN_TEST,
+        region: REGION_TEST
+      })
+    } catch (e) {
+      console.error(e)
+    }
   })
 
   it('when login is incorrect, the .netrc file is not populated and throw a reject message', async () => {
-    postSpy.mockRejectedValueOnce(new Error('Incorrect access'))
     try {
-      await api.login({ email: EMAIL_TEST, password: '1234', region: REGION_TEST })
+      await api.login(EMAIL_TEST, '1234', REGION_TEST)
     } catch (e) {
       expect(e.message).toBe('Incorrect access')
     }

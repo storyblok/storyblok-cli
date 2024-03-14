@@ -1,6 +1,6 @@
-import chalk from 'chalk'
-import UUID from 'simple-uuid'
-import api from '../../utils/api'
+const chalk = require('chalk')
+const UUID = require('simple-uuid')
+const api = require('../../utils/api')
 
 class SyncDatasources {
   /**
@@ -302,4 +302,4 @@ class SyncDatasources {
   }
 }
 
-export default SyncDatasources
+module.exports = SyncDatasources

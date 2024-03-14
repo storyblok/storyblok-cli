@@ -1,5 +1,9 @@
-import chalk from 'chalk'
-import { convertFile, sendContent, discoverExtension } from './utils'
+const chalk = require('chalk')
+const {
+  convertFile,
+  sendContent,
+  discoverExtension
+} = require('./utils')
 
 /**
  * @typedef {Object} ImportDataOptions
@@ -33,4 +37,4 @@ const importFiles = async (api, options) => {
     return Promise.reject(e)
   }
 }
-export default importFiles
+module.exports = importFiles

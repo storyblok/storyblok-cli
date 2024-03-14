@@ -1,5 +1,5 @@
-import chalk from 'chalk'
-import saveFileFactory from '../utils/save-file-factory'
+const chalk = require('chalk')
+const saveFileFactory = require('../utils/save-file-factory')
 
 /**
  * @method getNameFromComponentGroups
@@ -81,4 +81,4 @@ const pullComponents = async (api, options) => {
   }
 }
 
-export default pullComponents
+module.exports = pullComponents

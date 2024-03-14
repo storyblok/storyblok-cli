@@ -1,8 +1,8 @@
-import pSeries from 'p-series'
-import chalk from 'chalk'
-import SyncComponents from './sync-commands/components'
-import SyncDatasources from './sync-commands/datasources'
-import { capitalize } from '../utils'
+const pSeries = require('p-series')
+const chalk = require('chalk')
+const SyncComponents = require('./sync-commands/components')
+const SyncDatasources = require('./sync-commands/datasources')
+const { capitalize } = require('../utils')
 
 const SyncSpaces = {
   targetComponents: [],
@@ -230,7 +230,7 @@ const SyncSpaces = {
       oauthToken: this.oauthToken,
       componentsGroups: this.componentsGroups
     })
-    
+
     try {
       await syncComponentsInstance.sync()
     } catch (e) {
@@ -285,4 +285,4 @@ const sync = (types, options) => {
   return pSeries(tasks)
 }
 
-export default sync
+module.exports = sync

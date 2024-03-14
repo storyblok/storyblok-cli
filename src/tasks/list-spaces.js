@@ -1,6 +1,5 @@
-import chalk from 'chalk'
-import { ALL_REGIONS, getRegionName, CN_CODE } from '@storyblok/region-helper'
-
+const chalk = require('chalk')
+const { ALL_REGIONS, getRegionName, CN_CODE } = require('@storyblok/region-helper')
 /**
  * @method listSpaces
  * @param api - Pass the api instance as a parameter
@@ -61,4 +60,4 @@ const listSpaces = async (api, currentRegion) => {
   }
 }
 
-export default listSpaces
+module.exports = listSpaces

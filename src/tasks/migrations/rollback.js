@@ -1,7 +1,10 @@
-import chalk from 'chalk'
-import fs from 'fs-extra'
-import { checkExistenceFilesInRollBackDirectory, urlTofRollbackMigrationFile } from './utils'
+const chalk = require('chalk')
+const fs = require('fs-extra')
 const MIGRATIONS_ROLLBACK_DIRECTORY = `${process.cwd()}/migrations/rollback`
+const {
+  checkExistenceFilesInRollBackDirectory,
+  urlTofRollbackMigrationFile
+} = require('./utils')
 
 /**
  * @method rollbackMigration
@@ -64,4 +67,4 @@ const rollbackMigration = async (api, field, component) => {
   }
 }
 
-export default rollbackMigration
+module.exports = rollbackMigration

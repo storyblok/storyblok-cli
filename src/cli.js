@@ -1,20 +1,20 @@
 #!/usr/bin/env node
 
-import commander from 'commander'
-import chalk from 'chalk'
-import clear from 'clear'
-import figlet from 'figlet'
-import inquirer from 'inquirer'
-import { ALL_REGIONS, EU_CODE, isRegion } from '@storyblok/region-helper'
-import updateNotifier from 'update-notifier'
-import fs from 'fs'
-import tasks from './tasks'
-import { getQuestions, lastStep, api, creds } from './utils'
-import { SYNC_TYPES, COMMANDS } from './constants'
-
-const rawPkg = fs.readFileSync('./package.json')
-const pkg = JSON.parse(rawPkg)
+const commander = require('commander')
 const program = new commander.Command()
+
+const chalk = require('chalk')
+const clear = require('clear')
+const figlet = require('figlet')
+const inquirer = require('inquirer')
+const { ALL_REGIONS, EU_CODE, isRegion } = require('@storyblok/region-helper')
+
+const updateNotifier = require('update-notifier')
+const pkg = require('../package.json')
+
+const tasks = require('./tasks')
+const { getQuestions, lastStep, api, creds } = require('./utils')
+const { SYNC_TYPES, COMMANDS } = require('./constants')
 const allRegionsText = ALL_REGIONS.join(', ')
 
 clear()
@@ -520,42 +520,6 @@ program
       await tasks.deleteDatasources(api, { byName, bySlug })
     } catch (e) {
       errorHandler(e, COMMANDS.DELETE_DATASOURCES)
-    }
-  })
-
-// Generate Typescript type definitions
-program
-  .command(COMMANDS.GENERATE_TYPESCRIPT_TYPEDEFS)
-  // Providing backward-compatible flags with Storyblok Generate TS https://github.com/dohomi/storyblok-generate-ts
-  .requiredOption('--source, --sourceFilePaths <PATHS>', 'Path(s) to the components JSON file(s) as comma separated values', (paths, _previous) => paths.split(','))
-  .option('--target, --destinationFilePath <PATH>', 'Path to the Typescript file that will be generated (default: `storyblok-component-types.d.ts`)')
-  .option('--titlePrefix, --typeNamesPrefix <STRING>', 'A prefix that will be prepended to all the names of the generated types')
-  .option('--titleSuffix, --typeNamesSuffix <STRING>', 'A suffix that will be appended to all the names of the generated types (*default*: `Storyblok`)')
-  .option('--compilerOptions, --JSONSchemaToTSOptionsPath <PATH>', 'Path to a JSON file with a list of options supported by json-schema-to-typescript')
-  .option('--customTypeParser, --customFieldTypesParserPath <PATH>', 'Path to the parser file for Custom Field Types')
-  .action((options) => {
-    console.log(`${chalk.blue('-')} Executing ${COMMANDS.GENERATE_TYPESCRIPT_TYPEDEFS} task`)
-
-    const {
-      sourceFilePaths,
-      destinationFilePath,
-      typeNamesPrefix,
-      typeNamesSuffix,
-      customFieldTypesParserPath,
-      JSONSchemaToTSOptionsPath
-    } = options
-
-    try {
-      tasks.generateTypescriptTypedefs({
-        sourceFilePaths,
-        destinationFilePath,
-        typeNamesPrefix,
-        typeNamesSuffix,
-        customFieldTypesParserPath,
-        JSONSchemaToTSOptionsPath
-      })
-    } catch (e) {
-      errorHandler(e, COMMANDS.GENERATE_TYPESCRIPT_TYPEDEFS)
     }
   })
 
