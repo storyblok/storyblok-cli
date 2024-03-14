@@ -1,6 +1,6 @@
 <p align="center">
   <h1 align="center">Storyblok CLI</h1>
-  <p align="center">A simple CLI for scaffolding <a href="https://www.storyblok.com" target="_blank">Storyblok</a> projects and fieldtypes.</p>
+  <p align="center">A simple CLI for scaffolding <a href="https://www.storyblok.com?utm_source=github.com&utm_medium=readme&utm_campaign=storyblok" target="_blank">Storyblok</a> projects and fieldtypes.</p>
 </p>
 
 [![npm](https://img.shields.io/npm/v/storyblok.svg)](https://www.npmjs.com/package/storyblok)
