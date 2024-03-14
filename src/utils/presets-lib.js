@@ -1,8 +1,9 @@
-const chalk = require('chalk')
-const FormData = require('form-data')
-const axios = require('axios')
-const { last } = require('lodash')
-const api = require('./api')
+import chalk from 'chalk'
+import FormData from 'form-data'
+import axios from 'axios'
+import lodash from 'lodash'
+import api from './api'
+const { last } = lodash
 
 class PresetsLib {
   /**
@@ -134,4 +135,4 @@ class PresetsLib {
   }
 }
 
-module.exports = PresetsLib
+export default PresetsLib

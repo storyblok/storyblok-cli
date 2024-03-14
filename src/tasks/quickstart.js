@@ -1,6 +1,6 @@
-const open = require('open')
-const chalk = require('chalk')
-const lastStep = require('../utils/last-step')
+import open from 'open'
+import chalk from 'chalk'
+import lastStep from '../utils/last-step'
 
 const hasSpaceId = spaceId => typeof spaceId !== 'undefined'
 
@@ -88,4 +88,4 @@ const quickstart = async (api, answers, spaceId) => {
   }
 }
 
-module.exports = quickstart
+export default quickstart

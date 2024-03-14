@@ -1,17 +1,17 @@
-const csvReader = require('fast-csv')
-const xmlConverter = require('xml-js')
-const chalk = require('chalk')
-const path = require('path')
-const fs = require('fs')
-const { isArray } = require('lodash')
+import csvReader from 'fast-csv'
+import xmlConverter from 'xml-js'
+import chalk from 'chalk'
+import path from 'path'
+import fs from 'fs'
+import lodash from 'lodash'
+const { isArray } = lodash
 
 /**
  * @method discoverExtension
  * @param  {String} fileName - Name of the file
  * @return {String}
  */
-
-const discoverExtension = (fileName) => {
+export const discoverExtension = (fileName) => {
   const extension = path.extname(fileName)
 
   if (extension !== '') {
@@ -27,7 +27,7 @@ const discoverExtension = (fileName) => {
  * @param  {Object} contents - Object with the content
  * @return {Promise}
  */
-const sendContent = async (api, contents) => {
+export const sendContent = async (api, contents) => {
   for (const story of contents) {
     try {
       console.log(
@@ -66,8 +66,7 @@ const removeJsonTextAttribute = (value, parentElement) => {
  * @param  {String} delimiter - Csv file delimiter, default value is ';'
  * @return {Promise}
  */
-
-const csvParser = (data, typeOfContent, folderID = 0, delimiter = ';') => {
+export const csvParser = (data, typeOfContent, folderID = 0, delimiter = ';') => {
   return new Promise((resolve, reject) => {
     console.log()
     console.log(`${chalk.blue('-')} Reading CSV file... `)
@@ -131,8 +130,7 @@ const xmlFactoryOfStories = (line, typeOfContent, folderID) => {
  * @param  {Number} folderID - Storyblok folder id, default value is 0
  * @return {Promise}
  */
-
-const xmlParser = async (data, typeOfContent, folderID = 0) => {
+export const xmlParser = async (data, typeOfContent, folderID = 0) => {
   return new Promise((resolve, reject) => {
     console.log()
     console.log(`${chalk.blue('-')} Reading XML file... `)
@@ -166,8 +164,7 @@ const xmlParser = async (data, typeOfContent, folderID = 0) => {
  * @param  {Number} folderID - Storyblok folder id, default value is 0
  * @return {Promise}
  */
-
-const jsonParser = async (data, typeOfContent, folderID = 0) => {
+export const jsonParser = async (data, typeOfContent, folderID = 0) => {
   console.log()
   console.log(`${chalk.blue('-')} Reading JSON file... `)
   console.log()
@@ -201,7 +198,7 @@ const jsonParser = async (data, typeOfContent, folderID = 0) => {
  * @param  {string} extension           file extension
  * @param  {ConvertFileOptions} options options to parser functions
  */
-const convertFile = (file, extension, options) => {
+export const convertFile = (file, extension, options) => {
   const {
     type,
     folder,
@@ -222,13 +219,4 @@ const convertFile = (file, extension, options) => {
   }
 
   return Promise.reject(new Error('This file extension is not supported. Please use .xml, .json or .csv'))
-}
-
-module.exports = {
-  csvParser,
-  xmlParser,
-  jsonParser,
-  sendContent,
-  convertFile,
-  discoverExtension
 }

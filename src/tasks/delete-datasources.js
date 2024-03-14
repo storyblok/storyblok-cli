@@ -1,4 +1,4 @@
-const chalk = require('chalk')
+import chalk from 'chalk'
 
 /**
  * @method deleteDatasources
@@ -38,4 +38,4 @@ const deleteDatasources = async (api, options) => {
   }
 }
 
-module.exports = deleteDatasources
+export default deleteDatasources

@@ -1,12 +1,12 @@
-const { getRegionApiEndpoint } = require('../src/utils/region')
-const { EU_CODE } = require('@storyblok/region-helper')
-const EMAIL_TEST = 'test@storyblok.com'
-const PASSWORD_TEST = 'test'
-const TOKEN_TEST = 'storyblok1234'
-const REGION_TEST = EU_CODE
+import { getRegionApiEndpoint } from '../src/utils/region'
+import { EU_CODE } from '@storyblok/region-helper'
+export const EMAIL_TEST = 'test@storyblok.com'
+export const PASSWORD_TEST = 'test'
+export const TOKEN_TEST = 'storyblok1234'
+export const REGION_TEST = EU_CODE
 
 // use functions to always returns 'new' data
-const FAKE_COMPONENTS = () => [
+export const FAKE_COMPONENTS = () => [
   {
     name: 'teaser',
     display_name: null,
@@ -139,7 +139,7 @@ const FAKE_COMPONENTS = () => [
 ]
 
 // use functions to always returns 'new' data
-const FAKE_STORIES = () => [
+export const FAKE_STORIES = () => [
   {
     name: 'About',
     id: 0,
@@ -209,7 +209,7 @@ const FAKE_STORIES = () => [
   }
 ]
 
-const FAKE_SPACES = () => [
+export const FAKE_SPACES = () => [
   {
     name: 'Example Space',
     domain: 'https://example.storyblok.com',
@@ -232,7 +232,7 @@ const FAKE_SPACES = () => [
   }
 ]
 
-const FAKE_SPACE_OPTIONS = () => ({
+export const FAKE_SPACE_OPTIONS = () => ({
   languages: [
     {
       code: 'pt',
@@ -251,7 +251,7 @@ const FAKE_SPACE_OPTIONS = () => ({
   use_translated_stories: false
 })
 
-const FAKE_PRESET = () => ({
+export const FAKE_PRESET = () => ({
   id: 123,
   name: 'page_preset',
   preset: {
@@ -291,20 +291,7 @@ const FAKE_PRESET = () => ({
   description: 'page preset'
 })
 
-const USERS_ROUTES = {
+export const USERS_ROUTES = {
   LOGIN: `${getRegionApiEndpoint(EU_CODE)}users/login`,
   SIGNUP: `${getRegionApiEndpoint(EU_CODE)}users/signup`
-}
-
-module.exports = {
-  EMAIL_TEST,
-  TOKEN_TEST,
-  USERS_ROUTES,
-  FAKE_STORIES,
-  PASSWORD_TEST,
-  FAKE_COMPONENTS,
-  FAKE_SPACES,
-  FAKE_SPACE_OPTIONS,
-  REGION_TEST,
-  FAKE_PRESET
 }

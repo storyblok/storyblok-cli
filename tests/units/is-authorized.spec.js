@@ -1,6 +1,15 @@
-const api = require('../../src/utils/api')
-const creds = require('../../src/utils/creds')
-const { EMAIL_TEST, PASSWORD_TEST } = require('../constants')
+import axios from 'axios'
+import api from '../../src/utils/api'
+import creds from '../../src/utils/creds'
+import { EMAIL_TEST, PASSWORD_TEST, TOKEN_TEST } from '../constants'
+import { jest } from '@jest/globals'
+
+jest.mock('axios')
+jest.spyOn(axios, 'post').mockResolvedValue({
+  data: {
+    access_token: TOKEN_TEST
+  }
+})
 
 describe('api.isAuthorized() method', () => {
   beforeEach(() => {
@@ -11,27 +20,20 @@ describe('api.isAuthorized() method', () => {
     creds.set(null)
   })
 
-  it('api.isAuthorized() should be true when user is not logged', async () => {
-    try {
-      await api.login(EMAIL_TEST, PASSWORD_TEST)
+  afterAll(() => {
+    jest.resetAllMocks()
+  })
 
-      expect(api.isAuthorized()).toBe(true)
-    } catch (e) {
-      console.error(e)
-    }
+  it('api.isAuthorized() should be true when user is not logged', async () => {
+    await api.login(EMAIL_TEST, PASSWORD_TEST)
+    expect(api.isAuthorized()).toBe(true)
   })
 
   it('api.isAuthorized() should be false when user is logout', async () => {
-    try {
-      await api.login(EMAIL_TEST, PASSWORD_TEST)
+    await api.login(EMAIL_TEST, PASSWORD_TEST)
+    expect(api.isAuthorized()).toBe(true)
 
-      expect(api.isAuthorized()).toBe(true)
-
-      api.logout()
-
-      expect(api.isAuthorized()).toBe(false)
-    } catch (e) {
-      console.error(e)
-    }
+    api.logout()
+    expect(api.isAuthorized()).toBe(false)
   })
 })
