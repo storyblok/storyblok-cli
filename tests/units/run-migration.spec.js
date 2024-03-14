@@ -1,34 +1,27 @@
-import path from 'path'
-import fs from 'fs-extra'
-import migrationFile from './migrations/change_teaser_subtitle'
-// migration that does not execute any change in content
-import headlineMigrationFile from './migrations/change_teaser_headline'
-import { FAKE_STORIES } from '../constants'
-import runMigration from '../../src/tasks/migrations/run'
-import { jest } from '@jest/globals'
-import { dirname } from 'node:path'
-import { fileURLToPath } from 'node:url'
+const path = require('path')
+const migrationFile = require('./migrations/change_teaser_subtitle')
 
-const __dirname = dirname(fileURLToPath(import.meta.url))
+// migration that does not execute any change in content
+const headlineMigrationFile = require('./migrations/change_teaser_headline')
+
+const { FAKE_STORIES } = require('../constants')
+const runMigration = require('../../src/tasks/migrations/run')
 
 jest.mock('fs-extra')
 
-jest.spyOn(fs, 'existsSync').mockImplementation(jest.fn((_key) => {
-  return `${process.cwd()}/migrations/rollback`
-}))
-
-jest.spyOn(fs, 'readdirSync').mockImplementation(jest.fn((_key) => {
-  return ['rollback_product_title.json', 'rollback_product_text.json']
-}))
-
-jest.spyOn(fs, 'unlinkSync').mockReturnValue(true)
-
-jest.spyOn(fs, 'writeFile').mockReturnValue(true)
-
 const FILE_NAME = 'change_teaser_subtitle.js'
+
 const migrationPath = path.resolve(process.cwd(), __dirname, './migrations')
 
+const getFilePath = (field, component = 'teaser') => {
+  return `${migrationPath}/change_${component}_${field}.js`
+}
+
 describe('testing runMigration', () => {
+  beforeEach(() => {
+    require('fs-extra').__clearMockFiles()
+  })
+
   afterEach(() => {
     jest.clearAllMocks()
   })
@@ -40,6 +33,13 @@ describe('testing runMigration', () => {
   })
 
   describe('when the migration files does not exports a function', () => {
+    beforeEach(() => {
+      require('fs-extra').__clearMockFiles()
+      require('fs-extra').__setMockFiles({
+        [getFilePath('date')]: 'module.exports = {}'
+      })
+    })
+
     afterEach(() => {
       jest.clearAllMocks()
     })
@@ -56,6 +56,13 @@ describe('testing runMigration', () => {
   })
 
   describe('when the component does not exists in stories', () => {
+    beforeEach(() => {
+      require('fs-extra').__clearMockFiles()
+      require('fs-extra').__setMockFiles({
+        [getFilePath('subtitle')]: 'module.exports = {}'
+      })
+    })
+
     afterEach(() => {
       jest.clearAllMocks()
     })
@@ -108,6 +115,13 @@ describe('testing runMigration', () => {
       isDryrun: true
     }
 
+    beforeEach(() => {
+      require('fs-extra').__clearMockFiles()
+      require('fs-extra').__setMockFiles({
+        [getFilePath('subtitle')]: 'module.exports = {}'
+      })
+    })
+
     afterEach(() => {
       jest.clearAllMocks()
     })
@@ -149,6 +163,13 @@ describe('testing runMigration', () => {
       migrationPath
     }
 
+    beforeEach(() => {
+      require('fs-extra').__clearMockFiles()
+      require('fs-extra').__setMockFiles({
+        [getFilePath('headline')]: 'module.exports = {}'
+      })
+    })
+
     afterEach(() => {
       jest.clearAllMocks()
     })
@@ -189,6 +210,13 @@ describe('testing runMigration', () => {
     const opt = {
       migrationPath
     }
+
+    beforeEach(() => {
+      require('fs-extra').__clearMockFiles()
+      require('fs-extra').__setMockFiles({
+        [getFilePath('subtitle')]: 'module.exports = {}'
+      })
+    })
 
     afterEach(() => {
       jest.clearAllMocks()
@@ -346,7 +374,7 @@ describe('testing runMigration', () => {
     })
   })
 
-  describe('when the user pass the publish option', () => {
+  describe('when the user pass the publish option', async () => {
     const FAKE_API = {
       getStories: jest.fn(() => Promise.resolve(FAKE_STORIES())),
       getSingleStory: jest.fn(id => {
@@ -359,6 +387,13 @@ describe('testing runMigration', () => {
     const defaultOption = {
       migrationPath
     }
+
+    beforeEach(() => {
+      require('fs-extra').__clearMockFiles()
+      require('fs-extra').__setMockFiles({
+        [getFilePath('subtitle')]: 'module.exports = {}'
+      })
+    })
 
     afterEach(() => {
       jest.clearAllMocks()
@@ -431,7 +466,7 @@ describe('testing runMigration', () => {
     })
   })
 
-  describe('when the user pass the publish-languages option', () => {
+  describe('when the user pass the publish-languages option', async () => {
     const FAKE_API = {
       getStories: jest.fn(() => Promise.resolve(FAKE_STORIES())),
       getSingleStory: jest.fn(id => {
@@ -445,6 +480,13 @@ describe('testing runMigration', () => {
       migrationPath,
       publish: 'all'
     }
+
+    beforeEach(() => {
+      require('fs-extra').__clearMockFiles()
+      require('fs-extra').__setMockFiles({
+        [getFilePath('subtitle')]: 'module.exports = {}'
+      })
+    })
 
     afterEach(() => {
       jest.clearAllMocks()

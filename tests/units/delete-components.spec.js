@@ -1,20 +1,17 @@
-import deleteComponents from '../../src/tasks/delete-components'
-import { FAKE_COMPONENTS } from '../constants'
-import fs from 'fs'
-import { jest } from '@jest/globals'
-
+const deleteComponents = require('../../src/tasks/delete-components')
+const { FAKE_COMPONENTS } = require('../constants')
+const fs = require('fs')
 jest.mock('fs')
-jest.spyOn(fs, 'readFileSync')
 
 afterEach(() => {
   jest.clearAllMocks()
 })
 
 describe('testing deleteComponents', () => {
-  it('api.deleteComponents', async () => {
+  it('api.deleteComponents', () => {
     const source = 'components.js'
     const components = FAKE_COMPONENTS()
-    fs.readFileSync.mockReturnValue(JSON.stringify({
+    const spy = jest.spyOn(fs, 'readFileSync').mockReturnValue(JSON.stringify({
       components
     }))
     const api = {
@@ -28,6 +25,7 @@ describe('testing deleteComponents', () => {
       delete: jest.fn(() => Promise.resolve())
     }
     return deleteComponents(api, { source, reversed: false }).then(() => {
+      expect(spy.mock.calls.length).toBe(1)
       expect(api.delete.mock.calls.length).toBe(components.length)
     })
   })
@@ -36,8 +34,7 @@ describe('testing deleteComponents', () => {
     const components = FAKE_COMPONENTS()
     const copy = [...components]
     copy.splice(2, 1)
-    fs.readFileSync.mockReturnValue(JSON.stringify([...copy]))
-
+    const spy = jest.spyOn(fs, 'readFileSync').mockReturnValue(JSON.stringify([...copy]))
     const api = {
       get: jest.fn((path) => {
         const id = path.split('/')[1]
@@ -49,13 +46,14 @@ describe('testing deleteComponents', () => {
       delete: jest.fn(() => Promise.resolve())
     }
     return deleteComponents(api, { source, reversed: true }).then(() => {
+      expect(spy.mock.calls.length).toBe(1)
       expect(api.delete.mock.calls.length).toBe(1)
     })
   })
   it('api.deleteComponents --dryrun', () => {
     const source = 'components.js'
     const components = FAKE_COMPONENTS()
-    fs.readFileSync.mockReturnValue(JSON.stringify({
+    const spy = jest.spyOn(fs, 'readFileSync').mockReturnValue(JSON.stringify({
       components
     }))
     const api = {
@@ -66,13 +64,14 @@ describe('testing deleteComponents', () => {
       delete: jest.fn(() => Promise.resolve())
     }
     return deleteComponents(api, { source, reversed: false, dryRun: true }).then(() => {
+      expect(spy.mock.calls.length).toBe(1)
       expect(api.delete.mock.calls.length).toBe(0)
     })
   })
   it('api.deleteComponents reverse --dryrun', () => {
     const source = 'components.js'
     const components = FAKE_COMPONENTS()
-    fs.readFileSync.mockReturnValue(JSON.stringify({
+    const spy = jest.spyOn(fs, 'readFileSync').mockReturnValue(JSON.stringify({
       components
     }))
     const api = {
@@ -88,6 +87,7 @@ describe('testing deleteComponents', () => {
       delete: jest.fn(() => Promise.resolve())
     }
     return deleteComponents(api, { source, reversed: true, dryRun: true }).then(() => {
+      expect(spy.mock.calls.length).toBe(1)
       expect(api.delete.mock.calls.length).toBe(0)
     })
   })

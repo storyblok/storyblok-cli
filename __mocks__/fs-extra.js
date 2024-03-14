@@ -1,6 +1,4 @@
-import { jest } from '@jest/globals'
-
-const fs = jest.createMockFromModule('fs-extra')
+const fs = jest.genMockFromModule('fs-extra')
 
 let mockFiles = Object.create(null)
 
@@ -21,15 +19,15 @@ const readFile = jest.fn((path) => {
   mockFiles = path
   return Promise.resolve(JSON.stringify([
     {
-      id: 0,
-      full_slug: 'another-post',
-      content: {
-        _uid: '5647c21f-8813-4f8a-ad38-b9f74e0e7c89',
-        text: 'Donec tortor mauris, mollis vel pretium vitae, lacinia nec sapien. Donec erat neque, ullamcorper tincidunt iaculis sit amet, pharetra bibendum ipsum. Nunc mattis risus ac ante consequat nec pulvinar neque molestie. Etiam interdum nunc at metus lacinia non varius erat dignissim. Integer elementum, felis id facilisis vulputate, ipsum tellus venenatis dui, at blandit nibh massa in dolor. Cras a ultricies sapien. Vivamus adipiscing feugiat pharetra.',
-        image: 'https://a.storyblok.com/f/51376/884x750/3bff01d851/international.svg',
-        title: 'test',
-        category: 'news',
-        component: 'Product'
+      "id": 0,
+      "full_slug": "another-post",
+      "content": {
+        "_uid": "5647c21f-8813-4f8a-ad38-b9f74e0e7c89",
+        "text": "Donec tortor mauris, mollis vel pretium vitae, lacinia nec sapien. Donec erat neque, ullamcorper tincidunt iaculis sit amet, pharetra bibendum ipsum. Nunc mattis risus ac ante consequat nec pulvinar neque molestie. Etiam interdum nunc at metus lacinia non varius erat dignissim. Integer elementum, felis id facilisis vulputate, ipsum tellus venenatis dui, at blandit nibh massa in dolor. Cras a ultricies sapien. Vivamus adipiscing feugiat pharetra.",
+        "image": "https://a.storyblok.com/f/51376/884x750/3bff01d851/international.svg",
+        "title": "test",
+        "category": "news",
+        "component": "Product"
       }
     }
   ]))
@@ -62,4 +60,4 @@ fs.__clearMockFiles = __clearMockFiles
 
 fs.__setMockFiles = __setMockFiles
 
-export default fs
+module.exports = fs

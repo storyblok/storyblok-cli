@@ -1,6 +1,6 @@
-import fs from 'fs'
+const fs = require('fs')
 
-const replace = (file, replacements) => {
+module.exports = (file, replacements) => {
   return new Promise((resolve, reject) => {
     fs.readFile(file, 'utf8', function (err, data) {
       if (err) {
@@ -21,5 +21,3 @@ const replace = (file, replacements) => {
     })
   })
 }
-
-export default replace

@@ -1,5 +1,5 @@
-import chalk from 'chalk'
-import { getComponentsFromName } from './migrations/utils'
+const chalk = require('chalk')
+const { getComponentsFromName } = require('./migrations/utils')
 
 /**
  *
@@ -29,4 +29,4 @@ const deleteComponent = async (api, { comp, dryrun = false }) => {
     return Promise.reject(new Error(e))
   }
 }
-export default deleteComponent
+module.exports = deleteComponent

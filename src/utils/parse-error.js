@@ -22,4 +22,4 @@ const parserError = responseError => {
   }
 }
 
-export default parserError
+module.exports = parserError

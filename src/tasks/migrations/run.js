@@ -1,9 +1,14 @@
-import chalk from 'chalk'
-import lodash from 'lodash'
-import { getPathToFile, checkFileExists, processMigration, getStoriesByComponent, getNameOfMigrationFile, createRollbackFile } from './utils'
+const chalk = require('chalk')
+const { isEmpty, cloneDeep, isEqual } = require('lodash')
 
-// Separate import because apparently `cloneDeep` is not exported as named export
-const { isEmpty, cloneDeep, isEqual} = lodash
+const {
+  getPathToFile,
+  checkFileExists,
+  processMigration,
+  getStoriesByComponent,
+  getNameOfMigrationFile,
+  createRollbackFile
+} = require('./utils')
 
 /**
  * @method isStoryPublishedWithoutChanges
@@ -59,7 +64,7 @@ const runMigration = async (api, component, field, options = {}) => {
     console.log(
       `${chalk.blue('-')} Getting the user defined migration function`
     )
-    const migrationFn = (await import(pathToFile)).default;
+    const migrationFn = require(pathToFile)
 
     if (typeof migrationFn !== 'function') {
       throw new Error("The migration file doesn't export a function")
@@ -151,4 +156,4 @@ const runMigration = async (api, component, field, options = {}) => {
   }
 }
 
-export default runMigration
+module.exports = runMigration

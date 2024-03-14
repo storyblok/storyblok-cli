@@ -107,8 +107,3 @@ dist
 
 # IntelliJ
 .idea/
-
-# CLI generated files
-components.*.json
-presets.*.json
-storyblok-component-types.d.ts

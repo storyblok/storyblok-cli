@@ -1,10 +1,9 @@
-import chalk from 'chalk'
-import lodash from 'lodash'
-import SyncComponentGroups from './component-groups'
-import { findByProperty } from '../../utils'
-import PresetsLib from '../../utils/presets-lib'
-import api from '../../utils/api'
-const { find } = lodash
+const chalk = require('chalk')
+const { find } = require('lodash')
+const SyncComponentGroups = require('./component-groups')
+const { findByProperty } = require('../../utils')
+const PresetsLib = require('../../utils/presets-lib')
+const api = require('../../utils/api')
 
 class SyncComponents {
   /**
@@ -261,4 +260,4 @@ class SyncComponents {
   }
 }
 
-export default SyncComponents
+module.exports = SyncComponents

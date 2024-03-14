@@ -1,14 +1,15 @@
-import chalk from 'chalk'
-import axios from 'axios'
-import Storyblok from 'storyblok-js-client'
-import inquirer from 'inquirer'
-import creds from './creds'
-import getQuestions from './get-questions'
-import { DEFAULT_AGENT } from '../constants'
-import { getRegionApiEndpoint } from './region'
-import { EU_CODE } from '@storyblok/region-helper'
+const chalk = require('chalk')
+const axios = require('axios')
+const Storyblok = require('storyblok-js-client')
+const inquirer = require('inquirer')
 
-export default {
+const creds = require('./creds')
+const getQuestions = require('./get-questions')
+const { DEFAULT_AGENT } = require('../constants')
+const { getRegionApiEndpoint } = require('./region')
+const { EU_CODE } = require('@storyblok/region-helper')
+
+module.exports = {
   accessToken: '',
   oauthToken: '',
   spaceId: null,

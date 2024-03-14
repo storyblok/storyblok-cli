@@ -1,9 +1,9 @@
 /* eslint-disable camelcase */
 
-import fs from 'fs'
-import chalk from 'chalk'
-import ghdownload from 'git-clone'
-import replace from './replace'
+const fs = require('fs')
+const chalk = require('chalk')
+const ghdownload = require('git-clone')
+const replace = require('./replace')
 
 const getFinalStep = type => {
   if (type === 'Fieldtype' || type === 'quickstart') {
@@ -105,4 +105,4 @@ const lastStep = answers => {
   })
 }
 
-export default lastStep
+module.exports = lastStep

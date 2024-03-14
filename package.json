@@ -12,21 +12,15 @@
     "node",
     "javascript"
   ],
-  "main": "./dist/cli.mjs",
-  "files": [
-    "dist/**"
-  ],
+  "main": "src/cli.js",
   "bin": {
-    "storyblok": "./dist/cli.mjs"
+    "storyblok": "src/cli.js"
   },
-  "type": "module",
   "scripts": {
-    "build": "unbuild",
-    "dev": "npm run build && ./dist/cli.mjs",
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",
-    "test:unit": "node --experimental-vm-modules ./node_modules/.bin/jest --silent",
-    "test:coverage": "node --experimental-vm-modules ./node_modules/.bin/jest --coverage"
+    "test:unit": "jest --silent",
+    "test:coverage": "jest --coverage"
   },
   "author": "Dominik Angerer <dominikangerer1@gmail.com>, Alexander Feiglstorfer <delooks@gmail.com>",
   "license": "MIT",
@@ -42,7 +36,6 @@
     "fs-extra": "^9.0.1",
     "git-clone": "^0.1.0",
     "inquirer": "^7.3.2",
-    "json-schema-to-typescript": "^13.1.2",
     "lodash": "^4.17.21",
     "netrc": "0.1.4",
     "on-change": "^2.0.1",
@@ -50,7 +43,7 @@
     "p-series": "^2.1.0",
     "path": "^0.12.7",
     "simple-uuid": "^0.0.1",
-    "storyblok-js-client": "^6.7.1",
+    "storyblok-js-client": "^5.14.0",
     "update-notifier": "^5.1.0",
     "xml-js": "^1.6.11"
   },
@@ -66,16 +59,11 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
-    "jest": "^29.7.0",
-    "typescript": "^5.3.3",
-    "unbuild": "^2.0.0"
+    "jest": "^26.1.0"
   },
   "release": {
     "branches": [
       "master"
     ]
-  },
-  "prettier": {
-    "printWidth": 120
   }
 }

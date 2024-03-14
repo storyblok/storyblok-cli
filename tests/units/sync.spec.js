@@ -1,9 +1,7 @@
-import sync from '../../src/tasks/sync'
-import Storyblok from 'storyblok-js-client'
-import { getRegionApiEndpoint } from '../../src/utils/region'
-import { EU_CODE } from '@storyblok/region-helper'
-
-import { jest } from '@jest/globals'
+const sync = require('../../src/tasks/sync')
+const Storyblok = require('storyblok-js-client')
+const { getRegionApiEndpoint } = require('../../src/utils/region')
+const { EU_CODE } = require('@storyblok/region-helper')
 
 jest.unmock('axios')
 
