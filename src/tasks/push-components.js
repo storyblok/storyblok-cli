@@ -1,8 +1,9 @@
-const axios = require('axios')
-const fs = require('fs')
-const chalk = require('chalk')
-const PresetsLib = require('../utils/presets-lib')
-const isEmpty = require('lodash/isEmpty')
+import axios from 'axios'
+import fs from 'fs'
+import chalk from 'chalk'
+import PresetsLib from '../utils/presets-lib'
+import lodash from 'lodash'
+const { isEmpty } = lodash
 
 const isUrl = source => source.indexOf('http') === 0
 
@@ -62,7 +63,7 @@ const createContentList = (content, key) => {
   else return !isEmpty(content) ? [content] : []
 }
 
-module.exports = async (api, { source, presetsSource }) => {
+const pushComponents = async (api, { source, presetsSource }) => {
   try {
     const rawComponents = await getDataFromPath(source)
     const components = createContentList(rawComponents, 'components')
@@ -205,3 +206,5 @@ const push = async (api, components, presets = []) => {
     return Promise.reject(e.message)
   }
 }
+
+export default pushComponents

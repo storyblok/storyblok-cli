@@ -1,8 +1,9 @@
-const chalk = require('chalk')
-const axios = require('axios')
-const fs = require('fs')
-const isEmpty = require('lodash/isEmpty')
-const deleteComponent = require('./delete-component')
+import chalk from 'chalk'
+import axios from 'axios'
+import fs from 'fs'
+import lodash from 'lodash'
+import deleteComponent from './delete-component'
+const { isEmpty } = lodash
 
 const isUrl = source => source.indexOf('http') === 0
 
@@ -109,4 +110,4 @@ const deleteComponentAndSkip = async (api, c, dryrun) => {
   }
 }
 
-module.exports = deleteComponents
+export default deleteComponents

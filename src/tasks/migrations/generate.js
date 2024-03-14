@@ -1,14 +1,6 @@
-const chalk = require('chalk')
-const inquirer = require('inquirer')
-
-const {
-  getPathToFile,
-  checkFileExists,
-  getInquirerOptions,
-  createMigrationFile,
-  checkComponentExists,
-  getNameOfMigrationFile
-} = require('./utils')
+import chalk from 'chalk'
+import inquirer from 'inquirer'
+import { getPathToFile, checkFileExists, getInquirerOptions, createMigrationFile, checkComponentExists, getNameOfMigrationFile } from './utils'
 
 /**
  * @method generateMigration
@@ -58,4 +50,4 @@ const generateMigration = async (api, component, field) => {
   }
 }
 
-module.exports = generateMigration
+export default generateMigration

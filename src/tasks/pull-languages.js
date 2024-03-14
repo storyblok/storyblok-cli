@@ -1,5 +1,5 @@
-const fs = require('fs')
-const chalk = require('chalk')
+import fs from 'fs'
+import chalk from 'chalk'
 
 /**
  * @method pullLanguages
@@ -36,4 +36,4 @@ const pullLanguages = async (api, options) => {
   }
 }
 
-module.exports = pullLanguages
+export default pullLanguages

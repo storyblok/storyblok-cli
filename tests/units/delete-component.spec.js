@@ -1,5 +1,6 @@
-const deleteComponent = require('../../src/tasks/delete-component')
-const { FAKE_COMPONENTS } = require('../constants')
+import deleteComponent from '../../src/tasks/delete-component'
+import { FAKE_COMPONENTS } from '../constants'
+import { jest } from '@jest/globals'
 
 describe('testing deleteComponent', () => {
   it('api.deleteComponent name', () => {

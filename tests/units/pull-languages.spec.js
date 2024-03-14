@@ -1,8 +1,11 @@
-const fs = require('fs')
-const pullLanguages = require('../../src/tasks/pull-languages')
-const { FAKE_SPACE_OPTIONS } = require('../constants')
+import fs from 'fs'
+import pullLanguages from '../../src/tasks/pull-languages'
+import { FAKE_SPACE_OPTIONS } from '../constants'
+import { jest } from '@jest/globals'
 
-jest.mock('fs')
+jest.spyOn(fs, 'writeFile').mockImplementation(jest.fn((key, data, _) => {
+  [key] = data
+}))
 
 describe('testing pullLanguages', () => {
   afterEach(() => {

@@ -9,4 +9,4 @@ const capitalize = word => {
   return first + rest
 }
 
-module.exports = capitalize
+export default capitalize
