@@ -1,11 +1,9 @@
-module.exports = {
-  getQuestions: require('./get-questions'),
-  lastStep: require('./last-step'),
-  api: require('./api'),
-  creds: require('./creds'),
-  capitalize: require('./capitalize'),
-  findByProperty: require('./find-by-property'),
-  parseError: require('./parse-error'),
-  region: require('./region'),
-  saveFileFactory: require('./save-file-factory')
-}
+export { default as getQuestions } from './get-questions'
+export { default as lastStep } from './last-step'
+export { default as api } from './api'
+export { default as creds } from './creds'
+export { default as capitalize } from './capitalize'
+export { default as findByProperty } from './find-by-property'
+export { default as parseError } from './parse-error'
+export { default as region } from './region'
+export { default as saveFileFactory } from './save-file-factory'

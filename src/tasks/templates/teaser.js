@@ -1,4 +1,4 @@
-module.exports = `<div class="quickstart__teaser">
+export default `<div class="quickstart__teaser">
   <!--
   The _editable attribute makes the next
   DOM-element clickable so the sidebar can

@@ -1,7 +1,5 @@
-const { getRegionBaseUrl } = require('@storyblok/region-helper')
+import { getRegionBaseUrl } from '@storyblok/region-helper'
 
-const getRegionApiEndpoint = (region) => `${getRegionBaseUrl(region)}/v1/`
+export const getRegionApiEndpoint = (region) => `${getRegionBaseUrl(region)}/v1/`
 
-module.exports = {
-  getRegionApiEndpoint
-}
+export default getRegionApiEndpoint

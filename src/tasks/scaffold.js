@@ -1,6 +1,6 @@
-const fs = require('fs')
+import fs from 'fs'
 
-module.exports = function (api, name, space) {
+export default async function (api, name, space) {
   if (space) {
     if (!api.accessToken) {
       return Promise.reject(new Error('The user is not logged'))
@@ -17,7 +17,7 @@ module.exports = function (api, name, space) {
 
   var liquid = './views/components/_' + name + '.liquid'
   console.log('Writing template file to ' + liquid)
-  fs.writeFileSync(liquid, require('./templates/teaser'))
+  fs.writeFileSync(liquid, await import('./templates/teaser'))
 
   var scss = './source/scss/components/below/_' + name + '.scss'
   console.log('Writing scss file to ' + scss)
