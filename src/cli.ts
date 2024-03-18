@@ -12,8 +12,12 @@ import tasks from "./tasks";
 import { getQuestions, lastStep, api, creds } from "./utils";
 import { SYNC_TYPES, COMMANDS } from "./constants";
 export * from "./types/index";
+import { dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+import path from "path";
 
-const rawPkg = fs.readFileSync("./package.json");
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const rawPkg = fs.readFileSync(path.join(__dirname, "../package.json"));
 const pkg = JSON.parse(rawPkg);
 const program = new commander.Command();
 const allRegionsText = ALL_REGIONS.join(", ");
