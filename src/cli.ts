@@ -9,7 +9,7 @@ import { ALL_REGIONS, EU_CODE, isRegion } from "@storyblok/region-helper";
 import updateNotifier from "update-notifier";
 import fs from "fs";
 import tasks from "./tasks";
-import { getQuestions, lastStep, api, creds } from "./utils";
+import { getQuestions, lastStep, api, creds, buildFilterQuery } from "./utils";
 import { SYNC_TYPES, COMMANDS } from "./constants";
 export * from "./types/index";
 import { dirname } from "node:path";
@@ -298,6 +298,11 @@ program
   )
   .requiredOption("--source <SPACE_ID>", "Source space id")
   .requiredOption("--target <SPACE_ID>", "Target space id")
+  .option('--starts-with <STARTS_WITH>', 'Sync only stories that starts with the given string')
+  .option('--filter', 'Enable filter options to sync only stories that match the given filter. Required options: --keys; --operations; --values')
+  .option('--keys <KEYS>', 'Field names in your story object which should be used for filtering. Multiple keys should separated by comma.')
+  .option('--operations <OPERATIONS>', 'Operations to be used for filtering. Can be: is, in, not_in, like, not_like, any_in_array, all_in_array, gt_date, lt_date, gt_int, lt_int, gt_float, lt_float. Multiple operations should be separated by comma.')
+  .option('--values <VALUES>', 'Values to be used for filtering. Any string or number. If you want to use multiple values, separate them with a comma. Multiple values should be separated by comma.')
   .option("--components-groups <UUIDs>", "Synchronize components based on their group UUIDs separated by commas")
   .action(async (options) => {
     console.log(`${chalk.blue("-")} Sync data between spaces\n`);
@@ -307,10 +312,20 @@ program
         await api.processLogin();
       }
 
-      const { type, target, source, componentsGroups } = options;
+      const {
+        type,
+        target,
+        source, 
+        startsWith,
+        filter,
+        keys,
+        operations,
+        values,
+        componentsGroups
+      } = options;
 
       const _componentsGroups = componentsGroups ? componentsGroups.split(",") : null;
-
+      const filterQuery = filter ? buildFilterQuery(keys, operations, values) : undefined
       const token = creds.get().token || null;
 
       const _types = type.split(",") || [];
@@ -325,6 +340,8 @@ program
         token,
         target,
         source,
+        startsWith,
+        filterQuery,
         _componentsGroups,
       });
 
