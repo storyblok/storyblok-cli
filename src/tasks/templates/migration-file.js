@@ -1,4 +1,4 @@
-module.exports = `module.exports = function (block) {
+export default `export default function (block) {
   // Example to change a string to boolean
   // block.{{ fieldname }} = !!(block.{{ fieldname }})
 

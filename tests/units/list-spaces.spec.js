@@ -1,15 +1,12 @@
-const { listSpaces } = require('../../src/tasks/')
-const { FAKE_SPACES } = require('../constants')
-const { REGIONS } = require('../../src/constants')
+import { EU_CODE, US_CODE, AP_CODE, CA_CODE, CN_CODE } from '@storyblok/region-helper'
+import listSpaces from '../../src/tasks/list-spaces'
+import { FAKE_SPACES } from '../constants'
+import { jest } from '@jest/globals'
 
 describe('Test spaces method', () => {
   it('Testing list-spaces funtion without api instance', async () => {
-    try {
-      const spaces = await listSpaces()
-      expect(spaces).toStrictEqual([])
-    } catch (e) {
-      console.error(e)
-    }
+    const spaces = await listSpaces()
+    expect(spaces).toStrictEqual([])
   })
 
   it('Testing list-spaces function for China region', async () => {
@@ -17,7 +14,7 @@ describe('Test spaces method', () => {
       getAllSpacesByRegion: jest.fn(() => Promise.resolve(FAKE_SPACES()))
     }
     expect(
-      await listSpaces(FAKE_API, REGIONS.cn.key)
+      await listSpaces(FAKE_API, CN_CODE)
     ).toEqual(FAKE_SPACES())
     expect(FAKE_API.getAllSpacesByRegion).toHaveBeenCalled()
   })
@@ -28,25 +25,25 @@ describe('Test spaces method', () => {
     }
     const response = [
       {
-        key: REGIONS.eu.key,
+        key: EU_CODE,
         res: [...FAKE_SPACES()]
       },
       {
-        key: REGIONS.us.key,
+        key: US_CODE,
         res: [...FAKE_SPACES()]
       },
       {
-        key: REGIONS.ca.key,
+        key: CA_CODE,
         res: [...FAKE_SPACES()]
       },
       {
-        key: REGIONS.ap.key,
+        key: AP_CODE,
         res: [...FAKE_SPACES()]
       }
     ]
 
     expect(
-      await listSpaces(FAKE_API, REGIONS.eu.key)
+      await listSpaces(FAKE_API, EU_CODE)
     ).toEqual(response)
   })
 })

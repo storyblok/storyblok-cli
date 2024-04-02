@@ -1,13 +1,14 @@
-const chalk = require('chalk')
-const axios = require('axios')
-const Storyblok = require('storyblok-js-client')
-const inquirer = require('inquirer')
+import chalk from 'chalk'
+import axios from 'axios'
+import Storyblok from 'storyblok-js-client'
+import inquirer from 'inquirer'
+import creds from './creds'
+import getQuestions from './get-questions'
+import { DEFAULT_AGENT } from '../constants'
+import { getRegionApiEndpoint } from './region'
+import { EU_CODE } from '@storyblok/region-helper'
 
-const creds = require('./creds')
-const getQuestions = require('./get-questions')
-const { REGIONS, USERS_ROUTES, DEFAULT_AGENT } = require('../constants')
-
-module.exports = {
+export default {
   accessToken: '',
   oauthToken: '',
   spaceId: null,
@@ -39,7 +40,7 @@ module.exports = {
   },
 
   async login (content) {
-    const { email, password, region = 'eu' } = content
+    const { email, password, region = EU_CODE } = content
     try {
       const response = await axios.post(`${this.apiSwitcher(region)}users/login`, {
         email: email,
@@ -96,7 +97,7 @@ module.exports = {
     }
   },
 
-  persistCredentials (email, token = null, region = 'eu') {
+  persistCredentials (email, token = null, region = EU_CODE) {
     if (token) {
       this.oauthToken = token
       creds.set(email, token, region)
@@ -168,8 +169,8 @@ module.exports = {
     creds.set(null)
   },
 
-  signup (email, password, region = 'eu') {
-    return axios.post(USERS_ROUTES.SIGNUP, {
+  signup (email, password, region = EU_CODE) {
+    return axios.post(`${this.apiSwitcher(region)}users/signup`, {
       email: email,
       password: password,
       region
@@ -255,7 +256,6 @@ module.exports = {
       .catch(err => Promise.reject(err))
   },
 
-
   post (path, props) {
     return this.sendRequest(path, 'post', props)
   },
@@ -310,6 +310,6 @@ module.exports = {
   },
 
   apiSwitcher (region) {
-    return region ? REGIONS[region].apiEndpoint : REGIONS[this.region].apiEndpoint
+    return region ? getRegionApiEndpoint(region) : getRegionApiEndpoint(this.region)
   }
 }

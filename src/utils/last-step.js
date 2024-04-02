@@ -1,9 +1,9 @@
 /* eslint-disable camelcase */
 
-const fs = require('fs')
-const chalk = require('chalk')
-const ghdownload = require('git-clone')
-const replace = require('./replace')
+import fs from 'fs'
+import chalk from 'chalk'
+import ghdownload from 'git-clone'
+import replace from './replace'
 
 const getFinalStep = type => {
   if (type === 'Fieldtype' || type === 'quickstart') {
@@ -49,7 +49,7 @@ const lastStep = answers => {
     console.log(chalk.green('✓') + ' - The github repository ' + gitRepo + ' will be cloned now...')
 
     ghdownload(gitRepo, outputDir, async (err) => {
-      if(err) {
+      if (err) {
         if (err.code === 'ENOTEMPTY') {
           console.log(chalk.red('  Oh Snap! It seems that you already have a project with the name: ' + name))
           reject(new Error('This repository already has been cloned'))
@@ -105,4 +105,4 @@ const lastStep = answers => {
   })
 }
 
-module.exports = lastStep
+export default lastStep

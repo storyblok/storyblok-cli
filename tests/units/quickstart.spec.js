@@ -1,10 +1,15 @@
-const fs = require('fs')
-const path = require('path')
+import fs from 'fs'
+import path from 'path'
+import quickstart from '../../src/tasks/quickstart'
+import Storyblok from 'storyblok-js-client'
+import api from '../../src/utils/api'
+import { jest } from '@jest/globals'
+import { dirname } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { getRegionApiEndpoint } from '../../src/utils/region'
+import { EU_CODE } from '@storyblok/region-helper'
 
-const quickstart = require('../../src/tasks/quickstart')
-const Storyblok = require('storyblok-js-client')
-const api = require('../../src/utils/api')
-const { REGIONS } = require('../../src/constants')
+const __dirname = dirname(fileURLToPath(import.meta.url))
 
 jest.unmock('fs')
 jest.unmock('axios')
@@ -60,7 +65,7 @@ describe('testing quickstart()', () => {
 
       const client = new Storyblok({
         oauthToken: process.env.STORYBLOK_TOKEN
-      }, REGIONS.eu.apiEndpoint)
+      }, getRegionApiEndpoint(EU_CODE))
 
       const response = await client.get('spaces')
       const spaces = response.data.spaces

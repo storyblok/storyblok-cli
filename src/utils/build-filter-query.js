@@ -26,4 +26,4 @@ const buildFilterQuery = (keys, operations, values) => {
   return filterQuery
 }
 
-module.exports = buildFilterQuery
+export default buildFilterQuery

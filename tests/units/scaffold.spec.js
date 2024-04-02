@@ -1,18 +1,19 @@
-const fs = require('fs')
+import fs from 'fs'
+import scaffold from '../../src/tasks/scaffold'
+import Storyblok from 'storyblok-js-client'
+import api from '../../src/utils/api'
+import { getRegionApiEndpoint } from '../../src/utils/region'
+import { EU_CODE } from '@storyblok/region-helper'
 
-const scaffold = require('../../src/tasks/scaffold')
-const Storyblok = require('storyblok-js-client')
-const api = require('../../src/utils/api')
-const { REGIONS } = require('../../src/constants')
+import { jest } from '@jest/globals'
 
-jest.mock('fs')
-jest.unmock('axios')
+jest.spyOn(fs, 'writeFileSync').mockReturnValue("path_to_file")
 
 const deleteTestComponent = async () => {
   if (process.env.STORYBLOK_TOKEN) {
     const client = new Storyblok({
       oauthToken: process.env.STORYBLOK_TOKEN
-    }, REGIONS.eu.apiEndpoint)
+    }, getRegionApiEndpoint(EU_CODE))
 
     try {
       const path = `spaces/${process.env.STORYBLOK_SPACE}/components`
@@ -40,6 +41,10 @@ describe('testing scaffold()', () => {
 
   afterEach(async () => {
     await deleteTestComponent()
+  })
+
+  afterAll(() => {
+    jest.resetAllMocks()
   })
 
   it('call scaffold() with space should create a new component with corresponding name', async () => {

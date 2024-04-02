@@ -1,6 +1,6 @@
 <p align="center">
   <h1 align="center">Storyblok CLI</h1>
-  <p align="center">A simple CLI for scaffolding <a href="https://www.storyblok.com" target="_blank">Storyblok</a> projects and fieldtypes.</p>
+  <p align="center">A simple CLI for scaffolding <a href="https://www.storyblok.com?utm_source=github.com&utm_medium=readme&utm_campaign=storyblok" target="_blank">Storyblok</a> projects and fieldtypes.</p>
 </p>
 
 [![npm](https://img.shields.io/npm/v/storyblok.svg)](https://www.npmjs.com/package/storyblok)
@@ -44,7 +44,10 @@ $ storyblok login
 
 **For Both login options you nedd to pass the region**
 
-* `region`: region you would like to work in. Please keep in mind that the region must match the region of your space. You can use `us`, `cn`, `eu`, `ca` and `ap`, if left empty, default is `eu`. This region flag will be used for the other cli's commands. 
+* `region` (default: `eu`): the region you would like to work in. All the supported regions can be found [here](https://www.storyblok.com/faq/define-specific-region-storyblok-api).
+
+> [!NOTE]
+> Please keep in mind that the region must match the region of your space, and also that it will be used for all future commands you may perform.
 
 #### Login with token flag
 You can also add the token directly from the login’s command, like the example below:
@@ -563,6 +566,92 @@ module.exports = function (block) {
   }
 }
 ```
+
+## Typescript
+It is possible to generate Typescript type definitions for your Storyblok components. The type definitions are based on the components' JSON Schema that can be retrieved with the [pull-components](#pull-components) command.
+
+### generate-typescript-typedefs
+
+Generate a file with the type definitions for the specified components' JSON Schemas.
+
+```sh
+$ storyblok generate-typescript-typedefs
+  --sourceFilePaths <PATHS>
+  --destinationFilePath <PATH>
+  --typeNamesPrefix <STRING>
+  --typeNamesSuffix <STRING>
+  --JSONSchemaToTSOptionsPath <PATH>
+  --customFieldTypesParserPath <PATH>
+```
+
+#### Options
+
+* `sourceFilePaths` <sub>(alias `source`)</sub> : Path(s) to the components JSON file(s) as comma separated values
+* `destinationFilePath` <sub>(alias `target`) *optional*</sub> : Path to the Typescript file that will be generated (*default*: `storyblok-component-types.d.ts`)
+* `typeNamesPrefix` <sub>(alias `titlePrefix`) *optional*</sub> : A prefix that will be prepended to all the names of the generated types
+* `typeNamesSuffix` <sub>(alias `titleSuffix`) *optional*</sub> : A suffix that will be appended to all the names of the generated types (*default*: `Storyblok`)
+* `JSONSchemaToTSOptionsPath` <sub>(alias `compilerOptions`) *optional*</sub> : Path to a JSON file with a list of options supported by `json-schema-to-typescript`
+* `customFieldTypesParserPath` <sub>(alias `customTypeParser`) *optional*</sub> : Path to the parser file for Custom Field Types
+
+#### Examples
+
+```sh
+# Generate typedefs for the components retrieved for the space `12345` via the `storyblok pull-components` command
+$ storyblok generate-typescript-typedefs --sourceFilePaths ./components.12345.json
+
+# Generate typedefs for multiple components sources
+$ storyblok generate-typescript-typedefs --sourceFilePaths ./fooComponent-12345.json,./barComponent-12345.json
+
+# Custom path for the typedefs file
+$ storyblok generate-typescript-typedefs --sourceFilePaths ./components.12345.json --destinationFilePath ./types/my-custom-type-file.d.ts
+
+# Provide customized options for the JSON-schema-to-typescript lib
+$ storyblok generate-typescript-typedefs --sourceFilePaths ./components.12345.json --JSONSchemaToTSOptionsPath ./PathToJSONFileWithCustomOptions.json
+
+# Provide a custom field types parser
+$ storyblok generate-typescript-typedefs --sourceFilePaths ./components.12345.json --customFieldTypesParserPath ./customFieldTypesParser.js
+
+```
+
+##### JSON Schema to Typescript options
+This script uses the `json-schema-to-typescript` library under the hood. Values of the [JSON Schema to Typescript options](https://www.npmjs.com/package/json-schema-to-typescript#options) can be customized providing a JSON file to the `JSONSchemaToTSOptionsPath`.
+
+The default values used for the `storyblok generate-typescript-typedefs` command are the same defaults for the library except for two properties:
+* `bannerComment` - The default value is `""` to remove noise from the generated Typedefs file
+* `unknownAny` - The default value is `false` because it can help a smoother Typescript adoption on a JS project
+
+Example `JSONSchemaToTSOptions` JSON file to remove `additionalProperties` from the generated type definitions:
+
+```json
+{
+  "additionalProperties": false,
+}
+```
+
+##### Custom Field Types parser
+Storyblok [Custom Field Types](https://www.storyblok.com/docs/plugins/field-plugins/introduction) do not have inherent JSONSchema definitions. To overcome this issue, you can provide a path to a script exporting a parser function that should render a [JSONSchema Node](https://json-schema.org/learn/getting-started-step-by-step#define-properties) for each of your Custom Field Types. The parser function should be exported as a default export, like in the following example:
+```js
+export default function (key, obj) {
+  switch (obj.field_type) {
+    case 'my-custom-field-type-name':
+      return {
+        [key]: {
+          type: 'object',
+          properties: {
+            color: { type: 'string' }
+          },
+          required: ['color']
+        }
+      }
+    default:
+      return {}
+  }
+}
+```
+
+
+
+
 
 ## You're looking for a headstart?
 
