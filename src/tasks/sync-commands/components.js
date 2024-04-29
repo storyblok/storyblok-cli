@@ -20,6 +20,7 @@ class SyncComponents {
     this.client = api.getClient()
     this.presetsLib = new PresetsLib({ oauthToken: options.oauthToken, targetSpaceId: this.targetSpaceId })
     this.componentsGroups = options.componentsGroups
+    this.componentsFullSync = options.componentsFullSync
   }
 
   async sync () {
@@ -201,7 +202,10 @@ class SyncComponents {
   }
 
   mergeComponents (sourceComponent, targetComponent = {}) {
-    const data = {
+    console.log(this.componentsFullSync)
+    const data = this.componentsFullSync ? {
+      ...sourceComponent
+    } : {
       ...sourceComponent,
       ...targetComponent
     }

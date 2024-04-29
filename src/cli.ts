@@ -304,6 +304,7 @@ program
   .option('--operations <OPERATIONS>', 'Operations to be used for filtering. Can be: is, in, not_in, like, not_like, any_in_array, all_in_array, gt_date, lt_date, gt_int, lt_int, gt_float, lt_float. Multiple operations should be separated by comma.')
   .option('--values <VALUES>', 'Values to be used for filtering. Any string or number. If you want to use multiple values, separate them with a comma. Multiple values should be separated by comma.')
   .option("--components-groups <UUIDs>", "Synchronize components based on their group UUIDs separated by commas")
+  .option("--components-full-sync", "Synchronize components by overriding any property from source to target")
   .action(async (options) => {
     console.log(`${chalk.blue("-")} Sync data between spaces\n`);
 
@@ -321,10 +322,12 @@ program
         keys,
         operations,
         values,
-        componentsGroups
+        componentsGroups,
+        componentsFullSync
       } = options;
 
       const _componentsGroups = componentsGroups ? componentsGroups.split(",") : null;
+      console.log(componentsFullSync)
       const filterQuery = filter ? buildFilterQuery(keys, operations, values) : undefined
       const token = creds.get().token || null;
 
@@ -343,6 +346,7 @@ program
         startsWith,
         filterQuery,
         _componentsGroups,
+        componentsFullSync,
       });
 
       console.log("\n" + chalk.green("✓") + " Sync data between spaces successfully completed");
