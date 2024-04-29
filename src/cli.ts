@@ -327,6 +327,7 @@ program
       } = options;
 
       const _componentsGroups = componentsGroups ? componentsGroups.split(",") : null;
+      const _componentsFullSync = !!componentsFullSync;
       const filterQuery = filter ? buildFilterQuery(keys, operations, values) : undefined
       const token = creds.get().token || null;
 
@@ -345,7 +346,7 @@ program
         startsWith,
         filterQuery,
         _componentsGroups,
-        componentsFullSync,
+        _componentsFullSync,
       });
 
       console.log("\n" + chalk.green("✓") + " Sync data between spaces successfully completed");

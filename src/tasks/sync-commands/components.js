@@ -203,6 +203,7 @@ class SyncComponents {
 
   mergeComponents (sourceComponent, targetComponent = {}) {
     const data = this.componentsFullSync ? {
+      // This should be the default behavior in a major future version
       ...sourceComponent
     } : {
       ...sourceComponent,
