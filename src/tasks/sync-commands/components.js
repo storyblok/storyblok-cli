@@ -202,7 +202,6 @@ class SyncComponents {
   }
 
   mergeComponents (sourceComponent, targetComponent = {}) {
-    console.log(this.componentsFullSync)
     const data = this.componentsFullSync ? {
       ...sourceComponent
     } : {

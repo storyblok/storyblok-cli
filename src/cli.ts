@@ -327,7 +327,6 @@ program
       } = options;
 
       const _componentsGroups = componentsGroups ? componentsGroups.split(",") : null;
-      console.log(componentsFullSync)
       const filterQuery = filter ? buildFilterQuery(keys, operations, values) : undefined
       const token = creds.get().token || null;
 
