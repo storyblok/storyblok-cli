@@ -13,19 +13,26 @@ export default {
   oauthToken: '',
   spaceId: null,
   region: '',
+  client: false,
 
   getClient () {
     const { region } = creds.get()
 
     try {
-      return new Storyblok({
-        accessToken: this.accessToken,
-        oauthToken: this.oauthToken,
-        region: this.region,
-        headers: {
-          ...DEFAULT_AGENT
-        }
-      }, this.apiSwitcher(region))
+      if (this.client === false) {
+        this.client = new Storyblok(
+          {
+            accessToken: this.accessToken,
+            oauthToken: this.oauthToken,
+            region: this.region,
+            headers: {
+              ...DEFAULT_AGENT,
+            },
+          },
+          this.apiSwitcher(region)
+        );
+      }
+      return this.client
     } catch (error) {
       throw new Error(error)
     }
