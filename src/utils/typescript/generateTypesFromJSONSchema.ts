@@ -418,7 +418,7 @@ export class GenerateTypesFromJSONSchemas {
    */
   #getComponentType(componentName: string) {
     const componentType = startCase(
-      camelCase(`${this.#options.typeNamesPrefix ?? ""}${componentName}${this.#options.typeNamesSuffix}`)
+      camelCase(`${this.#options.typeNamesPrefix ?? ""}_${componentName}_${this.#options.typeNamesSuffix}`)
     ).replace(/ /g, "");
 
     /**
