@@ -13,13 +13,13 @@ export default {
   oauthToken: '',
   spaceId: null,
   region: '',
-  client: false,
+  client: null,
 
   getClient () {
     const { region } = creds.get()
 
     try {
-      if (this.client === false) {
+      if (!this.client) {
         this.client = new Storyblok(
           {
             accessToken: this.accessToken,
