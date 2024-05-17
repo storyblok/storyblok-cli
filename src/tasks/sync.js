@@ -16,6 +16,7 @@ const SyncSpaces = {
     this.targetSpaceId = options.target
     this.oauthToken = options.token
     this.componentsGroups = options._componentsGroups
+    this.componentsFullSync = options._componentsFullSync
     this.startsWith = options.startsWith
     this.filterQuery = options.filterQuery
   },
@@ -232,7 +233,8 @@ const SyncSpaces = {
       sourceSpaceId: this.sourceSpaceId,
       targetSpaceId: this.targetSpaceId,
       oauthToken: this.oauthToken,
-      componentsGroups: this.componentsGroups
+      componentsGroups: this.componentsGroups,
+      componentsFullSync: this.componentsFullSync
     })
     
     try {
