@@ -14,22 +14,42 @@ export default {
   spaceId: null,
   region: '',
 
-  getClient () {
-    const { region } = creds.get()
+  getClient: (function () {
+    let client, accessToken, oauthToken, region, credsRegion
 
-    try {
-      return new Storyblok({
-        accessToken: this.accessToken,
-        oauthToken: this.oauthToken,
-        region: this.region,
-        headers: {
-          ...DEFAULT_AGENT
-        }
-      }, this.apiSwitcher(region))
-    } catch (error) {
-      throw new Error(error)
+    return function getClient() {
+      const { region: _credsRegion } = creds.get()
+
+      // cache the client if the params are the same
+      // this is needed so request throttling works properly
+      if (
+        client
+        && accessToken === this.accessToken
+        && oauthToken === this.oauthToken
+        && region === this.region
+        && credsRegion === _credsRegion) {
+        return client
+      }
+
+      accessToken = this.accessToken
+      oauthToken = this.oauthToken
+      region = this.region
+      credsRegion = _credsRegion
+
+      try {
+        return client = new Storyblok({
+          accessToken,
+          oauthToken,
+          region,
+          headers: {
+            ...DEFAULT_AGENT
+          }
+        }, this.apiSwitcher(credsRegion))
+      } catch (error) {
+        throw new Error(error)
+      }
     }
-  },
+  })(),
 
   getPath (path) {
     if (this.spaceId) {
