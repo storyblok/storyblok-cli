@@ -618,7 +618,7 @@ function errorHandler(e, command) {
   } else {
     let errorMessage = e.message;
     
-    if (!errorMessage && e instance of Error) {
+    if (!errorMessage && e instanceof Error) {
       errorMessage = JSON.stringify(e);
     }
     
