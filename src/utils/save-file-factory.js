@@ -1,6 +1,6 @@
 import fs from 'fs'
 
-const saveFileFactory = (fileName, content, path = './temp/') => {
+const saveFileFactory = (fileName, content, path = './') => {
   try {
     fs.writeFileSync(`${path}${fileName}`, content);
     return true;
