@@ -3,7 +3,7 @@ import pullComponents from '../../src/tasks/pull-components'
 import { FAKE_PRESET, FAKE_COMPONENTS } from '../constants'
 import { jest } from '@jest/globals'
 
-jest.spyOn(fs, 'writeFile').mockImplementation(jest.fn((key, data, _) => {
+jest.spyOn(fs, 'writeFileSync').mockImplementation(jest.fn((key, data, _) => {
   [key] = data
 }))
 
@@ -25,7 +25,7 @@ describe('testing pullComponents', () => {
     expect(api.getComponents.mock.calls.length).toBe(1)
   })
 
-  it('pull components should be call fs.writeFile correctly and generate component file', async () => {
+  it('pull components should be call fs.writeFileSync correctly and generate component file', async () => {
     const SPACE = 12345
 
     const api = {
@@ -47,14 +47,14 @@ describe('testing pullComponents', () => {
     const expectFileName = `components.${SPACE}.json`
 
     await pullComponents(api, options)
-    const [path, data] = fs.writeFile.mock.calls[0]
+    const [path, data] = fs.writeFileSync.mock.calls[0]
 
-    expect(fs.writeFile.mock.calls.length).toBe(1)
+    expect(fs.writeFileSync.mock.calls.length).toBe(1)
     expect(path).toBe(`./${expectFileName}`)
     expect(JSON.parse(data)).toEqual({ components: [FAKE_COMPONENTS()[0]] })
   })
 
-  it('pull components should be call fs.writeFile correctly and generate a component and preset files', async () => {
+  it('pull components should be call fs.writeFileSync correctly and generate a component and preset files', async () => {
     const SPACE = 12345
 
     const api = {
@@ -77,10 +77,10 @@ describe('testing pullComponents', () => {
     const expectPresetFileName = `presets.${SPACE}.json`
 
     await pullComponents(api, options)
-    const [compPath, compData] = fs.writeFile.mock.calls[0]
-    const [presetPath, presetData] = fs.writeFile.mock.calls[1]
+    const [compPath, compData] = fs.writeFileSync.mock.calls[0]
+    const [presetPath, presetData] = fs.writeFileSync.mock.calls[1]
 
-    expect(fs.writeFile.mock.calls.length).toBe(2)
+    expect(fs.writeFileSync.mock.calls.length).toBe(2)
 
     expect(compPath).toBe(`./${expectComponentFileName}`)
     expect(JSON.parse(compData)).toEqual({ components: [FAKE_COMPONENTS()[0]] })
@@ -89,7 +89,7 @@ describe('testing pullComponents', () => {
     expect(JSON.parse(presetData)).toEqual({ presets: FAKE_PRESET() })
   })
 
-  it('pull components should be call fs.writeFile and generate a single file for each component', async () => {
+  it('pull components should be call fs.writeFileSync and generate a single file for each component', async () => {
     const SPACE = 12345
 
     const api = {
@@ -110,12 +110,12 @@ describe('testing pullComponents', () => {
     }
 
     await pullComponents(api, options)
-    expect(fs.writeFile.mock.calls.length).toBe(FAKE_COMPONENTS().length)
+    expect(fs.writeFileSync.mock.calls.length).toBe(FAKE_COMPONENTS().length)
 
     for (const comp in FAKE_COMPONENTS()) {
       const fileName = `${FAKE_COMPONENTS()[comp].name}-${SPACE}.json`
       let data = FAKE_COMPONENTS()[comp]
-      const [compPath, compData] = fs.writeFile.mock.calls[comp]
+      const [compPath, compData] = fs.writeFileSync.mock.calls[comp]
 
       if (FAKE_COMPONENTS()[comp].name === 'logo') {
         data = { ...FAKE_COMPONENTS()[comp], component_group_name: '' }
