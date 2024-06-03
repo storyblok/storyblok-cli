@@ -64,8 +64,8 @@ export const getStoriesByComponent = async (api, componentName) => {
 
 /**
  * @method getComponentsFromName
- * @param  {Object} api       API Object
- * @param  {String} component name of component
+ * @param  {Object} api           API Object
+ * @param  {String} componentName name of component
  * @return {Promise<Object>}
  */
 export const getComponentsFromName = async (api, componentName) => {
@@ -91,13 +91,13 @@ export const getComponentsFromName = async (api, componentName) => {
 
 /**
  * @method checkComponentExists
- * @param  {Object} api       API Object
- * @param  {String} component name of component
+ * @param  {Object} api           API Object
+ * @param  {String} componentName name of component
  * @return {Promise<Boolean>}
  */
-export const checkComponentExists = async (api, component) => {
+export const checkComponentExists = async (api, componentName) => {
   try {
-    const componentData = await getComponentsFromName(api, component)
+    const componentData = await getComponentsFromName(api, componentName)
 
     return Promise.resolve(Object.keys(componentData).length > 0)
   } catch (e) {
