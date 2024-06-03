@@ -316,7 +316,7 @@ program
       const {
         type,
         target,
-        source, 
+        source,
         startsWith,
         filter,
         keys,
@@ -413,12 +413,14 @@ program
   .option("--dryrun", "Do not update the story content")
   .option("--publish <PUBLISH_OPTION>", "Publish the content. It can be: all, published or published-with-changes")
   .option("--publish-languages <LANGUAGES>", "Publish specific languages")
+  .option("--starts-with <STARTS_WITH>", "Filter by specific paths")
   .action(async (options) => {
     const field = options.field || "";
     const component = options.component || "";
     const isDryrun = !!options.dryrun;
     const publish = options.publish || null;
     const publishLanguages = options.publishLanguages || "";
+    const startsWith = options.startsWith || ""
 
     const space = program.space;
     if (!space) {
@@ -442,7 +444,7 @@ program
       }
 
       api.setSpaceId(space);
-      await tasks.runMigration(api, component, field, { isDryrun, publish, publishLanguages });
+      await tasks.runMigration(api, component, field, { isDryrun, publish, publishLanguages, startsWith });
     } catch (e) {
       console.log(chalk.red("X") + " An error ocurred when run the migration file: " + e.message);
       process.exit(1);

@@ -43,14 +43,16 @@ export const getNameOfMigrationFile = (component, field) => {
 
 /**
  * @method getComponentsFromName
- * @param  {Object} api       API Object
- * @param  {String} component name of component
+ * @param  {Object} api           API Object
+ * @param  {String} componentName name of component
+ * @param  {String} startsWith    name of component
  * @return {Promise<Array>}
  */
-export const getStoriesByComponent = async (api, componentName) => {
+export const getStoriesByComponent = async (api, componentName, startsWith) => {
   try {
     const stories = await api.getStories({
-      contain_component: componentName
+      contain_component: componentName,
+      starts_with: startsWith
     })
 
     return stories

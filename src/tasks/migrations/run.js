@@ -45,6 +45,7 @@ const runMigration = async (api, component, field, options = {}) => {
   const migrationPath = options.migrationPath || null
   const publish = options.publish || null
   const publishLanguages = options.publishLanguages || null
+  const startsWith = options.startsWith || ""
 
   try {
     const fileName = getNameOfMigrationFile(component, field)
@@ -68,7 +69,7 @@ const runMigration = async (api, component, field, options = {}) => {
     console.log(
       `${chalk.blue('-')} Getting stories for ${component} component`
     )
-    const stories = await getStoriesByComponent(api, component)
+    const stories = await getStoriesByComponent(api, component, startsWith)
 
     if (isEmpty(stories)) {
       console.log(`${chalk.blue('-')} There are no stories for component ${component}!`)
