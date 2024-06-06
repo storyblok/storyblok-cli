@@ -94,14 +94,16 @@ $ storyblok pull-languages --space <SPACE_ID>
 
 ### pull-components
 
-Download your space's components schema as json. By default this command will download 2 files: 1 for the components and 1 for the presets; But if you pass a flag `--separate-files or --sf` the command will create file for each component and presets. And also you could pass a path `--path or -p` to save your components and presets.
+Download your space's components schema as json. By default this command will download 2 files: 1 for the components and 1 for the presets; But if you pass a flag `--separate-files or --sf` the command will create file for each component and presets. And also you could pass a path `--path or -p` to save your components and presets. 
+
+It's highly recommended to use also the `--prefix-presets-names` or `-ppn` parameter if you use `--separate-files` because it will prefix the names of the individual files with the name of the component. This feature solves the issue of multiple presets from different compoentns but with the same name, being written in the same file. In a future major version this will become the default behavior.
 
 ```sh
 $ storyblok pull-components --space <SPACE_ID> # Will save files like components-1234.json
 ```
 
 ```sh
-$ storyblok pull-components --space <SPACE_ID> --separate-files  --file-name production # Will save files like feature-production.json grid-production.json
+$ storyblok pull-components --space <SPACE_ID> --separate-files --prefix-presets-names  --file-name production # Will save files like feature-production.json grid-production.json
 ```
 
 #### Options
