@@ -24,7 +24,7 @@ const getNameFromComponentGroups = (groups, uuid) => {
  * @return {Promise<Object>}
  */
 const pullComponents = async (api, options) => {
-  const { fileName, separateFiles, path } = options
+  const { fileName, separateFiles, path, prefixPresetsNames } = options
 
   try {
     const componentGroups = await api.getComponentGroups()
@@ -52,7 +52,7 @@ const pullComponents = async (api, options) => {
       if (presets.length === 0) return
 
       for (const preset in presets) {
-        const presetFileName = `${presets[preset].name}-${fileName}.json`
+        const presetFileName = `${prefixPresetsNames ? `${presets[preset].preset.component}-` : ""}${presets[preset].name}-${fileName}.json`
         const data = JSON.stringify(presets[preset], null, 2)
         saveFileFactory(presetFileName, data, path)
       }

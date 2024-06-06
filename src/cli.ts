@@ -142,11 +142,12 @@ program
   .option("--sf, --separate-files [value]", "Argument to create a single file for each component")
   .option("-p, --path <path>", "Path to save the component files")
   .option("-f, --file-name <fileName>", "custom name to be used in file(s) name instead of space id")
+  .option("-ppn, --prefix-presets-names", "Prefixes the names of presets with the name of the components")
   .description("Download your space's components schema as json")
   .action(async (options) => {
     console.log(`${chalk.blue("-")} Executing pull-components task`);
     const space = program.space;
-    const { separateFiles, path } = options;
+    const { separateFiles, path, prefixPresetsNames } = options;
     if (!space) {
       console.log(chalk.red("X") + " Please provide the space as argument --space YOUR_SPACE_ID.");
       process.exit(0);
@@ -160,7 +161,7 @@ program
       }
 
       api.setSpaceId(space);
-      await tasks.pullComponents(api, { fileName, separateFiles, path });
+      await tasks.pullComponents(api, { fileName, separateFiles, path, prefixPresetsNames });
     } catch (e) {
       errorHandler(e, COMMANDS.PULL_COMPONENTS);
     }
