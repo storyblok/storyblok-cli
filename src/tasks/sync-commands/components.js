@@ -145,13 +145,13 @@ class SyncComponents {
 
           const componentTarget = this.getTargetComponent(component.name)
 
-          const updatedComponent = await this.updateComponent(
+          await this.updateComponent(
             this.targetSpaceId,
             componentTarget.id,
             componentData,
             componentTarget
           )
-          console.log(chalk.green('✓') + ` Component ${updatedComponent.name} synced`)
+          console.log(chalk.green('✓') + ` Component ${component.name} synced`)
 
           const presetsToSave = this.presetsLib.filterPresetsFromTargetComponent(
             componentPresets || [],

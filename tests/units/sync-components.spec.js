@@ -43,6 +43,8 @@ const FAKE_COMPONENTS_TO_TEST = {
           preview_tmpl: null,
           is_nestable: true,
           all_presets: [],
+          internal_tag_ids: [],
+          internal_tags_list: [],
           preset_id: null,
           real_name: 'feature',
           component_group_uuid: null
@@ -62,9 +64,23 @@ const FAKE_COMPONENTS_TO_TEST = {
           preview_tmpl: null,
           is_nestable: true,
           all_presets: [],
+          internal_tag_ids: [],
+          internal_tags_list: [],
           preset_id: null,
           real_name: 'teaser',
           component_group_uuid: null
+        }
+      ],
+      internal_tags: [
+        {
+          id: 1,
+          name: 'tag1',
+          object_type: 'component',
+        },
+        {
+          id: 2,
+          name: 'tag2',
+          object_type: 'component',
         }
       ]
     }
@@ -132,6 +148,14 @@ const mockGetRequest = (path) => {
     return Promise.resolve(FAKE_COMPONENTS_TO_TEST[extractSpace(path)])
   }
 
+  if (
+    path === 'spaces/001/internal_tags' ||
+    path === 'spaces/002/internal_tags'
+  ) {
+    return Promise.resolve(FAKE_COMPONENTS_TO_TEST[extractSpace(path)])
+  }
+  
+
   if (path === 'spaces/001/presets') {
     return Promise.resolve(FAKE_PRESETS[extractSpace(path)])
   }
@@ -175,7 +199,13 @@ const mockPostRequest = (path, payload) => {
 }
 
 const mockPutRequest = (path, payload) => {
-  return Promise.resolve(true)
+  return Promise.resolve({
+    data: {
+      component: {
+        ...payload.component,
+      }
+    }
+  })
 }
 
 const spyGet = jest.spyOn(Storyblok.prototype, 'get').mockImplementation(mockGetRequest)
@@ -207,6 +237,14 @@ describe('testing syncComponents', () => {
       source: SOURCE_SPACE_TEST,
       target: TARGET_SPACE_TEST
     })
+  })
+
+  afterAll(() => {
+    spyGet.mockClear()
+    spyPost.mockClear()
+    spyPut.mockClear()
+    spyGetPresets.mockClear()
+    spyCreatePresets.mockClear()
   })
 
   it('shoud be get the all data correctly', () => {
@@ -245,6 +283,8 @@ describe('testing syncComponents', () => {
           display_name: null,
           id: 0,
           image: null,
+          internal_tag_ids: [],
+          internal_tags_list: [],
           is_nestable: true,
           is_root: false,
           name: 'teaser',
@@ -303,6 +343,8 @@ describe('testing syncComponents', () => {
           preview_tmpl: null,
           is_nestable: true,
           all_presets: [],
+          internal_tag_ids: [],
+          internal_tags_list: [],
           preset_id: null,
           real_name: 'logo',
           component_group_uuid: '000000002'

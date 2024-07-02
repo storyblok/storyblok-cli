@@ -23,6 +23,8 @@ export const FAKE_COMPONENTS = () => [
     preview_tmpl: null,
     is_nestable: true,
     all_presets: [],
+    internal_tag_ids: [],
+    internal_tags_list: [],
     preset_id: null,
     real_name: 'teaser',
     component_group_uuid: null
@@ -56,6 +58,8 @@ export const FAKE_COMPONENTS = () => [
     preview_tmpl: null,
     is_nestable: true,
     all_presets: [],
+    internal_tag_ids: [],
+    internal_tags_list: [],
     preset_id: null,
     real_name: 'feature',
     component_group_uuid: null
@@ -75,6 +79,8 @@ export const FAKE_COMPONENTS = () => [
     preview_tmpl: null,
     is_nestable: true,
     all_presets: [],
+    internal_tag_ids: [],
+    internal_tags_list: [],
     preset_id: null,
     real_name: 'logo',
     component_group_uuid: '529cc32a-1d97-4b4a-b0b6-28e33dc56c0d'
@@ -101,6 +107,8 @@ export const FAKE_COMPONENTS = () => [
     preview_tmpl: null,
     is_nestable: true,
     all_presets: [],
+    internal_tag_ids: [],
+    internal_tags_list: [],
     preset_id: null,
     real_name: 'blocks',
     component_group_uuid: null
@@ -132,6 +140,8 @@ export const FAKE_COMPONENTS = () => [
         image: null
       }
     ],
+    internal_tag_ids: [],
+    internal_tags_list: [],
     preset_id: null,
     real_name: 'hero',
     component_group_uuid: null
