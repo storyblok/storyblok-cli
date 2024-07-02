@@ -101,11 +101,35 @@ class SyncComponents {
         component.component_group_uuid = targetGroupData.uuid
       }
 
+      const { internal_tags_list, internal_tag_ids, ...rest } = component;
+      const existingTags = await this.getSpaceInternalTags(this.targetSpaceId);
+
+      let processedInternalTagsIds = [];
+      if(internal_tags_list.length > 0) {
+        await internal_tags_list.forEach(async (tag) => {
+          const existingTag = existingTags.find(({ name }) => tag.name === name);
+          if(!existingTag) {
+            try {
+              const response = await this.createComponentInternalTag(this.targetSpaceId, tag);
+              processedInternalTagsIds.push(response.id);
+            } catch (e) {
+              console.error(chalk.red("X") + ` Internal tag ${tag} creation failed: ${e.message}`);
+            }
+          } else {
+            processedInternalTagsIds.push(existingTag.id);
+          }
+        })
+      }
+
       // Create new component on target space
+      const componentData = {
+        ...rest,
+        internal_tag_ids: processedInternalTagsIds || internal_tag_ids
+      }
       try {
         const componentCreated = await this.createComponent(
           this.targetSpaceId,
-          component
+          componentData
         )
 
         console.log(chalk.green('✓') + ` Component ${component.name} created`)
@@ -121,13 +145,13 @@ class SyncComponents {
 
           const componentTarget = this.getTargetComponent(component.name)
 
-          await this.updateComponent(
+          const updatedComponent = await this.updateComponent(
             this.targetSpaceId,
             componentTarget.id,
-            component,
+            componentData,
             componentTarget
           )
-          console.log(chalk.green('✓') + ` Component ${component.name} synced`)
+          console.log(chalk.green('✓') + ` Component ${updatedComponent.name} synced`)
 
           const presetsToSave = this.presetsLib.filterPresetsFromTargetComponent(
             componentPresets || [],
@@ -196,9 +220,16 @@ class SyncComponents {
         targetComponentData
       )
     }
+    // Unfortunatelly, the internal_tag_ids is not recursive and bot being merged correctly
+    payload.component.internal_tag_ids = sourceComponentData.internal_tag_ids
     return this
       .client
       .put(`spaces/${spaceId}/components/${componentId}`, payload)
+      .then(response => {
+        const component = response.data.component || {}
+
+        return component
+      }).catch(error => Promise.reject(error))
   }
 
   mergeComponents (sourceComponent, targetComponent = {}) {
@@ -262,6 +293,21 @@ class SyncComponents {
 
       return targetGroupData.uuid
     })
+  }
+
+  getSpaceInternalTags(spaceId) {
+    return this.client.get(`spaces/${spaceId}/internal_tags`).then((response) => response.data.internal_tags || []);
+  }
+
+  createComponentInternalTag(spaceId, tag) {
+    return this.client.post(`spaces/${spaceId}/internal_tags`, {
+      internal_tag: {
+        name: tag.name,
+        object_type: "component"
+      }
+    })
+    .then((response) => response.data.internal_tag || {})
+    .catch((error) => Promise.reject(error));
   }
 }
 
