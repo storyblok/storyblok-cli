@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+      {
+          "type": "node",
+          "request": "launch",
+          "name": "Launch CLI Script",
+          "skipFiles": ["<node_internals>/**"],
+          "program": "${workspaceFolder}/dist/cli.mjs",
+          "args": ["sync", "--type", "components", "--source", "295017", "--target", "295018"]
+      }
+  ]
+}
