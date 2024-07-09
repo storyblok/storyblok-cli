@@ -41,7 +41,7 @@ export type ComponentPropertySchema = {
   component_whitelist?: string[];
   email_link_type?: boolean;
   exclude_empty_option?: boolean;
-  filter_content_type?: string[];
+  filter_content_type?: string | string[];
   key: string;
   options?: ComponentPropertySchemaOption[];
   pos: number;
