@@ -342,6 +342,12 @@ export class GenerateTypesFromJSONSchemas {
 
     if (property.source === "internal_stories") {
       if (property.filter_content_type) {
+        if (typeof property.filter_content_type === "string") {
+          return {
+            tsType: `(${this.#getStoryType(property.filter_content_type)} | string )${property.type === "options" ? "[]" : ""}`,
+          };
+        }
+
         return {
           tsType: `(${property.filter_content_type
             .map((type2) => this.#getStoryType(type2))
