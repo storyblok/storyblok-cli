@@ -556,8 +556,8 @@ program
   .command(COMMANDS.GENERATE_TYPESCRIPT_TYPEDEFS)
   // Providing backward-compatible flags with Storyblok Generate TS https://github.com/dohomi/storyblok-generate-ts
   .requiredOption(
-    "--source, --sourceFilePaths <PATHS>",
-    "Path(s) to the components JSON file(s) as comma separated values",
+    "--source, --sourceFilePaths <PATHS | GLOB-PATTERN>",
+    "Path(s) to the components JSON file(s) as comma separated values OR a glob pattern as string",
     (paths, _previous) => paths.split(",")
   )
   .option(
