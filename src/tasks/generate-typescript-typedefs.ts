@@ -25,7 +25,7 @@ const generateTypescriptTypedefs: GenerateTSTypedefs = async ({
       return paths.map((sourceFilePath) => JSON.parse(fs.readFileSync(sourceFilePath, "utf8")));
     } catch (e) {
       console.error(
-        `${chalk.red("X")} 
+        `${chalk.red("X")}
         Could not load JSON files from the provided paths: ${paths}. Please check if those files exist.`
       );
       return null;
@@ -42,7 +42,7 @@ const generateTypescriptTypedefs: GenerateTSTypedefs = async ({
       return JSON.parse(fs.readFileSync(path, "utf8"));
     } catch (e) {
       console.error(
-        `${chalk.red("X")} 
+        `${chalk.red("X")}
         Could not load options from the JSON file at ${path}. Please check if the file exists and if it's properly formatted.`
       );
       return null;
