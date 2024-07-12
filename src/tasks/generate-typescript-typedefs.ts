@@ -3,6 +3,7 @@ import fs from "fs";
 import type { GenerateTypescriptTypedefsCLIOptions, JSONSchemaToTSOptions } from "../types";
 import { GenerateTypesFromJSONSchemas } from "../utils/typescript/generateTypesFromJSONSchema";
 import type { JSONSchema } from "json-schema-to-typescript";
+import { glob } from "glob";
 
 type GenerateTSTypedefs = (options: GenerateTypescriptTypedefsCLIOptions) => void;
 
@@ -58,7 +59,7 @@ const generateTypescriptTypedefs: GenerateTSTypedefs = async ({
     ...JSONSchemaToTSCustomOptions,
   };
 
-  const componentsJSONSchemaArray = getJSONSchemasFromPaths(sourceFilePaths)?.flatMap(
+  const componentsJSONSchemaArray = getJSONSchemasFromPaths(await glob(sourceFilePaths))?.flatMap(
     (componentsJSONSchema) => componentsJSONSchema.components || componentsJSONSchema
   );
 
