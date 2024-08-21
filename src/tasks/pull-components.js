@@ -61,7 +61,7 @@ const pullComponents = async (api, options) => {
     }
 
     const file = `components.${fileName}.json`
-    const data = JSON.stringify({ components }, null, 2)
+    const data = JSON.stringify({ components, component_groups: componentGroups }, null, 2)
 
     console.log(`${chalk.green('✓')} We've saved your components in the file: ${file}`)
 
