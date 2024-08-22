@@ -6,6 +6,7 @@ import lodash from 'lodash'
 const { isEmpty } = lodash
 
 const isUrl = source => source.indexOf('http') === 0
+ const listOfGroups = []
 
 /**
  * @method isGroupExists
@@ -111,6 +112,8 @@ const pushComponentsGroups = async (api, group) => {
           parent_id: group.parent_id
         }
       })
+
+      listOfGroups.push(newGroup.data.component_group)
       
       for (const child of group.children) {
         const children = {
@@ -147,7 +150,7 @@ const push = async (api, components, componentsGroups = [], presets = []) => {
       delete components[i].created_at
 
       const groupName = components[i].component_group_name
-      const groupData = getGroupByName(componentsGroups, groupName)
+      const groupData = getGroupByName(listOfGroups, groupName)
 
       if (groupName) {
         components[i].component_group_uuid = groupData.uuid
@@ -159,7 +162,7 @@ const push = async (api, components, componentsGroups = [], presets = []) => {
         Object.keys(schema).forEach(field => {
           if (schema[field].component_group_whitelist) {
             schema[field].component_group_whitelist = schema[field].component_group_whitelist.map(uuid =>
-              getGroupByUuid(componentsGroups, uuid) ? getGroupByUuid(componentsGroups, uuid).uuid : uuid
+              getGroupByUuid(listOfGroups, uuid) ? getGroupByUuid(listOfGroups, uuid).uuid : uuid
             )
           }
         })
