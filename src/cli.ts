@@ -56,7 +56,7 @@ program
     if (api.isAuthorized()) {
       console.log(
         chalk.green("✓") +
-          " The user has been already logged. If you want to change the logged user, you must logout and login again"
+          " The user has been already logged in. If you want to change the logged user, you must logout and login again"
       );
       return;
     }
