@@ -6,6 +6,7 @@ import lodash from 'lodash'
 const { isEmpty } = lodash
 
 const isUrl = source => source.indexOf('http') === 0
+ const listOfGroups = []
 
 /**
  * @method isGroupExists
@@ -69,45 +70,77 @@ const pushComponents = async (api, { source, presetsSource }) => {
     const components = createContentList(rawComponents, 'components')
     const rawPresets = await getDataFromPath(presetsSource)
     const presets = createContentList(rawPresets, 'presets')
+    const componentGroups = createContentList(rawComponents, 'component_groups')
 
-    return push(api, components, presets)
+    return push(api, components, componentGroups, presets)
   } catch (err) {
     console.error(`${chalk.red('X')} Can not push invalid json - please provide a valid json file`)
     return Promise.reject(new Error('Can not push invalid json - please provide a valid json file'))
   }
 }
 
-const push = async (api, components, presets = []) => {
-  const presetsLib = new PresetsLib({ oauthToken: api.accessToken, targetSpaceId: api.spaceId })
-  try {
-    const componentsGroups = await api.getComponentGroups()
-    for (let i = 0; i < components.length; i++) {
-      const groupName = components[i].component_group_name
-      if (components[i].component_group_name) {
-        const currentGroup = getGroupByName(componentsGroups, groupName)
-        if (!currentGroup.name) {
-          try {
-            console.log(`${chalk.blue('-')} Creating the ${groupName} component group...`)
-            const newGroup = await api.post('component_groups', {
-              component_group: {
-                name: groupName
-              }
-            })
-            componentsGroups.push({
-              ...newGroup.data.component_group,
-              source_uuid: components[i].component_group_uuid
-            })
-          } catch (err) {
-            console.log(
-              `${chalk.yellow('-')} Components group ${groupName} already exists...`
-            )
-          }
-        } else {
-          currentGroup.source_uuid = components[i].component_group_uuid
+const buildComponentsGroupsTree = (groups) => {
+    const map = new Map()
+    const roots = []
+
+    groups.forEach(component => {
+      map.set(component.id, { ...component, children: [] })
+    });
+
+    groups.forEach(component => {
+      if (component.parent_id === null) {
+        roots.push(map.get(component.id))
+      } else {
+        const parent = map.get(component.parent_id)
+        if (parent) {
+          parent.children.push(map.get(component.id))
         }
       }
-    }
+    })
 
+    return roots
+  }
+
+const pushComponentsGroups = async (api, group) => {
+    const groupName = group.name
+
+    try {
+      console.log(`${chalk.blue('-')} Creating the ${groupName} component group...`)
+      const newGroup = await api.post('component_groups', {
+        component_group: {
+          name: groupName,
+          parent_id: group.parent_id
+        }
+      })
+
+      listOfGroups.push(newGroup.data.component_group)
+      
+      for (const child of group.children) {
+        const children = {
+          ...child,
+          parent_id: newGroup.data.component_group.id
+        }
+
+        await pushComponentsGroups(api, children)
+      }
+
+    } catch (err) {
+      console.log(err)
+      console.log(
+        `${chalk.yellow('-')} Components group ${groupName} already exists...`
+      )
+    }
+}
+
+const push = async (api, components, componentsGroups = [], presets = []) => {
+  const presetsLib = new PresetsLib({ oauthToken: api.accessToken, targetSpaceId: api.spaceId })
+  try {
+    const componentGroupsTree = buildComponentsGroupsTree(componentsGroups)
+
+    for (const rootComponent of componentGroupsTree) {
+      await pushComponentsGroups(api, rootComponent)
+    }
+    
     const apiComponents = await api.getComponents()
 
     for (let i = 0; i < components.length; i++) {
@@ -117,7 +150,7 @@ const push = async (api, components, presets = []) => {
       delete components[i].created_at
 
       const groupName = components[i].component_group_name
-      const groupData = getGroupByName(componentsGroups, groupName)
+      const groupData = getGroupByName(listOfGroups, groupName)
 
       if (groupName) {
         components[i].component_group_uuid = groupData.uuid
@@ -129,7 +162,7 @@ const push = async (api, components, presets = []) => {
         Object.keys(schema).forEach(field => {
           if (schema[field].component_group_whitelist) {
             schema[field].component_group_whitelist = schema[field].component_group_whitelist.map(uuid =>
-              getGroupByUuid(componentsGroups, uuid) ? getGroupByUuid(componentsGroups, uuid).uuid : uuid
+              getGroupByUuid(listOfGroups, uuid) ? getGroupByUuid(listOfGroups, uuid).uuid : uuid
             )
           }
         })

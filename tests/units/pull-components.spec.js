@@ -51,7 +51,7 @@ describe('testing pullComponents', () => {
 
     expect(fs.writeFileSync.mock.calls.length).toBe(1)
     expect(path).toBe(`./${expectFileName}`)
-    expect(JSON.parse(data)).toEqual({ components: [FAKE_COMPONENTS()[0]] })
+    expect(JSON.parse(data)).toEqual({ components: [FAKE_COMPONENTS()[0]], component_groups: [] })
   })
 
   it('pull components should be call fs.writeFileSync correctly and generate a component and preset files', async () => {
@@ -83,7 +83,7 @@ describe('testing pullComponents', () => {
     expect(fs.writeFileSync.mock.calls.length).toBe(2)
 
     expect(compPath).toBe(`./${expectComponentFileName}`)
-    expect(JSON.parse(compData)).toEqual({ components: [FAKE_COMPONENTS()[0]] })
+    expect(JSON.parse(compData)).toEqual({ components: [FAKE_COMPONENTS()[0]], component_groups: [] })
 
     expect(presetPath).toBe(`./${expectPresetFileName}`)
     expect(JSON.parse(presetData)).toEqual({ presets: FAKE_PRESET() })
