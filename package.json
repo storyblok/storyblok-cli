@@ -50,7 +50,7 @@
     "p-series": "^2.1.0",
     "path": "^0.12.7",
     "simple-uuid": "^0.0.1",
-    "storyblok-js-client": "^6.7.1",
+    "storyblok-js-client": "^6.9.1",
     "update-notifier": "^5.1.0",
     "xml-js": "^1.6.11"
   },
