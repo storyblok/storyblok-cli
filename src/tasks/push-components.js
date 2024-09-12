@@ -64,6 +64,21 @@ const createContentList = (content, key) => {
   else return !isEmpty(content) ? [content] : []
 }
 
+const getSpaceInternalTags = (client, spaceId) => {
+  return client.get(`spaces/${spaceId}/internal_tags`).then((response) => response.data.internal_tags || []);
+}
+
+const createComponentInternalTag =(client, spaceId, tag) => {
+  return client.post(`spaces/${spaceId}/internal_tags`, {
+    internal_tag: {
+      name: tag.name,
+      object_type: "component"
+    }
+  })
+  .then((response) => response.data.internal_tag || {})
+  .catch((error) => Promise.reject(error));
+}
+
 const pushComponents = async (api, { source, presetsSource }) => {
   try {
     const rawComponents = await getDataFromPath(source)
@@ -133,7 +148,9 @@ const pushComponentsGroups = async (api, group) => {
 }
 
 const push = async (api, components, componentsGroups = [], presets = []) => {
-  const presetsLib = new PresetsLib({ oauthToken: api.accessToken, targetSpaceId: api.spaceId })
+  const targetSpaceId = api.spaceId
+  const presetsLib = new PresetsLib({ oauthToken: api.accessToken, targetSpaceId, })
+  const apiClient = api.getClient()
   try {
     const componentGroupsTree = buildComponentsGroupsTree(componentsGroups)
 
@@ -156,6 +173,29 @@ const push = async (api, components, componentsGroups = [], presets = []) => {
         components[i].component_group_uuid = groupData.uuid
         delete components[i].component_group_name
       }
+
+      const { internal_tags_list, internal_tag_ids } = components[i];
+      const existingTags = await getSpaceInternalTags(apiClient, targetSpaceId);
+
+      let processedInternalTagsIds = [];
+      if(internal_tags_list.length > 0) {
+        await internal_tags_list.forEach(async (tag) => {
+          const existingTag = existingTags.find(({ name }) => tag.name === name);
+          if(!existingTag) {
+            try {
+              const response = await createComponentInternalTag(apiClient, targetSpaceId, tag);
+              processedInternalTagsIds.push(response.id);
+            } catch (e) {
+              console.error(chalk.red("X") + ` Internal tag ${tag} creation failed: ${e.message}`);
+            }
+          } else {
+            processedInternalTagsIds.push(existingTag.id);
+          }
+        })
+      }
+
+      components[i].internal_tag_ids = processedInternalTagsIds || internal_tag_ids;
+
 
       const schema = components[i].schema
       if (schema) {
