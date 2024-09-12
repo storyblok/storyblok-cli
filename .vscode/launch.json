@@ -24,7 +24,7 @@
       "request": "launch",
       "name": "Debug pull-components",
       "program": "${workspaceFolder}/dist/cli.mjs",
-      "args": ["pull-components", "--space", "6274026"],
+      "args": ["push-components", "components.295017.json", "--space", "295018"],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "sourceMaps": true,
