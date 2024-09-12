@@ -18,6 +18,17 @@
       "windows": {
         "program": "${workspaceFolder}\\node_modules\\jest\\bin\\jest.js"
       }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug pull-components",
+      "program": "${workspaceFolder}/dist/cli.mjs",
+      "args": ["pull-components", "--space", "6274026"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "sourceMaps": true,
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"]
     }
   ]
 }
