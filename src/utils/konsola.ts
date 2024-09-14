@@ -5,7 +5,7 @@ export function formatHeader(title:string) {
   
   `
 }
-export const consola = {
+export const konsola = {
   
   ok: (message?: string, header: boolean = false) => {
     if(header) {
