@@ -11,6 +11,7 @@ const messageText = ` Starting Blok machine... `
 console.log(formatHeader(`
 ${introText} ${messageText}`))
 
+program.option("-s, --space [value]", "space ID");
 
 program.on('command:*', () => {
   console.error(`Invalid command: ${program.args.join(' ')}`)

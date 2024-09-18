@@ -20,6 +20,9 @@ importers:
       inquirer:
         specifier: ^10.2.2
         version: 10.2.2
+      storyblok-js-client:
+        specifier: ^6.9.2
+        version: 6.9.2
     devDependencies:
       '@storyblok/eslint-config':
         specifier: ^0.2.0
@@ -2564,6 +2567,9 @@ packages:
 
   std-env@3.7.0:
     resolution: {integrity: sha512-JPbdCEQLj1w5GilpiHAx3qJvFndqybBysA3qUOnznweH4QbNYUsW/ea8QzSrnh0vNsezMMw5bcVool8lM0gwzg==}
+
+  storyblok-js-client@6.9.2:
+    resolution: {integrity: sha512-31GM5X/SIP4eJsSMCpAnaPDRmmUotSSWD3Umnuzf3CGqjyakot2Gv5QmuV23fRM7TCDUQlg5wurROmAzkKMKKg==}
 
   string-width@4.2.3:
     resolution: {integrity: sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==}
@@ -5531,6 +5537,8 @@ snapshots:
   stackback@0.0.2: {}
 
   std-env@3.7.0: {}
+
+  storyblok-js-client@6.9.2: {}
 
   string-width@4.2.3:
     dependencies:
