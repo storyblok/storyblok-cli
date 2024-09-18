@@ -1,16 +1,15 @@
-import StoryblokClient from "storyblok-js-client";
-import { regions } from "./constants";
+import StoryblokClient from 'storyblok-js-client'
 
 export interface ApiClientState {
-  region: string,
-  accessToken: string,
+  region: string
+  accessToken: string
   client: StoryblokClient | null
 }
 
 const state: ApiClientState = {
   region: 'eu',
   accessToken: '',
-  client: null
+  client: null,
 }
 
 export function apiClient() {
@@ -21,7 +20,7 @@ export function apiClient() {
   function createClient() {
     state.client = new StoryblokClient({
       accessToken: state.accessToken,
-      region: state.region
+      region: state.region,
     })
   }
 

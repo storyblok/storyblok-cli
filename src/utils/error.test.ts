@@ -1,5 +1,5 @@
-import { handleError } from "./error"
-import { beforeAll, describe, expect, it, vi } from 'vitest'
+import { handleError } from './error'
+import { describe, expect, it, vi } from 'vitest'
 
 describe('error handling', () => {
   it('should prompt an error message', () => {

@@ -5,10 +5,10 @@ export const commands = {
 export const regions = {
   EU: 'eu',
   US: 'us',
-  CN: 'cn'
+  CN: 'cn',
 }
 
 export const DEFAULT_AGENT = {
   SB_Agent: 'SB-CLI',
-  SB_Agent_Version: process.env.npm_package_version || '4.x'
+  SB_Agent_Version: process.env.npm_package_version || '4.x',
 }

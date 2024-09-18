@@ -7,7 +7,7 @@ import inquirer from 'inquirer'
 
 const program = getProgram() // Get the shared singleton instance
 
-const allRegionsText = Object.values(regions).join(", ");
+const allRegionsText = Object.values(regions).join(', ')
 const loginStrategy = [
   {
     type: 'list',
@@ -17,30 +17,31 @@ const loginStrategy = [
       {
         name: 'With email',
         value: 'login-with-email',
-        short: 'Email'
+        short: 'Email',
       },
       {
         name: 'With Token (SSO)',
         value: 'login-with-token',
-        short: 'Token'
-      }
-    ]
-  }
+        short: 'Token',
+      },
+    ],
+  },
 ]
 export const loginCommand = program
   .command(commands.LOGIN)
   .description('Login to the Storyblok CLI')
-  .option("-t, --token <token>", "Token to login directly without questions, like for CI environments")
+  .option('-t, --token <token>', 'Token to login directly without questions, like for CI environments')
   .option(
-    "-r, --region <region>",
+    '-r, --region <region>',
     `The region you would like to work in. Please keep in mind that the region must match the region of your space. This region flag will be used for the other cli's commands. You can use the values: ${allRegionsText}.`,
-    regions.EU
+    regions.EU,
   )
-  .option("-ci", '--ci', false)
+  .option('-ci', '--ci', false)
   .action(async (options) => {
-    if(options.token || options.Ci) {
+    if (options.token || options.Ci) {
       console.log('CI version')
-    } else {
+    }
+    else {
       console.log(formatHeader(chalk.bgHex('#8556D3').bold.white(` ${commands.LOGIN} `)))
 
       const { strategy } = await inquirer.prompt(loginStrategy)
