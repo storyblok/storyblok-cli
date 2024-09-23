@@ -1,6 +1,5 @@
-import { machine } from 'node:os'
 import { addNetrcEntry, getNetrcCredentials, getNetrcFilePath } from './creds'
-import { fs, vol } from 'memfs'
+import { vol } from 'memfs'
 import { join } from 'pathe'
 // tell vitest to use fs mock from __mocks__ folder
 // this can be done in a setup file if fs should always be mocked
