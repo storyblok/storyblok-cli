@@ -9,6 +9,7 @@ export const konsola = {
 
   ok: (message?: string, header: boolean = false) => {
     if (header) {
+      console.log('') // Add a line break
       const successHeader = chalk.bgGreen.bold.white(` Success `)
       console.log(formatHeader(successHeader))
     }
@@ -17,10 +18,12 @@ export const konsola = {
   },
   error: (err: Error, header: boolean = false) => {
     if (header) {
+      console.log('') // Add a line break
       const errorHeader = chalk.bgRed.bold.white(` Error `)
       console.error(formatHeader(errorHeader))
     }
 
     console.error(chalk.red(err.message || err))
+    console.log('') // Add a line break
   },
 }

@@ -43,6 +43,7 @@
     "@types/inquirer": "^9.0.7",
     "@types/node": "^22.5.4",
     "eslint": "^9.10.0",
+    "memfs": "^4.11.2",
     "pathe": "^1.1.2",
     "typescript": "^5.6.2",
     "unbuild": "^2.0.0",

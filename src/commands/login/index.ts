@@ -45,12 +45,13 @@ export const loginCommand = program
       console.log(formatHeader(chalk.bgHex('#8556D3').bold.white(` ${commands.LOGIN} `)))
 
       const { strategy } = await inquirer.prompt(loginStrategy)
-      console.log(strategy)
-    }
-    try {
-      loginWithToken()
-    }
-    catch (error) {
-      handleError(error as Error)
+      try {
+        if (strategy === 'login-with-token') {
+          loginWithToken()
+        }
+      }
+      catch (error) {
+        handleError(error as Error)
+      }
     }
   })
