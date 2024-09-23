@@ -3,15 +3,14 @@ import { commands, regions } from '../../constants'
 import { getProgram } from '../../program'
 import { formatHeader, handleError } from '../../utils'
 import { loginWithToken } from './actions'
-import inquirer from 'inquirer'
+import { select } from '@inquirer/prompts'
 
 const program = getProgram() // Get the shared singleton instance
 
 const allRegionsText = Object.values(regions).join(', ')
-const loginStrategy = [
-  {
-    type: 'list',
-    name: 'strategy',
+
+const loginStrategy
+  = {
     message: 'How would you like to login?',
     choices: [
       {
@@ -25,8 +24,7 @@ const loginStrategy = [
         short: 'Token',
       },
     ],
-  },
-]
+  }
 export const loginCommand = program
   .command(commands.LOGIN)
   .description('Login to the Storyblok CLI')
@@ -44,7 +42,7 @@ export const loginCommand = program
     else {
       console.log(formatHeader(chalk.bgHex('#8556D3').bold.white(` ${commands.LOGIN} `)))
 
-      const { strategy } = await inquirer.prompt(loginStrategy)
+      const strategy = await select(loginStrategy)
       try {
         if (strategy === 'login-with-token') {
           loginWithToken()
