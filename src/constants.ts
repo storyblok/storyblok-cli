@@ -6,6 +6,8 @@ export const regions = {
   EU: 'eu',
   US: 'us',
   CN: 'cn',
+  CA: 'ca',
+  AP: 'ap',
 }
 
 export const DEFAULT_AGENT = {

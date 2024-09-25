@@ -1,7 +1,7 @@
 import chalk from 'chalk'
 import { commands, regions } from '../../constants'
 import { getProgram } from '../../program'
-import { formatHeader, handleError } from '../../utils'
+import { formatHeader, handleError, isRegion, konsola } from '../../utils'
 import { loginWithToken } from './actions'
 import { select } from '@inquirer/prompts'
 
@@ -36,8 +36,13 @@ export const loginCommand = program
   )
   .option('-ci', '--ci', false)
   .action(async (options) => {
-    if (options.token || options.Ci) {
+    const { token, Ci, region } = options
+
+    if (token || Ci) {
       console.log('CI version')
+    }
+    if (!isRegion(region)) {
+      konsola.error(new Error(`The provided region: ${region} is not valid. Please use one of the following values: ${Object.values(regions).join(' | ')}`), true)
     }
     else {
       console.log(formatHeader(chalk.bgHex('#8556D3').bold.white(` ${commands.LOGIN} `)))
@@ -46,6 +51,10 @@ export const loginCommand = program
       try {
         if (strategy === 'login-with-token') {
           loginWithToken()
+        }
+
+        else {
+          console.log('Not implemented yet')
         }
       }
       catch (error) {
