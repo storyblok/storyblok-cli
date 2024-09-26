@@ -139,29 +139,43 @@ export const getMultiassetJSONSchema = (title: string): JSONSchema => ({
   },
 });
 
+// TODO: find a reliable way to share props among different Link Types to increase maintainability
+// Currently not possible because of JSONSchema4 complaining
+const multilinkSharedRequiredProps = ["fieldtype", "id", "url", "cached_url", "linktype"];
+
 export const getMultilinkJSONSchema = (title: string): JSONSchema => ({
   $id: "#/multilink",
   title,
   oneOf: [
     {
       type: "object",
+      required: multilinkSharedRequiredProps,
       properties: {
-        id: {
+        // Shared props
+        fieldtype: {
           type: "string",
+          enum: ["multilink"],
         },
-        cached_url: {
-          type: "string",
-        },
+        id: { type: "string" },
+        url: { type: "string" },
+        cached_url: { type: "string" },
+        target: { type: "string", enum: ["_blank", "_self"] },
+        // Custom props
         anchor: {
+          type: "string",
+        },
+        rel: {
+          type: "string",
+        },
+        title: {
+          type: "string",
+        },
+        prep: {
           type: "string",
         },
         linktype: {
           type: "string",
           enum: ["story"],
-        },
-        target: {
-          type: "string",
-          enum: ["_self", "_blank"],
         },
         story: {
           type: "object",
@@ -248,29 +262,44 @@ export const getMultilinkJSONSchema = (title: string): JSONSchema => ({
     },
     {
       type: "object",
+      required: multilinkSharedRequiredProps,
       properties: {
-        url: {
+        // Shared props
+        fieldtype: {
           type: "string",
+          enum: ["multilink"],
         },
-        cached_url: {
-          type: "string",
-        },
-        anchor: {
-          type: "string",
-        },
+        id: { type: "string" },
+        url: { type: "string" },
+        cached_url: { type: "string" },
+        target: { type: "string", enum: ["_blank", "_self"] },
+        // Custom props
         linktype: {
           type: "string",
-          enum: ["asset", "url"],
+          enum: ["url"],
         },
-        target: {
+        rel: {
           type: "string",
-          enum: ["_self", "_blank"],
+        },
+        title: {
+          type: "string",
         },
       },
     },
     {
       type: "object",
+      required: multilinkSharedRequiredProps,
       properties: {
+        // Shared props
+        fieldtype: {
+          type: "string",
+          enum: ["multilink"],
+        },
+        id: { type: "string" },
+        url: { type: "string" },
+        cached_url: { type: "string" },
+        target: { type: "string", enum: ["_blank", "_self"] },
+        // Custom props
         email: {
           type: "string",
         },
@@ -278,9 +307,25 @@ export const getMultilinkJSONSchema = (title: string): JSONSchema => ({
           type: "string",
           enum: ["email"],
         },
-        target: {
+      },
+    },
+    {
+      type: "object",
+      required: multilinkSharedRequiredProps,
+      properties: {
+        // Shared props
+        fieldtype: {
           type: "string",
-          enum: ["_self", "_blank"],
+          enum: ["multilink"],
+        },
+        id: { type: "string" },
+        url: { type: "string" },
+        cached_url: { type: "string" },
+        target: { type: "string", enum: ["_blank", "_self"] },
+        // Custom props
+        linktype: {
+          type: "string",
+          enum: ["asset"],
         },
       },
     },
