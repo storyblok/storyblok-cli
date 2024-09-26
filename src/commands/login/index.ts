@@ -1,14 +1,14 @@
 import chalk from 'chalk'
-import { commands, regions } from '../../constants'
+import { input, password, select } from '@inquirer/prompts'
+import { commands, regionNames, regions, regionsDomain } from '../../constants'
 import { getProgram } from '../../program'
 import { formatHeader, handleError, isRegion, konsola } from '../../utils'
-import { loginWithToken } from './actions'
-import { select } from '@inquirer/prompts'
+import { loginWithEmailAndPassword, loginWithOtp, loginWithToken } from './actions'
+import { addNetrcEntry } from '../../creds'
 
 const program = getProgram() // Get the shared singleton instance
 
-const allRegionsText = Object.values(regions).join(', ')
-
+const allRegionsText = Object.values(regions).join(',')
 const loginStrategy
   = {
     message: 'How would you like to login?',
@@ -37,12 +37,24 @@ export const loginCommand = program
   .option('-ci', '--ci', false)
   .action(async (options) => {
     const { token, Ci, region } = options
-
-    if (token || Ci) {
-      console.log('CI version')
-    }
     if (!isRegion(region)) {
       konsola.error(new Error(`The provided region: ${region} is not valid. Please use one of the following values: ${Object.values(regions).join(' | ')}`), true)
+    }
+
+    if (token || Ci) {
+      try {
+        const { user } = await loginWithToken(token, region)
+        await addNetrcEntry({
+          machineName: regionsDomain[region],
+          login: user.email,
+          password: token,
+          region,
+        })
+        konsola.ok(`Successfully logged in with token`)
+      }
+      catch (error) {
+        handleError(error as Error)
+      }
     }
     else {
       console.log(formatHeader(chalk.bgHex('#8556D3').bold.white(` ${commands.LOGIN} `)))
@@ -50,11 +62,64 @@ export const loginCommand = program
       const strategy = await select(loginStrategy)
       try {
         if (strategy === 'login-with-token') {
-          loginWithToken()
+          const userToken = await password({
+            message: 'Please enter your token:',
+            validate: (value: string) => {
+              return value.length > 0
+            },
+          })
+
+          const { user } = await loginWithToken(userToken, region)
+
+          await addNetrcEntry({
+            machineName: regionsDomain[region],
+            login: user.email,
+            password: userToken,
+            region,
+          })
+
+          konsola.ok(`Successfully logged in with token`)
         }
 
         else {
-          console.log('Not implemented yet')
+          const userEmail = await input({
+            message: 'Please enter your email address:',
+            required: true,
+            validate: (value: string) => {
+              const emailRegex = /^[^\s@]+@[^\s@][^\s.@]*\.[^\s@]+$/
+              return emailRegex.test(value)
+            },
+          })
+          const userPassword = await password({
+            message: 'Please enter your password:',
+          })
+          const userRegion = await select({
+            message: 'Please select the region you would like to work in:',
+            choices: Object.values(regions).map(region => ({
+              name: regionNames[region],
+              value: region,
+            })),
+            default: regions.EU,
+          })
+          const { otp_required } = await loginWithEmailAndPassword(userEmail, userPassword, userRegion as string)
+
+          if (otp_required) {
+            const otp = await input({
+              message: 'We sent a code to your email / phone, please insert the authentication code:',
+              required: true,
+            })
+
+            const { access_token } = await loginWithOtp(userEmail, userPassword, otp, userRegion as string)
+
+            await addNetrcEntry({
+              machineName: regionsDomain[userRegion],
+              login: userEmail,
+              password: access_token,
+              region: userRegion,
+            })
+
+            konsola.ok(`Successfully logged in with email ${chalk.hex('#45bfb9')(userEmail)}`, true)
+          }
         }
       }
       catch (error) {
