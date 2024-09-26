@@ -4,27 +4,65 @@ export const getAssetJSONSchema = (title: string): JSONSchema => ({
   $id: "#/asset",
   title,
   type: "object",
-  required: ["id", "filename", "name"],
+  required: ["id", "fieldtype", "filename", "name", "title", "focus", "alt"],
   properties: {
     alt: {
-      type: "string",
+      type: ["string", "null"],
     },
     copyright: {
+      type: ["string", "null"],
+    },
+    fieldtype: {
       type: "string",
+      enum: ["asset"],
     },
     id: {
       type: "number",
     },
     filename: {
-      type: "string",
+      type: ["string", "null"],
     },
     name: {
       type: "string",
     },
     title: {
-      type: "string",
+      type: ["string", "null"],
     },
     focus: {
+      type: ["string", "null"],
+    },
+    meta_data: {
+      type: "object",
+    },
+    source: {
+      type: ["string", "null"],
+    },
+    is_external_url: {
+      type: "boolean",
+    },
+    is_private: {
+      type: "boolean",
+    },
+    src: {
+      type: "string",
+    },
+    updated_at: {
+      type: "string",
+    },
+    // Cloudinary integration keys
+    width: {
+      type: ["number", "null"],
+    },
+    height: {
+      type: ["number", "null"],
+    },
+    aspect_ratio: {
+      type: ["number", "null"],
+    },
+    public_id: {
+      type: ["string", "null"],
+    },
+    content_type: {
       type: "string",
     },
   },
