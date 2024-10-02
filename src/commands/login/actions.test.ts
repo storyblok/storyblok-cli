@@ -35,12 +35,12 @@ describe('login actions', () => {
       )
     })
 
-    it('should throw a generic error for other issues', async () => {
+    it('should throw a network error if response is empty (network)', async () => {
       const mockError = new Error('Network error')
       ofetch.mockRejectedValue(mockError)
 
       await expect(loginWithToken('any-token', 'eu')).rejects.toThrow(
-        'Error logging with token',
+        'No response from server, please check if you are correctly connected to internet',
       )
     })
   })
