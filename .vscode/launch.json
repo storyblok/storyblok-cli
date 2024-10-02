@@ -22,9 +22,9 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug pull-components",
-      "program": "${workspaceFolder}/dist/cli.mjs",
-      "args": ["push-components", "components.295017.json", "--space", "295018"],
+      "name": "Debug login",
+      "program": "${workspaceFolder}/dist/index.mjs",
+      "args": ["login", "--token", "295018"],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "sourceMaps": true,

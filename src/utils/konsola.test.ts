@@ -24,7 +24,8 @@ describe('konsola', () => {
       const consoleSpy = vi.spyOn(console, 'error')
 
       konsola.error(new Error('Oh gosh, this is embarrasing'))
-      expect(consoleSpy).toHaveBeenCalledWith(chalk.red(`Oh gosh, this is embarrasing`))
+      const errorText = `${chalk.red('x')} Oh gosh, this is embarrasing`
+      expect(consoleSpy).toHaveBeenCalledWith(errorText)
     })
 
     it('should prompt an error message with header', () => {

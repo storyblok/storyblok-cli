@@ -7,7 +7,7 @@ import './commands/login'
 const program = getProgram()
 console.clear()
 const introText = chalk.bgHex('#45bfb9').bold.black(` Storyblok CLI `)
-const messageText = ` Starting Blok machine... `
+const messageText = ` `
 console.log(formatHeader(`
 ${introText} ${messageText}`))
 
@@ -17,6 +17,14 @@ program.on('command:*', () => {
   console.error(`Invalid command: ${program.args.join(' ')}`)
   program.help()
 })
+
+/* console.log(`
+${chalk.hex('#45bfb9')(' ─────╮')}
+${chalk.hex('#45bfb9')('│     │')}
+${chalk.hex('#45bfb9')('│')} ◠ ◡ ◠
+${chalk.hex('#45bfb9')('|_  __|')}
+${chalk.hex('#45bfb9')('  |/ ')}
+`) */
 
 try {
   program.parse(process.argv)

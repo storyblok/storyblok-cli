@@ -23,7 +23,7 @@ export const konsola = {
       console.error(formatHeader(errorHeader))
     }
 
-    console.error(chalk.red(err.message || err))
+    console.error(`${chalk.red('x')} ${err.message || err}`)
     console.log('') // Add a line break
   },
 }

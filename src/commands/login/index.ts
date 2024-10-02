@@ -53,7 +53,7 @@ export const loginCommand = program
         konsola.ok(`Successfully logged in with token`)
       }
       catch (error) {
-        handleError(error as Error)
+        handleError(error as Error, true)
       }
     }
     else {
@@ -123,7 +123,7 @@ export const loginCommand = program
         }
       }
       catch (error) {
-        handleError(error as Error)
+        handleError(error as Error, true)
       }
     }
   })
