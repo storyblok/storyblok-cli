@@ -15,6 +15,7 @@ vi.mock('./actions', () => ({
 
 vi.mock('../../creds', () => ({
   addNetrcEntry: vi.fn(),
+  isAuthorized: vi.fn(),
 }))
 
 vi.mock('../../utils', async () => {

@@ -1,4 +1,4 @@
-import { addNetrcEntry, getNetrcCredentials, getNetrcFilePath } from './creds'
+import { addNetrcEntry, getNetrcCredentials, getNetrcFilePath, isAuthorized } from './creds'
 import { vol } from 'memfs'
 import { join } from 'pathe'
 // tell vitest to use fs mock from __mocks__ folder
@@ -160,6 +160,39 @@ describe('creds', async () => {
     password my_access_token
     region eu
 `)
+    })
+  })
+
+  describe('isAuthorized', () => {
+    beforeEach(() => {
+      vol.reset()
+      process.env.HOME = '/temp' // Ensure getNetrcFilePath points to /temp/.netrc
+
+      vol.fromJSON({
+        '/temp/.netrc': `machine api.storyblok.com
+        login julio.iglesias@storyblok.com
+        password my_access_token
+        region eu`,
+      })
+    })
+    it('should return true if .netrc file contains an entry', async () => {
+      vi.doMock('./creds', () => {
+        return {
+          getNetrcCredentials: async () => {
+            return {
+              'api.storyblok.com': {
+                login: 'julio.iglesias@storyblok.co,m',
+                password: 'my_access',
+                region: 'eu',
+              },
+            }
+          },
+        }
+      })
+
+      const result = await isAuthorized()
+
+      expect(result).toBe(true)
     })
   })
 })

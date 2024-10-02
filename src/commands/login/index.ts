@@ -4,7 +4,7 @@ import { commands, regionNames, regions, regionsDomain } from '../../constants'
 import { getProgram } from '../../program'
 import { formatHeader, handleError, isRegion, konsola } from '../../utils'
 import { loginWithEmailAndPassword, loginWithOtp, loginWithToken } from './actions'
-import { addNetrcEntry } from '../../creds'
+import { addNetrcEntry, isAuthorized } from '../../creds'
 
 const program = getProgram() // Get the shared singleton instance
 
@@ -38,6 +38,12 @@ export const loginCommand = program
     const { token, region } = options
     if (!isRegion(region)) {
       konsola.error(new Error(`The provided region: ${region} is not valid. Please use one of the following values: ${Object.values(regions).join(' | ')}`), true)
+    }
+
+    if (await isAuthorized()) {
+      konsola.ok(`You are already logged in. If you want to login with a different account, please logout first.
+`)
+      return
     }
 
     if (token) {

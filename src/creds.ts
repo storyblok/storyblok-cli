@@ -159,7 +159,24 @@ export const addNetrcEntry = async ({
 
     konsola.ok(`Successfully added/updated entry for machine ${machineName} in ${chalk.hex('#45bfb9')(filePath)}`, true)
   }
-  catch (error: any) {
-    handleError(new Error(`Error adding/updating entry for machine ${machineName} in .netrc file: ${error.message}`), true)
+  catch (error: unknown) {
+    handleError(new Error(`Error adding/updating entry for machine ${machineName} in .netrc file: ${(error as Error).message}`), true)
+  }
+}
+
+export async function isAuthorized(): Promise<boolean> {
+  try {
+    const machines = await getNetrcCredentials()
+    // Check if there is any machine with a valid email and token
+    for (const machine of Object.values(machines)) {
+      if (machine.login && machine.password) {
+        return true
+      }
+    }
+    return false
+  }
+  catch (error: unknown) {
+    handleError(new Error(`Error checking authorization in .netrc file: ${(error as Error).message}`), true)
+    return false
   }
 }
