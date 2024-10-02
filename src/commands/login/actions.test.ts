@@ -7,10 +7,6 @@ vi.mock('ofetch', () => ({
   ofetch: vi.fn(),
 }))
 
-vi.mock('../../utils', () => ({
-  maskToken: (token: string) => token.replace(/.(?=.{4})/g, '*'),
-}))
-
 describe('login actions', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -33,7 +29,7 @@ describe('login actions', () => {
       ofetch.mockRejectedValue(mockError)
 
       await expect(loginWithToken('invalid-token', 'eu')).rejects.toThrow(
-        new Error(`The token provided ${chalk.bold('*********oken')} is invalid: ${chalk.bold('401 Unauthorized')}
+        new Error(`The token provided ${chalk.bold('inva*********')} is invalid: ${chalk.bold('401 Unauthorized')}
 
   Please make sure you are using the correct token and try again.`),
       )
