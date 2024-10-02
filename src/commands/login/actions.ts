@@ -15,7 +15,7 @@ export const loginWithToken = async (token: string, region: string) => {
   catch (error) {
     if ((error as FetchError).response?.status === 401) {
       throw new Error(`The token provided ${chalk.bold(maskToken(token))} is invalid: ${chalk.bold(`401 ${(error as FetchError).data.error}`)}
-      
+
   Please make sure you are using the correct token and try again.`)
     }
     throw new Error('Error logging with token', error as Error)

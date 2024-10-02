@@ -4,27 +4,21 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug Jest Tests",
-      "runtimeArgs": [
-        "--experimental-vm-modules"
-      ],
-      "args": [
-        "--silent",
-        "--runInBand"
-      ],
+      "name": "Debug Vitest Tests",
+      "program": "${workspaceFolder}/node_modules/vitest/vitest.mjs",
+      "args": ["run"],
+      "autoAttachChildProcesses": true,
+      "smartStep": true,
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
-      "program": "${workspaceFolder}/node_modules/.bin/jest",
-      "windows": {
-        "program": "${workspaceFolder}\\node_modules\\jest\\bin\\jest.js"
-      }
+      "skipFiles": ["<node_internals>/**"]
     },
     {
       "type": "node",
       "request": "launch",
       "name": "Debug login",
       "program": "${workspaceFolder}/dist/index.mjs",
-      "args": ["login", "--token", "295018"],
+      "args": ["login", "--token", "invalidt-token"],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "sourceMaps": true,
