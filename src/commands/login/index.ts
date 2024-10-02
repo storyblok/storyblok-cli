@@ -34,14 +34,13 @@ export const loginCommand = program
     `The region you would like to work in. Please keep in mind that the region must match the region of your space. This region flag will be used for the other cli's commands. You can use the values: ${allRegionsText}.`,
     regions.EU,
   )
-  .option('-ci', '--ci', false)
   .action(async (options) => {
-    const { token, Ci, region } = options
+    const { token, region } = options
     if (!isRegion(region)) {
       konsola.error(new Error(`The provided region: ${region} is not valid. Please use one of the following values: ${Object.values(regions).join(' | ')}`), true)
     }
 
-    if (token || Ci) {
+    if (token) {
       try {
         const { user } = await loginWithToken(token, region)
         await addNetrcEntry({
