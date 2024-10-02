@@ -29,7 +29,8 @@
     "dev": "node dist/index.mjs",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "test": "vitest"
+    "test": "vitest",
+    "coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@inquirer/prompts": "^6.0.1",
@@ -43,6 +44,7 @@
     "@storyblok/eslint-config": "^0.2.0",
     "@types/inquirer": "^9.0.7",
     "@types/node": "^22.5.4",
+    "@vitest/coverage-v8": "^2.1.1",
     "eslint": "^9.10.0",
     "memfs": "^4.11.2",
     "pathe": "^1.1.2",
