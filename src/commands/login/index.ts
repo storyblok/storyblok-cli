@@ -117,7 +117,7 @@ export const loginCommand = program
               region: userRegion,
             })
 
-            konsola.ok(`Successfully logged in with email ${chalk.hex('#45bfb9')(userEmail)}`, true)
+            konsola.ok(`Successfully logged in with email ${chalk.hex('#45bfb9')(userEmail)}`)
           }
         }
       }
