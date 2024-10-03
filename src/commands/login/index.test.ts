@@ -1,7 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { loginWithEmailAndPassword, loginWithOtp, loginWithToken } from './actions'
 import { loginCommand } from './'
-import { addNetrcEntry } from '../../creds'
 import { konsola } from '../../utils'
 import { input, password, select } from '@inquirer/prompts'
 import { regions } from '../../constants'

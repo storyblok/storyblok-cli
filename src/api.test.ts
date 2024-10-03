@@ -15,8 +15,6 @@ vi.mock('storyblok-js-client', () => {
 })
 
 // Mocking the session module
-const sessionMock = vi.fn()
-// Mocking the session module
 vi.mock('./session', () => {
   let _cache
   const session = () => {
