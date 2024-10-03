@@ -95,15 +95,36 @@ export const getNetrcCredentials = async (filePath: string = getNetrcFilePath())
   }
 }
 
-export const getCredentialsForMachine = (machines: Record<string, NetrcMachine> = {}, machineName: string) => {
-  if (machines[machineName]) {
-    return machines[machineName]
-  }
-  else if (machines.default) {
-    return machines.default
+export const getCredentialsForMachine = (
+  machines: Record<string, NetrcMachine> = {},
+  machineName?: string,
+) => {
+  if (machineName) {
+    // Machine name provided
+    if (machines[machineName]) {
+      return machines[machineName]
+    }
+    else if (machines.default) {
+      return machines.default
+    }
+    else {
+      return null
+    }
   }
   else {
-    return null
+    // No machine name provided
+    if (machines.default) {
+      return machines.default
+    }
+    else {
+      const machineNames = Object.keys(machines)
+      if (machineNames.length > 0) {
+        return machines[machineNames[0]]
+      }
+      else {
+        return null
+      }
+    }
   }
 }
 

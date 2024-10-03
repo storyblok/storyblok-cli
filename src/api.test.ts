@@ -14,10 +14,37 @@ vi.mock('storyblok-js-client', () => {
   }
 })
 
+// Mocking the session module
+const sessionMock = vi.fn()
+// Mocking the session module
+vi.mock('./session', () => {
+  let _cache
+  const session = () => {
+    if (!_cache) {
+      _cache = {
+        state: {
+          isLoggedIn: true,
+          password: 'test-token',
+          region: 'eu',
+        },
+        updateSession: vi.fn(),
+        persistCredentials: vi.fn(),
+        initializeSession: vi.fn(),
+      }
+    }
+    return _cache
+  }
+
+  return {
+    session,
+  }
+})
+
 describe('storyblok API Client', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     // Reset the module state before each test to ensure test isolation
     vi.resetModules()
+    vi.clearAllMocks()
   })
 
   it('should have a default region of "eu"', () => {

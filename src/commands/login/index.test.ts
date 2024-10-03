@@ -4,8 +4,9 @@ import { loginCommand } from './'
 import { addNetrcEntry } from '../../creds'
 import { konsola } from '../../utils'
 import { input, password, select } from '@inquirer/prompts'
-import { regions } from 'src/constants'
+import { regions } from '../../constants'
 import chalk from 'chalk'
+import { session } from '../../session' // Import as module to mock properly
 
 vi.mock('./actions', () => ({
   loginWithEmailAndPassword: vi.fn(),
@@ -16,7 +17,31 @@ vi.mock('./actions', () => ({
 vi.mock('../../creds', () => ({
   addNetrcEntry: vi.fn(),
   isAuthorized: vi.fn(),
+  getNetrcCredentials: vi.fn(),
+  getCredentialsForMachine: vi.fn(),
 }))
+
+// Mocking the session module
+vi.mock('../../session', () => {
+  let _cache
+  const session = () => {
+    if (!_cache) {
+      _cache = {
+        state: {
+          isLoggedIn: false,
+        },
+        updateSession: vi.fn(),
+        persistCredentials: vi.fn(),
+        initializeSession: vi.fn(),
+      }
+    }
+    return _cache
+  }
+
+  return {
+    session,
+  }
+})
 
 vi.mock('../../utils', async () => {
   const actualUtils = await vi.importActual('../../utils')
@@ -41,6 +66,7 @@ vi.mock('@inquirer/prompts', () => ({
 
 describe('loginCommand', () => {
   beforeEach(() => {
+    vi.resetAllMocks()
     vi.clearAllMocks()
   })
 
@@ -143,13 +169,8 @@ describe('loginCommand', () => {
         // Verify that loginWithToken was called with the correct arguments
         expect(loginWithToken).toHaveBeenCalledWith('test-token', 'eu')
 
-        // Verify that addNetrcEntry was called with the correct arguments
-        expect(addNetrcEntry).toHaveBeenCalledWith({
-          machineName: 'api.storyblok.com',
-          login: mockUser.email,
-          password: 'test-token',
-          region: 'eu',
-        })
+        // Verify that updateSession was called with the correct arguments
+        expect(session().updateSession).toHaveBeenCalledWith(mockUser.email, 'test-token', 'eu')
       })
     })
   })
@@ -163,12 +184,7 @@ describe('loginCommand', () => {
       await loginCommand.parseAsync(['node', 'test', '--token', mockToken])
 
       expect(loginWithToken).toHaveBeenCalledWith(mockToken, 'eu')
-      expect(addNetrcEntry).toHaveBeenCalledWith({
-        machineName: 'api.storyblok.com',
-        login: mockUser.email,
-        password: mockToken,
-        region: 'eu',
-      })
+
       expect(konsola.ok).toHaveBeenCalledWith('Successfully logged in with token')
     })
 
@@ -180,12 +196,7 @@ describe('loginCommand', () => {
       await loginCommand.parseAsync(['node', 'test', '--token', mockToken, '--region', 'us'])
 
       expect(loginWithToken).toHaveBeenCalledWith(mockToken, 'us')
-      expect(addNetrcEntry).toHaveBeenCalledWith({
-        machineName: 'api-us.storyblok.com',
-        login: mockUser.email,
-        password: mockToken,
-        region: 'us',
-      })
+
       expect(konsola.ok).toHaveBeenCalledWith('Successfully logged in with token')
     })
 

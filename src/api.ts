@@ -1,4 +1,5 @@
 import StoryblokClient from 'storyblok-js-client'
+import { session } from './session'
 
 export interface ApiClientState {
   region: string
@@ -18,9 +19,13 @@ export function apiClient() {
   }
 
   function createClient() {
+    const userSession = session()
+    if (!userSession.state.isLoggedIn) {
+      throw new Error('User is not logged in')
+    }
     state.client = new StoryblokClient({
-      accessToken: state.accessToken,
-      region: state.region,
+      accessToken: userSession.state.password!,
+      region: userSession.state.region!,
     })
   }
 

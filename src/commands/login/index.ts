@@ -4,7 +4,8 @@ import { commands, regionNames, regions, regionsDomain } from '../../constants'
 import { getProgram } from '../../program'
 import { formatHeader, handleError, isRegion, konsola } from '../../utils'
 import { loginWithEmailAndPassword, loginWithOtp, loginWithToken } from './actions'
-import { addNetrcEntry, isAuthorized } from '../../creds'
+
+import { session } from '../../session'
 
 const program = getProgram() // Get the shared singleton instance
 
@@ -25,6 +26,7 @@ const loginStrategy
       },
     ],
   }
+
 export const loginCommand = program
   .command(commands.LOGIN)
   .description('Login to the Storyblok CLI')
@@ -40,7 +42,11 @@ export const loginCommand = program
       konsola.error(new Error(`The provided region: ${region} is not valid. Please use one of the following values: ${Object.values(regions).join(' | ')}`), true)
     }
 
-    if (await isAuthorized()) {
+    const { state, updateSession, persistCredentials, initializeSession } = session()
+
+    await initializeSession()
+
+    if (state.isLoggedIn) {
       konsola.ok(`You are already logged in. If you want to login with a different account, please logout first.
 `)
       return
@@ -49,12 +55,9 @@ export const loginCommand = program
     if (token) {
       try {
         const { user } = await loginWithToken(token, region)
-        await addNetrcEntry({
-          machineName: regionsDomain[region],
-          login: user.email,
-          password: token,
-          region,
-        })
+        updateSession(user.email, token, region)
+        await persistCredentials(regionsDomain[region])
+
         konsola.ok(`Successfully logged in with token`)
       }
       catch (error) {
@@ -76,12 +79,8 @@ export const loginCommand = program
 
           const { user } = await loginWithToken(userToken, region)
 
-          await addNetrcEntry({
-            machineName: regionsDomain[region],
-            login: user.email,
-            password: userToken,
-            region,
-          })
+          updateSession(user.email, userToken, region)
+          await persistCredentials(regionsDomain[region])
 
           konsola.ok(`Successfully logged in with token`)
         }
@@ -115,13 +114,8 @@ export const loginCommand = program
             })
 
             const { access_token } = await loginWithOtp(userEmail, userPassword, otp, userRegion as string)
-
-            await addNetrcEntry({
-              machineName: regionsDomain[userRegion],
-              login: userEmail,
-              password: access_token,
-              region: userRegion,
-            })
+            updateSession(userEmail, access_token, userRegion)
+            await persistCredentials(regionsDomain[userRegion])
 
             konsola.ok(`Successfully logged in with email ${chalk.hex('#45bfb9')(userEmail)}`)
           }
