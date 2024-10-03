@@ -164,6 +164,51 @@ export const addNetrcEntry = async ({
   }
 }
 
+// Function to remove an entry from the .netrc file asynchronously
+export const removeNetrcEntry = async (
+  filePath = getNetrcFilePath(),
+  machineName?: string,
+) => {
+  try {
+    let machines: Record<string, NetrcMachine> = {}
+
+    // Check if the file exists
+    try {
+      await fs.access(filePath)
+      // File exists, read and parse it
+      const content = await fs.readFile(filePath, 'utf8')
+      machines = parseNetrcContent(content)
+    }
+    catch {
+      // File does not exist
+      console.warn(`.netrc file not found at path: ${filePath}. No action taken.`)
+      return
+    }
+
+    if (machineName) {
+      // Remove the machine entry
+      delete machines[machineName]
+    }
+    else {
+      // Remove all machine entries
+      machines = {}
+    }
+
+    // Serialize machines back into .netrc format
+    const newContent = serializeNetrcMachines(machines)
+
+    // Write the updated content back to the .netrc file
+    await fs.writeFile(filePath, newContent, {
+      mode: 0o600, // Set file permissions
+    })
+
+    konsola.ok(`Successfully removed entries from ${chalk.hex('#45bfb9')(filePath)}`, true)
+  }
+  catch (error: unknown) {
+    handleError(new Error(`Error removing entry for machine ${machineName} from .netrc file: ${(error as Error).message}`), true)
+  }
+}
+
 export async function isAuthorized(): Promise<boolean> {
   try {
     const machines = await getNetrcCredentials()

@@ -1,4 +1,4 @@
-import { addNetrcEntry, getNetrcCredentials, getNetrcFilePath, isAuthorized } from './creds'
+import { addNetrcEntry, getNetrcCredentials, getNetrcFilePath, isAuthorized, removeNetrcEntry } from './creds'
 import { vol } from 'memfs'
 import { join } from 'pathe'
 // tell vitest to use fs mock from __mocks__ folder
@@ -160,6 +160,23 @@ describe('creds', async () => {
     password my_access_token
     region eu
 `)
+    })
+  })
+
+  describe('removeNetrcEntry', () => {
+    it('should remove an entry from .netrc file', async () => {
+      vol.fromJSON({
+        'test/.netrc': `machine api.storyblok.com
+        login julio.iglesias@storyblok.com
+        password my_access_token
+        region eu`,
+      }, '/temp')
+
+      await removeNetrcEntry('/temp/test/.netrc')
+
+      const content = vol.readFileSync('/temp/test/.netrc', 'utf8')
+
+      expect(content).toBe('')
     })
   })
 

@@ -3,6 +3,7 @@ import chalk from 'chalk'
 import { formatHeader, handleError } from './utils'
 import { getProgram } from './program'
 import './commands/login'
+import './commands/logout'
 
 const program = getProgram()
 console.clear()
