@@ -109,7 +109,7 @@ export const loginCommand = program
 
           if (otp_required) {
             const otp = await input({
-              message: 'We sent a code to your email / phone, please insert the authentication code:',
+              message: 'Add the code from your Authenticator app, or the one we sent to your e-mail / phone:',
               required: true,
             })
 
