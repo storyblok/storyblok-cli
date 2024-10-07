@@ -6,6 +6,7 @@ import { formatHeader, handleError } from './utils'
 import { getProgram } from './program'
 import './commands/login'
 import './commands/logout'
+import './commands/user'
 import { session } from './session'
 
 dotenv.config() // This will load variables from .env into process.env

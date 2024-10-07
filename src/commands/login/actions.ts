@@ -21,7 +21,7 @@ export const loginWithToken = async (token: string, region: string) => {
     if (!(error as FetchError).response) {
       throw new Error('No response from server, please check if you are correctly connected to internet', error as Error)
     }
-    throw new Error('Error logging with token', error as Error)
+    throw new Error('There was an error logging with token', error as Error)
   }
 }
 

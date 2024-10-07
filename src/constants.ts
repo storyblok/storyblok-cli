@@ -1,6 +1,7 @@
 export const commands: Record<string, string> = {
   LOGIN: 'login',
   LOGOUT: 'logout',
+  USER: 'user',
 }
 
 export const regions: Record<string, string> = {
