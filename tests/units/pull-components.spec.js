@@ -1,6 +1,6 @@
 import fs from 'fs'
 import pullComponents from '../../src/tasks/pull-components'
-import { FAKE_PRESET, FAKE_COMPONENTS } from '../constants'
+import { FAKE_PRESET, FAKE_COMPONENTS, FAKE_DATASOURCES, FAKE_DATASOURCE_ENTRIES } from '../constants'
 import { jest } from '@jest/globals'
 
 jest.spyOn(fs, 'writeFileSync').mockImplementation(jest.fn((key, data, _) => {
@@ -124,6 +124,54 @@ describe('testing pullComponents', () => {
       expect(compPath).toBe(`./${fileName}`)
       expect(JSON.parse(compData)).toEqual(data)
     }
+  })
+
+  it('pull components should be call fs.writeFile correctly and return filled options from datasource entries', async () => {
+    const SPACE = 12345
+
+    const api = {
+      getComponents () {
+        return Promise.resolve([FAKE_COMPONENTS()[5]])
+      },
+      getComponentGroups () {
+        return Promise.resolve([])
+      },
+      getDatasources () {
+        return Promise.resolve(FAKE_DATASOURCES())
+      },
+      getDatasourceEntries () {
+        return Promise.resolve(FAKE_DATASOURCE_ENTRIES())
+      },
+      getPresets () {
+        return Promise.resolve([])
+      }
+    }
+
+    const options = {
+      fileName: SPACE,
+      resolveDatasources: true
+    }
+
+    const expectFileName = `components.${SPACE}.json`
+
+    await pullComponents(api, options)
+    const [path, data] = fs.writeFile.mock.calls[0]
+
+    expect(fs.writeFile.mock.calls.length).toBe(1)
+    expect(path).toBe(`./${expectFileName}`)
+    expect(JSON.parse(data)).toEqual({
+      components: [{
+        ...FAKE_COMPONENTS()[5],
+        schema: {
+          robot: {
+            type: "option",
+            source: "internal",
+            datasource_slug: "robots",
+            options: FAKE_DATASOURCE_ENTRIES().map(entry => ({ value: entry.value, name: entry.name }))
+          }
+        }
+      }]
+    })
   })
 
   it('api.getComponents() when a error ocurred, catch the body response', async () => {

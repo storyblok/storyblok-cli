@@ -143,11 +143,12 @@ program
   .option("-p, --path <path>", "Path to save the component files")
   .option("-f, --file-name <fileName>", "custom name to be used in file(s) name instead of space id")
   .option("-ppn, --prefix-presets-names", "Prefixes the names of presets with the name of the components")
+  .option("--rd, --resolve-datasources", "Fill options for single/multiple option field with the linked datasource")
   .description("Download your space's components schema as json")
   .action(async (options) => {
     console.log(`${chalk.blue("-")} Executing pull-components task`);
     const space = program.space;
-    const { separateFiles, path, prefixPresetsNames } = options;
+    const { separateFiles, path, prefixPresetsNames, resolveDatasources } = options;
     if (!space) {
       console.log(chalk.red("X") + " Please provide the space as argument --space YOUR_SPACE_ID.");
       process.exit(0);
@@ -161,7 +162,7 @@ program
       }
 
       api.setSpaceId(space);
-      await tasks.pullComponents(api, { fileName, separateFiles, path, prefixPresetsNames });
+      await tasks.pullComponents(api, { fileName, separateFiles, path, prefixPresetsNames, resolveDatasources });
     } catch (e) {
       errorHandler(e, COMMANDS.PULL_COMPONENTS);
     }
@@ -299,11 +300,11 @@ program
   )
   .requiredOption("--source <SPACE_ID>", "Source space id")
   .requiredOption("--target <SPACE_ID>", "Target space id")
-  .option('--starts-with <STARTS_WITH>', 'Sync only stories that starts with the given string')
-  .option('--filter', 'Enable filter options to sync only stories that match the given filter. Required options: --keys; --operations; --values')
-  .option('--keys <KEYS>', 'Field names in your story object which should be used for filtering. Multiple keys should separated by comma.')
-  .option('--operations <OPERATIONS>', 'Operations to be used for filtering. Can be: is, in, not_in, like, not_like, any_in_array, all_in_array, gt_date, lt_date, gt_int, lt_int, gt_float, lt_float. Multiple operations should be separated by comma.')
-  .option('--values <VALUES>', 'Values to be used for filtering. Any string or number. If you want to use multiple values, separate them with a comma. Multiple values should be separated by comma.')
+  .option("--starts-with <STARTS_WITH>", "Sync only stories that starts with the given string")
+  .option("--filter", "Enable filter options to sync only stories that match the given filter. Required options: --keys; --operations; --values")
+  .option("--keys <KEYS>", "Field names in your story object which should be used for filtering. Multiple keys should separated by comma.")
+  .option("--operations <OPERATIONS>", "Operations to be used for filtering. Can be: is, in, not_in, like, not_like, any_in_array, all_in_array, gt_date, lt_date, gt_int, lt_int, gt_float, lt_float. Multiple operations should be separated by comma.")
+  .option("--values <VALUES>", "Values to be used for filtering. Any string or number. If you want to use multiple values, separate them with a comma. Multiple values should be separated by comma.")
   .option("--components-groups <UUIDs>", "Synchronize components based on their group UUIDs separated by commas")
   .option("--components-full-sync", "Synchronize components by overriding any property from source to target")
   .action(async (options) => {
@@ -317,7 +318,7 @@ program
       const {
         type,
         target,
-        source, 
+        source,
         startsWith,
         filter,
         keys,
@@ -329,7 +330,7 @@ program
 
       const _componentsGroups = componentsGroups ? componentsGroups.split(",") : null;
       const _componentsFullSync = !!componentsFullSync;
-      const filterQuery = filter ? buildFilterQuery(keys, operations, values) : undefined
+      const filterQuery = filter ? buildFilterQuery(keys, operations, values) : undefined;
       const token = creds.get().token || null;
 
       const _types = type.split(",") || [];

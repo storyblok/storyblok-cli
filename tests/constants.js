@@ -145,6 +145,55 @@ export const FAKE_COMPONENTS = () => [
     preset_id: null,
     real_name: 'hero',
     component_group_uuid: null
+  },
+  {
+    name: 'meta',
+    display_name: null,
+    created_at: '2019-11-06T17:07:04.196Z',
+    updated_at: '2019-11-06T18:12:29.136Z',
+    id: 4,
+    schema: {
+      robot: {
+        type: "option",
+        source: "internal",
+        datasource_slug: "robots",
+      }
+    },
+    image: null,
+    preview_field: null,
+    is_root: false,
+    preview_tmpl: null,
+    is_nestable: true,
+    all_presets: [],
+    preset_id: null,
+    real_name: 'meta',
+    component_group_uuid: null
+  },
+]
+
+export const FAKE_DATASOURCES = () => [
+  {
+    id: 1,
+    name: "Robots",
+    slug: "robots",
+    dimensions: [],
+    created_at: "2019-10-15T17:00:32.212Z",
+    updated_at: "2019-11-15T17:00:32.212Z",
+  },
+]
+
+export const FAKE_DATASOURCE_ENTRIES = () => [
+  {
+    id: 1,
+    name: "No index",
+    value: "noindex",
+    dimension_value: ""
+  },
+  {
+    id: 2,
+    name: "No follow",
+    value: "nofollow",
+    dimension_value: ""
   }
 ]
 
