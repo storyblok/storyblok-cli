@@ -72,7 +72,7 @@ describe('userCommand', () => {
 
     expect(getUser).toHaveBeenCalledWith('valid-token', 'eu')
     expect(konsola.ok).toHaveBeenCalledWith(
-      `Hi: ${chalk.bold('John Doe')}, you current logged in with: ${chalk.hex('#45bfb9')(mockResponse.user.email)} on region: ${chalk.bold('eu')}`,
+      `Hi ${chalk.bold('John Doe')}, you are currently logged in with ${chalk.hex('#45bfb9')(mockResponse.user.email)} on ${chalk.bold('eu')} region`,
     )
   })
 

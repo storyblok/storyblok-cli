@@ -24,7 +24,7 @@ export const userCommand = program
     try {
       const { password, region } = state as NetrcMachine
       const { user } = await getUser(password, region)
-      konsola.ok(`Hi: ${chalk.bold(user.friendly_name)}, you current logged in with: ${chalk.hex('#45bfb9')(user.email)} on region: ${chalk.bold(region)}`)
+      konsola.ok(`Hi ${chalk.bold(user.friendly_name)}, you are currently logged in with ${chalk.hex('#45bfb9')(user.email)} on ${chalk.bold(region)} region`)
     }
     catch (error) {
       handleError(error as Error, true)
