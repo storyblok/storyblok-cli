@@ -2,11 +2,12 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import { handleError, konsola } from './utils'
 import chalk from 'chalk'
+import type { RegionCode } from './constants'
 
 export interface NetrcMachine {
   login: string
   password: string
-  region: string
+  region: RegionCode
 }
 
 export const getNetrcFilePath = () => {

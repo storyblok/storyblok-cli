@@ -1,5 +1,6 @@
 import chalk from 'chalk'
 import { input, password, select } from '@inquirer/prompts'
+import type { RegionCode } from '../../constants'
 import { commands, regionNames, regions, regionsDomain } from '../../constants'
 import { getProgram } from '../../program'
 import { formatHeader, handleError, isRegion, konsola } from '../../utils'
@@ -36,7 +37,10 @@ export const loginCommand = program
     `The region you would like to work in. Please keep in mind that the region must match the region of your space. This region flag will be used for the other cli's commands. You can use the values: ${allRegionsText}.`,
     regions.EU,
   )
-  .action(async (options) => {
+  .action(async (options: {
+    token: string
+    region: RegionCode
+  }) => {
     const { token, region } = options
     if (!isRegion(region)) {
       konsola.error(new Error(`The provided region: ${region} is not valid. Please use one of the following values: ${Object.values(regions).join(' | ')}`), true)
@@ -47,8 +51,7 @@ export const loginCommand = program
     await initializeSession()
 
     if (state.isLoggedIn) {
-      konsola.ok(`You are already logged in. If you want to login with a different account, please logout first.
-`)
+      konsola.ok(`You are already logged in. If you want to login with a different account, please logout first.`)
       return
     }
 
@@ -99,13 +102,13 @@ export const loginCommand = program
           })
           const userRegion = await select({
             message: 'Please select the region you would like to work in:',
-            choices: Object.values(regions).map(region => ({
+            choices: Object.values(regions).map((region: RegionCode) => ({
               name: regionNames[region],
               value: region,
             })),
             default: regions.EU,
           })
-          const { otp_required } = await loginWithEmailAndPassword(userEmail, userPassword, userRegion as string)
+          const { otp_required } = await loginWithEmailAndPassword(userEmail, userPassword, userRegion)
 
           if (otp_required) {
             const otp = await input({
@@ -113,7 +116,7 @@ export const loginCommand = program
               required: true,
             })
 
-            const { access_token } = await loginWithOtp(userEmail, userPassword, otp, userRegion as string)
+            const { access_token } = await loginWithOtp(userEmail, userPassword, otp, userRegion)
             updateSession(userEmail, access_token, userRegion)
             await persistCredentials(regionsDomain[userRegion])
 

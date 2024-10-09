@@ -1,4 +1,5 @@
 // session.ts
+import type { RegionCode } from './constants'
 import { addNetrcEntry, getCredentialsForMachine, getNetrcCredentials } from './creds'
 
 interface SessionState {
@@ -73,7 +74,7 @@ function createSession() {
     }
   }
 
-  function updateSession(login: string, password: string, region: string) {
+  function updateSession(login: string, password: string, region: RegionCode) {
     state.isLoggedIn = true
     state.login = login
     state.password = password

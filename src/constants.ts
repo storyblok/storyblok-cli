@@ -3,7 +3,9 @@ export const commands = {
   LOGOUT: 'logout',
 } as const
 
-export const regions = {
+export type RegionCode = 'eu' | 'us' | 'cn' | 'ca' | 'ap'
+
+export const regions: Record<Uppercase<RegionCode>, RegionCode> = {
   EU: 'eu',
   US: 'us',
   CN: 'cn',
@@ -11,7 +13,7 @@ export const regions = {
   AP: 'ap',
 } as const
 
-export const regionsDomain = {
+export const regionsDomain: Record<RegionCode, string> = {
   eu: 'api.storyblok.com',
   us: 'api-us.storyblok.com',
   cn: 'app.storyblokchina.cn',
@@ -19,7 +21,7 @@ export const regionsDomain = {
   ap: 'api-ap.storyblok.com',
 } as const
 
-export const managementApiRegions = {
+export const managementApiRegions: Record<RegionCode, string> = {
   eu: 'mapi.storyblok.com',
   us: 'mapi-us.storyblok.com',
   cn: 'mapi.storyblokchina.cn',
@@ -27,7 +29,7 @@ export const managementApiRegions = {
   ap: 'mapi-ap.storyblok.com',
 } as const
 
-export const regionNames = {
+export const regionNames: Record<RegionCode, string> = {
   eu: 'Europe',
   us: 'United States',
   cn: 'China',

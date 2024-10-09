@@ -1,10 +1,11 @@
 import chalk from 'chalk'
+import type { RegionCode } from '../../constants'
 import { regionsDomain } from '../../constants'
 import type { FetchError } from 'ofetch'
 import { ofetch } from 'ofetch'
 import { maskToken } from '../../utils'
 
-export const loginWithToken = async (token: string, region: string) => {
+export const loginWithToken = async (token: string, region: RegionCode) => {
   try {
     return await ofetch(`https://${regionsDomain[region]}/v1/users/me`, {
       headers: {
@@ -25,7 +26,7 @@ export const loginWithToken = async (token: string, region: string) => {
   }
 }
 
-export const loginWithEmailAndPassword = async (email: string, password: string, region: string) => {
+export const loginWithEmailAndPassword = async (email: string, password: string, region: RegionCode) => {
   try {
     return await ofetch(`https://${regionsDomain[region]}/v1/users/login`, {
       method: 'POST',
@@ -37,7 +38,7 @@ export const loginWithEmailAndPassword = async (email: string, password: string,
   }
 }
 
-export const loginWithOtp = async (email: string, password: string, otp: string, region: string) => {
+export const loginWithOtp = async (email: string, password: string, otp: string, region: RegionCode) => {
   try {
     return await ofetch(`https://${regionsDomain[region]}/v1/users/login`, {
       method: 'POST',
