@@ -1,5 +1,5 @@
-import fs from 'node:fs/promises'
-import path from 'node:path'
+import { access, readFile, writeFile } from 'node:fs/promises'
+import { join } from 'node:path'
 import { handleError, konsola } from './utils'
 import chalk from 'chalk'
 import type { RegionCode } from './constants'
@@ -15,11 +15,11 @@ export const getNetrcFilePath = () => {
     process.platform.startsWith('win') ? 'USERPROFILE' : 'HOME'
   ] || process.cwd()
 
-  return path.join(homeDirectory, '.netrc')
+  return join(homeDirectory, '.netrc')
 }
 
 const readNetrcFileAsync = async (filePath: string) => {
-  return await fs.readFile(filePath, 'utf8')
+  return await readFile(filePath, 'utf8')
 }
 
 const preprocessNetrcContent = (content: string) => {
@@ -78,7 +78,7 @@ const parseNetrcContent = (content: string) => {
 export const getNetrcCredentials = async (filePath: string = getNetrcFilePath()) => {
   try {
     try {
-      await fs.access(filePath)
+      await access(filePath)
     }
     catch {
       console.warn(`.netrc file not found at path: ${filePath}`)
@@ -154,9 +154,9 @@ export const addNetrcEntry = async ({
 
     // Check if the file exists
     try {
-      await fs.access(filePath)
+      await access(filePath)
       // File exists, read and parse it
-      const content = await fs.readFile(filePath, 'utf8')
+      const content = await readFile(filePath, 'utf8')
       machines = parseNetrcContent(content)
     }
     catch {
@@ -175,7 +175,7 @@ export const addNetrcEntry = async ({
     const newContent = serializeNetrcMachines(machines)
 
     // Write the updated content back to the .netrc file
-    await fs.writeFile(filePath, newContent, {
+    await writeFile(filePath, newContent, {
       mode: 0o600, // Set file permissions
     })
 
@@ -196,9 +196,9 @@ export const removeNetrcEntry = async (
 
     // Check if the file exists
     try {
-      await fs.access(filePath)
+      await access(filePath)
       // File exists, read and parse it
-      const content = await fs.readFile(filePath, 'utf8')
+      const content = await readFile(filePath, 'utf8')
       machines = parseNetrcContent(content)
     }
     catch {
@@ -220,7 +220,7 @@ export const removeNetrcEntry = async (
     const newContent = serializeNetrcMachines(machines)
 
     // Write the updated content back to the .netrc file
-    await fs.writeFile(filePath, newContent, {
+    await writeFile(filePath, newContent, {
       mode: 0o600, // Set file permissions
     })
 

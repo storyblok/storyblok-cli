@@ -2,27 +2,23 @@
   "compilerOptions": {
     "target": "esnext",
     "lib": ["esnext", "DOM", "DOM.Iterable"],
-    "useDefineForClassFields": true,
     "baseUrl": ".",
     "module": "esnext",
 
-    /* Bundler mode */
-    "moduleResolution": "bundler",
+    "moduleResolution": "Node",
     "resolveJsonModule": true,
     "types": ["node", "vitest/globals"],
     "allowImportingTsExtensions": true,
-
     /* Linting */
     "strict": true,
     "noFallthroughCasesInSwitch": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noEmit": true,
+    "allowSyntheticDefaultImports": true,
     "isolatedModules": true,
     "skipLibCheck": true
-
   },
-  "references": [{ "path": "./tsconfig.node.json" }],
   "include": ["src"],
-  "exclude": ["node_modules", "src/**/*.cy.ts", "src/**/*.test.ts"]
+  "exclude": ["node_modules"]
 }
