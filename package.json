@@ -25,7 +25,7 @@
   "scripts": {
     "build": "unbuild",
     "build:stub": "unbuild --stub",
-    "dev": "node dist/index.mjs",
+    "dev": "pnpm run build:stub && STUB=true node dist/index.mjs",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "vitest",
