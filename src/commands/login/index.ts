@@ -11,22 +11,21 @@ import { session } from '../../session'
 const program = getProgram() // Get the shared singleton instance
 
 const allRegionsText = Object.values(regions).join(',')
-const loginStrategy
-  = {
-    message: 'How would you like to login?',
-    choices: [
-      {
-        name: 'With email',
-        value: 'login-with-email',
-        short: 'Email',
-      },
-      {
-        name: 'With Token (SSO)',
-        value: 'login-with-token',
-        short: 'Token',
-      },
-    ],
-  }
+const loginStrategy = {
+  message: 'How would you like to login?',
+  choices: [
+    {
+      name: 'With email',
+      value: 'login-with-email',
+      short: 'Email',
+    },
+    {
+      name: 'With Token (SSO)',
+      value: 'login-with-token',
+      short: 'Token',
+    },
+  ],
+}
 
 export const loginCommand = program
   .command(commands.LOGIN)
