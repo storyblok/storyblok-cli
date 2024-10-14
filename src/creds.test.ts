@@ -198,7 +198,7 @@ describe('creds', async () => {
           getNetrcCredentials: async () => {
             return {
               'api.storyblok.com': {
-                login: 'julio.iglesias@storyblok.co,m',
+                login: 'julio.iglesias@storyblok.com',
                 password: 'my_access',
                 region: 'eu',
               },

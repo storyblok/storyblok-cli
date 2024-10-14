@@ -13,14 +13,14 @@ describe('logoutCommand', () => {
   })
 
   it('should log out the user if has previously login', async () => {
-    isAuthorized.mockResolvedValue(true)
+    vi.mocked(isAuthorized).mockResolvedValue(true)
 
     await logoutCommand.parseAsync(['node', 'test'])
     expect(removeNetrcEntry).toHaveBeenCalled()
   })
 
   it('should not log out the user if has not previously login', async () => {
-    isAuthorized.mockResolvedValue(false)
+    vi.mocked(isAuthorized).mockResolvedValue(false)
     await logoutCommand.parseAsync(['node', 'test'])
     expect(removeNetrcEntry).not.toHaveBeenCalled()
   })
