@@ -3,7 +3,7 @@ import { input, password, select } from '@inquirer/prompts'
 import type { RegionCode } from '../../constants'
 import { commands, regionNames, regions, regionsDomain } from '../../constants'
 import { getProgram } from '../../program'
-import { formatHeader, handleError, isRegion, konsola } from '../../utils'
+import { handleError, isRegion, konsola } from '../../utils'
 import { loginWithEmailAndPassword, loginWithOtp, loginWithToken } from './actions'
 
 import { session } from '../../session'
