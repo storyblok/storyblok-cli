@@ -42,7 +42,7 @@ export const loginCommand = program
   }) => {
     const { token, region } = options
     if (!isRegion(region)) {
-      konsola.error(new Error(`The provided region: ${region} is not valid. Please use one of the following values: ${Object.values(regions).join(' | ')}`), true)
+      handleError(new Error(`The provided region: ${region} is not valid. Please use one of the following values: ${Object.values(regions).join(' | ')}`), true)
     }
 
     const { state, updateSession, persistCredentials, initializeSession } = session()
@@ -67,7 +67,7 @@ export const loginCommand = program
       }
     }
     else {
-      console.log(formatHeader(chalk.bgHex('#8556D3').bold.white(` ${commands.LOGIN} `)))
+      konsola.title(` ${commands.LOGIN} `, '#8556D3')
 
       const strategy = await select(loginStrategy)
       try {

@@ -77,14 +77,13 @@ const parseNetrcContent = (content: string) => {
 
 export const getNetrcCredentials = async (filePath: string = getNetrcFilePath()) => {
   try {
-    try {
-      await access(filePath)
-    }
-    catch {
-      console.warn(`.netrc file not found at path: ${filePath}`)
-      return {}
-    }
-
+    await access(filePath)
+  }
+  catch {
+    console.warn(`.netrc file not found at path: ${filePath}`)
+    return {}
+  }
+  try {
     const content = await readNetrcFileAsync(filePath)
 
     const machines = parseNetrcContent(content)
@@ -182,7 +181,7 @@ export const addNetrcEntry = async ({
     konsola.ok(`Successfully added/updated entry for machine ${machineName} in ${chalk.hex('#45bfb9')(filePath)}`, true)
   }
   catch (error: unknown) {
-    handleError(new Error(`Error adding/updating entry for machine ${machineName} in .netrc file: ${(error as Error).message}`), true)
+    throw new Error(`Error adding/updating entry for machine ${machineName} in .netrc file: ${(error as Error).message}`)
   }
 }
 
@@ -227,11 +226,11 @@ export const removeNetrcEntry = async (
     konsola.ok(`Successfully removed entries from ${chalk.hex('#45bfb9')(filePath)}`, true)
   }
   catch (error: unknown) {
-    handleError(new Error(`Error removing entry for machine ${machineName} from .netrc file: ${(error as Error).message}`), true)
+    throw new Error(`Error removing entry for machine ${machineName} from .netrc file: ${(error as Error).message}`)
   }
 }
 
-export async function isAuthorized(): Promise<boolean> {
+export async function isAuthorized() {
   try {
     const machines = await getNetrcCredentials()
     // Check if there is any machine with a valid email and token

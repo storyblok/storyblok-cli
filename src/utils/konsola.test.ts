@@ -3,6 +3,32 @@ import { formatHeader, konsola } from './konsola'
 import { describe, expect, it, vi } from 'vitest'
 
 describe('konsola', () => {
+  describe('title', () => {
+    it('should prompt a title message', () => {
+      const consoleSpy = vi.spyOn(console, 'log')
+      konsola.title('This is a test title', '#45bfb9')
+
+      expect(consoleSpy).toHaveBeenCalledWith(formatHeader(chalk.bgHex('#45bfb9').bold.white(` This is a test title `)))
+    })
+  })
+  describe('warn', () => {
+    it('should prompt a warning message', () => {
+      const consoleSpy = vi.spyOn(console, 'warn')
+      konsola.warn('This is a test warning message')
+
+      expect(consoleSpy).toHaveBeenCalledWith(`${chalk.yellow('⚠️')} This is a test warning message`)
+    })
+
+    it('should prompt a warning message with header', () => {
+      const consoleSpy = vi.spyOn(console, 'warn')
+      konsola.warn('This is a test warning message', true)
+      const warnText = chalk.bgYellow.bold.black(` Warning `)
+
+      expect(consoleSpy).toHaveBeenCalledWith(formatHeader(warnText,
+      ))
+    })
+  })
+
   describe('success', () => {
     it('should prompt an success message', () => {
       const consoleSpy = vi.spyOn(console, 'log')

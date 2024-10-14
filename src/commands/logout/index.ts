@@ -11,8 +11,7 @@ export const logoutCommand = program
   .action(async () => {
     const isAuth = await isAuthorized()
     if (!isAuth) {
-      konsola.ok(`You are already logged out. If you want to login, please use the login command.
-      `)
+      konsola.ok(`You are already logged out. If you want to login, please use the login command.`)
       return
     }
     try {
