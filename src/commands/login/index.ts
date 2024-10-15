@@ -3,7 +3,7 @@ import { input, password, select } from '@inquirer/prompts'
 import type { RegionCode } from '../../constants'
 import { commands, regionNames, regions, regionsDomain } from '../../constants'
 import { getProgram } from '../../program'
-import { handleError, isRegion, konsola } from '../../utils'
+import { CommandError, handleError, isRegion, konsola } from '../../utils'
 import { loginWithEmailAndPassword, loginWithOtp, loginWithToken } from './actions'
 
 import { session } from '../../session'
@@ -40,9 +40,10 @@ export const loginCommand = program
     token: string
     region: RegionCode
   }) => {
+    konsola.title(` ${commands.LOGIN} `, '#8556D3')
     const { token, region } = options
     if (!isRegion(region)) {
-      handleError(new Error(`The provided region: ${region} is not valid. Please use one of the following values: ${Object.values(regions).join(' | ')}`), true)
+      handleError(new CommandError(`The provided region: ${region} is not valid. Please use one of the following values: ${Object.values(regions).join(' | ')}`))
     }
 
     const { state, updateSession, persistCredentials, initializeSession } = session()
@@ -67,8 +68,6 @@ export const loginCommand = program
       }
     }
     else {
-      konsola.title(` ${commands.LOGIN} `, '#8556D3')
-
       const strategy = await select(loginStrategy)
       try {
         if (strategy === 'login-with-token') {

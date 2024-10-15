@@ -4,8 +4,7 @@
     "lib": ["esnext", "DOM", "DOM.Iterable"],
     "baseUrl": ".",
     "module": "esnext",
-
-    "moduleResolution": "Node",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "types": ["node", "vitest/globals"],
     "allowImportingTsExtensions": true,
@@ -16,6 +15,7 @@
     "noUnusedParameters": true,
     "noEmit": true,
     "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
     "isolatedModules": true,
     "skipLibCheck": true
   },

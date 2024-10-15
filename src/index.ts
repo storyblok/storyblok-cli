@@ -6,6 +6,8 @@ import { formatHeader, handleError, konsola } from './utils'
 import { getProgram } from './program'
 import './commands/login'
 import './commands/logout'
+import { APIError } from './utils/error/api-error'
+import { loginWithEmailAndPassword, loginWithToken } from './commands/login/actions'
 
 dotenv.config() // This will load variables from .env into process.env
 const program = getProgram()
@@ -16,6 +18,7 @@ console.log(formatHeader(`
 ${introText} ${messageText}`))
 
 program.option('-s, --space [value]', 'space ID')
+program.option('-v, --verbose', 'Enable verbose output')
 
 program.on('command:*', () => {
   console.error(`Invalid command: ${program.args.join(' ')}`)
@@ -23,8 +26,15 @@ program.on('command:*', () => {
   konsola.br() // Add a line break
 })
 
-program.command('test').action(async () => {
-  handleError(new Error('There was an error with credentials'), true)
+program.command('test').action(async (options) => {
+  konsola.title(`Test`, '#8556D3', 'Attempting a test...')
+  try {
+    // await loginWithEmailAndPassword('aw', 'passwrod', 'eu')
+    await loginWithToken('WYSYDHYASDHSYD', 'eu')
+  }
+  catch (error) {
+    handleError(error as Error)
+  }
 })
 
 /* console.log(`

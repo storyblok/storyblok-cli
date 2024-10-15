@@ -3,7 +3,7 @@ import { dirname } from 'pathe'
 import type { RegionCode } from '../constants'
 import { regions } from '../constants'
 
-export * from './error'
+export * from './error/'
 export * from './konsola'
 export const __filename = fileURLToPath(import.meta.url)
 export const __dirname = dirname(__filename)
