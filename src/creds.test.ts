@@ -172,7 +172,7 @@ describe('creds', async () => {
         region eu`,
       }, '/temp')
 
-      await removeNetrcEntry('/temp/test/.netrc')
+      await removeNetrcEntry('/temp/test/.netrc', 'api.storyblok.com')
 
       const content = vol.readFileSync('/temp/test/.netrc', 'utf8')
 

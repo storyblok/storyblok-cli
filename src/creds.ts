@@ -193,7 +193,7 @@ export const addNetrcEntry = async ({
 // Function to remove an entry from the .netrc file asynchronously
 export const removeNetrcEntry = async (
   filePath = getNetrcFilePath(),
-  machineName?: string,
+  machineName: string,
 ) => {
   try {
     let machines: Record<string, NetrcMachine> = {}
@@ -211,24 +211,19 @@ export const removeNetrcEntry = async (
       return
     }
 
-    if (machineName) {
+    if (machines[machineName]) {
       // Remove the machine entry
       delete machines[machineName]
+      // Serialize machines back into .netrc format
+      const newContent = serializeNetrcMachines(machines)
+
+      // Write the updated content back to the .netrc file
+      await writeFile(filePath, newContent, {
+        mode: 0o600, // Set file permissions
+      })
+
+      konsola.ok(`Successfully removed entry from ${chalk.hex('#45bfb9')(filePath)}`, true)
     }
-    else {
-      // Remove all machine entries
-      machines = {}
-    }
-
-    // Serialize machines back into .netrc format
-    const newContent = serializeNetrcMachines(machines)
-
-    // Write the updated content back to the .netrc file
-    await writeFile(filePath, newContent, {
-      mode: 0o600, // Set file permissions
-    })
-
-    konsola.ok(`Successfully removed entries from ${chalk.hex('#45bfb9')(filePath)}`, true)
   }
   catch (error: unknown) {
     throw new Error(`Error removing entry for machine ${machineName} from .netrc file: ${(error as Error).message}`)
