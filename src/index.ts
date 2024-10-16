@@ -6,6 +6,7 @@ import { formatHeader, handleError, konsola } from './utils'
 import { getProgram } from './program'
 import './commands/login'
 import './commands/logout'
+import { loginWithToken } from './commands/login/actions'
 
 dotenv.config() // This will load variables from .env into process.env
 const program = getProgram()
@@ -26,14 +27,14 @@ program.on('command:*', () => {
 
 program.command('test').action(async () => {
   konsola.title(`Test`, '#8556D3', 'Attempting a test...')
-  konsola.error('This is an error message')
-  /* try {
+
+  try {
     // await loginWithEmailAndPassword('aw', 'passwrod', 'eu')
     await loginWithToken('WYSYDHYASDHSYD', 'eu')
   }
   catch (error) {
     handleError(error as Error)
-  } */
+  }
 })
 
 /* console.log(`

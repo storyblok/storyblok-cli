@@ -2,12 +2,12 @@ import { access, readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { FileSystemError, handleFileSystemError, konsola } from './utils'
 import chalk from 'chalk'
-import type { RegionCode } from './constants'
+import { regionCodes } from './constants'
 
 export interface NetrcMachine {
   login: string
   password: string
-  region: RegionCode
+  region: string
 }
 
 export const getNetrcFilePath = () => {
@@ -36,6 +36,10 @@ const tokenizeNetrcContent = (content: string) => {
     .filter(token => token.length > 0)
 }
 
+function includes<T extends U, U>(coll: ReadonlyArray<T>, el: U): el is T {
+  return coll.includes(el as T)
+}
+
 const parseNetrcTokens = (tokens: string[]) => {
   const machines: Record<string, NetrcMachine> = {}
   let i = 0
@@ -53,12 +57,12 @@ const parseNetrcTokens = (tokens: string[]) => {
         && tokens[i] !== 'machine'
         && tokens[i] !== 'default'
       ) {
-        const key = tokens[i] as keyof NetrcMachine
+        const key = tokens[i]
         const value = tokens[++i]
-        if (key === 'region') {
-          machineData[key] = value as RegionCode
+        if (key === 'region' && includes(regionCodes, value)) {
+          machineData[key] = value
         }
-        else {
+        else if (key === 'login' || key === 'password') {
           machineData[key] = value
         }
         i++

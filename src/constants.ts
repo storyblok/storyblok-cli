@@ -3,7 +3,11 @@ export const commands = {
   LOGOUT: 'logout',
 } as const
 
-export type RegionCode = 'eu' | 'us' | 'cn' | 'ca' | 'ap'
+export interface ReadonlyArray<T> {
+  includes: (searchElement: any, fromIndex?: number) => searchElement is T
+}
+export const regionCodes = ['eu', 'us', 'cn', 'ca', 'ap'] as const
+export type RegionCode = typeof regionCodes[number]
 
 export const regions: Record<Uppercase<RegionCode>, RegionCode> = {
   EU: 'eu',
