@@ -28,13 +28,14 @@ program.on('command:*', () => {
 
 program.command('test').action(async (options) => {
   konsola.title(`Test`, '#8556D3', 'Attempting a test...')
-  try {
+  konsola.error('This is an error message')
+  /* try {
     // await loginWithEmailAndPassword('aw', 'passwrod', 'eu')
     await loginWithToken('WYSYDHYASDHSYD', 'eu')
   }
   catch (error) {
     handleError(error as Error)
-  }
+  } */
 })
 
 /* console.log(`

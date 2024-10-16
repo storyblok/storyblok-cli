@@ -12,7 +12,12 @@ export const konsola = {
   title: (message: string, color: string, subtitle?: string) => {
     console.log('') // Add a line break
     console.log('') // Add a line break
-    console.log(`${formatHeader(chalk.bgHex(color).bold.white(` ${message} `))} ${subtitle || ''}`)
+    if (subtitle) {
+      console.log(`${formatHeader(chalk.bgHex(color).bold.white(` ${message} `))} ${subtitle}`)
+    }
+    else {
+      console.log(formatHeader(chalk.bgHex(color).bold.white(` ${message} `)))
+    }
     console.log('') // Add a line break
     console.log('') // Add a line break
   },
@@ -52,18 +57,15 @@ export const konsola = {
 
     console.warn(message ? `${chalk.yellow('⚠️')} ${message}` : '')
   },
-  error: (message: string, info: unknown, options: KonsolaFormatOptions = {
-    header: false,
-    margin: true,
-  }) => {
-    if (options.header) {
+  error: (message: string, info?: unknown, options?: KonsolaFormatOptions) => {
+    if (options?.header) {
       const errorHeader = chalk.bgRed.bold.white(` Error `)
       console.error(formatHeader(errorHeader))
       console.log('') // Add a line break
     }
 
     console.error(`${chalk.red.bold('▲ error')} ${message}`, info || '')
-    if (options.margin) {
+    if (options?.margin) {
       console.error('') // Add a line break
     }
   },

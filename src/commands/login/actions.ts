@@ -18,13 +18,14 @@ export const loginWithToken = async (token: string, region: RegionCode) => {
 
       switch (status) {
         case 401:
-          throw new APIError('unauthorized', 'login_with_token', error, `The token provided ${chalk.bold(maskToken(token))} is invalid: ${chalk.bold(`401 ${(error as FetchError).data.error}`)}
+          throw new APIError('unauthorized', 'login_with_token', error, `The token provided ${chalk.bold(maskToken(token))} is invalid.
         Please make sure you are using the correct token and try again.`)
-        case 422:
-          throw new APIError('invalid_credentials', 'login_with_token', error)
         default:
           throw new APIError('network_error', 'login_with_token', error)
       }
+    }
+    else {
+      throw new APIError('generic', 'login_with_token', error as Error)
     }
   }
 }

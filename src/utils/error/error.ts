@@ -11,7 +11,6 @@ export function handleError(error: Error, verbose = false): void {
       konsola.error(`Command Error: ${error.getInfo().message}`, errorDetails)
     }
     else if (error instanceof APIError) {
-      console.log('error', error)
       konsola.error(`API Error: ${error.getInfo().cause}`, errorDetails)
     }
     else if (error instanceof FileSystemError) {

@@ -12,6 +12,7 @@ export const API_ERRORS = {
   network_error: 'No response from server, please check if you are correctly connected to internet',
   invalid_credentials: 'The provided credentials are invalid',
   timeout: 'The API request timed out',
+  generic: 'Error logging in',
 } as const
 
 export function handleAPIError(action: keyof typeof API_ACTIONS, error: Error): void {
@@ -31,7 +32,7 @@ export function handleAPIError(action: keyof typeof API_ACTIONS, error: Error): 
     throw new APIError('network_error', action, error)
   }
   else {
-    throw new APIError('timeout', action, error)
+    throw new APIError('generic', action, error)
   }
 }
 

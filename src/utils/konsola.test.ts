@@ -49,17 +49,23 @@ describe('konsola', () => {
     it('should prompt an error message', () => {
       const consoleSpy = vi.spyOn(console, 'error')
 
-      konsola.error(new Error('Oh gosh, this is embarrasing'))
-      const errorText = `${chalk.red('x')} Oh gosh, this is embarrasing`
-      expect(consoleSpy).toHaveBeenCalledWith(errorText)
+      konsola.error('Oh gosh, this is embarrasing')
+      const errorText = `${chalk.red.bold('▲ error')} Oh gosh, this is embarrasing`
+      expect(consoleSpy).toHaveBeenCalledWith(errorText, '')
     })
 
     it('should prompt an error message with header', () => {
       const consoleSpy = vi.spyOn(console, 'error')
-      konsola.error(new Error('Oh gosh, this is embarrasing'), true)
+      konsola.error('Oh gosh, this is embarrasing', null, { header: true })
       const errorText = chalk.bgRed.bold.white(` Error `)
 
       expect(consoleSpy).toHaveBeenCalledWith(formatHeader(errorText))
+    })
+
+    it('should add a line break if margin set to true ', () => {
+      const consoleSpy = vi.spyOn(console, 'error')
+      konsola.error('Oh gosh, this is embarrasing', null, { margin: true })
+      expect(consoleSpy).toHaveBeenCalledWith('')
     })
   })
 })

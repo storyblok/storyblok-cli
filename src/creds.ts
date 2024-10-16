@@ -1,6 +1,6 @@
 import { access, readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { handleError, konsola } from './utils'
+import { FileSystemError, handleFileSystemError, konsola } from './utils'
 import chalk from 'chalk'
 import type { RegionCode } from './constants'
 
@@ -55,7 +55,12 @@ const parseNetrcTokens = (tokens: string[]) => {
       ) {
         const key = tokens[i] as keyof NetrcMachine
         const value = tokens[++i]
-        machineData[key] = value
+        if (key === 'region') {
+          machineData[key] = value as RegionCode
+        }
+        else {
+          machineData[key] = value
+        }
         i++
       }
 
@@ -80,7 +85,7 @@ export const getNetrcCredentials = async (filePath: string = getNetrcFilePath())
     await access(filePath)
   }
   catch {
-    console.warn(`.netrc file not found at path: ${filePath}`)
+    konsola.warn(`.netrc file not found at path: ${filePath}`)
     return {}
   }
   try {
@@ -90,7 +95,7 @@ export const getNetrcCredentials = async (filePath: string = getNetrcFilePath())
     return machines
   }
   catch (error) {
-    console.error('Error reading or parsing .netrc file:', error)
+    handleFileSystemError('read', error as NodeJS.ErrnoException)
     return {}
   }
 }
@@ -160,7 +165,7 @@ export const addNetrcEntry = async ({
     }
     catch {
       // File does not exist
-      console.warn(`.netrc file not found at path: ${filePath}. A new file will be created.`)
+      konsola.warn(`.netrc file not found at path: ${filePath}. A new file will be created.`)
     }
 
     // Add or update the machine entry
@@ -180,8 +185,8 @@ export const addNetrcEntry = async ({
 
     konsola.ok(`Successfully added/updated entry for machine ${machineName} in ${chalk.hex('#45bfb9')(filePath)}`, true)
   }
-  catch (error: unknown) {
-    throw new Error(`Error adding/updating entry for machine ${machineName} in .netrc file: ${(error as Error).message}`)
+  catch (error) {
+    throw new FileSystemError('invalid_argument', 'write', error as NodeJS.ErrnoException, `Error adding/updating entry for machine ${machineName} in .netrc file`)
   }
 }
 
@@ -202,7 +207,7 @@ export const removeNetrcEntry = async (
     }
     catch {
       // File does not exist
-      console.warn(`.netrc file not found at path: ${filePath}. No action taken.`)
+      konsola.warn(`.netrc file not found at path: ${filePath}. No action taken.`)
       return
     }
 
@@ -242,7 +247,7 @@ export async function isAuthorized() {
     return false
   }
   catch (error: unknown) {
-    handleError(new Error(`Error checking authorization in .netrc file: ${(error as Error).message}`), true)
+    handleFileSystemError('authorization_check', error as NodeJS.ErrnoException)
     return false
   }
 }
