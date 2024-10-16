@@ -6,8 +6,6 @@ import { formatHeader, handleError, konsola } from './utils'
 import { getProgram } from './program'
 import './commands/login'
 import './commands/logout'
-import { APIError } from './utils/error/api-error'
-import { loginWithEmailAndPassword, loginWithToken } from './commands/login/actions'
 
 dotenv.config() // This will load variables from .env into process.env
 const program = getProgram()
@@ -26,7 +24,7 @@ program.on('command:*', () => {
   konsola.br() // Add a line break
 })
 
-program.command('test').action(async (options) => {
+program.command('test').action(async () => {
   konsola.title(`Test`, '#8556D3', 'Attempting a test...')
   konsola.error('This is an error message')
   /* try {
