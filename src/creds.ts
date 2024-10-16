@@ -192,8 +192,8 @@ export const addNetrcEntry = async ({
 
 // Function to remove an entry from the .netrc file asynchronously
 export const removeNetrcEntry = async (
-  filePath = getNetrcFilePath(),
   machineName: string,
+  filePath = getNetrcFilePath(),
 ) => {
   try {
     let machines: Record<string, NetrcMachine> = {}

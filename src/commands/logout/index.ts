@@ -15,7 +15,7 @@ export const logoutCommand = program
       return
     }
     try {
-      await removeNetrcEntry()
+      await removeNetrcEntry('api.storyblok.com')
 
       konsola.ok(`Successfully logged out`)
     }
