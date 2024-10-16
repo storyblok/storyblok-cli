@@ -5,7 +5,7 @@ import { resolve } from 'pathe'
 import { __dirname, handleError } from './utils'
 
 // Read package.json for metadata
-const packageJsonPath = resolve(__dirname, '../../package.json')
+const packageJsonPath = resolve(__dirname, process.env.VITEST || process.env.STUB ? '../../package.json' : '../package.json')
 const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'))
 
 // Declare a variable to hold the singleton instance
