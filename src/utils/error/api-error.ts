@@ -31,9 +31,7 @@ export function handleAPIError(action: keyof typeof API_ACTIONS, error: Error): 
   else if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
     throw new APIError('network_error', action, error)
   }
-  else {
-    throw new APIError('generic', action, error)
-  }
+  throw new APIError('generic', action, error)
 }
 
 export class APIError extends Error {

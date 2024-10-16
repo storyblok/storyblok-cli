@@ -10,7 +10,9 @@ const emailRegex = /^[^\s@]+@[^\s@][^\s.@]*\.[^\s@]+$/
 const handlers = [
   http.get('https://api.storyblok.com/v1/users/me', async ({ request }) => {
     const token = request.headers.get('Authorization')
-    if (token === 'valid-token') { return HttpResponse.json({ data: 'user data' }) }
+    if (token === 'valid-token') {
+      return HttpResponse.json({ data: 'user data' })
+    }
     return new HttpResponse('Unauthorized', { status: 401 })
   }),
   http.post('https://api.storyblok.com/v1/users/login', async ({ request }) => {
@@ -31,14 +33,10 @@ const handlers = [
 
 const server = setupServer(...handlers)
 
-// Start server before all tests
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
 
-//  Close server after all tests
-afterAll(() => server.close())
-
-// Reset handlers after each test `important for test isolation`
 afterEach(() => server.resetHandlers())
+afterAll(() => server.close())
 
 describe('login actions', () => {
   describe('loginWithToken', () => {
