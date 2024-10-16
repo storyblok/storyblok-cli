@@ -27,13 +27,13 @@ program.on('command:*', () => {
 
 program.command('test').action(async () => {
   konsola.title(`Test`, '#8556D3', 'Attempting a test...')
-
+  const verbose = program.opts().verbose
   try {
     // await loginWithEmailAndPassword('aw', 'passwrod', 'eu')
     await loginWithToken('WYSYDHYASDHSYD', 'eu')
   }
   catch (error) {
-    handleError(error as Error)
+    handleError(error as Error, verbose)
   }
 })
 

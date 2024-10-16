@@ -41,6 +41,7 @@ export const loginCommand = program
     region: RegionCode
   }) => {
     konsola.title(` ${commands.LOGIN} `, '#8556D3')
+    const verbose = program.opts().verbose
     const { token, region } = options
     if (!isRegion(region)) {
       handleError(new CommandError(`The provided region: ${region} is not valid. Please use one of the following values: ${Object.values(regions).join(' | ')}`))
@@ -64,7 +65,7 @@ export const loginCommand = program
         konsola.ok(`Successfully logged in with token`)
       }
       catch (error) {
-        handleError(error as Error, true)
+        handleError(error as Error, verbose)
       }
     }
     else {
@@ -123,7 +124,7 @@ export const loginCommand = program
         }
       }
       catch (error) {
-        handleError(error as Error, true)
+        handleError(error as Error, verbose)
       }
     }
   })

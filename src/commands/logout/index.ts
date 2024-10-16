@@ -9,6 +9,8 @@ export const logoutCommand = program
   .command(commands.LOGOUT)
   .description('Logout from the Storyblok CLI')
   .action(async () => {
+    const verbose = program.opts().verbose
+
     const isAuth = await isAuthorized()
     if (!isAuth) {
       konsola.ok(`You are already logged out. If you want to login, please use the login command.`)
@@ -20,6 +22,6 @@ export const logoutCommand = program
       konsola.ok(`Successfully logged out`)
     }
     catch (error) {
-      handleError(error as Error, true)
+      handleError(error as Error, verbose)
     }
   })

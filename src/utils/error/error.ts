@@ -4,7 +4,21 @@ import { CommandError } from './command-error'
 import { FileSystemError } from './filesystem-error'
 
 export function handleError(error: Error, verbose = false): void {
-  // If verbose flag is true and the error has getInfo method
+  // Print the message stack if it exists
+  if ((error as any).messageStack) {
+    const messageStack = (error as any).messageStack
+    messageStack.forEach((message: string, index: number) => {
+      konsola.error(message, null, {
+        header: index === 0,
+        margin: false,
+      })
+    })
+  }
+  else {
+    konsola.error(error.message, null, {
+      header: true,
+    })
+  }
   if (verbose && typeof (error as any).getInfo === 'function') {
     const errorDetails = (error as any).getInfo()
     if (error instanceof CommandError) {
@@ -21,23 +35,8 @@ export function handleError(error: Error, verbose = false): void {
     }
   }
   else {
-    // Print the message stack if it exists
-    if ((error as any).messageStack) {
-      const messageStack = (error as any).messageStack
-      messageStack.forEach((message: string, index: number) => {
-        konsola.error(message, null, {
-          header: index === 0,
-          margin: false,
-        })
-      })
-      konsola.br()
-      konsola.info('For more information about the error, run the command with the `--verbose` flag')
-    }
-    else {
-      konsola.error(error.message, null, {
-        header: true,
-      })
-    }
+    konsola.br()
+    konsola.info('For more information about the error, run the command with the `--verbose` flag')
   }
 
   if (!process.env.VITEST) {
