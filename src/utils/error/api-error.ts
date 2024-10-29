@@ -5,6 +5,7 @@ export const API_ACTIONS = {
   login_with_token: 'Failed to log in with token',
   login_with_otp: 'Failed to log in with email, password and otp',
   login_email_password: 'Failed to log in with email and password',
+  get_user: 'Failed to get user',
 } as const
 
 export const API_ERRORS = {

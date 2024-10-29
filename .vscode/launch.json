@@ -38,9 +38,9 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug test",
+      "name": "Debug user",
       "program": "${workspaceFolder}/dist/index.mjs",
-      "args": ["test", "--verbose"],
+      "args": ["user"],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "sourceMaps": true,

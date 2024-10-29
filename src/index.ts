@@ -6,6 +6,7 @@ import { formatHeader, handleError, konsola } from './utils'
 import { getProgram } from './program'
 import './commands/login'
 import './commands/logout'
+import './commands/user'
 import { loginWithToken } from './commands/login/actions'
 
 dotenv.config() // This will load variables from .env into process.env
@@ -47,7 +48,6 @@ ${chalk.hex('#45bfb9')('  |/ ')}
 
 try {
   program.parse(process.argv)
-  konsola.br() // Add a line break
 }
 catch (error) {
   handleError(error as Error)

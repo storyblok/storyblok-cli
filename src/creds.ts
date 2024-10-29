@@ -2,7 +2,7 @@ import { access, readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { FileSystemError, handleFileSystemError, konsola } from './utils'
 import chalk from 'chalk'
-import { regionCodes } from './constants'
+import { colorPalette, regionCodes } from './constants'
 
 export interface NetrcMachine {
   login: string
@@ -186,7 +186,7 @@ export const addNetrcEntry = async ({
       mode: 0o600, // Set file permissions
     })
 
-    konsola.ok(`Successfully added/updated entry for machine ${machineName} in ${chalk.hex('#45bfb9')(filePath)}`, true)
+    konsola.ok(`Successfully added/updated entry for machine ${machineName} in ${chalk.hex(colorPalette.PRIMARY)(filePath)}`, true)
   }
   catch (error) {
     throw new FileSystemError('invalid_argument', 'write', error as NodeJS.ErrnoException, `Error adding/updating entry for machine ${machineName} in .netrc file`)
@@ -223,7 +223,7 @@ export const removeNetrcEntry = async (
         mode: 0o600, // Set file permissions
       })
 
-      konsola.ok(`Successfully removed entry from ${chalk.hex('#45bfb9')(filePath)}`, true)
+      konsola.ok(`Successfully removed entry from ${chalk.hex(colorPalette.PRIMARY)(filePath)}`, true)
     }
   }
   catch (error: unknown) {
