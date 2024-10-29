@@ -4,6 +4,12 @@ export const commands = {
   USER: 'user',
 } as const
 
+export const colorPalette = {
+  PRIMARY: '#45bfb9',
+  LOGIN: '#8556D3',
+  USER: '#8BC34A', // Changed to a less saturated green color
+} as const
+
 export interface ReadonlyArray<T> {
   includes: (searchElement: any, fromIndex?: number) => searchElement is T
 }

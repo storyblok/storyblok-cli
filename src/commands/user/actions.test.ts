@@ -1,4 +1,3 @@
-import { ofetch } from 'ofetch'
 import chalk from 'chalk'
 import { getUser } from './actions'
 import { http, HttpResponse } from 'msw'

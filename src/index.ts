@@ -48,7 +48,6 @@ ${chalk.hex('#45bfb9')('  |/ ')}
 
 try {
   program.parse(process.argv)
-  konsola.br() // Add a line break
 }
 catch (error) {
   handleError(error as Error)
