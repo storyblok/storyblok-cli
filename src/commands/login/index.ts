@@ -69,8 +69,8 @@ export const loginCommand = program
       }
     }
     else {
-      const strategy = await select(loginStrategy)
       try {
+        const strategy = await select(loginStrategy)
         if (strategy === 'login-with-token') {
           const userToken = await password({
             message: 'Please enter your token:',
