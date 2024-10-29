@@ -89,7 +89,6 @@ export const getNetrcCredentials = async (filePath: string = getNetrcFilePath())
     await access(filePath)
   }
   catch {
-    konsola.warn(`.netrc file not found at path: ${filePath}`)
     return {}
   }
   try {
@@ -161,10 +160,16 @@ export const addNetrcEntry = async ({
     let machines: Record<string, NetrcMachine> = {}
 
     // Check if the file exists
-    await access(filePath)
-    // File exists, read and parse it
-    const content = await readFile(filePath, 'utf8')
-    machines = parseNetrcContent(content)
+    try {
+      await access(filePath)
+      // File exists, read and parse it
+      const content = await readFile(filePath, 'utf8')
+      machines = parseNetrcContent(content)
+    }
+    catch {
+      // File does not exist
+      konsola.ok(`.netrc file not found at path: ${filePath}. A new file will be created.`)
+    }
 
     // Add or update the machine entry
     machines[machineName] = {
@@ -227,9 +232,14 @@ export const removeNetrcEntry = async (
 }
 
 export function removeAllNetrcEntries(filePath = getNetrcFilePath()) {
-  return writeFile(filePath, '', {
-    mode: 0o600, // Set file permissions
-  })
+  try {
+    writeFile(filePath, '', {
+      mode: 0o600, // Set file permissions
+    })
+  }
+  catch (error) {
+    handleFileSystemError('write', error as NodeJS.ErrnoException)
+  }
 }
 
 export async function isAuthorized() {

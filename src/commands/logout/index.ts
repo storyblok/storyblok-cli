@@ -10,13 +10,12 @@ export const logoutCommand = program
   .description('Logout from the Storyblok CLI')
   .action(async () => {
     const verbose = program.opts().verbose
-
-    const isAuth = await isAuthorized()
-    if (!isAuth) {
-      konsola.ok(`You are already logged out. If you want to login, please use the login command.`)
-      return
-    }
     try {
+      const isAuth = await isAuthorized()
+      if (!isAuth) {
+        konsola.ok(`You are already logged out. If you want to login, please use the login command.`)
+        return
+      }
       await removeAllNetrcEntries()
 
       konsola.ok(`Successfully logged out`)
