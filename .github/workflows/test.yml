@@ -5,8 +5,8 @@ env:
   PNPM_CACHE_FOLDER: .pnpm-store
 
 jobs:
-  lint:
-    name: Lint
+  test:
+    name: Test
     runs-on: ubuntu-22.04
     strategy:
       matrix:
@@ -23,5 +23,5 @@ jobs:
           cache: pnpm
       - name: Install dependencies
         run: pnpm install
-      - name: Run Lint
-        run: pnpm run lint
+      - name: Run Test
+        run: pnpm run test
