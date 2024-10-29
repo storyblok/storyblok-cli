@@ -7,6 +7,7 @@ interface SessionState {
   login?: string
   password?: string
   region?: string
+  envLogin?: boolean
 }
 
 let sessionInstance: ReturnType<typeof createSession> | null = null
@@ -24,6 +25,7 @@ function createSession() {
       state.login = envCredentials.login
       state.password = envCredentials.password
       state.region = envCredentials.region
+      state.envLogin = true
       return
     }
 
@@ -43,6 +45,7 @@ function createSession() {
       state.password = undefined
       state.region = undefined
     }
+    state.envLogin = false
   }
 
   function getEnvCredentials() {

@@ -51,7 +51,7 @@ export const loginCommand = program
 
     await initializeSession()
 
-    if (state.isLoggedIn) {
+    if (state.isLoggedIn && !state.envLogin) {
       konsola.ok(`You are already logged in. If you want to login with a different account, please logout first.`)
       return
     }
@@ -107,9 +107,9 @@ export const loginCommand = program
             })),
             default: regions.EU,
           })
-          const { otp_required } = await loginWithEmailAndPassword(userEmail, userPassword, userRegion)
+          const response = await loginWithEmailAndPassword(userEmail, userPassword, userRegion)
 
-          if (otp_required) {
+          if (response.otp_required) {
             const otp = await input({
               message: 'Add the code from your Authenticator app, or the one we sent to your e-mail / phone:',
               required: true,
@@ -117,10 +117,12 @@ export const loginCommand = program
 
             const { access_token } = await loginWithOtp(userEmail, userPassword, otp, userRegion)
             updateSession(userEmail, access_token, userRegion)
-            await persistCredentials(regionsDomain[userRegion])
-
-            konsola.ok(`Successfully logged in with email ${chalk.hex('#45bfb9')(userEmail)}`)
           }
+          else {
+            updateSession(userEmail, response.access_token, userRegion)
+          }
+          await persistCredentials(regionsDomain[userRegion])
+          konsola.ok(`Successfully logged in with email ${chalk.hex('#45bfb9')(userEmail)}`)
         }
       }
       catch (error) {
