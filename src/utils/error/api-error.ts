@@ -55,6 +55,7 @@ export class APIError extends Error {
     return {
       name: this.name,
       message: this.message,
+      httpCode: this.code,
       cause: this.cause,
       errorId: this.errorId,
       stack: this.stack,
