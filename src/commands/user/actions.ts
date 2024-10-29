@@ -1,8 +1,7 @@
-import type { FetchError } from 'ofetch'
-import { ofetch } from 'ofetch'
+import { FetchError, ofetch } from 'ofetch'
 import { regionsDomain } from '../../constants'
 import chalk from 'chalk'
-import { maskToken } from '../../utils'
+import { APIError, maskToken } from '../../utils'
 
 export const getUser = async (token: string, region: string) => {
   try {
@@ -13,14 +12,19 @@ export const getUser = async (token: string, region: string) => {
     })
   }
   catch (error) {
-    if ((error as FetchError).response?.status === 401) {
-      throw new Error(`The token provided ${chalk.bold(maskToken(token))} is invalid: ${chalk.bold(`401 ${(error as FetchError).data.error}`)}
+    if (error instanceof FetchError) {
+      const status = error.response?.status
 
-  Please make sure you are using the correct token and try again.`)
+      switch (status) {
+        case 401:
+          throw new APIError('unauthorized', 'get_user', error, `The token provided ${chalk.bold(maskToken(token))} is invalid.
+        Please make sure you are using the correct token and try again.`)
+        default:
+          throw new APIError('network_error', 'get_user', error)
+      }
     }
-    if (!(error as FetchError).response) {
-      throw new Error('No response from server, please check if you are correctly connected to internet', error as Error)
+    else {
+      throw new APIError('generic', 'get_user', error as Error)
     }
-    throw new Error('There was an error logging with token ', error as Error)
   }
 }
