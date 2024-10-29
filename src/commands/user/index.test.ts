@@ -3,7 +3,6 @@ import { getUser } from './actions'
 import { konsola } from '../../utils'
 import { session } from '../../session'
 import chalk from 'chalk'
-import { title } from 'node:process'
 
 vi.mock('./actions', () => ({
   getUser: vi.fn(),
