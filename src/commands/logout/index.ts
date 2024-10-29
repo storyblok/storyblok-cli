@@ -1,4 +1,4 @@
-import { isAuthorized, removeAllNetrcEntries, removeNetrcEntry } from '../../creds'
+import { isAuthorized, removeAllNetrcEntries } from '../../creds'
 import { commands } from '../../constants'
 import { getProgram } from '../../program'
 import { handleError, konsola } from '../../utils'

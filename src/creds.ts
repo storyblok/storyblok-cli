@@ -161,16 +161,10 @@ export const addNetrcEntry = async ({
     let machines: Record<string, NetrcMachine> = {}
 
     // Check if the file exists
-    try {
-      await access(filePath)
-      // File exists, read and parse it
-      const content = await readFile(filePath, 'utf8')
-      machines = parseNetrcContent(content)
-    }
-    catch {
-      // File does not exist
-      konsola.warn(`.netrc file not found at path: ${filePath}. A new file will be created.`)
-    }
+    await access(filePath)
+    // File exists, read and parse it
+    const content = await readFile(filePath, 'utf8')
+    machines = parseNetrcContent(content)
 
     // Add or update the machine entry
     machines[machineName] = {
@@ -210,8 +204,6 @@ export const removeNetrcEntry = async (
       machines = parseNetrcContent(content)
     }
     catch {
-      // File does not exist
-      konsola.warn(`.netrc file not found at path: ${filePath}. No action taken.`)
       return
     }
 
