@@ -1,4 +1,5 @@
 // session.ts
+import type { RegionCode } from './constants'
 import { addNetrcEntry, getCredentialsForMachine, getNetrcCredentials } from './creds'
 
 interface SessionState {
@@ -6,6 +7,7 @@ interface SessionState {
   login?: string
   password?: string
   region?: string
+  envLogin?: boolean
 }
 
 let sessionInstance: ReturnType<typeof createSession> | null = null
@@ -23,6 +25,7 @@ function createSession() {
       state.login = envCredentials.login
       state.password = envCredentials.password
       state.region = envCredentials.region
+      state.envLogin = true
       return
     }
 
@@ -42,6 +45,7 @@ function createSession() {
       state.password = undefined
       state.region = undefined
     }
+    state.envLogin = false
   }
 
   function getEnvCredentials() {
@@ -73,7 +77,7 @@ function createSession() {
     }
   }
 
-  function updateSession(login: string, password: string, region: string) {
+  function updateSession(login: string, password: string, region: RegionCode) {
     state.isLoggedIn = true
     state.login = login
     state.password = password

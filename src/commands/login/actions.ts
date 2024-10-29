@@ -1,10 +1,10 @@
 import chalk from 'chalk'
+import type { RegionCode } from '../../constants'
 import { regionsDomain } from '../../constants'
-import type { FetchError } from 'ofetch'
-import { ofetch } from 'ofetch'
-import { maskToken } from '../../utils'
+import { FetchError, ofetch } from 'ofetch'
+import { APIError, handleAPIError, maskToken } from '../../utils'
 
-export const loginWithToken = async (token: string, region: string) => {
+export const loginWithToken = async (token: string, region: RegionCode) => {
   try {
     return await ofetch(`https://${regionsDomain[region]}/v1/users/me`, {
       headers: {
@@ -13,19 +13,24 @@ export const loginWithToken = async (token: string, region: string) => {
     })
   }
   catch (error) {
-    if ((error as FetchError).response?.status === 401) {
-      throw new Error(`The token provided ${chalk.bold(maskToken(token))} is invalid: ${chalk.bold(`401 ${(error as FetchError).data.error}`)}
+    if (error instanceof FetchError) {
+      const status = error.response?.status
 
-  Please make sure you are using the correct token and try again.`)
+      switch (status) {
+        case 401:
+          throw new APIError('unauthorized', 'login_with_token', error, `The token provided ${chalk.bold(maskToken(token))} is invalid.
+        Please make sure you are using the correct token and try again.`)
+        default:
+          throw new APIError('network_error', 'login_with_token', error)
+      }
     }
-    if (!(error as FetchError).response) {
-      throw new Error('No response from server, please check if you are correctly connected to internet', error as Error)
+    else {
+      throw new APIError('generic', 'login_with_token', error as Error)
     }
-    throw new Error('There was an error logging with token', error as Error)
   }
 }
 
-export const loginWithEmailAndPassword = async (email: string, password: string, region: string) => {
+export const loginWithEmailAndPassword = async (email: string, password: string, region: RegionCode) => {
   try {
     return await ofetch(`https://${regionsDomain[region]}/v1/users/login`, {
       method: 'POST',
@@ -33,11 +38,11 @@ export const loginWithEmailAndPassword = async (email: string, password: string,
     })
   }
   catch (error) {
-    throw new Error('Error logging in with email and password', error as Error)
+    handleAPIError('login_email_password', error as Error)
   }
 }
 
-export const loginWithOtp = async (email: string, password: string, otp: string, region: string) => {
+export const loginWithOtp = async (email: string, password: string, otp: string, region: RegionCode) => {
   try {
     return await ofetch(`https://${regionsDomain[region]}/v1/users/login`, {
       method: 'POST',
@@ -45,6 +50,6 @@ export const loginWithOtp = async (email: string, password: string, otp: string,
     })
   }
   catch (error) {
-    throw new Error('Error logging in with email, password and otp', error as Error)
+    handleAPIError('login_with_otp', error as Error)
   }
 }

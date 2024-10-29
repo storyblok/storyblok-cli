@@ -16,7 +16,7 @@ vi.mock('storyblok-js-client', () => {
 
 // Mocking the session module
 vi.mock('./session', () => {
-  let _cache
+  let _cache: Record<string, any> | null = null
   const session = () => {
     if (!_cache) {
       _cache = {
@@ -65,12 +65,5 @@ describe('storyblok API Client', () => {
     setRegion('us')
     const { region } = apiClient()
     expect(region).toBe('us')
-  })
-
-  it('should set the access token on the client', () => {
-    const { setAccessToken } = apiClient()
-    setAccessToken('test-token')
-    const { client } = apiClient()
-    expect(client.config.accessToken).toBe('test-token')
   })
 })

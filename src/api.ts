@@ -1,8 +1,9 @@
 import StoryblokClient from 'storyblok-js-client'
 import { session } from './session'
+import type { RegionCode } from './constants'
 
 export interface ApiClientState {
-  region: string
+  region: RegionCode
   accessToken: string
   client: StoryblokClient | null
 }
@@ -35,7 +36,7 @@ export function apiClient() {
     createClient()
   }
 
-  function setRegion(region: string) {
+  function setRegion(region: RegionCode) {
     state.region = region
     state.client = null
     createClient()

@@ -2,11 +2,14 @@
 import { session } from './session'
 
 import { getCredentialsForMachine } from './creds'
+import type { Mock } from 'vitest'
 
 vi.mock('./creds', () => ({
   getNetrcCredentials: vi.fn(),
   getCredentialsForMachine: vi.fn(),
 }))
+
+const mockedGetCredentialsForMachine = getCredentialsForMachine as Mock
 
 describe('session', () => {
   beforeEach(() => {
@@ -15,7 +18,7 @@ describe('session', () => {
   })
   describe('session initialization with netrc', () => {
     it('should initialize session with netrc credentials', async () => {
-      getCredentialsForMachine.mockReturnValue({
+      mockedGetCredentialsForMachine.mockReturnValue({
         login: 'test_login',
         password: 'test_token',
         region: 'test_region',
@@ -28,7 +31,7 @@ describe('session', () => {
       expect(userSession.state.region).toBe('test_region')
     })
     it('should initialize session with netrc credentials for a specific machine', async () => {
-      getCredentialsForMachine.mockReturnValue({
+      mockedGetCredentialsForMachine.mockReturnValue({
         login: 'test_login',
         password: 'test_token',
         region: 'test_region',
@@ -42,7 +45,7 @@ describe('session', () => {
     })
 
     it('should initialize session with netrc credentials for a specific machine when no matching machine is present', async () => {
-      getCredentialsForMachine.mockReturnValue(undefined)
+      mockedGetCredentialsForMachine.mockReturnValue(undefined)
       const userSession = session()
       await userSession.initializeSession('nonexistent-machine')
       expect(userSession.state.isLoggedIn).toBe(false)

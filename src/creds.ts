@@ -1,7 +1,8 @@
-import fs from 'node:fs/promises'
-import path from 'node:path'
-import { handleError, konsola } from './utils'
+import { access, readFile, writeFile } from 'node:fs/promises'
+import { join } from 'node:path'
+import { FileSystemError, handleFileSystemError, konsola } from './utils'
 import chalk from 'chalk'
+import { regionCodes } from './constants'
 
 export interface NetrcMachine {
   login: string
@@ -14,11 +15,11 @@ export const getNetrcFilePath = () => {
     process.platform.startsWith('win') ? 'USERPROFILE' : 'HOME'
   ] || process.cwd()
 
-  return path.join(homeDirectory, '.netrc')
+  return join(homeDirectory, '.netrc')
 }
 
 const readNetrcFileAsync = async (filePath: string) => {
-  return await fs.readFile(filePath, 'utf8')
+  return await readFile(filePath, 'utf8')
 }
 
 const preprocessNetrcContent = (content: string) => {
@@ -33,6 +34,10 @@ const tokenizeNetrcContent = (content: string) => {
   return content
     .split(/\s+/)
     .filter(token => token.length > 0)
+}
+
+function includes<T extends U, U>(coll: ReadonlyArray<T>, el: U): el is T {
+  return coll.includes(el as T)
 }
 
 const parseNetrcTokens = (tokens: string[]) => {
@@ -52,9 +57,14 @@ const parseNetrcTokens = (tokens: string[]) => {
         && tokens[i] !== 'machine'
         && tokens[i] !== 'default'
       ) {
-        const key = tokens[i] as keyof NetrcMachine
+        const key = tokens[i]
         const value = tokens[++i]
-        machineData[key] = value
+        if (key === 'region' && includes(regionCodes, value)) {
+          machineData[key] = value
+        }
+        else if (key === 'login' || key === 'password') {
+          machineData[key] = value
+        }
         i++
       }
 
@@ -76,21 +86,19 @@ const parseNetrcContent = (content: string) => {
 
 export const getNetrcCredentials = async (filePath: string = getNetrcFilePath()) => {
   try {
-    try {
-      await fs.access(filePath)
-    }
-    catch {
-      console.warn(`.netrc file not found at path: ${filePath}`)
-      return {}
-    }
-
+    await access(filePath)
+  }
+  catch {
+    return {}
+  }
+  try {
     const content = await readNetrcFileAsync(filePath)
 
     const machines = parseNetrcContent(content)
     return machines
   }
   catch (error) {
-    console.error('Error reading or parsing .netrc file:', error)
+    handleFileSystemError('read', error as NodeJS.ErrnoException)
     return {}
   }
 }
@@ -153,14 +161,14 @@ export const addNetrcEntry = async ({
 
     // Check if the file exists
     try {
-      await fs.access(filePath)
+      await access(filePath)
       // File exists, read and parse it
-      const content = await fs.readFile(filePath, 'utf8')
+      const content = await readFile(filePath, 'utf8')
       machines = parseNetrcContent(content)
     }
     catch {
       // File does not exist
-      console.warn(`.netrc file not found at path: ${filePath}. A new file will be created.`)
+      konsola.ok(`.netrc file not found at path: ${filePath}. A new file will be created.`)
     }
 
     // Add or update the machine entry
@@ -174,63 +182,67 @@ export const addNetrcEntry = async ({
     const newContent = serializeNetrcMachines(machines)
 
     // Write the updated content back to the .netrc file
-    await fs.writeFile(filePath, newContent, {
+    await writeFile(filePath, newContent, {
       mode: 0o600, // Set file permissions
     })
 
     konsola.ok(`Successfully added/updated entry for machine ${machineName} in ${chalk.hex('#45bfb9')(filePath)}`, true)
   }
-  catch (error: unknown) {
-    handleError(new Error(`Error adding/updating entry for machine ${machineName} in .netrc file: ${(error as Error).message}`), true)
+  catch (error) {
+    throw new FileSystemError('invalid_argument', 'write', error as NodeJS.ErrnoException, `Error adding/updating entry for machine ${machineName} in .netrc file`)
   }
 }
 
 // Function to remove an entry from the .netrc file asynchronously
 export const removeNetrcEntry = async (
+  machineName: string,
   filePath = getNetrcFilePath(),
-  machineName?: string,
 ) => {
   try {
     let machines: Record<string, NetrcMachine> = {}
 
     // Check if the file exists
     try {
-      await fs.access(filePath)
+      await access(filePath)
       // File exists, read and parse it
-      const content = await fs.readFile(filePath, 'utf8')
+      const content = await readFile(filePath, 'utf8')
       machines = parseNetrcContent(content)
     }
     catch {
-      // File does not exist
-      console.warn(`.netrc file not found at path: ${filePath}. No action taken.`)
       return
     }
 
-    if (machineName) {
+    if (machines[machineName]) {
       // Remove the machine entry
       delete machines[machineName]
+      // Serialize machines back into .netrc format
+      const newContent = serializeNetrcMachines(machines)
+
+      // Write the updated content back to the .netrc file
+      await writeFile(filePath, newContent, {
+        mode: 0o600, // Set file permissions
+      })
+
+      konsola.ok(`Successfully removed entry from ${chalk.hex('#45bfb9')(filePath)}`, true)
     }
-    else {
-      // Remove all machine entries
-      machines = {}
-    }
-
-    // Serialize machines back into .netrc format
-    const newContent = serializeNetrcMachines(machines)
-
-    // Write the updated content back to the .netrc file
-    await fs.writeFile(filePath, newContent, {
-      mode: 0o600, // Set file permissions
-    })
-
-    konsola.ok(`Successfully removed entries from ${chalk.hex('#45bfb9')(filePath)}`, true)
   }
   catch (error: unknown) {
-    handleError(new Error(`Error removing entry for machine ${machineName} from .netrc file: ${(error as Error).message}`), true)
+    throw new Error(`Error removing entry for machine ${machineName} from .netrc file: ${(error as Error).message}`)
   }
 }
 
-export async function isAuthorized(): Promise<boolean> {
+export function removeAllNetrcEntries(filePath = getNetrcFilePath()) {
+  try {
+    writeFile(filePath, '', {
+      mode: 0o600, // Set file permissions
+    })
+  }
+  catch (error) {
+    handleFileSystemError('write', error as NodeJS.ErrnoException)
+  }
+}
+
+export async function isAuthorized() {
   try {
     const machines = await getNetrcCredentials()
     // Check if there is any machine with a valid email and token
@@ -242,7 +254,7 @@ export async function isAuthorized(): Promise<boolean> {
     return false
   }
   catch (error: unknown) {
-    handleError(new Error(`Error checking authorization in .netrc file: ${(error as Error).message}`), true)
+    handleFileSystemError('authorization_check', error as NodeJS.ErrnoException)
     return false
   }
 }

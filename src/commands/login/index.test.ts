@@ -22,7 +22,7 @@ vi.mock('../../creds', () => ({
 
 // Mocking the session module
 vi.mock('../../session', () => {
-  let _cache
+  let _cache: Record<string, any> | null = null
   const session = () => {
     if (!_cache) {
       _cache = {
@@ -48,6 +48,7 @@ vi.mock('../../utils', async () => {
     ...actualUtils,
     konsola: {
       ok: vi.fn(),
+      title: vi.fn(),
       error: vi.fn(),
     },
     handleError: (error: Error, header = false) => {
@@ -83,15 +84,15 @@ describe('loginCommand', () => {
         vi.resetAllMocks()
       })
       it('should prompt the user for email and password when login-with-email is selected', async () => {
-        select
+        vi.mocked(select)
           .mockResolvedValueOnce('login-with-email') // For login strategy
           .mockResolvedValueOnce('eu') // For region
 
-        input
+        vi.mocked(input)
           .mockResolvedValueOnce('user@example.com') // For email
           .mockResolvedValueOnce('123456') // For OTP code
 
-        password.mockResolvedValueOnce('test-password')
+        vi.mocked(password).mockResolvedValueOnce('test-password')
 
         await loginCommand.parseAsync(['node', 'test'])
 
@@ -109,18 +110,18 @@ describe('loginCommand', () => {
       })
 
       it('should login with email and password if provided using login-with-email strategy', async () => {
-        select
+        vi.mocked(select)
           .mockResolvedValueOnce('login-with-email') // For login strategy
           .mockResolvedValueOnce('eu') // For region
 
-        input
+        vi.mocked(input)
           .mockResolvedValueOnce('user@example.com') // For email
           .mockResolvedValueOnce('123456') // For OTP code
 
-        password.mockResolvedValueOnce('test-password')
+        vi.mocked(password).mockResolvedValueOnce('test-password')
 
-        loginWithEmailAndPassword.mockResolvedValueOnce({ otp_required: true })
-        loginWithOtp.mockResolvedValueOnce({ access_token: 'test-token' })
+        vi.mocked(loginWithEmailAndPassword).mockResolvedValueOnce({ otp_required: true })
+        vi.mocked(loginWithOtp).mockResolvedValueOnce({ access_token: 'test-token' })
 
         await loginCommand.parseAsync(['node', 'test'])
 
@@ -130,15 +131,15 @@ describe('loginCommand', () => {
       })
 
       it('should throw an error for invalid email and password', async () => {
-        select.mockResolvedValueOnce('login-with-email')
-        input.mockResolvedValueOnce('eu')
+        vi.mocked(select).mockResolvedValueOnce('login-with-email')
+        vi.mocked(input).mockResolvedValueOnce('eu')
 
         const mockError = new Error('Error logging in with email and password')
         loginWithEmailAndPassword.mockRejectedValueOnce(mockError)
 
         await loginCommand.parseAsync(['node', 'test'])
 
-        expect(konsola.error).toHaveBeenCalledWith(mockError, true)
+        expect(konsola.error).toHaveBeenCalledWith(mockError, false)
       })
     })
 
@@ -155,10 +156,10 @@ describe('loginCommand', () => {
       })
 
       it('should login with token if token is provided using login-with-token strategy', async () => {
-        select.mockResolvedValueOnce('login-with-token')
-        password.mockResolvedValueOnce('test-token')
+        vi.mocked(select).mockResolvedValueOnce('login-with-token')
+        vi.mocked(password).mockResolvedValueOnce('test-token')
         const mockUser = { email: 'user@example.com' }
-        loginWithToken.mockResolvedValue({ user: mockUser })
+        vi.mocked(loginWithToken).mockResolvedValue({ user: mockUser })
 
         await loginCommand.parseAsync(['node', 'test'])
 
@@ -178,7 +179,7 @@ describe('loginCommand', () => {
     it('should login with a valid token', async () => {
       const mockToken = 'test-token'
       const mockUser = { email: 'test@example.com' }
-      loginWithToken.mockResolvedValue({ user: mockUser })
+      vi.mocked(loginWithToken).mockResolvedValue({ user: mockUser })
 
       await loginCommand.parseAsync(['node', 'test', '--token', mockToken])
 
@@ -190,7 +191,7 @@ describe('loginCommand', () => {
     it('should login with a valid token in another region --region', async () => {
       const mockToken = 'test-token'
       const mockUser = { email: 'test@example.com' }
-      loginWithToken.mockResolvedValue({ user: mockUser })
+      vi.mocked(loginWithToken).mockResolvedValue({ user: mockUser })
 
       await loginCommand.parseAsync(['node', 'test', '--token', mockToken, '--region', 'us'])
 
@@ -204,12 +205,12 @@ describe('loginCommand', () => {
 
       Please make sure you are using the correct token and try again.`)
 
-      loginWithToken.mockRejectedValue(mockError)
+      vi.mocked(loginWithToken).mockRejectedValue(mockError)
 
       await loginCommand.parseAsync(['node', 'test', '--token', 'invalid-token'])
 
       // expect(handleError).toHaveBeenCalledWith(mockError, true)
-      expect(konsola.error).toHaveBeenCalledWith(mockError, true)
+      expect(konsola.error).toHaveBeenCalledWith(mockError, false)
     })
   })
 
@@ -217,10 +218,10 @@ describe('loginCommand', () => {
     it('should handle invalid region error with correct message', async () => {
       await loginCommand.parseAsync(['node', 'test', '--region', 'invalid-region'])
 
-      expect(konsola.error).toHaveBeenCalledWith(expect.any(Error), true)
+      expect(konsola.error).toHaveBeenCalledWith(expect.any(Error), false)
 
       // Access the error argument
-      const errorArg = konsola.error.mock.calls[0][0]
+      const errorArg = vi.mocked(konsola.error).mock.calls[0][0]
 
       // Build the expected error message
       const expectedMessage = `The provided region: invalid-region is not valid. Please use one of the following values: ${Object.values(regions).join(' | ')}`

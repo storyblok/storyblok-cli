@@ -1,8 +1,9 @@
 import chalk from 'chalk'
 import { input, password, select } from '@inquirer/prompts'
+import type { RegionCode } from '../../constants'
 import { commands, regionNames, regions, regionsDomain } from '../../constants'
 import { getProgram } from '../../program'
-import { formatHeader, handleError, isRegion, konsola } from '../../utils'
+import { CommandError, handleError, isRegion, konsola } from '../../utils'
 import { loginWithEmailAndPassword, loginWithOtp, loginWithToken } from './actions'
 
 import { session } from '../../session'
@@ -10,22 +11,21 @@ import { session } from '../../session'
 const program = getProgram() // Get the shared singleton instance
 
 const allRegionsText = Object.values(regions).join(',')
-const loginStrategy
-  = {
-    message: 'How would you like to login?',
-    choices: [
-      {
-        name: 'With email',
-        value: 'login-with-email',
-        short: 'Email',
-      },
-      {
-        name: 'With Token (SSO)',
-        value: 'login-with-token',
-        short: 'Token',
-      },
-    ],
-  }
+const loginStrategy = {
+  message: 'How would you like to login?',
+  choices: [
+    {
+      name: 'With email',
+      value: 'login-with-email',
+      short: 'Email',
+    },
+    {
+      name: 'With Token (SSO)',
+      value: 'login-with-token',
+      short: 'Token',
+    },
+  ],
+}
 
 export const loginCommand = program
   .command(commands.LOGIN)
@@ -36,19 +36,23 @@ export const loginCommand = program
     `The region you would like to work in. Please keep in mind that the region must match the region of your space. This region flag will be used for the other cli's commands. You can use the values: ${allRegionsText}.`,
     regions.EU,
   )
-  .action(async (options) => {
+  .action(async (options: {
+    token: string
+    region: RegionCode
+  }) => {
+    konsola.title(` ${commands.LOGIN} `, '#8556D3')
+    const verbose = program.opts().verbose
     const { token, region } = options
     if (!isRegion(region)) {
-      konsola.error(new Error(`The provided region: ${region} is not valid. Please use one of the following values: ${Object.values(regions).join(' | ')}`), true)
+      handleError(new CommandError(`The provided region: ${region} is not valid. Please use one of the following values: ${Object.values(regions).join(' | ')}`))
     }
 
     const { state, updateSession, persistCredentials, initializeSession } = session()
 
     await initializeSession()
 
-    if (state.isLoggedIn) {
-      konsola.ok(`You are already logged in. If you want to login with a different account, please logout first.
-`)
+    if (state.isLoggedIn && !state.envLogin) {
+      konsola.ok(`You are already logged in. If you want to login with a different account, please logout first.`)
       return
     }
 
@@ -61,14 +65,12 @@ export const loginCommand = program
         konsola.ok(`Successfully logged in with token`)
       }
       catch (error) {
-        handleError(error as Error, true)
+        handleError(error as Error, verbose)
       }
     }
     else {
-      console.log(formatHeader(chalk.bgHex('#8556D3').bold.white(` ${commands.LOGIN} `)))
-
-      const strategy = await select(loginStrategy)
       try {
+        const strategy = await select(loginStrategy)
         if (strategy === 'login-with-token') {
           const userToken = await password({
             message: 'Please enter your token:',
@@ -99,30 +101,32 @@ export const loginCommand = program
           })
           const userRegion = await select({
             message: 'Please select the region you would like to work in:',
-            choices: Object.values(regions).map(region => ({
+            choices: Object.values(regions).map((region: RegionCode) => ({
               name: regionNames[region],
               value: region,
             })),
             default: regions.EU,
           })
-          const { otp_required } = await loginWithEmailAndPassword(userEmail, userPassword, userRegion as string)
+          const response = await loginWithEmailAndPassword(userEmail, userPassword, userRegion)
 
-          if (otp_required) {
+          if (response.otp_required) {
             const otp = await input({
               message: 'Add the code from your Authenticator app, or the one we sent to your e-mail / phone:',
               required: true,
             })
 
-            const { access_token } = await loginWithOtp(userEmail, userPassword, otp, userRegion as string)
+            const { access_token } = await loginWithOtp(userEmail, userPassword, otp, userRegion)
             updateSession(userEmail, access_token, userRegion)
-            await persistCredentials(regionsDomain[userRegion])
-
-            konsola.ok(`Successfully logged in with email ${chalk.hex('#45bfb9')(userEmail)}`)
           }
+          else {
+            updateSession(userEmail, response.access_token, userRegion)
+          }
+          await persistCredentials(regionsDomain[userRegion])
+          konsola.ok(`Successfully logged in with email ${chalk.hex('#45bfb9')(userEmail)}`)
         }
       }
       catch (error) {
-        handleError(error as Error, true)
+        handleError(error as Error, verbose)
       }
     }
   })
