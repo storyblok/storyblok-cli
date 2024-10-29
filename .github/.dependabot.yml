@@ -3,11 +3,11 @@
 
 version: 2
 updates:
-  - package-ecosystem: "npm"
-    directory: "/"
+  - package-ecosystem: npm
+    directory: /
     schedule:
-      interval: "monthly"
+      interval: monthly
     allow:
-      - dependency-name: "@storyblok/region-helper"
+      - dependency-name: '@storyblok/region-helper'
     reviewers:
-      - "storyblok/plugins-team"
+      - storyblok/plugins-team

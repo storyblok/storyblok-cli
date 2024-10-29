@@ -26,23 +26,29 @@
   "scripts": {
     "build": "unbuild",
     "build:stub": "unbuild --stub",
-    "dev": "node dist/index.mjs",
+    "dev": "pnpm run build:stub && STUB=true node dist/index.mjs",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "test": "vitest"
-
+    "test": "vitest",
+    "coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@inquirer/prompts": "^6.0.1",
     "chalk": "^5.3.0",
     "commander": "^12.1.0",
     "consola": "^3.2.3",
-    "inquirer": "^10.2.2"
+    "dotenv": "^16.4.5",
+    "ofetch": "^1.4.0",
+    "storyblok-js-client": "^6.9.2"
   },
   "devDependencies": {
     "@storyblok/eslint-config": "^0.2.0",
     "@types/inquirer": "^9.0.7",
     "@types/node": "^22.5.4",
+    "@vitest/coverage-v8": "^2.1.1",
     "eslint": "^9.10.0",
+    "memfs": "^4.11.2",
+    "msw": "^2.4.11",
     "pathe": "^1.1.2",
     "typescript": "^5.6.2",
     "unbuild": "^2.0.0",
