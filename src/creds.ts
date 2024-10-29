@@ -234,6 +234,12 @@ export const removeNetrcEntry = async (
   }
 }
 
+export function removeAllNetrcEntries(filePath = getNetrcFilePath()) {
+  return writeFile(filePath, '', {
+    mode: 0o600, // Set file permissions
+  })
+}
+
 export async function isAuthorized() {
   try {
     const machines = await getNetrcCredentials()

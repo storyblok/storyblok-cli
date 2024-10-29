@@ -1,4 +1,4 @@
-import { isAuthorized, removeNetrcEntry } from '../../creds'
+import { isAuthorized, removeAllNetrcEntries, removeNetrcEntry } from '../../creds'
 import { commands } from '../../constants'
 import { getProgram } from '../../program'
 import { handleError, konsola } from '../../utils'
@@ -17,7 +17,7 @@ export const logoutCommand = program
       return
     }
     try {
-      await removeNetrcEntry('api.storyblok.com')
+      await removeAllNetrcEntries()
 
       konsola.ok(`Successfully logged out`)
     }

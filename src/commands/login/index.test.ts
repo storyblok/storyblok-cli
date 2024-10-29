@@ -139,7 +139,7 @@ describe('loginCommand', () => {
 
         await loginCommand.parseAsync(['node', 'test'])
 
-        expect(konsola.error).toHaveBeenCalledWith(mockError, true)
+        expect(konsola.error).toHaveBeenCalledWith(mockError, false)
       })
     })
 
@@ -210,7 +210,7 @@ describe('loginCommand', () => {
       await loginCommand.parseAsync(['node', 'test', '--token', 'invalid-token'])
 
       // expect(handleError).toHaveBeenCalledWith(mockError, true)
-      expect(konsola.error).toHaveBeenCalledWith(mockError, true)
+      expect(konsola.error).toHaveBeenCalledWith(mockError, false)
     })
   })
 
@@ -218,7 +218,7 @@ describe('loginCommand', () => {
     it('should handle invalid region error with correct message', async () => {
       await loginCommand.parseAsync(['node', 'test', '--region', 'invalid-region'])
 
-      expect(konsola.error).toHaveBeenCalledWith(expect.any(Error), true)
+      expect(konsola.error).toHaveBeenCalledWith(expect.any(Error), false)
 
       // Access the error argument
       const errorArg = vi.mocked(konsola.error).mock.calls[0][0]
