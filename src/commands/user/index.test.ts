@@ -3,6 +3,7 @@ import { getUser } from './actions'
 import { konsola } from '../../utils'
 import { session } from '../../session'
 import chalk from 'chalk'
+import { title } from 'node:process'
 
 vi.mock('./actions', () => ({
   getUser: vi.fn(),
@@ -40,6 +41,7 @@ vi.mock('../../utils', async () => {
     ...actualUtils,
     konsola: {
       ok: vi.fn(),
+      title: vi.fn(),
       error: vi.fn(),
     },
     handleError: (error: Error, header = false) => {
@@ -82,8 +84,7 @@ describe('userCommand', () => {
     }
     await userCommand.parseAsync(['node', 'test'])
 
-    expect(konsola.error).toHaveBeenCalledWith(new Error(`You are not logged in. Please login first.
-        `))
+    expect(konsola.error).toHaveBeenCalledWith(new Error(`You are currently not logged in. Please login first to get your user info.`), false)
   })
 
   it('should show an error if the user information cannot be fetched', async () => {
