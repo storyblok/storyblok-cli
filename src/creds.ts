@@ -227,13 +227,13 @@ export const removeNetrcEntry = async (
     }
   }
   catch (error: unknown) {
-    throw new Error(`Error removing entry for machine ${machineName} from .netrc file: ${(error as Error).message}`)
+    handleFileSystemError('write', error as NodeJS.ErrnoException)
   }
 }
 
 export function removeAllNetrcEntries(filePath = getNetrcFilePath()) {
   try {
-    writeFile(filePath, '', {
+    return writeFile(filePath, '', {
       mode: 0o600, // Set file permissions
     })
   }
