@@ -1,6 +1,5 @@
 import { http, HttpResponse } from 'msw'
 import { setupServer } from 'msw/node'
-import chalk from 'chalk'
 import { vol } from 'memfs'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { pullLanguages, saveLanguagesToFile } from './actions'
