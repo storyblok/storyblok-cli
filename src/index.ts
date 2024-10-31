@@ -7,6 +7,8 @@ import { getProgram } from './program'
 import './commands/login'
 import './commands/logout'
 import './commands/user'
+import './commands/pull-languages'
+
 import { loginWithToken } from './commands/login/actions'
 
 dotenv.config() // This will load variables from .env into process.env
@@ -17,7 +19,6 @@ const messageText = ` `
 console.log(formatHeader(`
 ${introText} ${messageText}`))
 
-program.option('-s, --space [value]', 'space ID')
 program.option('-v, --verbose', 'Enable verbose output')
 
 program.on('command:*', () => {
