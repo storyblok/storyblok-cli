@@ -23,12 +23,12 @@ export const pullLanguagesCommand = program
     await initializeSession()
 
     if (!state.isLoggedIn) {
-      handleError(new CommandError(`You are currently not logged in. Please login first to get your user info.`))
+      handleError(new CommandError(`You are currently not logged in. Please login first to get your user info.`), verbose)
       return
     }
 
     if (!space) {
-      handleError(new CommandError(`Please provide the space as argument --space YOUR_SPACE_ID.`))
+      handleError(new CommandError(`Please provide the space as argument --space YOUR_SPACE_ID.`), verbose)
       return
     }
 
