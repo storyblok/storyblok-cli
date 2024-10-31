@@ -22,7 +22,7 @@ export const pullLanguagesCommand = program
     const { state, initializeSession } = session()
     await initializeSession()
 
-    if (!state.isLoggedIn) {
+    if (!state.isLoggedIn || !state.password || !state.region) {
       handleError(new CommandError(`You are currently not logged in. Please login first to get your user info.`), verbose)
       return
     }
@@ -33,7 +33,7 @@ export const pullLanguagesCommand = program
     }
 
     try {
-      const internationalization = await pullLanguages(space)
+      const internationalization = await pullLanguages(space, state.password, state.region)
 
       if (!internationalization || !internationalization.languages) {
         konsola.warn(`No languages found in the space ${space}`)

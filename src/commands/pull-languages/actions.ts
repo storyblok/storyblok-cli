@@ -4,8 +4,6 @@ import { join, resolve } from 'node:path'
 import { handleAPIError, handleFileSystemError } from '../../utils'
 import { ofetch } from 'ofetch'
 import { regionsDomain } from '../../constants'
-import { session } from '../../session'
-import { apiClient } from '../../api'
 
 export interface SpaceInternationalizationOptions {
   languages: SpaceLanguage[]
@@ -16,17 +14,11 @@ export interface SpaceLanguage {
   name: string
 }
 
-export const pullLanguages = async (space: string): Promise<SpaceInternationalizationOptions | undefined> => {
+export const pullLanguages = async (space: string, token: string, region: string): Promise<SpaceInternationalizationOptions | undefined> => {
   try {
-    const { client } = apiClient()
-    if (!client) {
-      throw new Error('Client not initialized')
-    }
-
-    const { state } = session()
-    const response = await ofetch(`https://${regionsDomain[state.region]}/v1/spaces/${space}`, {
+    const response = await ofetch(`https://${regionsDomain[region]}/v1/spaces/${space}`, {
       headers: {
-        Authorization: state.password,
+        Authorization: token,
       },
     })
     return {
