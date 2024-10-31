@@ -26,7 +26,6 @@ export const pullLanguagesCommand = program
       handleError(new CommandError(`You are currently not logged in. Please login first to get your user info.`), verbose)
       return
     }
-
     if (!space) {
       handleError(new CommandError(`Please provide the space as argument --space YOUR_SPACE_ID.`), verbose)
       return
@@ -35,7 +34,7 @@ export const pullLanguagesCommand = program
     try {
       const internationalization = await pullLanguages(space, state.password, state.region)
 
-      if (!internationalization || !internationalization.languages) {
+      if (!internationalization || internationalization.languages.length === 0) {
         konsola.warn(`No languages found in the space ${space}`)
         return
       }
