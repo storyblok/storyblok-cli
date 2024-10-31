@@ -13,8 +13,11 @@ export const pullLanguagesCommand = program
   .option('-s, --space <space>', 'space ID')
   .option('-p, --path <path>', 'path to save the file')
   .action(async (options) => {
-    const { space, path } = options
     konsola.title(` ${commands.PULL_LANGUAGES} `, colorPalette.PULL_LANGUAGES, 'Pulling languages...')
+    // Global options
+    const verbose = program.opts().verbose
+    // Command options
+    const { space, path } = options
 
     const { state, initializeSession } = session()
     await initializeSession()
@@ -40,6 +43,6 @@ export const pullLanguagesCommand = program
       konsola.ok(`Languages schema downloaded successfully at ${chalk.hex(colorPalette.PRIMARY)(path ? `${path}/languages.${space}.json` : `languages.${space}.json`)}`)
     }
     catch (error) {
-      handleError(error as Error, true)
+      handleError(error as Error, verbose)
     }
   })
