@@ -4,7 +4,6 @@ import { pullComponents, saveComponentsToFiles } from './actions'
 import { pullComponentsCommand } from '.'
 import chalk from 'chalk'
 import { colorPalette } from '../../constants'
-import { saveLanguagesToFile } from '../pull-languages/actions'
 
 vi.mock('./actions', () => ({
   pullComponents: vi.fn(),
