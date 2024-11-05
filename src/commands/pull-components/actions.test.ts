@@ -1,7 +1,7 @@
 import { http, HttpResponse } from 'msw'
 import { setupServer } from 'msw/node'
 import { vol } from 'memfs'
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import { pullComponents, saveComponentsToFiles } from './actions'
 
 const handlers = [
