@@ -43,12 +43,21 @@ export const saveLanguagesToFile = async (space: string, internationalizationOpt
       await access(resolvedPath, constants.F_OK)
     }
     catch {
-      await mkdir(resolvedPath, { recursive: true })
+      try {
+        await mkdir(resolvedPath, { recursive: true })
+      }
+      catch (mkdirError) {
+        handleFileSystemError('mkdir', mkdirError as Error)
+        return // Exit early if the directory creation fails
+      }
     }
 
-    return await writeFile(filePath, data, {
-      mode: 0o600,
-    })
+    try {
+      await writeFile(filePath, data, { mode: 0o600 })
+    }
+    catch (writeError) {
+      handleFileSystemError('write', writeError as Error)
+    }
   }
   catch (error) {
     handleFileSystemError('write', error as Error)
