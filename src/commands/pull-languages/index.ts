@@ -34,7 +34,7 @@ export const pullLanguagesCommand = program
     try {
       const internationalization = await pullLanguages(space, state.password, state.region)
 
-      if (!internationalization || internationalization.languages.length === 0) {
+      if (!internationalization || internationalization.languages?.length === 0) {
         konsola.warn(`No languages found in the space ${space}`)
         return
       }
