@@ -43,7 +43,7 @@ export const pullComponentsCommand = program
         path,
         filename,
       })
-      konsola.ok(`Components schema downloaded successfully at ${chalk.hex(colorPalette.PRIMARY)(path ? `${path}/components.${space}.json` : `components.${space}.json`)}`)
+      konsola.ok(`Components downloaded successfully at ${chalk.hex(colorPalette.PRIMARY)(path ? `${path}/components.${space}.json` : `components.${space}.json`)}`)
     }
     catch (error) {
       handleError(error as Error, verbose)
