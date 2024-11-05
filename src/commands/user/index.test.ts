@@ -68,7 +68,7 @@ describe('userCommand', () => {
       password: 'valid-token',
       region: 'eu',
     }
-    getUser.mockResolvedValue(mockResponse)
+    vi.mocked(getUser).mockResolvedValue(mockResponse)
     await userCommand.parseAsync(['node', 'test'])
 
     expect(getUser).toHaveBeenCalledWith('valid-token', 'eu')
@@ -95,7 +95,7 @@ describe('userCommand', () => {
 
     const mockError = new Error('Network error')
 
-    getUser.mockRejectedValue(mockError)
+    vi.mocked(getUser).mockRejectedValue(mockError)
 
     await userCommand.parseAsync(['node', 'test'])
 

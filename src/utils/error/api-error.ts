@@ -6,6 +6,7 @@ export const API_ACTIONS = {
   login_with_otp: 'Failed to log in with email, password and otp',
   login_email_password: 'Failed to log in with email and password',
   get_user: 'Failed to get user',
+  pull_languages: 'Failed to pull languages',
 } as const
 
 export const API_ERRORS = {
@@ -13,7 +14,8 @@ export const API_ERRORS = {
   network_error: 'No response from server, please check if you are correctly connected to internet',
   invalid_credentials: 'The provided credentials are invalid',
   timeout: 'The API request timed out',
-  generic: 'Error logging in',
+  generic: 'Error fetching data from the API',
+  not_found: 'The requested resource was not found',
 } as const
 
 export function handleAPIError(action: keyof typeof API_ACTIONS, error: Error): void {
@@ -23,6 +25,8 @@ export function handleAPIError(action: keyof typeof API_ACTIONS, error: Error): 
     switch (status) {
       case 401:
         throw new APIError('unauthorized', action, error)
+      case 404:
+        throw new APIError('not_found', action, error)
       case 422:
         throw new APIError('invalid_credentials', action, error)
       default:
