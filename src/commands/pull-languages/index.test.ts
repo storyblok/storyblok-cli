@@ -110,7 +110,6 @@ describe('pullLanguages', () => {
 
       const mockError = new CommandError(`Please provide the space as argument --space YOUR_SPACE_ID.`)
 
-      console.log(pullLanguagesCommand)
       await pullLanguagesCommand.parseAsync(['node', 'test'])
       expect(konsola.error).toHaveBeenCalledWith(mockError, false)
     })
