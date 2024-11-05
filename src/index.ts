@@ -8,6 +8,7 @@ import './commands/login'
 import './commands/logout'
 import './commands/user'
 import './commands/pull-languages'
+import './commands/pull-components'
 
 import { loginWithToken } from './commands/login/actions'
 

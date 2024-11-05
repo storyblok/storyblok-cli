@@ -3,6 +3,7 @@ export const commands = {
   LOGOUT: 'logout',
   USER: 'user',
   PULL_LANGUAGES: 'pull-languages',
+  PULL_COMPONENTS: 'pull-components',
 } as const
 
 export const colorPalette = {
@@ -10,6 +11,7 @@ export const colorPalette = {
   LOGIN: '#8556D3',
   USER: '#8BC34A',
   PULL_LANGUAGES: '#FFC107',
+  PULL_COMPONENTS: '#FF5722',
 } as const
 
 export interface ReadonlyArray<T> {
