@@ -1,8 +1,8 @@
 import { ofetch } from 'ofetch'
 import { handleAPIError, handleFileSystemError } from '../../utils'
 import { regionsDomain } from '../../constants'
-import { access, constants, mkdir, writeFile } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
+import { saveToFile } from '../../utils/filesystem'
 
 export interface SpaceComponent {
   name: string
@@ -29,6 +29,7 @@ export interface SpaceComponent {
 export interface ComponentsSaveOptions {
   path?: string
   filename?: string
+  separateFiles?: boolean
 }
 
 export const pullComponents = async (space: string, token: string, region: string): Promise<SpaceComponent[] | undefined> => {
@@ -51,28 +52,25 @@ export const saveComponentsToFiles = async (space: string, components: SpaceComp
   try {
     const data = JSON.stringify(components, null, 2)
     const resolvedPath = path ? resolve(process.cwd(), path) : process.cwd()
+
+    if (options.separateFiles) {
+      for (const component of components) {
+        try {
+          const filePath = join(resolvedPath, `${component.name}.${space}.json`)
+          await saveToFile(filePath, JSON.stringify(component, null, 2))
+        }
+        catch (error) {
+          handleFileSystemError('write', error as Error)
+        }
+      }
+      return
+    }
+
+    // Default to saving all components to a single file
     const filePath = join(resolvedPath, filename ? `${filename}.json` : `components.${space}.json`)
 
     // Check if the path exists, and create it if it doesn't
-    try {
-      await access(resolvedPath, constants.F_OK)
-    }
-    catch {
-      try {
-        await mkdir(resolvedPath, { recursive: true })
-      }
-      catch (mkdirError) {
-        handleFileSystemError('mkdir', mkdirError as Error)
-        return // Exit early if the directory creation fails
-      }
-    }
-
-    try {
-      await writeFile(filePath, data, { mode: 0o600 })
-    }
-    catch (writeError) {
-      handleFileSystemError('write', writeError as Error)
-    }
+    await saveToFile(filePath, data)
   }
   catch (error) {
     handleFileSystemError('write', error as Error)

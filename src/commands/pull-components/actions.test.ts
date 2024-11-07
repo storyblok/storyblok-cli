@@ -126,5 +126,38 @@ describe('pull components actions', () => {
       const files = vol.readdirSync('/path/to/components2')
       expect(files).toEqual(['custom.json'])
     })
+
+    it('should save components to separate files', async () => {
+      vol.fromJSON({
+        '/path/to/components3': null,
+      })
+
+      const components = [{
+        name: 'component-name',
+        display_name: 'Component Name',
+        created_at: '2021-08-09T12:00:00Z',
+        updated_at: '2021-08-09T12:00:00Z',
+        id: 12345,
+        schema: { type: 'object' },
+        color: null,
+        internal_tags_list: ['tag'],
+        interntal_tags_ids: [1],
+      }, {
+        name: 'component-name-2',
+        display_name: 'Component Name 2',
+        created_at: '2021-08-09T12:00:00Z',
+        updated_at: '2021-08-09T12:00:00Z',
+        id: 12346,
+        schema: { type: 'object' },
+        color: null,
+        internal_tags_list: ['tag'],
+        interntal_tags_ids: [1],
+      }]
+
+      await saveComponentsToFiles('12345', components, { path: '/path/to/components3', separateFiles: true })
+
+      const files = vol.readdirSync('/path/to/components3')
+      expect(files).toEqual(['component-name-2.12345.json', 'component-name.12345.json'])
+    })
   })
 })

@@ -65,7 +65,7 @@ describe('pullComponents', () => {
   })
 
   describe('default mode', () => {
-    it('should prompt tge yser if the operation was sucessfull', async () => {
+    it('should prompt the user if the operation was sucessfull', async () => {
       const mockResponse = [{
         name: 'component-name',
         display_name: 'Component Name',
@@ -100,7 +100,7 @@ describe('pullComponents', () => {
       expect(saveComponentsToFiles).toHaveBeenCalledWith('12345', mockResponse, {
 
       })
-      expect(konsola.ok).toHaveBeenCalledWith(`Components downloaded successfully at ${chalk.hex(colorPalette.PRIMARY)(`components.12345.json`)}`)
+      expect(konsola.ok).toHaveBeenCalledWith(`Components downloaded successfully in ${chalk.hex(colorPalette.PRIMARY)(`components.12345.json`)}`)
     })
 
     it('should throw an error if the user is not logged in', async () => {
@@ -151,7 +151,7 @@ describe('pullComponents', () => {
       await pullComponentsCommand.parseAsync(['node', 'test', '--space', '12345', '--path', '/path/to/components'])
       expect(pullComponents).toHaveBeenCalledWith('12345', 'valid-token', 'eu')
       expect(saveComponentsToFiles).toHaveBeenCalledWith('12345', mockResponse, { path: '/path/to/components' })
-      expect(konsola.ok).toHaveBeenCalledWith(`Components downloaded successfully at ${chalk.hex(colorPalette.PRIMARY)(`/path/to/components/components.12345.json`)}`)
+      expect(konsola.ok).toHaveBeenCalledWith(`Components downloaded successfully in ${chalk.hex(colorPalette.PRIMARY)(`/path/to/components/components.12345.json`)}`)
     })
   })
 
@@ -180,7 +180,73 @@ describe('pullComponents', () => {
       await pullComponentsCommand.parseAsync(['node', 'test', '--space', '12345', '--filename', 'custom'])
       expect(pullComponents).toHaveBeenCalledWith('12345', 'valid-token', 'eu')
       expect(saveComponentsToFiles).toHaveBeenCalledWith('12345', mockResponse, { filename: 'custom' })
-      expect(konsola.ok).toHaveBeenCalledWith(`Components downloaded successfully at ${chalk.hex(colorPalette.PRIMARY)(`custom.json`)}`)
+      expect(konsola.ok).toHaveBeenCalledWith(`Components downloaded successfully in ${chalk.hex(colorPalette.PRIMARY)(`custom.json`)}`)
+    })
+  })
+
+  describe('--separate-files option', () => {
+    it('should save each component in a separate file', async () => {
+      const mockResponse = [{
+        name: 'component-name',
+        display_name: 'Component Name',
+        created_at: '2021-08-09T12:00:00Z',
+        updated_at: '2021-08-09T12:00:00Z',
+        id: 12345,
+        schema: { type: 'object' },
+        color: null,
+        internal_tags_list: ['tag'],
+        interntal_tags_ids: [1],
+      }, {
+        name: 'component-name-2',
+        display_name: 'Component Name 2',
+        created_at: '2021-08-09T12:00:00Z',
+        updated_at: '2021-08-09T12:00:00Z',
+        id: 12346,
+        schema: { type: 'object' },
+        color: null,
+        internal_tags_list: ['tag'],
+        interntal_tags_ids: [1],
+      }]
+
+      session().state = {
+        isLoggedIn: true,
+        password: 'valid-token',
+        region: 'eu',
+      }
+
+      vi.mocked(pullComponents).mockResolvedValue(mockResponse)
+
+      await pullComponentsCommand.parseAsync(['node', 'test', '--space', '12345', '--separate-files'])
+      expect(pullComponents).toHaveBeenCalledWith('12345', 'valid-token', 'eu')
+      expect(saveComponentsToFiles).toHaveBeenCalledWith('12345', mockResponse, { separateFiles: true })
+      expect(konsola.ok).toHaveBeenCalledWith(`Components downloaded successfully in ${chalk.hex(colorPalette.PRIMARY)(`./`)}`)
+    })
+
+    it('should warn the user if the --filename is used along', async () => {
+      const mockResponse = [{
+        name: 'component-name',
+        display_name: 'Component Name',
+        created_at: '2021-08-09T12:00:00Z',
+        updated_at: '2021-08-09T12:00:00Z',
+        id: 12345,
+        schema: { type: 'object' },
+        color: null,
+        internal_tags_list: ['tag'],
+        interntal_tags_ids: [1],
+      }]
+
+      session().state = {
+        isLoggedIn: true,
+        password: 'valid-token',
+        region: 'eu',
+      }
+
+      vi.mocked(pullComponents).mockResolvedValue(mockResponse)
+
+      await pullComponentsCommand.parseAsync(['node', 'test', '--space', '12345', '--separate-files', '--filename', 'custom'])
+      expect(pullComponents).toHaveBeenCalledWith('12345', 'valid-token', 'eu')
+      expect(saveComponentsToFiles).toHaveBeenCalledWith('12345', mockResponse, { separateFiles: true, filename: 'custom' })
+      expect(konsola.warn).toHaveBeenCalledWith(`The --filename option is ignored when using --separate-files`)
     })
   })
 })
