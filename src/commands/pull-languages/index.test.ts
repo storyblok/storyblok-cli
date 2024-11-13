@@ -89,7 +89,7 @@ describe('pullLanguages', () => {
       await pullLanguagesCommand.parseAsync(['node', 'test', '--space', '12345'])
       expect(pullLanguages).toHaveBeenCalledWith('12345', 'valid-token', 'eu')
       expect(saveLanguagesToFile).toHaveBeenCalledWith('12345', mockResponse, undefined)
-      expect(konsola.ok).toHaveBeenCalledWith(`Languages schema downloaded successfully at ${chalk.hex(colorPalette.PRIMARY)(`languages.12345.json`)}`)
+      expect(konsola.ok).toHaveBeenCalledWith(`Languages schema downloaded successfully at ${chalk.hex(colorPalette.PRIMARY)(`.storyblok/languages/languages.12345.json`)}`)
     })
 
     it('should throw an error if the user is not logged in', async () => {
