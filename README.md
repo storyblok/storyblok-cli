@@ -64,6 +64,37 @@ Will generate the languages in the `.storyblok/languages` directory.
 > [!TIP]
 > If you prefer to avoid pushing the `.storyblok` directory to your repository you can add it to your `.gitignore` file.
 
+### Generated filename syntax conventions
+
+The generated files will now follow a more consistent naming convention. The files will be named using the following syntax:
+
+```
+<filename>.<suffix>.<extension>
+```
+
+Where:
+
+- `<filename>` is the name of the file. Customizable by the user with the `--filename` flag
+- `<suffix>` is an optional suffix to differentiate the files. By default is going to be the `spaceId` and is customizable by the user with the `--suffix` flag
+- `<extension>` is the file extension. By default is `json` (Not configurable)
+
+Example:
+
+```bash
+storyblok pull-languages --space=12345 --filename=my-languages --suffix=dev
+```
+
+Will generate the languages in the following path  `.storyblok/languages/my-languages.dev.json`
+
+If you would like to use a timestamp as the suffix you can use:
+
+```bash
+storyblok pull-languages --space=12345 --filename=my-languages --suffix="$(date +%s)"
+```
+
+> [!WARNING]
+> The `--filename` will be ignored in the case that `--separate-files` is used on the commands that supports it.
+
 ## Setup
 
 First clone the repository and install the dependencies:

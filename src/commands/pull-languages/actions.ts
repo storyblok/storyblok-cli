@@ -4,6 +4,7 @@ import { handleAPIError, handleFileSystemError } from '../../utils'
 import { ofetch } from 'ofetch'
 import { regionsDomain } from '../../constants'
 import { resolvePath, saveToFile } from '../../utils/filesystem'
+import type { PullLanguagesOptions } from './constants'
 
 export interface SpaceInternationalizationOptions {
   languages: SpaceLanguage[]
@@ -31,12 +32,13 @@ export const pullLanguages = async (space: string, token: string, region: string
   }
 }
 
-export const saveLanguagesToFile = async (space: string, internationalizationOptions: SpaceInternationalizationOptions, path?: string) => {
+export const saveLanguagesToFile = async (space: string, internationalizationOptions: SpaceInternationalizationOptions, options: PullLanguagesOptions) => {
   try {
+    const { filename = 'languages', suffix = space, path } = options
     const data = JSON.stringify(internationalizationOptions, null, 2)
-    const filename = `languages.${space}.json`
+    const name = `${filename}.${suffix}.json`
     const resolvedPath = resolvePath(path, 'languages')
-    const filePath = join(resolvedPath, filename)
+    const filePath = join(resolvedPath, name)
 
     await saveToFile(filePath, data)
   }

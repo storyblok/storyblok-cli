@@ -84,7 +84,12 @@ describe('pull languages actions', () => {
           },
         ],
       }
-      await saveLanguagesToFile('12345', mockResponse, '/temp')
+      await saveLanguagesToFile('12345', mockResponse, {
+        filename: 'languages',
+        path: '/temp',
+        verbose: false,
+        space: '12345',
+      })
       const content = vol.readFileSync('/temp/languages.12345.json', 'utf8')
       expect(content).toBe(JSON.stringify(mockResponse, null, 2))
     })
