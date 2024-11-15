@@ -1,9 +1,9 @@
-import { access, constants, mkdir, writeFile } from 'node:fs/promises'
-import { join, resolve } from 'node:path'
+import { join } from 'node:path'
 
 import { handleAPIError, handleFileSystemError } from '../../utils'
 import { ofetch } from 'ofetch'
 import { regionsDomain } from '../../constants'
+import { resolvePath, saveToFile } from '../../utils/filesystem'
 
 export interface SpaceInternationalizationOptions {
   languages: SpaceLanguage[]
@@ -35,29 +35,10 @@ export const saveLanguagesToFile = async (space: string, internationalizationOpt
   try {
     const data = JSON.stringify(internationalizationOptions, null, 2)
     const filename = `languages.${space}.json`
-    const resolvedPath = path ? resolve(process.cwd(), path) : process.cwd()
+    const resolvedPath = resolvePath(path, 'languages')
     const filePath = join(resolvedPath, filename)
 
-    // Check if the path exists, and create it if it doesn't
-    try {
-      await access(resolvedPath, constants.F_OK)
-    }
-    catch {
-      try {
-        await mkdir(resolvedPath, { recursive: true })
-      }
-      catch (mkdirError) {
-        handleFileSystemError('mkdir', mkdirError as Error)
-        return // Exit early if the directory creation fails
-      }
-    }
-
-    try {
-      await writeFile(filePath, data, { mode: 0o600 })
-    }
-    catch (writeError) {
-      handleFileSystemError('write', writeError as Error)
-    }
+    await saveToFile(filePath, data)
   }
   catch (error) {
     handleFileSystemError('write', error as Error)

@@ -11,7 +11,7 @@ export const pullLanguagesCommand = program
   .command('pull-languages')
   .description(`Download your space's languages schema as json`)
   .option('-s, --space <space>', 'space ID')
-  .option('-p, --path <path>', 'path to save the file')
+  .option('-p, --path <path>', 'path to save the file. Default is .storyblok/languages')
   .action(async (options) => {
     konsola.title(` ${commands.PULL_LANGUAGES} `, colorPalette.PULL_LANGUAGES, 'Pulling languages...')
     // Global options
@@ -39,7 +39,7 @@ export const pullLanguagesCommand = program
         return
       }
       await saveLanguagesToFile(space, internationalization, path)
-      konsola.ok(`Languages schema downloaded successfully at ${chalk.hex(colorPalette.PRIMARY)(path ? `${path}/languages.${space}.json` : `languages.${space}.json`)}`)
+      konsola.ok(`Languages schema downloaded successfully at ${chalk.hex(colorPalette.PRIMARY)(path ? `${path}/languages.${space}.json` : `.storyblok/languages/languages.${space}.json`)}`)
     }
     catch (error) {
       handleError(error as Error, verbose)

@@ -47,6 +47,23 @@ If you prefer not to install the package globally you can use `npx`:
 npx storyblok <command>
 ```
 
+## Breaking Changes ⚠️
+
+### `.storyblok` directory as default
+
+All the commands that generate files will now use the `.storyblok` directory as the default directory to interact with those files. This aims to encapsulate all Storyblok CLI operations instead of filling them on the root. Users would be able to customize the directory by using the `--path` flag.
+
+Example:
+
+```bash
+storyblok pull-languages --space=12345
+```
+
+Will generate the languages in the `.storyblok/languages` directory.
+
+> [!TIP]
+> If you prefer to avoid pushing the `.storyblok` directory to your repository you can add it to your `.gitignore` file.
+
 ## Setup
 
 First clone the repository and install the dependencies:
