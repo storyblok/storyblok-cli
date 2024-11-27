@@ -14,7 +14,7 @@ export const pullLanguagesCommand = program
   .option('-s, --space <space>', 'space ID')
   .option('-p, --path <path>', 'path to save the file. Default is .storyblok/languages')
   .option('-f, --filename <filename>', 'filename to save the file as <filename>.<suffix>.json')
-  .option('-su, --suffix <suffix>', 'suffix to add to the file name (e.g. languages.<suffix>.json). By default, the space ID is used.')
+  .option('--su, --suffix <suffix>', 'suffix to add to the file name (e.g. languages.<suffix>.json). By default, the space ID is used.')
   .action(async (options: PullLanguagesOptions) => {
     konsola.title(` ${commands.PULL_LANGUAGES} `, colorPalette.PULL_LANGUAGES, 'Pulling languages...')
     // Global options
