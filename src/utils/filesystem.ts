@@ -17,7 +17,7 @@ export const saveToFile = async (filePath: string, data: string) => {
 
   // Write the file
   try {
-    await writeFile(filePath, data, { mode: 0o600 })
+    await writeFile(filePath, data)
   }
   catch (writeError) {
     handleFileSystemError('write', writeError as Error)
