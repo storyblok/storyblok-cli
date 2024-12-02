@@ -1,27 +1,27 @@
-import { parse } from 'node:path'
-import { access, constants, mkdir, writeFile } from 'node:fs/promises'
+import { parse, resolve } from 'node:path'
+import { mkdir, writeFile } from 'node:fs/promises'
 import { handleFileSystemError } from './error/filesystem-error'
 
 export const saveToFile = async (filePath: string, data: string) => {
-  // Check if the path exists, and create it if it doesn't
+  // Get the directory path
   const resolvedPath = parse(filePath).dir
+
+  // Ensure the directory exists
   try {
-    await access(resolvedPath, constants.F_OK)
+    await mkdir(resolvedPath, { recursive: true })
   }
-  catch {
-    try {
-      await mkdir(resolvedPath, { recursive: true })
-    }
-    catch (mkdirError) {
-      handleFileSystemError('mkdir', mkdirError as Error)
-      return // Exit early if the directory creation fails
-    }
+  catch (mkdirError) {
+    handleFileSystemError('mkdir', mkdirError as Error)
+    return // Exit early if the directory creation fails
   }
 
+  // Write the file
   try {
-    await writeFile(filePath, data, { mode: 0o600 })
+    await writeFile(filePath, data)
   }
   catch (writeError) {
     handleFileSystemError('write', writeError as Error)
   }
 }
+
+export const resolvePath = (path: string | undefined, folder: string) => path ? resolve(process.cwd(), path) : resolve(resolve(process.cwd(), '.storyblok'), folder)

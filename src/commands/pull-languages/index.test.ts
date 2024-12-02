@@ -88,8 +88,10 @@ describe('pullLanguages', () => {
       vi.mocked(pullLanguages).mockResolvedValue(mockResponse)
       await pullLanguagesCommand.parseAsync(['node', 'test', '--space', '12345'])
       expect(pullLanguages).toHaveBeenCalledWith('12345', 'valid-token', 'eu')
-      expect(saveLanguagesToFile).toHaveBeenCalledWith('12345', mockResponse, undefined)
-      expect(konsola.ok).toHaveBeenCalledWith(`Languages schema downloaded successfully at ${chalk.hex(colorPalette.PRIMARY)(`languages.12345.json`)}`)
+      expect(saveLanguagesToFile).toHaveBeenCalledWith('12345', mockResponse, {
+        space: '12345',
+      })
+      expect(konsola.ok).toHaveBeenCalledWith(`Languages schema downloaded successfully at ${chalk.hex(colorPalette.PRIMARY)(`.storyblok/languages/languages.12345.json`)}`)
     })
 
     it('should throw an error if the user is not logged in', async () => {
@@ -109,7 +111,6 @@ describe('pullLanguages', () => {
       }
 
       const mockError = new CommandError(`Please provide the space as argument --space YOUR_SPACE_ID.`)
-
       await pullLanguagesCommand.parseAsync(['node', 'test'])
       expect(konsola.error).toHaveBeenCalledWith(mockError, false)
     })
@@ -156,8 +157,75 @@ describe('pullLanguages', () => {
       vi.mocked(pullLanguages).mockResolvedValue(mockResponse)
       await pullLanguagesCommand.parseAsync(['node', 'test', '--space', '12345', '--path', '/tmp'])
       expect(pullLanguages).toHaveBeenCalledWith('12345', 'valid-token', 'eu')
-      expect(saveLanguagesToFile).toHaveBeenCalledWith('12345', mockResponse, '/tmp')
+      expect(saveLanguagesToFile).toHaveBeenCalledWith('12345', mockResponse, {
+        path: '/tmp',
+        space: '12345',
+      })
       expect(konsola.ok).toHaveBeenCalledWith(`Languages schema downloaded successfully at ${chalk.hex(colorPalette.PRIMARY)(`/tmp/languages.12345.json`)}`)
+    })
+  })
+
+  describe('--filename option', () => {
+    it('should save the file with the provided filename', async () => {
+      const mockResponse = {
+        default_lang_name: 'en',
+        languages: [
+          {
+            code: 'ca',
+            name: 'Catalan',
+          },
+          {
+            code: 'fr',
+            name: 'French',
+          },
+        ],
+      }
+      session().state = {
+        isLoggedIn: true,
+        password: 'valid-token',
+        region: 'eu',
+      }
+
+      vi.mocked(pullLanguages).mockResolvedValue(mockResponse)
+      await pullLanguagesCommand.parseAsync(['node', 'test', '--space', '12345', '--filename', 'custom-languages'])
+      expect(pullLanguages).toHaveBeenCalledWith('12345', 'valid-token', 'eu')
+      expect(saveLanguagesToFile).toHaveBeenCalledWith('12345', mockResponse, {
+        filename: 'custom-languages',
+        space: '12345',
+      })
+      expect(konsola.ok).toHaveBeenCalledWith(`Languages schema downloaded successfully at ${chalk.hex(colorPalette.PRIMARY)(`.storyblok/languages/custom-languages.12345.json`)}`)
+    })
+  })
+
+  describe('--suffix option', () => {
+    it('should save the file with the provided suffix', async () => {
+      const mockResponse = {
+        default_lang_name: 'en',
+        languages: [
+          {
+            code: 'ca',
+            name: 'Catalan',
+          },
+          {
+            code: 'fr',
+            name: 'French',
+          },
+        ],
+      }
+      session().state = {
+        isLoggedIn: true,
+        password: 'valid-token',
+        region: 'eu',
+      }
+
+      vi.mocked(pullLanguages).mockResolvedValue(mockResponse)
+      await pullLanguagesCommand.parseAsync(['node', 'test', '--space', '12345', '--suffix', 'custom-suffix'])
+      expect(pullLanguages).toHaveBeenCalledWith('12345', 'valid-token', 'eu')
+      expect(saveLanguagesToFile).toHaveBeenCalledWith('12345', mockResponse, {
+        suffix: 'custom-suffix',
+        space: '12345',
+      })
+      expect(konsola.ok).toHaveBeenCalledWith(`Languages schema downloaded successfully at ${chalk.hex(colorPalette.PRIMARY)(`.storyblok/languages/languages.custom-suffix.json`)}`)
     })
   })
 })
