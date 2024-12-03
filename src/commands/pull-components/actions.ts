@@ -1,8 +1,9 @@
 import { ofetch } from 'ofetch'
 import { handleAPIError, handleFileSystemError } from '../../utils'
 import { regionsDomain } from '../../constants'
-import { join, resolve } from 'node:path'
-import { saveToFile } from '../../utils/filesystem'
+import { join } from 'node:path'
+import { resolvePath, saveToFile } from '../../utils/filesystem'
+import type { PullComponentsOptions } from './constants'
 
 export interface SpaceComponent {
   name: string
@@ -30,6 +31,7 @@ export interface ComponentsSaveOptions {
   path?: string
   filename?: string
   separateFiles?: boolean
+  suffix?: string
 }
 
 export const pullComponents = async (space: string, token: string, region: string): Promise<SpaceComponent[] | undefined> => {
@@ -46,17 +48,17 @@ export const pullComponents = async (space: string, token: string, region: strin
   }
 }
 
-export const saveComponentsToFiles = async (space: string, components: SpaceComponent[], options: ComponentsSaveOptions) => {
-  const { path, filename } = options
+export const saveComponentsToFiles = async (space: string, components: SpaceComponent[], options: PullComponentsOptions) => {
+  const { filename = 'components', suffix = space, path } = options
 
   try {
     const data = JSON.stringify(components, null, 2)
-    const resolvedPath = path ? resolve(process.cwd(), path) : process.cwd()
+    const resolvedPath = resolvePath(path, 'components')
 
     if (options.separateFiles) {
       for (const component of components) {
         try {
-          const filePath = join(resolvedPath, `${component.name}.${space}.json`)
+          const filePath = join(resolvedPath, `${component.name}.${suffix}.json`)
           await saveToFile(filePath, JSON.stringify(component, null, 2))
         }
         catch (error) {
@@ -67,7 +69,8 @@ export const saveComponentsToFiles = async (space: string, components: SpaceComp
     }
 
     // Default to saving all components to a single file
-    const filePath = join(resolvedPath, filename ? `${filename}.json` : `components.${space}.json`)
+    const name = `${filename}.${suffix}.json`
+    const filePath = join(resolvedPath, name)
 
     // Check if the path exists, and create it if it doesn't
     await saveToFile(filePath, data)
