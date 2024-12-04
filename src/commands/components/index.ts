@@ -8,20 +8,25 @@ import type { PullComponentsOptions } from './constants'
 
 const program = getProgram() // Get the shared singleton instance
 
-export const pullComponentsCommand = program
-  .command('pull-components')
-  .description(`Download your space's components schema as json`)
+export const componentsCommand = program
+  .command('components')
+  .description(`Manage your space's block schema`)
   .option('-s, --space <space>', 'space ID')
   .option('-p, --path <path>', 'path to save the file. Default is .storyblok/components')
+
+componentsCommand
+  .command('pull')
   .option('-f, --filename <filename>', 'custom name to be used in file(s) name instead of space id')
   .option('--sf, --separate-files [value]', 'Argument to create a single file for each component')
   .option('--su, --suffix <suffix>', 'suffix to add to the file name (e.g. components.<suffix>.json). By default, the space ID is used.')
+  .description(`Download your space's components schema as json`)
   .action(async (options: PullComponentsOptions) => {
-    konsola.title(` ${commands.PULL_COMPONENTS} `, colorPalette.PULL_COMPONENTS, 'Pulling components...')
+    konsola.title(` ${commands.COMPONENTS} `, colorPalette.COMPONENTS, 'Pulling components...')
     // Global options
     const verbose = program.opts().verbose
     // Command options
-    const { space, path, filename = 'components', suffix = options.space, separateFiles } = options
+    const { space, path } = componentsCommand.opts()
+    const { separateFiles, suffix = space, filename = 'components' } = options
 
     const { state, initializeSession } = session()
     await initializeSession()
@@ -42,7 +47,7 @@ export const pullComponentsCommand = program
         konsola.warn(`No components found in the space ${space}`)
         return
       }
-      await saveComponentsToFiles(space, components, options)
+      await saveComponentsToFiles(space, components, { ...options, path })
       const msgFilename = `${filename}.${suffix}.json`
 
       if (separateFiles) {
