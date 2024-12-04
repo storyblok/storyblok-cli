@@ -7,6 +7,7 @@ export const API_ACTIONS = {
   login_email_password: 'Failed to log in with email and password',
   get_user: 'Failed to get user',
   pull_languages: 'Failed to pull languages',
+  pull_components: 'Failed to pull components',
 } as const
 
 export const API_ERRORS = {
