@@ -52,7 +52,11 @@ componentsCommand
       }
 
       // Save everything using the new structure
-      await saveComponentsToFiles(space, components, groups || [], presets || [], { ...options, path })
+      await saveComponentsToFiles(
+        space,
+        { components, groups: groups || [], presets: presets || [] },
+        { ...options, path },
+      )
 
       if (separateFiles) {
         if (filename !== 'components') {
@@ -64,18 +68,6 @@ componentsCommand
         const msgFilename = `${filename}.${suffix}.json`
         konsola.ok(`Components downloaded successfully in ${chalk.hex(colorPalette.PRIMARY)(path ? `${path}/${msgFilename}` : `./storyblok/components/${msgFilename}`)}`)
       }
-
-      // Fetch component groups
-      /*       const componentGroups = await fetchComponentGroups(space, state.password, state.region)
-
-      if (!componentGroups || componentGroups.length === 0) {
-        konsola.warn(`No component groups found in the space ${space}`)
-        return
-      }
-
-      await saveComponentsToFiles(space, componentGroups, { ...options, path, filename: 'groups' })
-
-      konsola.ok(`Component groups downloaded successfully in ${chalk.hex(colorPalette.PRIMARY)(path ? `${path}/groups.${suffix}.json` : `./storyblok/components/groups.${suffix}.json`)}`) */
     }
     catch (error) {
       handleError(error as Error, verbose)

@@ -56,6 +56,11 @@ export interface SpaceComponentPreset {
   description: string
 }
 
+export interface SpaceData {
+  components: SpaceComponent[]
+  groups: SpaceComponentGroup[]
+  presets: SpaceComponentPreset[]
+}
 /**
  * Resolves the nested folder structure based on component group hierarchy.
  * @param groupUuid - The UUID of the component group.
@@ -113,11 +118,10 @@ export const fetchComponentPresets = async (space: string, token: string, region
 
 export const saveComponentsToFiles = async (
   space: string,
-  components: SpaceComponent[],
-  groups: SpaceComponentGroup[],
-  presets: SpaceComponentPreset[],
+  spaceData: SpaceData,
   options: PullComponentsOptions,
 ) => {
+  const { components, groups, presets } = spaceData
   const { filename = 'components', suffix = space, path, separateFiles } = options
   const resolvedPath = resolvePath(path, 'components')
 
@@ -158,23 +162,6 @@ export const saveComponentsToFiles = async (
       const presetsFilePath = join(resolvedPath, `presets.${suffix}.json`)
       await saveToFile(presetsFilePath, JSON.stringify(presets, null, 2))
     }
-  }
-  catch (error) {
-    handleFileSystemError('write', error as Error)
-  }
-}
-
-export const saveComponentPresetsToFiles = async (
-  space: string,
-  presets: SpaceComponentPreset[],
-  options: PullComponentsOptions,
-) => {
-  const { filename = 'presets', suffix = space, path } = options
-
-  try {
-    const resolvedPath = resolvePath(path, 'components')
-    const filePath = join(resolvedPath, `${filename}.${suffix}.json`)
-    await saveToFile(filePath, JSON.stringify(presets, null, 2))
   }
   catch (error) {
     handleFileSystemError('write', error as Error)
