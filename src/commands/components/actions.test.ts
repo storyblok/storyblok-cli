@@ -2,7 +2,7 @@ import { http, HttpResponse } from 'msw'
 import { setupServer } from 'msw/node'
 import { vol } from 'memfs'
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
-import { pullComponents, saveComponentsToFiles } from './actions'
+import { fetchComponents, saveComponentsToFiles } from './actions'
 
 const handlers = [
   http.get('https://api.storyblok.com/v1/spaces/12345/components', async ({ request }) => {
@@ -70,12 +70,12 @@ describe('pull components actions', () => {
       interntal_tags_ids: [1],
     }]
 
-    const result = await pullComponents('12345', 'valid-token', 'eu')
+    const result = await fetchComponents('12345', 'valid-token', 'eu')
     expect(result).toEqual(mockResponse)
   })
 
   it('should throw an masked error for invalid token', async () => {
-    await expect(pullComponents('12345', 'invalid-token', 'eu')).rejects.toThrow(
+    await expect(fetchComponents('12345', 'invalid-token', 'eu')).rejects.toThrow(
       new Error(`The user is not authorized to access the API`),
     )
   })

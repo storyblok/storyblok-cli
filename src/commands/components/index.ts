@@ -3,7 +3,7 @@ import { colorPalette, commands } from '../../constants'
 import { session } from '../../session'
 import { getProgram } from '../../program'
 import { CommandError, handleError, konsola } from '../../utils'
-import { pullComponents, saveComponentsToFiles } from './actions'
+import { fetchComponentGroups, fetchComponentPresets, fetchComponents, saveComponentPresetsToFiles, saveComponentsToFiles } from './actions'
 import type { PullComponentsOptions } from './constants'
 
 const program = getProgram() // Get the shared singleton instance
@@ -41,23 +41,41 @@ componentsCommand
     }
 
     try {
-      const components = await pullComponents(space, state.password, state.region)
+      // Fetch all data first
+      const groups = await fetchComponentGroups(space, state.password, state.region)
+      const components = await fetchComponents(space, state.password, state.region)
+      const presets = await fetchComponentPresets(space, state.password, state.region)
 
       if (!components || components.length === 0) {
         konsola.warn(`No components found in the space ${space}`)
         return
       }
-      await saveComponentsToFiles(space, components, { ...options, path })
-      const msgFilename = `${filename}.${suffix}.json`
+
+      // Save everything using the new structure
+      await saveComponentsToFiles(space, components, groups || [], presets || [], { ...options, path })
 
       if (separateFiles) {
         if (filename !== 'components') {
           konsola.warn(`The --filename option is ignored when using --separate-files`)
         }
         konsola.ok(`Components downloaded successfully in ${chalk.hex(colorPalette.PRIMARY)(path ? `${path}` : './storyblok/components')}`)
+      }
+      else {
+        const msgFilename = `${filename}.${suffix}.json`
+        konsola.ok(`Components downloaded successfully in ${chalk.hex(colorPalette.PRIMARY)(path ? `${path}/${msgFilename}` : `./storyblok/components/${msgFilename}`)}`)
+      }
+
+      // Fetch component groups
+      /*       const componentGroups = await fetchComponentGroups(space, state.password, state.region)
+
+      if (!componentGroups || componentGroups.length === 0) {
+        konsola.warn(`No component groups found in the space ${space}`)
         return
       }
-      konsola.ok(`Components downloaded successfully in ${chalk.hex(colorPalette.PRIMARY)(path ? `${path}/${msgFilename}` : `./storyblok/components/${msgFilename}`)}`)
+
+      await saveComponentsToFiles(space, componentGroups, { ...options, path, filename: 'groups' })
+
+      konsola.ok(`Component groups downloaded successfully in ${chalk.hex(colorPalette.PRIMARY)(path ? `${path}/groups.${suffix}.json` : `./storyblok/components/groups.${suffix}.json`)}`) */
     }
     catch (error) {
       handleError(error as Error, verbose)

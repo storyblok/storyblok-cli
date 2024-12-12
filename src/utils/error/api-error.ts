@@ -8,6 +8,8 @@ export const API_ACTIONS = {
   get_user: 'Failed to get user',
   pull_languages: 'Failed to pull languages',
   pull_components: 'Failed to pull components',
+  pull_component_groups: 'Failed to pull component groups',
+  pull_component_presets: 'Failed to pull component presets',
 } as const
 
 export const API_ERRORS = {
