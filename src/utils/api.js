@@ -268,6 +268,15 @@ export default {
       .catch(err => Promise.reject(err))
   },
 
+  getDatasourceEntries (id) {
+    const client = this.getClient()
+
+    return client
+      .get(this.getPath(`datasource_entries?datasource_id=${id}`))
+      .then(data => data.data.datasource_entries || [])
+      .catch(err => Promise.reject(err))
+  },
+
   deleteDatasource (id) {
     const client = this.getClient()
 

@@ -38,7 +38,7 @@ export const getPathToFile = (fileName, migrationPath = null) => {
  * getNameOfMigrationFile('product', 'price') // change_product_price
  */
 export const getNameOfMigrationFile = (component, field) => {
-  return `change_${component}_${field}.js`
+  return `change_${component}_${field}.mjs`
 }
 
 /**

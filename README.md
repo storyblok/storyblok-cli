@@ -98,12 +98,18 @@ Download your space's components schema as json. By default this command will do
 
 It's highly recommended to use also the `--prefix-presets-names` or `-ppn` parameter if you use `--separate-files` because it will prefix the names of the individual files with the name of the component. This feature solves the issue of multiple presets from different components but with the same name, being written in the same file. In a future major version this will become the default behavior.
 
+If you want to resolve datasources for single/multiple option field from your Storyblok components, you can use `--resolve-datasources` or `--rd`, it will fill up the options fields with the datasource's options.
+
 ```sh
 $ storyblok pull-components --space <SPACE_ID> # Will save files like components-1234.json
 ```
 
 ```sh
 $ storyblok pull-components --space <SPACE_ID> --separate-files --prefix-presets-names --file-name production # Will save files like feature-production.json grid-production.json
+```
+
+```sh
+$ storyblok pull-components --space <SPACE_ID> --resolve-datasources # Will resolve datasources for single/multiple option field
 ```
 
 #### Options

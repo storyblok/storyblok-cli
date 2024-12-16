@@ -17,21 +17,50 @@ const getNameFromComponentGroups = (groups, uuid) => {
   return ''
 }
 
+const resolveDatasourceOptions = async (api, components) => {
+  const datasources = await api.getDatasources()
+
+  for (const datasource of datasources) {
+    const datasourceEntries = await api.getDatasourceEntries(datasource.id)
+    datasource.entries = datasourceEntries
+  }
+
+  return components.map(component => {
+    const schema = component.schema
+
+    for (const field in schema) {
+      if (schema[field].source === 'internal' && schema[field].datasource_slug) {
+        const datasource = datasources.find(ds => ds.slug === schema[field].datasource_slug)
+
+        if (datasource) {
+          schema[field].options = datasource.entries.map(entry => ({ value: entry.value, name: entry.name }))
+        }
+      }
+    }
+
+    return component
+  })
+}
+
 /**
  * @method pullComponents
  * @param  {Object} api
- * @param  {Object} options { fileName: string, separateFiles: Boolean, path: String }
+ * @param  {Object} options { fileName: string, separateFiles: Boolean, path: String, resolveDatasources: Boolean }
  * @return {Promise<Object>}
  */
 const pullComponents = async (api, options) => {
-  const { fileName, separateFiles, path, prefixPresetsNames } = options
+  const { fileName, separateFiles, path, prefixPresetsNames, resolveDatasources } = options
 
   try {
     const componentGroups = await api.getComponentGroups()
 
-    const components = await api.getComponents()
+    let components = await api.getComponents()
 
     const presets = await api.getPresets()
+
+    if (resolveDatasources) {
+      components = await resolveDatasourceOptions(api, components)
+    }
 
     components.forEach(component => {
       const groupUuid = component.component_group_uuid
