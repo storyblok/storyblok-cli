@@ -392,7 +392,7 @@ program
       process.exit(1);
     }
 
-    console.log(`${chalk.blue("-")} Creating the migration file in ./migrations/change_${component}_${field}.mjs\n`);
+    console.log(`${chalk.blue("-")} Creating the migration file in ./migrations/change_${component}_${field}.js\n`);
 
     try {
       if (!api.isAuthorized()) {
