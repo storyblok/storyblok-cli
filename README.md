@@ -473,7 +473,7 @@ The created file will have the following content:
 
 ```js
 // here, 'subtitle' is the name of the field defined when you execute the generate command
-module.exports = function (block) {
+module.exports = function (block, slug) {
   // Example to change a string to boolean
   // block.subtitle = !!(block.subtitle)
 
