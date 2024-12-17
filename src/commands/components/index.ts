@@ -3,8 +3,8 @@ import { colorPalette, commands } from '../../constants'
 import { session } from '../../session'
 import { getProgram } from '../../program'
 import { CommandError, handleError, konsola } from '../../utils'
-import { fetchComponentGroups, fetchComponentPresets, fetchComponents, saveComponentPresetsToFiles, saveComponentsToFiles } from './actions'
-import type { PullComponentsOptions } from './constants'
+import { fetchComponentGroups, fetchComponentPresets, fetchComponents, readComponentsFiles, saveComponentsToFiles } from './actions'
+import type { PullComponentsOptions, PushComponentsOptions } from './constants'
 
 const program = getProgram() // Get the shared singleton instance
 
@@ -67,6 +67,52 @@ componentsCommand
       else {
         const msgFilename = `${filename}.${suffix}.json`
         konsola.ok(`Components downloaded successfully in ${chalk.hex(colorPalette.PRIMARY)(path ? `${path}/${msgFilename}` : `./storyblok/components/${msgFilename}`)}`)
+      }
+    }
+    catch (error) {
+      handleError(error as Error, verbose)
+    }
+  })
+
+componentsCommand
+  .command('push')
+  .description(`Push your space's components schema as json`)
+  .option('--fi, --filter <filter>', 'Regex filter to apply to the components before pushing')
+  .option('--sf, --separate-files', 'Read from separate files instead of consolidated files')
+  .action(async (options: PushComponentsOptions) => {
+    konsola.title(` ${commands.COMPONENTS} `, colorPalette.COMPONENTS, 'Pushing components...')
+    // Global options
+    const verbose = program.opts().verbose
+    const { space, path } = componentsCommand.opts()
+    const { filter } = options
+
+    const { state, initializeSession } = session()
+    await initializeSession()
+
+    if (!state.isLoggedIn || !state.password || !state.region) {
+      handleError(new CommandError(`You are currently not logged in. Please login first to get your user info.`), verbose)
+      return
+    }
+    if (!space) {
+      handleError(new CommandError(`Please provide the space as argument --space YOUR_SPACE_ID.`), verbose)
+      return
+    }
+
+    try {
+      const spaceData = await readComponentsFiles(path, {
+        filter,
+        separateFiles: options.separateFiles,
+      })
+
+      console.log('Components:', spaceData.components.length)
+      console.log('Groups:', spaceData.groups.length)
+      console.log('Presets:', spaceData.presets.length)
+
+      console.log('Components:', spaceData.components.map(c => c.name))
+
+      if (filter) {
+        console.log('Applied filter:', filter)
+        console.log('Filtered components:', spaceData.components.map(c => c.name))
       }
     }
     catch (error) {
