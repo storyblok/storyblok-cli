@@ -1,10 +1,49 @@
-import { access, readFile, writeFile } from 'node:fs/promises'
+import { access } from 'node:fs/promises'
 import { join } from 'node:path'
 import { FileSystemError, handleFileSystemError, konsola } from './utils'
 import chalk from 'chalk'
-import { colorPalette, regionCodes } from './constants'
+import { colorPalette } from './constants'
+import { getStoryblokGlobalPath, readFile, saveToFile } from './utils/filesystem'
 
-export interface NetrcMachine {
+export const getCredentials = async (filePath = join(getStoryblokGlobalPath(), 'credentials.json')) => {
+  try {
+    await access(filePath)
+    const content = await readFile(filePath)
+    return JSON.parse(content)
+  }
+  catch (error) {
+    handleFileSystemError('read', error as NodeJS.ErrnoException)
+    return {}
+  }
+}
+
+export const addCredentials = async ({
+  filePath = join(getStoryblokGlobalPath(), 'credentials.json'),
+  machineName,
+  login,
+  password,
+  region,
+}: Record<string, string>) => {
+  const credentials = {
+    ...await getCredentials(filePath),
+    [machineName]: {
+      login,
+      password,
+      region,
+    },
+  }
+
+  try {
+    await saveToFile(filePath, JSON.stringify(credentials, null, 2), { mode: 0o600 })
+
+    konsola.ok(`Successfully added/updated entry for machine ${machineName} in ${chalk.hex(colorPalette.PRIMARY)(filePath)}`, true)
+  }
+  catch (error) {
+    throw new FileSystemError('invalid_argument', 'write', error as NodeJS.ErrnoException, `Error adding/updating entry for machine ${machineName} in .netrc file`)
+  }
+}
+
+/* export interface NetrcMachine {
   login: string
   password: string
   region: string
@@ -15,7 +54,7 @@ export const getNetrcFilePath = () => {
     process.platform.startsWith('win') ? 'USERPROFILE' : 'HOME'
   ] || process.cwd()
 
-  return join(homeDirectory, '.netrc')
+  return join(homeDirectory, '.storyblok')
 }
 
 const readNetrcFileAsync = async (filePath: string) => {
@@ -257,4 +296,4 @@ export async function isAuthorized() {
     handleFileSystemError('authorization_check', error as NodeJS.ErrnoException)
     return false
   }
-}
+} */

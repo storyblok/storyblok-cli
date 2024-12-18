@@ -10,6 +10,7 @@ import './commands/user'
 import './commands/pull-languages'
 
 import { loginWithToken } from './commands/login/actions'
+import { session } from './session'
 
 dotenv.config() // This will load variables from .env into process.env
 const program = getProgram()
@@ -31,8 +32,11 @@ program.command('test').action(async () => {
   konsola.title(`Test`, '#8556D3', 'Attempting a test...')
   const verbose = program.opts().verbose
   try {
-    // await loginWithEmailAndPassword('aw', 'passwrod', 'eu')
-    await loginWithToken('WYSYDHYASDHSYD', 'eu')
+    const { state, updateSession, persistCredentials, initializeSession } = session()
+
+    await initializeSession()
+
+    console.log(state)
   }
   catch (error) {
     handleError(error as Error, verbose)
