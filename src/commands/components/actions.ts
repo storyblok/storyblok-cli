@@ -122,27 +122,20 @@ export const saveComponentsToFiles = async (
   options: PullComponentsOptions,
 ) => {
   const { components, groups, presets } = spaceData
-  const { filename = 'components', suffix = space, path, separateFiles } = options
-  const resolvedPath = resolvePath(path, 'components')
+  const { filename = 'components', suffix, path, separateFiles } = options
+  const resolvedPath = resolvePath(path, space)
 
   try {
     if (separateFiles) {
-      // Save in separate files with nested structure
+      // Save in separate files without nested structure
       for (const component of components) {
-        const groupPath = component.component_group_uuid
-          ? resolveGroupPath(component.component_group_uuid, groups)
-          : ''
-
-        const componentPath = join(resolvedPath, groupPath)
-
-        // Save component definition
-        const componentFilePath = join(componentPath, `${component.name}.${suffix}.json`)
+        const componentFilePath = join(resolvedPath, suffix ? `${component.name}.${suffix}.json` : `${component.name}.json`)
         await saveToFile(componentFilePath, JSON.stringify(component, null, 2))
 
         // Find and save associated presets
         const componentPresets = presets.filter(preset => preset.component_id === component.id)
         if (componentPresets.length > 0) {
-          const presetsFilePath = join(componentPath, `${component.name}.presets.${suffix}.json`)
+          const presetsFilePath = join(resolvedPath, suffix ? `${component.name}.presets.${suffix}.json` : `${component.name}.presets.json`)
           await saveToFile(presetsFilePath, JSON.stringify(componentPresets, null, 2))
         }
       }
@@ -150,16 +143,16 @@ export const saveComponentsToFiles = async (
     }
 
     // Default to saving consolidated files
-    const componentsFilePath = join(resolvedPath, `${filename}.${suffix}.json`)
+    const componentsFilePath = join(resolvedPath, suffix ? `${filename}.${suffix}.json` : `${filename}.json`)
     await saveToFile(componentsFilePath, JSON.stringify(components, null, 2))
 
     if (groups.length > 0) {
-      const groupsFilePath = join(resolvedPath, `groups.${suffix}.json`)
+      const groupsFilePath = join(resolvedPath, suffix ? `groups.${suffix}.json` : `groups.json`)
       await saveToFile(groupsFilePath, JSON.stringify(groups, null, 2))
     }
 
     if (presets.length > 0) {
-      const presetsFilePath = join(resolvedPath, `presets.${suffix}.json`)
+      const presetsFilePath = join(resolvedPath, suffix ? `presets.${suffix}.json` : `presets.json`)
       await saveToFile(presetsFilePath, JSON.stringify(presets, null, 2))
     }
   }
