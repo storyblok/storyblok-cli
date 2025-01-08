@@ -123,7 +123,7 @@ export const saveComponentsToFiles = async (
 ) => {
   const { components, groups, presets } = spaceData
   const { filename = 'components', suffix, path, separateFiles } = options
-  const resolvedPath = resolvePath(path, space)
+  const resolvedPath = resolvePath(path, `components/${space}`)
 
   try {
     if (separateFiles) {
