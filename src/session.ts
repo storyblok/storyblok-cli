@@ -1,5 +1,5 @@
 // session.ts
-import type { RegionCode } from './constants'
+import { type RegionCode, regionsDomain } from './constants'
 import { addCredentials, getCredentials } from './creds'
 
 interface SessionState {
@@ -17,7 +17,7 @@ function createSession() {
     isLoggedIn: false,
   }
 
-  async function initializeSession(machineName?: string) {
+  async function initializeSession(region = 'eu' as RegionCode) {
     // First, check for environment variables
     const envCredentials = getEnvCredentials()
     if (envCredentials) {
@@ -31,7 +31,7 @@ function createSession() {
 
     // If no environment variables, fall back to .storyblok/credentials.json
     const machines = await getCredentials()
-    const creds = machines[machineName || 'api.storyblok.com']
+    const creds = machines[regionsDomain[region] || 'api.storyblok.com']
     if (creds) {
       state.isLoggedIn = true
       state.login = creds.login

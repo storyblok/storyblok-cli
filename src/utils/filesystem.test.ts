@@ -1,6 +1,6 @@
 import { vol } from 'memfs'
-import { resolvePath, saveToFile } from './filesystem'
-import { resolve } from 'node:path'
+import { getStoryblokGlobalPath, resolvePath, saveToFile } from './filesystem'
+import { join, resolve } from 'node:path'
 
 // tell vitest to use fs mock from __mocks__ folder
 // this can be done in a setup file if fs should always be mocked
@@ -14,6 +14,108 @@ beforeEach(() => {
 })
 
 describe('filesystem utils', async () => {
+  describe('getStoryblokGlobalPath', async () => {
+    const originalPlatform = process.platform
+    const originalEnv = { ...process.env }
+    const originalCwd = process.cwd
+
+    beforeEach(() => {
+      process.env = { ...originalEnv }
+    })
+
+    afterEach(() => {
+    // Restore the original platform after each test
+      Object.defineProperty(process, 'platform', {
+        value: originalPlatform,
+      })
+      // Restore process.cwd()
+      process.cwd = originalCwd
+    })
+    it('should return the correct path on Unix-like systems when HOME is set', () => {
+      // Mock the platform to be Unix-like
+      Object.defineProperty(process, 'platform', {
+        value: 'linux',
+      })
+
+      // Set the HOME environment variable
+      process.env.HOME = '/home/testuser'
+
+      const expectedPath = join('/home/testuser', '.storyblok')
+      const result = getStoryblokGlobalPath()
+
+      expect(result).toBe(expectedPath)
+    })
+
+    it('should return the correct path on Windows systems when USERPROFILE is set', () => {
+      // Mock the platform to be Windows
+      Object.defineProperty(process, 'platform', {
+        value: 'win32',
+      })
+
+      // Set the USERPROFILE environment variable
+      process.env.USERPROFILE = 'C:/Users/TestUser'
+
+      const expectedPath = join('C:/Users/TestUser', '.storyblok')
+      const result = getStoryblokGlobalPath()
+
+      expect(result).toBe(expectedPath)
+    })
+
+    it('should use process.cwd() when home directory is not set', () => {
+      // Mock the platform to be Unix-like
+      Object.defineProperty(process, 'platform', {
+        value: 'linux',
+      })
+
+      // Remove HOME and USERPROFILE
+      delete process.env.HOME
+      delete process.env.USERPROFILE
+
+      // Mock process.cwd()
+      process.cwd = vi.fn().mockReturnValue('/current/working/directory')
+
+      const expectedPath = join('/current/working/directory', '.storyblok')
+      const result = getStoryblokGlobalPath()
+
+      expect(result).toBe(expectedPath)
+    })
+
+    it('should use process.cwd() when HOME is empty', () => {
+      // Mock the platform to be Unix-like
+      Object.defineProperty(process, 'platform', {
+        value: 'linux',
+      })
+
+      // Set HOME to an empty string
+      process.env.HOME = ''
+
+      // Mock process.cwd()
+      process.cwd = vi.fn().mockReturnValue('/current/working/directory')
+
+      const expectedPath = join('/current/working/directory', '.storyblok')
+      const result = getStoryblokGlobalPath()
+
+      expect(result).toBe(expectedPath)
+    })
+
+    it('should handle Windows platform when USERPROFILE is not set', () => {
+      // Mock the platform to be Windows
+      Object.defineProperty(process, 'platform', {
+        value: 'win32',
+      })
+
+      // Remove USERPROFILE
+      delete process.env.USERPROFILE
+
+      // Mock process.cwd()
+      process.cwd = vi.fn().mockReturnValue('C:/Current/Directory')
+
+      const expectedPath = join('C:/Current/Directory', '.storyblok')
+      const result = getStoryblokGlobalPath()
+
+      expect(result).toBe(expectedPath)
+    })
+  })
   describe('saveToFile', async () => {
     it('should save the data to the file', async () => {
       const filePath = '/path/to/file.txt'
