@@ -1,4 +1,4 @@
-import { FetchError } from 'ofetch'
+import { FetchError } from '../fetch'
 
 export const API_ACTIONS = {
   login: 'login',
@@ -18,9 +18,9 @@ export const API_ERRORS = {
   not_found: 'The requested resource was not found',
 } as const
 
-export function handleAPIError(action: keyof typeof API_ACTIONS, error: Error): void {
+export function handleAPIError(action: keyof typeof API_ACTIONS, error: unknown): void {
   if (error instanceof FetchError) {
-    const status = error.response?.status
+    const status = error.response.status
 
     switch (status) {
       case 401:
@@ -33,10 +33,7 @@ export function handleAPIError(action: keyof typeof API_ACTIONS, error: Error): 
         throw new APIError('network_error', action, error)
     }
   }
-  else if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
-    throw new APIError('network_error', action, error)
-  }
-  throw new APIError('generic', action, error)
+  throw new APIError('generic', action, error as FetchError)
 }
 
 export class APIError extends Error {

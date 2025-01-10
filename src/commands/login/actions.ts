@@ -1,12 +1,13 @@
 import chalk from 'chalk'
 import type { RegionCode } from '../../constants'
-import { regionsDomain } from '../../constants'
-import { FetchError, ofetch } from 'ofetch'
+import { customFetch, FetchError } from '../../utils/fetch'
 import { APIError, handleAPIError, maskToken } from '../../utils'
+import { getStoryblokUrl } from '../../utils/api-routes'
 
 export const loginWithToken = async (token: string, region: RegionCode) => {
   try {
-    return await ofetch(`https://${regionsDomain[region]}/v1/users/me`, {
+    const url = getStoryblokUrl(region)
+    return await customFetch(`${url}/users/me`, {
       headers: {
         Authorization: token,
       },
@@ -14,7 +15,7 @@ export const loginWithToken = async (token: string, region: RegionCode) => {
   }
   catch (error) {
     if (error instanceof FetchError) {
-      const status = error.response?.status
+      const status = error.response.status
 
       switch (status) {
         case 401:
@@ -24,17 +25,16 @@ export const loginWithToken = async (token: string, region: RegionCode) => {
           throw new APIError('network_error', 'login_with_token', error)
       }
     }
-    else {
-      throw new APIError('generic', 'login_with_token', error as Error)
-    }
+    throw new APIError('generic', 'login_with_token', error as FetchError)
   }
 }
 
 export const loginWithEmailAndPassword = async (email: string, password: string, region: RegionCode) => {
   try {
-    return await ofetch(`https://${regionsDomain[region]}/v1/users/login`, {
+    const url = getStoryblokUrl(region)
+    return await customFetch(`${url}/users/login`, {
       method: 'POST',
-      body: JSON.stringify({ email, password }),
+      body: { email, password },
     })
   }
   catch (error) {
@@ -44,9 +44,10 @@ export const loginWithEmailAndPassword = async (email: string, password: string,
 
 export const loginWithOtp = async (email: string, password: string, otp: string, region: RegionCode) => {
   try {
-    return await ofetch(`https://${regionsDomain[region]}/v1/users/login`, {
+    const url = getStoryblokUrl(region)
+    return await customFetch(`${url}/users/login`, {
       method: 'POST',
-      body: JSON.stringify({ email, password, otp_attempt: otp }),
+      body: { email, password, otp_attempt: otp },
     })
   }
   catch (error) {

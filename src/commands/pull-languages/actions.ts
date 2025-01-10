@@ -1,38 +1,33 @@
 import { join } from 'node:path'
-
 import { handleAPIError, handleFileSystemError } from '../../utils'
-import { ofetch } from 'ofetch'
-import { regionsDomain } from '../../constants'
+import type { FetchError } from '../../utils/fetch'
+import { customFetch } from '../../utils/fetch'
 import { resolvePath, saveToFile } from '../../utils/filesystem'
 import type { PullLanguagesOptions } from './constants'
+import type { RegionCode } from '../../constants'
+import type { SpaceInternationalization } from '../../types'
+import { getStoryblokUrl } from '../../utils/api-routes'
 
-export interface SpaceInternationalizationOptions {
-  languages: SpaceLanguage[]
-  default_lang_name: string
-}
-export interface SpaceLanguage {
-  code: string
-  name: string
-}
-
-export const pullLanguages = async (space: string, token: string, region: string): Promise<SpaceInternationalizationOptions | undefined> => {
+export const pullLanguages = async (space: string, token: string, region: RegionCode): Promise<SpaceInternationalization | undefined> => {
   try {
-    const response = await ofetch(`https://${regionsDomain[region]}/v1/spaces/${space}`, {
+    const url = getStoryblokUrl(region)
+    const response = await customFetch(`${url}/spaces/${space}`, {
       headers: {
         Authorization: token,
       },
     })
+
     return {
       default_lang_name: response.space.default_lang_name,
       languages: response.space.languages,
     }
   }
   catch (error) {
-    handleAPIError('pull_languages', error as Error)
+    handleAPIError('pull_languages', error as FetchError)
   }
 }
 
-export const saveLanguagesToFile = async (space: string, internationalizationOptions: SpaceInternationalizationOptions, options: PullLanguagesOptions) => {
+export const saveLanguagesToFile = async (space: string, internationalizationOptions: SpaceInternationalization, options: PullLanguagesOptions) => {
   try {
     const { filename = 'languages', suffix = space, path } = options
     const data = JSON.stringify(internationalizationOptions, null, 2)

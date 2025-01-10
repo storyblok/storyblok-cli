@@ -30,6 +30,20 @@
     {
       "type": "node",
       "request": "launch",
+      "name": "Debug login by token",
+      "program": "${workspaceFolder}/dist/index.mjs",
+      "args": ["login", "--token", "1234567890"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "sourceMaps": true,
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "env": {
+        "STUB": "true"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
       "name": "Debug logout",
       "program": "${workspaceFolder}/dist/index.mjs",
       "args": ["logout"],
