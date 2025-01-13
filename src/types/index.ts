@@ -8,6 +8,8 @@ export interface CommandOptions {
   verbose: boolean
 }
 
+// All these types should come from a general package
+
 /**
  * Interface representing a language in Storyblok
  */
@@ -21,4 +23,29 @@ export interface Language {
 export interface SpaceInternationalization {
   languages: Language[]
   default_lang_name: string
+}
+
+export interface StoryblokUser {
+  id: number
+  email: string
+  username: string
+  friendly_name: string
+  otp_required: boolean
+  access_token: string
+}
+
+export interface StoryblokLoginResponse {
+  otp_required: boolean
+  login_strategy: string
+  configured_2fa_options: string[]
+  access_token?: string
+}
+
+export interface StoryblokLoginWithOtpResponse {
+  access_token: string
+  email: string
+  token_type: string
+  user_id: number
+  role: string
+  has_partner: boolean
 }

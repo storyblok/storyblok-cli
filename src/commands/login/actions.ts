@@ -3,11 +3,14 @@ import type { RegionCode } from '../../constants'
 import { customFetch, FetchError } from '../../utils/fetch'
 import { APIError, handleAPIError, maskToken } from '../../utils'
 import { getStoryblokUrl } from '../../utils/api-routes'
+import type { StoryblokLoginResponse, StoryblokLoginWithOtpResponse, StoryblokUser } from '../../types'
 
 export const loginWithToken = async (token: string, region: RegionCode) => {
   try {
     const url = getStoryblokUrl(region)
-    return await customFetch(`${url}/users/me`, {
+    return await customFetch<{
+      user: StoryblokUser
+    }>(`${url}/users/me`, {
       headers: {
         Authorization: token,
       },
@@ -32,7 +35,7 @@ export const loginWithToken = async (token: string, region: RegionCode) => {
 export const loginWithEmailAndPassword = async (email: string, password: string, region: RegionCode) => {
   try {
     const url = getStoryblokUrl(region)
-    return await customFetch(`${url}/users/login`, {
+    return await customFetch<StoryblokLoginResponse>(`${url}/users/login`, {
       method: 'POST',
       body: { email, password },
     })
@@ -45,7 +48,7 @@ export const loginWithEmailAndPassword = async (email: string, password: string,
 export const loginWithOtp = async (email: string, password: string, otp: string, region: RegionCode) => {
   try {
     const url = getStoryblokUrl(region)
-    return await customFetch(`${url}/users/login`, {
+    return await customFetch<StoryblokLoginWithOtpResponse>(`${url}/users/login`, {
       method: 'POST',
       body: { email, password, otp_attempt: otp },
     })

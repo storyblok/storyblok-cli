@@ -11,7 +11,9 @@ import { getStoryblokUrl } from '../../utils/api-routes'
 export const pullLanguages = async (space: string, token: string, region: RegionCode): Promise<SpaceInternationalization | undefined> => {
   try {
     const url = getStoryblokUrl(region)
-    const response = await customFetch(`${url}/spaces/${space}`, {
+    const response = await customFetch<{
+      space: SpaceInternationalization
+    }>(`${url}/spaces/${space}`, {
       headers: {
         Authorization: token,
       },

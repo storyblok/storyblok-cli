@@ -3,15 +3,19 @@ import type { RegionCode } from '../../constants'
 import { customFetch, FetchError } from '../../utils/fetch'
 import { APIError, maskToken } from '../../utils'
 import { getStoryblokUrl } from '../../utils/api-routes'
+import type { StoryblokUser } from '../../types'
 
 export const getUser = async (token: string, region: RegionCode) => {
   try {
     const url = getStoryblokUrl(region)
-    return await customFetch(`${url}/users/me`, {
+    const response = await customFetch<{
+      user: StoryblokUser
+    }>(`${url}/users/me`, {
       headers: {
         Authorization: token,
       },
     })
+    return response
   }
   catch (error) {
     if (error instanceof FetchError) {

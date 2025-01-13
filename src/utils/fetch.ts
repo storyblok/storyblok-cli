@@ -2,21 +2,23 @@ export class FetchError extends Error {
   response: {
     status: number
     statusText: string
-    data?: any
+    data?: Record<string, unknown> | null
   }
 
-  constructor(message: string, response: { status: number, statusText: string, data?: any }) {
+  constructor(message: string, response: { status: number, statusText: string, data?: Record<string, unknown> | null }) {
     super(message)
     this.name = 'FetchError'
     this.response = response
   }
 }
 
-type FetchOptions = Omit<RequestInit, 'body'> & {
+export interface FetchOptions {
+  headers?: Record<string, string>
+  method?: string
   body?: any
 }
 
-export async function customFetch<T = any>(url: string, options: FetchOptions = {}): Promise<T> {
+export async function customFetch<T>(url: string, options: FetchOptions = {}): Promise<T> {
   try {
     const headers = {
       'Content-Type': 'application/json',
@@ -24,36 +26,33 @@ export async function customFetch<T = any>(url: string, options: FetchOptions = 
     }
 
     // Handle JSON body
-    const fetchOptions: RequestInit = {
+    const fetchOptions: FetchOptions = {
       ...options,
       headers,
     }
 
     if (options.body) {
-      if (typeof options.body === 'string') {
-        try {
-          JSON.parse(options.body)
-          fetchOptions.body = options.body
-        }
-        catch {
-          fetchOptions.body = JSON.stringify(options.body)
-        }
-      }
-      else {
-        fetchOptions.body = JSON.stringify(options.body)
-      }
+      fetchOptions.body = typeof options.body === 'string'
+        ? options.body
+        : JSON.stringify(options.body)
     }
 
     const response = await fetch(url, fetchOptions)
+    let data
+    try {
+      // We try to parse the response as JSON
+      data = await response.json()
+    }
+    catch {
+      // If it fails, we throw an error
+      throw new FetchError(`Non-JSON response`, {
+        status: response.status,
+        statusText: response.statusText,
+        data: null,
+      })
+    }
 
     if (!response.ok) {
-      let data
-      try {
-        data = await response.json()
-      }
-      catch {
-        // Ignore JSON parse errors
-      }
       throw new FetchError(`HTTP error! status: ${response.status}`, {
         status: response.status,
         statusText: response.statusText,
@@ -61,12 +60,7 @@ export async function customFetch<T = any>(url: string, options: FetchOptions = 
       })
     }
 
-    // Handle empty responses
-    const contentType = response.headers.get('content-type')
-    if (contentType?.includes('application/json')) {
-      return await response.json()
-    }
-    return await response.text() as T
+    return data
   }
   catch (error) {
     if (error instanceof FetchError) {

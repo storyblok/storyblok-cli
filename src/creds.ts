@@ -3,11 +3,12 @@ import { join } from 'node:path'
 import { FileSystemError, handleFileSystemError, konsola } from './utils'
 import chalk from 'chalk'
 import { colorPalette, regionCodes } from './constants'
+import type { RegionCode } from './constants'
 
 export interface NetrcMachine {
   login: string
   password: string
-  region: string
+  region: RegionCode
 }
 
 export const getNetrcFilePath = () => {

@@ -6,7 +6,7 @@ interface SessionState {
   isLoggedIn: boolean
   login?: string
   password?: string
-  region?: string
+  region?: RegionCode
   envLogin?: boolean
 }
 
@@ -24,7 +24,7 @@ function createSession() {
       state.isLoggedIn = true
       state.login = envCredentials.login
       state.password = envCredentials.password
-      state.region = envCredentials.region
+      state.region = envCredentials.region as RegionCode
       state.envLogin = true
       return
     }
@@ -36,7 +36,7 @@ function createSession() {
       state.isLoggedIn = true
       state.login = creds.login
       state.password = creds.password
-      state.region = creds.region
+      state.region = creds.region as RegionCode
     }
     else {
       // No credentials found; set state to logged out

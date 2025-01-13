@@ -112,16 +112,18 @@ export const loginCommand = program
           })
           const response = await loginWithEmailAndPassword(userEmail, userPassword, userRegion)
 
-          if (response.otp_required) {
+          if (response?.otp_required) {
             const otp = await input({
               message: 'Add the code from your Authenticator app, or the one we sent to your e-mail / phone:',
               required: true,
             })
 
-            const { access_token } = await loginWithOtp(userEmail, userPassword, otp, userRegion)
-            updateSession(userEmail, access_token, userRegion)
+            const otpResponse = await loginWithOtp(userEmail, userPassword, otp, userRegion)
+            if (otpResponse?.access_token) {
+              updateSession(userEmail, otpResponse?.access_token, userRegion)
+            }
           }
-          else {
+          else if (response?.access_token) {
             updateSession(userEmail, response.access_token, userRegion)
           }
           await persistCredentials(regionsDomain[userRegion])
