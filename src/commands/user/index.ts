@@ -1,5 +1,4 @@
 import chalk from 'chalk'
-import type { NetrcMachine } from '../../creds'
 import { colorPalette, commands } from '../../constants'
 import { getProgram } from '../../program'
 import { CommandError, handleError, konsola } from '../../utils'
@@ -21,7 +20,10 @@ export const userCommand = program
       return
     }
     try {
-      const { password, region } = state as NetrcMachine
+      const { password, region } = state
+      if (!password || !region) {
+        throw new Error('No password or region found')
+      }
       const { user } = await getUser(password, region)
       konsola.ok(`Hi ${chalk.bold(user.friendly_name)}, you are currently logged in with ${chalk.hex(colorPalette.PRIMARY)(user.email)} on ${chalk.bold(region)} region`)
     }

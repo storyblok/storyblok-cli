@@ -1,6 +1,6 @@
 // session.ts
-import type { RegionCode } from './constants'
-import { addNetrcEntry, getCredentialsForMachine, getNetrcCredentials } from './creds'
+import { type RegionCode, regionsDomain } from './constants'
+import { addCredentials, getCredentials } from './creds'
 
 interface SessionState {
   isLoggedIn: boolean
@@ -17,7 +17,7 @@ function createSession() {
     isLoggedIn: false,
   }
 
-  async function initializeSession(machineName?: string) {
+  async function initializeSession(region = 'eu' as RegionCode) {
     // First, check for environment variables
     const envCredentials = getEnvCredentials()
     if (envCredentials) {
@@ -29,9 +29,9 @@ function createSession() {
       return
     }
 
-    // If no environment variables, fall back to netrc
-    const machines = await getNetrcCredentials()
-    const creds = getCredentialsForMachine(machines, machineName)
+    // If no environment variables, fall back to .storyblok/credentials.json
+    const machines = await getCredentials()
+    const creds = machines[regionsDomain[region] || 'api.storyblok.com']
     if (creds) {
       state.isLoggedIn = true
       state.login = creds.login
@@ -63,10 +63,10 @@ function createSession() {
     return null
   }
 
-  async function persistCredentials(machineName: string) {
+  async function persistCredentials(region: RegionCode) {
     if (state.isLoggedIn && state.login && state.password && state.region) {
-      await addNetrcEntry({
-        machineName,
+      await addCredentials({
+        machineName: regionsDomain[region] || 'api.storyblok.com',
         login: state.login,
         password: state.password,
         region: state.region,

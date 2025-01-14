@@ -1,7 +1,7 @@
 import chalk from 'chalk'
 import { input, password, select } from '@inquirer/prompts'
 import type { RegionCode } from '../../constants'
-import { colorPalette, commands, regionNames, regions, regionsDomain } from '../../constants'
+import { colorPalette, commands, regionNames, regions } from '../../constants'
 import { getProgram } from '../../program'
 import { CommandError, handleError, isRegion, konsola } from '../../utils'
 import { loginWithEmailAndPassword, loginWithOtp, loginWithToken } from './actions'
@@ -63,7 +63,7 @@ export const loginCommand = program
       try {
         const { user } = await loginWithToken(token, region)
         updateSession(user.email, token, region)
-        await persistCredentials(regionsDomain[region])
+        await persistCredentials(region)
 
         konsola.ok(`Successfully logged in with token`)
       }
@@ -85,7 +85,7 @@ export const loginCommand = program
           const { user } = await loginWithToken(userToken, region)
 
           updateSession(user.email, userToken, region)
-          await persistCredentials(regionsDomain[region])
+          await persistCredentials(region)
 
           konsola.ok(`Successfully logged in with token`)
         }
@@ -126,7 +126,7 @@ export const loginCommand = program
           else if (response?.access_token) {
             updateSession(userEmail, response.access_token, userRegion)
           }
-          await persistCredentials(regionsDomain[userRegion])
+          await persistCredentials(region)
           konsola.ok(`Successfully logged in with email ${chalk.hex(colorPalette.PRIMARY)(userEmail)}`)
         }
       }
