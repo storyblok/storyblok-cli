@@ -31,10 +31,9 @@ describe('creds', async () => {
         region: 'eu',
       })
     })
-    it('should throw an error if credentials file does not exist', async () => {
-      await expect(getCredentials('/temp/test/nonexistent.json')).rejects.toThrow(
-        new Error('The file requested was not found'),
-      )
+    it('should create a credentials.json file if it does not exist', async () => {
+      const credentials = await getCredentials('/temp/test/nonexistent.json')
+      expect(credentials).toEqual({})
     })
   })
 
@@ -69,7 +68,7 @@ describe('creds', async () => {
         }),
       }, '/temp')
 
-      await removeCredentials('api.storyblok.com', '/temp/test')
+      await removeCredentials('eu', '/temp/test')
 
       const content = vol.readFileSync('/temp/test/credentials.json', 'utf8')
       expect(content).toBe('{}')
