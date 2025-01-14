@@ -32,10 +32,11 @@ program.command('test').action(async () => {
   const verbose = program.opts().verbose
   try {
     const { state, initializeSession } = session()
-
     await initializeSession()
 
-    console.log(state)
+    if (!state.password) {
+      throw new Error('No password found')
+    }
   }
   catch (error) {
     handleError(error as Error, verbose)

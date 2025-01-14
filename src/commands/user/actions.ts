@@ -1,19 +1,25 @@
-import { FetchError, ofetch } from 'ofetch'
-import { regionsDomain } from '../../constants'
 import chalk from 'chalk'
+import type { RegionCode } from '../../constants'
+import { customFetch, FetchError } from '../../utils/fetch'
 import { APIError, maskToken } from '../../utils'
+import { getStoryblokUrl } from '../../utils/api-routes'
+import type { StoryblokUser } from '../../types'
 
-export const getUser = async (token: string, region: string) => {
+export const getUser = async (token: string, region: RegionCode) => {
   try {
-    return await ofetch(`https://${regionsDomain[region]}/v1/users/me`, {
+    const url = getStoryblokUrl(region)
+    const response = await customFetch<{
+      user: StoryblokUser
+    }>(`${url}/users/me`, {
       headers: {
         Authorization: token,
       },
     })
+    return response
   }
   catch (error) {
     if (error instanceof FetchError) {
-      const status = error.response?.status
+      const status = error.response.status
 
       switch (status) {
         case 401:
@@ -23,8 +29,6 @@ export const getUser = async (token: string, region: string) => {
           throw new APIError('network_error', 'get_user', error)
       }
     }
-    else {
-      throw new APIError('generic', 'get_user', error as Error)
-    }
+    throw new APIError('generic', 'get_user', error as FetchError)
   }
 }
