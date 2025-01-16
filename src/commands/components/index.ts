@@ -3,7 +3,7 @@ import { colorPalette, commands } from '../../constants'
 import { session } from '../../session'
 import { getProgram } from '../../program'
 import { CommandError, handleError, konsola } from '../../utils'
-import { fetchComponentGroups, fetchComponentPresets, fetchComponents, saveComponentPresetsToFiles, saveComponentsToFiles } from './actions'
+import { fetchComponentGroups, fetchComponentPresets, fetchComponents, saveComponentsToFiles } from './actions'
 import type { PullComponentsOptions } from './constants'
 
 const program = getProgram() // Get the shared singleton instance
@@ -26,7 +26,7 @@ componentsCommand
     const verbose = program.opts().verbose
     // Command options
     const { space, path } = componentsCommand.opts()
-    const { separateFiles, suffix = space, filename = 'components' } = options
+    const { separateFiles, suffix, filename = 'components' } = options
 
     const { state, initializeSession } = session()
     await initializeSession()
@@ -62,11 +62,14 @@ componentsCommand
         if (filename !== 'components') {
           konsola.warn(`The --filename option is ignored when using --separate-files`)
         }
-        konsola.ok(`Components downloaded successfully in ${chalk.hex(colorPalette.PRIMARY)(path ? `${path}` : './storyblok/components')}`)
+        const filePath = path ? `${path}/` : `.storyblok/components/${space}/`
+        konsola.ok(`Components downloaded successfully in ${chalk.hex(colorPalette.PRIMARY)(filePath)}`)
       }
       else {
-        const msgFilename = `${filename}.${suffix}.json`
-        konsola.ok(`Components downloaded successfully in ${chalk.hex(colorPalette.PRIMARY)(path ? `${path}/${msgFilename}` : `./storyblok/components/${msgFilename}`)}`)
+        const fileName = suffix ? `${filename}.${suffix}.json` : `${filename}.json`
+        const filePath = path ? `${path}/${fileName}` : `.storyblok/components/${space}/${fileName}`
+
+        konsola.ok(`Components downloaded successfully in ${chalk.hex(colorPalette.PRIMARY)(filePath)}`)
       }
     }
     catch (error) {

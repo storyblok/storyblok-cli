@@ -1,82 +1,17 @@
-import { ofetch } from 'ofetch'
-import { handleAPIError, handleFileSystemError, slugify } from '../../utils'
-import { regionsDomain } from '../../constants'
+import { handleAPIError, handleFileSystemError } from '../../utils'
+import type { RegionCode } from '../../constants'
 import { join } from 'node:path'
 import { resolvePath, saveToFile } from '../../utils/filesystem'
-import type { PullComponentsOptions } from './constants'
+import type { SaveComponentsOptions, SpaceComponent, SpaceComponentGroup, SpaceComponentPreset, SpaceData } from './constants'
+import { getStoryblokUrl } from '../../utils/api-routes'
+import { customFetch } from '../../utils/fetch'
 
-export interface SpaceComponent {
-  name: string
-  display_name: string
-  created_at: string
-  updated_at: string
-  id: number
-  schema: Record<string, unknown>
-  image?: string
-  preview_field?: string
-  is_root?: boolean
-  is_nestable?: boolean
-  preview_tmpl?: string
-  all_presets?: Record<string, unknown>
-  preset_id?: number
-  real_name?: string
-  component_group_uuid?: string
-  color: null
-  internal_tags_list: string[]
-  interntal_tags_ids: number[]
-  content_type_asset_preview?: string
-}
-
-export interface SpaceComponentGroup {
-  name: string
-  id: number
-  uuid: string
-  parent_id: number
-  parent_uuid: string
-}
-
-export interface ComponentsSaveOptions {
-  path?: string
-  filename?: string
-  separateFiles?: boolean
-  suffix?: string
-}
-
-export interface SpaceComponentPreset {
-  id: number
-  name: string
-  preset: Record<string, unknown>
-  component_id: number
-  space_id: number
-  created_at: string
-  updated_at: string
-  image: string
-  color: string
-  icon: string
-  description: string
-}
-
-export interface SpaceData {
-  components: SpaceComponent[]
-  groups: SpaceComponentGroup[]
-  presets: SpaceComponentPreset[]
-}
-/**
- * Resolves the nested folder structure based on component group hierarchy.
- * @param groupUuid - The UUID of the component group.
- * @param groups - The list of all component groups.
- * @returns The resolved path for the component group.
- */
-const resolveGroupPath = (groupUuid: string, groups: SpaceComponentGroup[]): string => {
-  const group = groups.find(g => g.uuid === groupUuid)
-  if (!group) { return '' }
-  const parentPath = group.parent_uuid ? resolveGroupPath(group.parent_uuid, groups) : ''
-  return join(parentPath, slugify(group.name))
-}
-
-export const fetchComponents = async (space: string, token: string, region: string): Promise<SpaceComponent[] | undefined> => {
+export const fetchComponents = async (space: string, token: string, region: RegionCode): Promise<SpaceComponent[] | undefined> => {
   try {
-    const response = await ofetch(`https://${regionsDomain[region]}/v1/spaces/${space}/components`, {
+    const url = getStoryblokUrl(region)
+    const response = await customFetch<{
+      components: SpaceComponent[]
+    }>(`${url}/spaces/${space}/components`, {
       headers: {
         Authorization: token,
       },
@@ -88,9 +23,12 @@ export const fetchComponents = async (space: string, token: string, region: stri
   }
 }
 
-export const fetchComponentGroups = async (space: string, token: string, region: string): Promise<SpaceComponentGroup[] | undefined> => {
+export const fetchComponentGroups = async (space: string, token: string, region: RegionCode): Promise<SpaceComponentGroup[] | undefined> => {
   try {
-    const response = await ofetch(`https://${regionsDomain[region]}/v1/spaces/${space}/component_groups`, {
+    const url = getStoryblokUrl(region)
+    const response = await customFetch<{
+      component_groups: SpaceComponentGroup[]
+    }>(`${url}/spaces/${space}/component_groups`, {
       headers: {
         Authorization: token,
       },
@@ -102,9 +40,12 @@ export const fetchComponentGroups = async (space: string, token: string, region:
   }
 }
 
-export const fetchComponentPresets = async (space: string, token: string, region: string): Promise<SpaceComponentPreset[] | undefined> => {
+export const fetchComponentPresets = async (space: string, token: string, region: RegionCode): Promise<SpaceComponentPreset[] | undefined> => {
   try {
-    const response = await ofetch(`https://${regionsDomain[region]}/v1/spaces/${space}/presets`, {
+    const url = getStoryblokUrl(region)
+    const response = await customFetch<{
+      presets: SpaceComponentPreset[]
+    }>(`${url}/spaces/${space}/presets`, {
       headers: {
         Authorization: token,
       },
@@ -119,7 +60,7 @@ export const fetchComponentPresets = async (space: string, token: string, region
 export const saveComponentsToFiles = async (
   space: string,
   spaceData: SpaceData,
-  options: PullComponentsOptions,
+  options: SaveComponentsOptions,
 ) => {
   const { components, groups, presets } = spaceData
   const { filename = 'components', suffix, path, separateFiles } = options

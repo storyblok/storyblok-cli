@@ -98,10 +98,13 @@ describe('pull components actions', () => {
         interntal_tags_ids: [1],
       }]
 
-      await saveComponentsToFiles('12345', components, { path: '/path/to/components' })
+      await saveComponentsToFiles('12345', { components, groups: [], presets: [] }, {
+        path: '/path/to/components',
+        verbose: false,
+      })
 
       const files = vol.readdirSync('/path/to/components')
-      expect(files).toEqual(['components.12345.json'])
+      expect(files).toEqual(['components.json'])
     })
 
     it('should save components to files with custom filename', async () => {
@@ -121,10 +124,14 @@ describe('pull components actions', () => {
         interntal_tags_ids: [1],
       }]
 
-      await saveComponentsToFiles('12345', components, { path: '/path/to/components2', filename: 'custom' })
+      await saveComponentsToFiles('12345', { components, groups: [], presets: [] }, {
+        path: '/path/to/components2',
+        filename: 'custom',
+        verbose: false,
+      })
 
       const files = vol.readdirSync('/path/to/components2')
-      expect(files).toEqual(['custom.12345.json'])
+      expect(files).toEqual(['custom.json'])
     })
 
     it('should save components to files with custom suffix', async () => {
@@ -144,7 +151,11 @@ describe('pull components actions', () => {
         interntal_tags_ids: [1],
       }]
 
-      await saveComponentsToFiles('12345', components, { path: '/path/to/components3', suffix: 'custom' })
+      await saveComponentsToFiles('12345', { components, groups: [], presets: [] }, {
+        path: '/path/to/components3',
+        suffix: 'custom',
+        verbose: false,
+      })
 
       const files = vol.readdirSync('/path/to/components3')
       expect(files).toEqual(['components.custom.json'])
@@ -177,10 +188,14 @@ describe('pull components actions', () => {
         interntal_tags_ids: [1],
       }]
 
-      await saveComponentsToFiles('12345', components, { path: '/path/to/components4', separateFiles: true })
+      await saveComponentsToFiles('12345', { components, groups: [], presets: [] }, {
+        path: '/path/to/components4',
+        separateFiles: true,
+        verbose: false,
+      })
 
       const files = vol.readdirSync('/path/to/components4')
-      expect(files).toEqual(['component-name-2.12345.json', 'component-name.12345.json'])
+      expect(files).toEqual(['component-name-2.json', 'component-name.json'])
     })
   })
 })
