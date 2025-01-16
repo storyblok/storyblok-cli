@@ -2,14 +2,14 @@ export const commands = {
   LOGIN: 'login',
   LOGOUT: 'logout',
   USER: 'user',
-  PULL_LANGUAGES: 'pull-languages',
+  LANGUAGES: 'languages',
 } as const
 
 export const colorPalette = {
   PRIMARY: '#45bfb9',
   LOGIN: '#8556D3',
   USER: '#8BC34A',
-  PULL_LANGUAGES: '#FFC107',
+  LANGUAGES: '#FFC107',
 } as const
 
 export interface ReadonlyArray<T> {

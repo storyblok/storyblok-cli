@@ -14,7 +14,7 @@ export const getStoryblokGlobalPath = () => {
   return join(homeDirectory, '.storyblok')
 }
 
-export const saveToFile = async (filePath: string, data: string, options: FileOptions) => {
+export const saveToFile = async (filePath: string, data: string, options?: FileOptions) => {
   // Get the directory path
   const resolvedPath = parse(filePath).dir
 
