@@ -4,7 +4,6 @@ import { fetchComponents, saveComponentsToFiles } from './actions'
 import { componentsCommand } from '.'
 import chalk from 'chalk'
 import { colorPalette } from '../../constants'
-import { group } from 'node:console'
 
 vi.mock('./actions', () => ({
   fetchComponents: vi.fn(),
