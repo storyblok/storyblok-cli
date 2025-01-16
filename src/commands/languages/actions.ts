@@ -8,7 +8,7 @@ import type { RegionCode } from '../../constants'
 import type { SpaceInternationalization } from '../../types'
 import { getStoryblokUrl } from '../../utils/api-routes'
 
-export const pullLanguages = async (space: string, token: string, region: RegionCode): Promise<SpaceInternationalization | undefined> => {
+export const fetchLanguages = async (space: string, token: string, region: RegionCode): Promise<SpaceInternationalization | undefined> => {
   try {
     const url = getStoryblokUrl(region)
     const response = await customFetch<{
@@ -31,10 +31,10 @@ export const pullLanguages = async (space: string, token: string, region: Region
 
 export const saveLanguagesToFile = async (space: string, internationalizationOptions: SpaceInternationalization, options: PullLanguagesOptions) => {
   try {
-    const { filename = 'languages', suffix = space, path } = options
+    const { filename = 'languages', suffix, path } = options
     const data = JSON.stringify(internationalizationOptions, null, 2)
-    const name = `${filename}.${suffix}.json`
-    const resolvedPath = resolvePath(path, 'languages')
+    const name = suffix ? `${filename}.${suffix}.json` : `${filename}.json`
+    const resolvedPath = resolvePath(path, `languages/${space}/`)
     const filePath = join(resolvedPath, name)
 
     await saveToFile(filePath, data)

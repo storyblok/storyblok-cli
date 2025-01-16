@@ -2,7 +2,7 @@ import { http, HttpResponse } from 'msw'
 import { setupServer } from 'msw/node'
 import { vol } from 'memfs'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
-import { pullLanguages, saveLanguagesToFile } from './actions'
+import { fetchLanguages, saveLanguagesToFile } from './actions'
 
 const handlers = [
   http.get('https://api.storyblok.com/v1/spaces/12345', async ({ request }) => {
@@ -44,7 +44,7 @@ describe('pull languages actions', () => {
     vol.reset()
   })
 
-  describe('pullLanguages', () => {
+  describe('fetchLanguages', () => {
     it('should pull languages successfully with a valid token', async () => {
       const mockResponse = {
         default_lang_name: 'en',
@@ -59,12 +59,12 @@ describe('pull languages actions', () => {
           },
         ],
       }
-      const result = await pullLanguages('12345', 'valid-token', 'eu')
+      const result = await fetchLanguages('12345', 'valid-token', 'eu')
       expect(result).toEqual(mockResponse)
     })
   })
   it('should throw an masked error for invalid token', async () => {
-    await expect(pullLanguages('12345', 'invalid-token', 'eu')).rejects.toThrow(
+    await expect(fetchLanguages('12345', 'invalid-token', 'eu')).rejects.toThrow(
       new Error(`The user is not authorized to access the API`),
     )
   })
@@ -90,7 +90,7 @@ describe('pull languages actions', () => {
         verbose: false,
         space: '12345',
       })
-      const content = vol.readFileSync('/temp/languages.12345.json', 'utf8')
+      const content = vol.readFileSync('/temp/languages.json', 'utf8')
       expect(content).toBe(JSON.stringify(mockResponse, null, 2))
     })
   })
