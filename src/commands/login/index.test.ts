@@ -14,10 +14,10 @@ vi.mock('./actions', () => ({
 }))
 
 vi.mock('../../creds', () => ({
-  addNetrcEntry: vi.fn(),
-  isAuthorized: vi.fn(),
-  getNetrcCredentials: vi.fn(),
-  getCredentialsForMachine: vi.fn(),
+  getCredentials: vi.fn(),
+  addCredentials: vi.fn(),
+  removeCredentials: vi.fn(),
+  removeAllCredentials: vi.fn(),
 }))
 
 // Mocking the session module

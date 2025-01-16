@@ -7,11 +7,10 @@ import { getProgram } from './program'
 import './commands/login'
 import './commands/logout'
 import './commands/user'
-import './commands/pull-languages'
 import './commands/components'
-import './commands/block'
+import './commands/languages'
 
-import { loginWithToken } from './commands/login/actions'
+import { session } from './session'
 
 dotenv.config() // This will load variables from .env into process.env
 const program = getProgram()
@@ -33,8 +32,12 @@ program.command('test').action(async () => {
   konsola.title(`Test`, '#8556D3', 'Attempting a test...')
   const verbose = program.opts().verbose
   try {
-    // await loginWithEmailAndPassword('aw', 'passwrod', 'eu')
-    await loginWithToken('WYSYDHYASDHSYD', 'eu')
+    const { state, initializeSession } = session()
+    await initializeSession()
+
+    if (!state.password) {
+      throw new Error('No password found')
+    }
   }
   catch (error) {
     handleError(error as Error, verbose)

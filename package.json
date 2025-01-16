@@ -38,7 +38,6 @@
     "chalk": "^5.3.0",
     "commander": "^12.1.0",
     "dotenv": "^16.4.5",
-    "ofetch": "^1.4.0",
     "storyblok-js-client": "^6.9.2"
   },
   "devDependencies": {

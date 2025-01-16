@@ -1,12 +1,13 @@
 import { konsola } from '..'
+import type { FetchError } from '../fetch'
 import { APIError } from './api-error'
 import { CommandError } from './command-error'
 import { FileSystemError } from './filesystem-error'
 
-export function handleError(error: Error, verbose = false): void {
+export function handleError(error: Error | FetchError, verbose = false): void {
   // Print the message stack if it exists
-  if ((error as any).messageStack) {
-    const messageStack = (error as any).messageStack
+  if (error instanceof APIError || error instanceof FileSystemError) {
+    const messageStack = (error).messageStack
     messageStack.forEach((message: string, index: number) => {
       konsola.error(message, null, {
         header: index === 0,
@@ -19,8 +20,8 @@ export function handleError(error: Error, verbose = false): void {
       header: true,
     })
   }
-  if (verbose && typeof (error as any).getInfo === 'function') {
-    const errorDetails = (error as any).getInfo()
+  if (verbose && (error instanceof APIError || error instanceof FileSystemError)) {
+    const errorDetails = error.getInfo()
     if (error instanceof CommandError) {
       konsola.error(`Command Error: ${error.getInfo().message}`, errorDetails)
     }
@@ -31,7 +32,7 @@ export function handleError(error: Error, verbose = false): void {
       konsola.error(`File System Error: ${error.getInfo().cause}`, errorDetails)
     }
     else {
-      konsola.error(`Unexpected Error: ${error.message}`, errorDetails)
+      konsola.error(`Unexpected Error: ${error}`, errorDetails)
     }
   }
   else {
