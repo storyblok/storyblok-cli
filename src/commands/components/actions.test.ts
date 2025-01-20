@@ -2,7 +2,7 @@ import { http, HttpResponse } from 'msw'
 import { setupServer } from 'msw/node'
 import { vol } from 'memfs'
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
-import { fetchComponents, saveComponentsToFiles } from './actions'
+import { fetchComponent, fetchComponents, saveComponentsToFiles } from './actions'
 
 const handlers = [
   http.get('https://api.storyblok.com/v1/spaces/12345/components', async ({ request }) => {
@@ -72,6 +72,24 @@ describe('pull components actions', () => {
 
     const result = await fetchComponents('12345', 'valid-token', 'eu')
     expect(result).toEqual(mockResponse)
+  })
+
+  it('should fetch a component by name', async () => {
+    const mockResponse = {
+      components: [{
+        name: 'component-name',
+        display_name: 'Component Name',
+        created_at: '2021-08-09T12:00:00Z',
+        updated_at: '2021-08-09T12:00:00Z',
+        id: 12345,
+        schema: { type: 'object' },
+        color: null,
+        internal_tags_list: ['tag'],
+        interntal_tags_ids: [1],
+      }],
+    }
+    const result = await fetchComponent('12345', 'component-name', 'valid-token', 'eu')
+    expect(result).toEqual(mockResponse.components[0])
   })
 
   it('should throw an masked error for invalid token', async () => {

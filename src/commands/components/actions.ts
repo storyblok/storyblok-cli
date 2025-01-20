@@ -23,6 +23,23 @@ export const fetchComponents = async (space: string, token: string, region: Regi
   }
 }
 
+export const fetchComponent = async (space: string, componentName: string, token: string, region: RegionCode): Promise<SpaceComponent | undefined> => {
+  try {
+    const url = getStoryblokUrl(region)
+    const response = await customFetch<{
+      components: SpaceComponent[]
+    }>(`${url}/spaces/${space}/components?search=${encodeURIComponent(componentName)}`, {
+      headers: {
+        Authorization: token,
+      },
+    })
+    return response.components?.[0]
+  }
+  catch (error) {
+    handleAPIError('pull_components', error as Error)
+  }
+}
+
 export const fetchComponentGroups = async (space: string, token: string, region: RegionCode): Promise<SpaceComponentGroup[] | undefined> => {
   try {
     const url = getStoryblokUrl(region)

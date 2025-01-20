@@ -1,12 +1,13 @@
 import { session } from '../../session'
 import { CommandError, konsola } from '../../utils'
-import { fetchComponents, saveComponentsToFiles } from './actions'
+import { fetchComponent, fetchComponents, saveComponentsToFiles } from './actions'
 import { componentsCommand } from '.'
 import chalk from 'chalk'
 import { colorPalette } from '../../constants'
 
 vi.mock('./actions', () => ({
   fetchComponents: vi.fn(),
+  fetchComponent: vi.fn(),
   fetchComponentGroups: vi.fn(),
   fetchComponentPresets: vi.fn(),
   saveComponentsToFiles: vi.fn(),
@@ -108,8 +109,44 @@ describe('pull', () => {
         presets: [],
       }, {
         path: undefined,
+        separateFiles: false,
       })
       expect(konsola.ok).toHaveBeenCalledWith(`Components downloaded successfully in ${chalk.hex(colorPalette.PRIMARY)(`.storyblok/components/12345/components.json`)}`)
+    })
+
+    it('should fetch a component by name', async () => {
+      const mockResponse = {
+        name: 'component-name',
+        display_name: 'Component Name',
+        created_at: '2021-08-09T12:00:00Z',
+        updated_at: '2021-08-09T12:00:00Z',
+        id: 12345,
+        schema: { type: 'object' },
+        color: null,
+        internal_tags_list: ['tag'],
+        interntal_tags_ids: [1],
+      }
+
+      session().state = {
+        isLoggedIn: true,
+        password: 'valid-token',
+        region: 'eu',
+      }
+      vi.mocked(fetchComponent).mockResolvedValue(mockResponse)
+      await componentsCommand.parseAsync(['node', 'test', 'pull', 'component-name', '--space', '12345'])
+      expect(fetchComponent).toHaveBeenCalledWith('12345', 'component-name', 'valid-token', 'eu')
+      expect(saveComponentsToFiles).toHaveBeenCalledWith('12345', {
+        components: [mockResponse],
+        groups: [],
+        presets: [],
+      }, { separateFiles: true, path: undefined })
+    })
+
+    it('should throw an error if the component is not found', async () => {
+      const componentName = 'component-name'
+      vi.mocked(fetchComponent).mockResolvedValue(undefined)
+      await componentsCommand.parseAsync(['node', 'test', 'pull', 'component-name', '--space', '12345'])
+      expect(konsola.warn).toHaveBeenCalledWith(`No component found with name "${componentName}"`)
     })
 
     it('should throw an error if the user is not logged in', async () => {
@@ -163,7 +200,7 @@ describe('pull', () => {
         components: mockResponse,
         groups: [],
         presets: [],
-      }, { path: '/path/to/components' })
+      }, { path: '/path/to/components', separateFiles: false })
       expect(konsola.ok).toHaveBeenCalledWith(`Components downloaded successfully in ${chalk.hex(colorPalette.PRIMARY)(`/path/to/components/components.json`)}`)
     })
   })
@@ -196,7 +233,7 @@ describe('pull', () => {
         components: mockResponse,
         groups: [],
         presets: [],
-      }, { filename: 'custom' })
+      }, { filename: 'custom', separateFiles: false })
       expect(konsola.ok).toHaveBeenCalledWith(`Components downloaded successfully in ${chalk.hex(colorPalette.PRIMARY)(`.storyblok/components/12345/custom.json`)}`)
     })
   })
