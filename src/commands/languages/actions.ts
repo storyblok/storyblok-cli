@@ -1,7 +1,7 @@
 import { join } from 'node:path'
 import { handleAPIError, handleFileSystemError } from '../../utils'
 import type { FetchError } from '../../utils/fetch'
-import { customFetch, delay } from '../../utils/fetch'
+import { customFetch } from '../../utils/fetch'
 import { resolvePath, saveToFile } from '../../utils/filesystem'
 import type { PullLanguagesOptions } from './constants'
 import type { RegionCode } from '../../constants'
