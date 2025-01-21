@@ -19,8 +19,6 @@ export const fetchLanguages = async (space: string, token: string, region: Regio
       },
     })
 
-    await delay(500)
-
     return {
       default_lang_name: response.space.default_lang_name,
       languages: response.space.languages,
