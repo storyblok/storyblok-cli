@@ -30,13 +30,6 @@ export interface SpaceComponentGroup {
   parent_uuid: string
 }
 
-export interface ComponentsSaveOptions {
-  path?: string
-  filename?: string
-  separateFiles?: boolean
-  suffix?: string
-}
-
 export interface SpaceComponentPreset {
   id: number
   name: string
@@ -87,11 +80,6 @@ export interface SaveComponentsOptions extends PullComponentsOptions {
    * @default `.storyblok/components`
    */
   path?: string
-  /**
-   * The space ID.
-   * @required true
-   */
-  space: string
   /**
    * The regex filter to apply to the components before pushing.
    * @default `.*`
