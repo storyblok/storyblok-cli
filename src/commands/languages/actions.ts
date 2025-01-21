@@ -1,7 +1,7 @@
 import { join } from 'node:path'
 import { handleAPIError, handleFileSystemError } from '../../utils'
 import type { FetchError } from '../../utils/fetch'
-import { customFetch } from '../../utils/fetch'
+import { customFetch, delay } from '../../utils/fetch'
 import { resolvePath, saveToFile } from '../../utils/filesystem'
 import type { PullLanguagesOptions } from './constants'
 import type { RegionCode } from '../../constants'
@@ -18,6 +18,8 @@ export const fetchLanguages = async (space: string, token: string, region: Regio
         Authorization: token,
       },
     })
+
+    await delay(500)
 
     return {
       default_lang_name: response.space.default_lang_name,
