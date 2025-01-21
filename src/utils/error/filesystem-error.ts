@@ -12,7 +12,7 @@ const FS_ERRORS = {
 }
 
 const FS_ACTIONS = {
-  read: 'Failed to read/parse the .netrc file:',
+  read: 'Failed to read/parse file:',
   write: 'Writing file',
   delete: 'Deleting file',
   mkdir: 'Creating directory',

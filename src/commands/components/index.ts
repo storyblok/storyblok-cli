@@ -4,14 +4,14 @@ import { session } from '../../session'
 import { getProgram } from '../../program'
 import { CommandError, handleError, konsola } from '../../utils'
 import { fetchComponent, fetchComponentGroups, fetchComponentPresets, fetchComponents, readComponentsFiles, saveComponentsToFiles } from './actions'
-import type { PullComponentsOptions } from './constants'
+import type { PullComponentsOptions, PushComponentsOptions } from './constants'
 
 const program = getProgram() // Get the shared singleton instance
 
 export const componentsCommand = program
   .command('components')
   .description(`Manage your space's block schema`)
-  .option('-s, --space <space>', 'space ID')
+  .requiredOption('-s, --space <space>', 'space ID')
   .option('-p, --path <path>', 'path to save the file. Default is .storyblok/components')
 
 componentsCommand
@@ -94,12 +94,13 @@ componentsCommand
   })
 
 componentsCommand
-  .command('push')
+  .command('push [componentName]')
   .description(`Push your space's components schema as json`)
-  .option('--fi, --filter <filter>', 'Regex filter to apply to the components before pushing')
+  .option('-f, --from <from>', 'source space id')
+  .option('--fi, --filter <filter>', 'glob filter to apply to the components before pushing')
   .option('--sf, --separate-files', 'Read from separate files instead of consolidated files')
-  .action(async (options: PushComponentsOptions) => {
-    konsola.title(` ${commands.COMPONENTS} `, colorPalette.COMPONENTS, 'Pushing components...')
+  .action(async (componentName: string | undefined, options: PushComponentsOptions) => {
+    konsola.title(` ${commands.COMPONENTS} `, colorPalette.COMPONENTS, componentName ? `Pushing component ${componentName}...` : 'Pushing components...')
     // Global options
     const verbose = program.opts().verbose
     const { space, path } = componentsCommand.opts()
@@ -118,9 +119,9 @@ componentsCommand
     }
 
     try {
-      const spaceData = await readComponentsFiles(path, {
-        filter,
-        separateFiles: options.separateFiles,
+      const spaceData = await readComponentsFiles({
+        ...options,
+        path,
       })
 
       console.log('Components:', spaceData.components.length)
@@ -128,10 +129,14 @@ componentsCommand
       console.log('Presets:', spaceData.presets.length)
 
       console.log('Components:', spaceData.components.map(c => c.name))
+      console.log('Groups:', spaceData.groups.map(g => g.name))
+      console.log('Presets:', spaceData.presets.map(p => p.name))
 
       if (filter) {
         console.log('Applied filter:', filter)
         console.log('Filtered components:', spaceData.components.map(c => c.name))
+        console.log('Filtered groups:', spaceData.groups.map(g => g.name))
+        console.log('Filtered presets:', spaceData.presets.map(p => p.name))
       }
     }
     catch (error) {

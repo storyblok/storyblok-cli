@@ -11,7 +11,7 @@ const program = getProgram() // Get the shared singleton instance
 export const languagesCommand = program
   .command('languages')
   .description(`Manage your space's languages`)
-  .option('-s, --space <space>', 'space ID')
+  .requiredOption('-s, --space <space>', 'space ID')
   .option('-p, --path <path>', 'path to save the file. Default is .storyblok/languages')
 
 languagesCommand

@@ -96,6 +96,48 @@
       "env": {
         "STUB": "true"
       }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Pull components",
+      "program": "${workspaceFolder}/dist/index.mjs",
+      "args": ["components", "pull", "--space", "295018"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "sourceMaps": true,
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "env": {
+        "STUB": "true"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Push components",
+      "program": "${workspaceFolder}/dist/index.mjs",
+      "args": ["components", "push", "--space", "295018", "--from", "295017"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "sourceMaps": true,
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "env": {
+        "STUB": "true"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Push components --separate-files",
+      "program": "${workspaceFolder}/dist/index.mjs",
+      "args": ["components", "push", "--space", "295018", "--from", "295017", "--sf"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "sourceMaps": true,
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "env": {
+        "STUB": "true"
+      }
     }
   ]
 }
