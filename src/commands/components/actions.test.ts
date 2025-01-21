@@ -2,7 +2,7 @@ import { http, HttpResponse } from 'msw'
 import { setupServer } from 'msw/node'
 import { vol } from 'memfs'
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
-import { fetchComponents, saveComponentsToFiles } from './actions'
+import { fetchComponent, fetchComponents, saveComponentsToFiles } from './actions'
 
 const handlers = [
   http.get('https://api.storyblok.com/v1/spaces/12345/components', async ({ request }) => {
@@ -74,6 +74,24 @@ describe('pull components actions', () => {
     expect(result).toEqual(mockResponse)
   })
 
+  it('should fetch a component by name', async () => {
+    const mockResponse = {
+      components: [{
+        name: 'component-name',
+        display_name: 'Component Name',
+        created_at: '2021-08-09T12:00:00Z',
+        updated_at: '2021-08-09T12:00:00Z',
+        id: 12345,
+        schema: { type: 'object' },
+        color: null,
+        internal_tags_list: ['tag'],
+        interntal_tags_ids: [1],
+      }],
+    }
+    const result = await fetchComponent('12345', 'component-name', 'valid-token', 'eu')
+    expect(result).toEqual(mockResponse.components[0])
+  })
+
   it('should throw an masked error for invalid token', async () => {
     await expect(fetchComponents('12345', 'invalid-token', 'eu')).rejects.toThrow(
       new Error(`The user is not authorized to access the API`),
@@ -98,10 +116,13 @@ describe('pull components actions', () => {
         interntal_tags_ids: [1],
       }]
 
-      await saveComponentsToFiles('12345', components, { path: '/path/to/components' })
+      await saveComponentsToFiles('12345', { components, groups: [], presets: [] }, {
+        path: '/path/to/components',
+        verbose: false,
+      })
 
       const files = vol.readdirSync('/path/to/components')
-      expect(files).toEqual(['components.12345.json'])
+      expect(files).toEqual(['components.json'])
     })
 
     it('should save components to files with custom filename', async () => {
@@ -121,10 +142,14 @@ describe('pull components actions', () => {
         interntal_tags_ids: [1],
       }]
 
-      await saveComponentsToFiles('12345', components, { path: '/path/to/components2', filename: 'custom' })
+      await saveComponentsToFiles('12345', { components, groups: [], presets: [] }, {
+        path: '/path/to/components2',
+        filename: 'custom',
+        verbose: false,
+      })
 
       const files = vol.readdirSync('/path/to/components2')
-      expect(files).toEqual(['custom.12345.json'])
+      expect(files).toEqual(['custom.json'])
     })
 
     it('should save components to files with custom suffix', async () => {
@@ -144,7 +169,11 @@ describe('pull components actions', () => {
         interntal_tags_ids: [1],
       }]
 
-      await saveComponentsToFiles('12345', components, { path: '/path/to/components3', suffix: 'custom' })
+      await saveComponentsToFiles('12345', { components, groups: [], presets: [] }, {
+        path: '/path/to/components3',
+        suffix: 'custom',
+        verbose: false,
+      })
 
       const files = vol.readdirSync('/path/to/components3')
       expect(files).toEqual(['components.custom.json'])
@@ -177,10 +206,14 @@ describe('pull components actions', () => {
         interntal_tags_ids: [1],
       }]
 
-      await saveComponentsToFiles('12345', components, { path: '/path/to/components4', separateFiles: true })
+      await saveComponentsToFiles('12345', { components, groups: [], presets: [] }, {
+        path: '/path/to/components4',
+        separateFiles: true,
+        verbose: false,
+      })
 
       const files = vol.readdirSync('/path/to/components4')
-      expect(files).toEqual(['component-name-2.12345.json', 'component-name.12345.json'])
+      expect(files).toEqual(['component-name-2.json', 'component-name.json'])
     })
   })
 })

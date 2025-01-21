@@ -60,17 +60,7 @@ export interface SpaceData {
  * Interface representing the options for the `pull-components` command.
  */
 export interface PullComponentsOptions extends CommandOptions {
-  /**
-   * The path to save the components file to.
-   * Defaults to `.storyblok/components`.
-   * @default `.storyblok/components`
-   */
-  path?: string
-  /**
-   * The space ID.
-   * @required true
-   */
-  space: string
+
   /**
    * The filename to save the file as.
    * Defaults to `components`. The file will be saved as `<filename>.<space>.json`.
@@ -90,9 +80,9 @@ export interface PullComponentsOptions extends CommandOptions {
   separateFiles?: boolean
 }
 
-export interface PushComponentsOptions extends CommandOptions {
+export interface SaveComponentsOptions extends PullComponentsOptions {
   /**
-   * The path to read the components file to.
+   * The path to save the components file to.
    * Defaults to `.storyblok/components`.
    * @default `.storyblok/components`
    */

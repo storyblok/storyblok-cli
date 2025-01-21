@@ -30,6 +30,20 @@
     {
       "type": "node",
       "request": "launch",
+      "name": "Debug login by token",
+      "program": "${workspaceFolder}/dist/index.mjs",
+      "args": ["login", "--token", "1234567890"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "sourceMaps": true,
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "env": {
+        "STUB": "true"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
       "name": "Debug logout",
       "program": "${workspaceFolder}/dist/index.mjs",
       "args": ["logout"],
@@ -60,7 +74,7 @@
       "request": "launch",
       "name": "Debug Pull languages",
       "program": "${workspaceFolder}/dist/index.mjs",
-      "args": ["pull-languages", "--space", "295018", "--path", ".storyblok"],
+      "args": ["languages", "pull", "--space", "2950182323", "--path", ".storyblok"],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "sourceMaps": true,
@@ -72,9 +86,9 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug Pull Components",
+      "name": "Debug Test",
       "program": "${workspaceFolder}/dist/index.mjs",
-      "args": ["pull-components", "--space", "295018", "--path", ".storyblok"],
+      "args": ["test"],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "sourceMaps": true,
