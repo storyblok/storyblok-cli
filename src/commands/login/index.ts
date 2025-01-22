@@ -7,6 +7,7 @@ import { CommandError, handleError, isRegion, konsola } from '../../utils'
 import { loginWithEmailAndPassword, loginWithOtp, loginWithToken } from './actions'
 
 import { session } from '../../session'
+import ora from 'ora'
 
 const program = getProgram() // Get the shared singleton instance
 
@@ -61,10 +62,11 @@ export const loginCommand = program
 
     if (token) {
       try {
+        const spinner = ora(`Logging in with token`).start()
         const { user } = await loginWithToken(token, region)
         updateSession(user.email, token, region)
         await persistCredentials(region)
-
+        spinner.succeed()
         konsola.ok(`Successfully logged in with token`)
       }
       catch (error) {
@@ -81,9 +83,9 @@ export const loginCommand = program
               return value.length > 0
             },
           })
-
+          const spinner = ora(`Logging in with token`).start()
           const { user } = await loginWithToken(userToken, region)
-
+          spinner.succeed()
           updateSession(user.email, userToken, region)
           await persistCredentials(region)
 
@@ -110,7 +112,9 @@ export const loginCommand = program
             })),
             default: regions.EU,
           })
+          const spinner = ora(`Logging in with email`).start()
           const response = await loginWithEmailAndPassword(userEmail, userPassword, userRegion)
+          spinner.succeed()
 
           if (response?.otp_required) {
             const otp = await input({

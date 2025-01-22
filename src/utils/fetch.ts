@@ -74,3 +74,5 @@ export async function customFetch<T>(url: string, options: FetchOptions = {}): P
     })
   }
 }
+
+export const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
