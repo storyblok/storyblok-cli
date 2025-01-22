@@ -7,6 +7,7 @@ import { getProgram } from './program'
 import './commands/login'
 import './commands/logout'
 import './commands/user'
+import './commands/components'
 import './commands/languages'
 
 import { session } from './session'

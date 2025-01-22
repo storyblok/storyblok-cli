@@ -2,6 +2,7 @@ export const commands = {
   LOGIN: 'login',
   LOGOUT: 'logout',
   USER: 'user',
+  COMPONENTS: 'Components',
   LANGUAGES: 'languages',
 } as const
 
@@ -9,6 +10,7 @@ export const colorPalette = {
   PRIMARY: '#45bfb9',
   LOGIN: '#8556D3',
   USER: '#8BC34A',
+  COMPONENTS: '#a185ff',
   LANGUAGES: '#FFC107',
 } as const
 
