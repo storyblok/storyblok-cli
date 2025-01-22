@@ -86,7 +86,7 @@ componentsCommand
         const fileName = suffix ? `${filename}.${suffix}.json` : `${filename}.json`
         const filePath = path ? `${path}/${fileName}` : `.storyblok/components/${space}/${fileName}`
 
-        konsola.ok(`Components downloaded successfully in ${chalk.hex(colorPalette.PRIMARY)(filePath)}`)
+        konsola.ok(`Components downloaded successfully to ${chalk.hex(colorPalette.PRIMARY)(filePath)}`)
       }
     }
     catch (error) {
