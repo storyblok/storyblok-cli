@@ -6,10 +6,13 @@ import { CommandError, handleError, konsola } from '../../utils'
 import { fetchComponent, fetchComponentGroups, fetchComponentPresets, fetchComponents, pushComponent, readComponentsFiles, saveComponentsToFiles } from './actions'
 import type { PullComponentsOptions, PushComponentsOptions } from './constants'
 
+import ora from 'ora'
+
 const program = getProgram() // Get the shared singleton instance
 
 export const componentsCommand = program
   .command('components')
+  .alias('comp')
   .description(`Manage your space's block schema`)
   .requiredOption('-s, --space <space>', 'space ID')
   .option('-p, --path <path>', 'path to save the file. Default is .storyblok/components')
@@ -41,10 +44,18 @@ componentsCommand
     }
 
     try {
+      const spinner = ora(`Fetching ${chalk.hex(colorPalette.COMPONENTS)('components groups')}`).start()
+
       // Fetch all data first
       const groups = await fetchComponentGroups(space, state.password, state.region)
-      const presets = await fetchComponentPresets(space, state.password, state.region)
+      spinner.succeed()
+      const spinner2 = ora(`Fetching ${chalk.hex(colorPalette.COMPONENTS)('components presets')}`).start()
 
+      const presets = await fetchComponentPresets(space, state.password, state.region)
+      spinner2.succeed()
+
+      const spinner3 = ora(`Saving ${chalk.hex(colorPalette.COMPONENTS)('components')}`).start()
+      // Save everything using the new structure
       let components
       if (componentName) {
         const component = await fetchComponent(space, componentName, state.password, state.region)
@@ -61,8 +72,7 @@ componentsCommand
           return
         }
       }
-
-      // Save everything using the new structure
+      spinner3.succeed()
       await saveComponentsToFiles(
         space,
         { components, groups: groups || [], presets: presets || [] },
@@ -74,7 +84,7 @@ componentsCommand
           konsola.warn(`The --filename option is ignored when using --separate-files`)
         }
         const filePath = path ? `${path}/` : `.storyblok/components/${space}/`
-        konsola.ok(`Components downloaded successfully in ${chalk.hex(colorPalette.PRIMARY)(filePath)}`)
+        konsola.ok(`Components downloaded successfully to ${chalk.hex(colorPalette.PRIMARY)(filePath)}`)
       }
       else if (componentName) {
         const fileName = suffix ? `${filename}.${suffix}.json` : `${componentName}.json`
@@ -85,7 +95,7 @@ componentsCommand
         const fileName = suffix ? `${filename}.${suffix}.json` : `${filename}.json`
         const filePath = path ? `${path}/${fileName}` : `.storyblok/components/${space}/${fileName}`
 
-        konsola.ok(`Components downloaded successfully in ${chalk.hex(colorPalette.PRIMARY)(filePath)}`)
+        konsola.ok(`Components downloaded successfully to ${chalk.hex(colorPalette.PRIMARY)(filePath)}`)
       }
     }
     catch (error) {
