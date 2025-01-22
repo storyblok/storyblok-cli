@@ -75,7 +75,7 @@ componentsCommand
           konsola.warn(`The --filename option is ignored when using --separate-files`)
         }
         const filePath = path ? `${path}/` : `.storyblok/components/${space}/`
-        konsola.ok(`Components downloaded successfully in ${chalk.hex(colorPalette.PRIMARY)(filePath)}`)
+        konsola.ok(`Components downloaded successfully to ${chalk.hex(colorPalette.PRIMARY)(filePath)}`)
       }
       else if (componentName) {
         const fileName = suffix ? `${filename}.${suffix}.json` : `${componentName}.json`

@@ -111,7 +111,7 @@ describe('pull', () => {
         path: undefined,
         separateFiles: false,
       })
-      expect(konsola.ok).toHaveBeenCalledWith(`Components downloaded successfully in ${chalk.hex(colorPalette.PRIMARY)(`.storyblok/components/12345/components.json`)}`)
+      expect(konsola.ok).toHaveBeenCalledWith(`Components downloaded successfully to ${chalk.hex(colorPalette.PRIMARY)(`.storyblok/components/12345/components.json`)}`)
     })
 
     it('should fetch a component by name', async () => {
@@ -201,7 +201,7 @@ describe('pull', () => {
         groups: [],
         presets: [],
       }, { path: '/path/to/components', separateFiles: false })
-      expect(konsola.ok).toHaveBeenCalledWith(`Components downloaded successfully in ${chalk.hex(colorPalette.PRIMARY)(`/path/to/components/components.json`)}`)
+      expect(konsola.ok).toHaveBeenCalledWith(`Components downloaded successfully to ${chalk.hex(colorPalette.PRIMARY)(`/path/to/components/components.json`)}`)
     })
   })
 
@@ -234,7 +234,7 @@ describe('pull', () => {
         groups: [],
         presets: [],
       }, { filename: 'custom', separateFiles: false })
-      expect(konsola.ok).toHaveBeenCalledWith(`Components downloaded successfully in ${chalk.hex(colorPalette.PRIMARY)(`.storyblok/components/12345/custom.json`)}`)
+      expect(konsola.ok).toHaveBeenCalledWith(`Components downloaded successfully to ${chalk.hex(colorPalette.PRIMARY)(`.storyblok/components/12345/custom.json`)}`)
     })
   })
 
@@ -277,7 +277,7 @@ describe('pull', () => {
         groups: [],
         presets: [],
       }, { separateFiles: true, path: undefined })
-      expect(konsola.ok).toHaveBeenCalledWith(`Components downloaded successfully in ${chalk.hex(colorPalette.PRIMARY)(`.storyblok/components/12345/`)}`)
+      expect(konsola.ok).toHaveBeenCalledWith(`Components downloaded successfully to ${chalk.hex(colorPalette.PRIMARY)(`.storyblok/components/12345/`)}`)
     })
 
     it('should warn the user if the --filename is used along', async () => {
