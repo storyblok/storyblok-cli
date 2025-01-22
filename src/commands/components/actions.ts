@@ -75,6 +75,25 @@ export const fetchComponentPresets = async (space: string, token: string, region
   }
 }
 
+export const pushComponent = async (space: string, component: SpaceComponent, token: string, region: RegionCode): Promise<SpaceComponent | undefined> => {
+  try {
+    const url = getStoryblokUrl(region)
+    const response = await customFetch<{
+      component: SpaceComponent
+    }>(`${url}/spaces/${space}/components`, {
+      method: 'POST',
+      headers: {
+        Authorization: token,
+      },
+      body: JSON.stringify(component),
+    })
+    return response.component
+  }
+  catch (error) {
+    handleAPIError('push_component', error as Error)
+  }
+}
+
 export const saveComponentsToFiles = async (
   space: string,
   spaceData: SpaceData,
@@ -97,12 +116,9 @@ export const saveComponentsToFiles = async (
           const presetsFilePath = join(resolvedPath, suffix ? `${component.name}.preset.${suffix}.json` : `${component.name}.preset.json`)
           await saveToFile(presetsFilePath, JSON.stringify(componentPresets, null, 2))
         }
-        // Find and save associated groups
-        const componentGroups = groups.filter(group => group.uuid === component.component_group_uuid)
-        if (componentGroups.length > 0) {
-          const groupsFilePath = join(resolvedPath, suffix ? `${component.name}.group.${suffix}.json` : `${component.name}.group.json`)
-          await saveToFile(groupsFilePath, JSON.stringify(componentGroups, null, 2))
-        }
+        // Save groups
+        const groupsFilePath = join(resolvedPath, suffix ? `groups.${suffix}.json` : `groups.json`)
+        await saveToFile(groupsFilePath, JSON.stringify(groups, null, 2))
       }
       return
     }
@@ -137,16 +153,15 @@ export const readComponentsFiles = async (
     groups: [],
     presets: [],
   }
+  // Add regex patterns to match file structures
+  const componentsPattern = /^components(?:\..+)?\.json$/
+  const groupsPattern = /^groups(?:\..+)?\.json$/
+  const presetsPattern = /^presets(?:\..+)?\.json$/
 
   try {
     if (!separateFiles) {
       // Read from consolidated files
       const files = await readdir(resolvedPath, { recursive: !separateFiles })
-
-      // Add regex patterns to match file structures
-      const componentsPattern = /^components(?:\..+)?\.json$/
-      const groupsPattern = /^groups(?:\..+)?\.json$/
-      const presetsPattern = /^presets(?:\..+)?\.json$/
 
       for (const file of files) {
         if (!file.endsWith('.json') || !componentsPattern.test(file) && !groupsPattern.test(file) && !presetsPattern.test(file)) { continue }
@@ -187,12 +202,11 @@ export const readComponentsFiles = async (
       if (!file.endsWith('.json')) { continue }
 
       // Skip consolidated files in separate files mode
-      if (/^(?:components|groups|presets)\.json$/.test(file)) { continue }
+      if (/^(?:components|presets)\.json$/.test(file)) { continue }
 
       const { dir, name } = parse(file)
       const isPreset = /\.preset\.json$/.test(file)
-      const isGroup = /\.group\.json$/.test(file)
-      const baseName = name.replace(/\.preset$/, '').replace(/\.group$/, '').split('.')[0]
+      const baseName = name.replace(/\.preset$/, '').split('.')[0]
 
       // Skip if filter is set and doesn't match the base component name
       if (regex && !regex.test(baseName)) { continue }
@@ -203,8 +217,8 @@ export const readComponentsFiles = async (
       if (isPreset) {
         spaceData.presets.push(...data)
       }
-      else if (isGroup) {
-        spaceData.groups.push(...data)
+      else if (groupsPattern.test(file)) {
+        spaceData.groups = data
       }
       else {
         // Regular component file

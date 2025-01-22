@@ -3,7 +3,7 @@ import { colorPalette, commands } from '../../constants'
 import { session } from '../../session'
 import { getProgram } from '../../program'
 import { CommandError, handleError, konsola } from '../../utils'
-import { fetchComponent, fetchComponentGroups, fetchComponentPresets, fetchComponents, readComponentsFiles, saveComponentsToFiles } from './actions'
+import { fetchComponent, fetchComponentGroups, fetchComponentPresets, fetchComponents, pushComponent, readComponentsFiles, saveComponentsToFiles } from './actions'
 import type { PullComponentsOptions, PushComponentsOptions } from './constants'
 
 const program = getProgram() // Get the shared singleton instance
@@ -124,19 +124,55 @@ componentsCommand
         path,
       })
 
-      console.log('Components:', spaceData.components.length)
-      console.log('Groups:', spaceData.groups.length)
-      console.log('Presets:', spaceData.presets.length)
+      const results = {
+        successful: [] as string[],
+        failed: [] as Array<{ name: string, error: unknown }>,
+      }
 
-      console.log('Components:', spaceData.components.map(c => c.name))
-      console.log('Groups:', spaceData.groups.map(g => g.name))
-      console.log('Presets:', spaceData.presets.map(p => p.name))
+      try {
+        await pushComponent(space, spaceData.components[0], state.password, state.region)
+        results.successful.push(spaceData.components[0].name)
+      }
+      catch (error) {
+        results.failed.push({
+          name: spaceData.components[0].name,
+          error,
+        })
+      }
+      // Process all components sequentially
+      /* for (const component of spaceData.components) {
+        try {
+          await pushComponent(space, component, state.password, state.region)
+          results.successful.push(component.name)
+        }
+        catch (error) {
+          results.failed.push({
+            name: component.name,
+            error,
+          })
+        }
+      } */
+
+      console.log(results)
+
+      // Display summary
+      konsola.ok(`Successfully pushed ${results.successful.length} components:`)
+      if (results.successful.length > 0) {
+        results.successful.forEach(name => konsola.info(`✓ ${name}`))
+      }
+
+      if (results.failed.length > 0) {
+        konsola.error('', null, {
+          header: true,
+        })
+        konsola.error(`Failed to push ${results.failed.length} components:`)
+        results.failed.forEach(({ name, error }) => {
+          konsola.error(`✗ ${name}`, error)
+        })
+      }
 
       if (filter) {
-        console.log('Applied filter:', filter)
-        console.log('Filtered components:', spaceData.components.map(c => c.name))
-        console.log('Filtered groups:', spaceData.groups.map(g => g.name))
-        console.log('Filtered presets:', spaceData.presets.map(p => p.name))
+        konsola.info('Filter applied:', filter)
       }
     }
     catch (error) {

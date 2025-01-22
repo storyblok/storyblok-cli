@@ -10,6 +10,7 @@ export const API_ACTIONS = {
   pull_components: 'Failed to pull components',
   pull_component_groups: 'Failed to pull component groups',
   pull_component_presets: 'Failed to pull component presets',
+  push_component: 'Failed to push component',
 } as const
 
 export const API_ERRORS = {
@@ -19,6 +20,7 @@ export const API_ERRORS = {
   timeout: 'The API request timed out',
   generic: 'Error fetching data from the API',
   not_found: 'The requested resource was not found',
+  unprocessable_entity: 'The request was well-formed but was unable to be followed due to semantic errors',
 } as const
 
 export function handleAPIError(action: keyof typeof API_ACTIONS, error: unknown): void {
@@ -31,7 +33,7 @@ export function handleAPIError(action: keyof typeof API_ACTIONS, error: unknown)
       case 404:
         throw new APIError('not_found', action, error)
       case 422:
-        throw new APIError('invalid_credentials', action, error)
+        throw new APIError('unprocessable_entity', action, error)
       default:
         throw new APIError('network_error', action, error)
     }
@@ -64,6 +66,7 @@ export class APIError extends Error {
       cause: this.cause,
       errorId: this.errorId,
       stack: this.stack,
+      data: this.error?.response?.data,
     }
   }
 }
