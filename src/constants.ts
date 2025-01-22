@@ -10,7 +10,7 @@ export const colorPalette = {
   PRIMARY: '#45bfb9',
   LOGIN: '#8556D3',
   USER: '#8BC34A',
-  COMPONENTS: '#FF5722',
+  COMPONENTS: '#a185ff',
   LANGUAGES: '#FFC107',
 } as const
 

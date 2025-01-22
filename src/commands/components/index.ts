@@ -5,6 +5,7 @@ import { getProgram } from '../../program'
 import { CommandError, handleError, konsola } from '../../utils'
 import { fetchComponent, fetchComponentGroups, fetchComponentPresets, fetchComponents, saveComponentsToFiles } from './actions'
 import type { PullComponentsOptions } from './constants'
+import ora from 'ora'
 
 const program = getProgram() // Get the shared singleton instance
 
@@ -42,10 +43,18 @@ componentsCommand
     }
 
     try {
+      const spinner = ora(`Fetching ${chalk.hex(colorPalette.COMPONENTS)('components groups')}`).start()
+
       // Fetch all data first
       const groups = await fetchComponentGroups(space, state.password, state.region)
-      const presets = await fetchComponentPresets(space, state.password, state.region)
+      spinner.succeed()
+      const spinner2 = ora(`Fetching ${chalk.hex(colorPalette.COMPONENTS)('components presets')}`).start()
 
+      const presets = await fetchComponentPresets(space, state.password, state.region)
+      spinner2.succeed()
+
+      const spinner3 = ora(`Saving ${chalk.hex(colorPalette.COMPONENTS)('components')}`).start()
+      // Save everything using the new structure
       let components
       if (componentName) {
         const component = await fetchComponent(space, componentName, state.password, state.region)
@@ -62,8 +71,7 @@ componentsCommand
           return
         }
       }
-
-      // Save everything using the new structure
+      spinner3.succeed()
       await saveComponentsToFiles(
         space,
         { components, groups: groups || [], presets: presets || [] },
