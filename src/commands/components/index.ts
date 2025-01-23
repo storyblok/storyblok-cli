@@ -3,7 +3,7 @@ import { colorPalette, commands } from '../../constants'
 import { session } from '../../session'
 import { getProgram } from '../../program'
 import { CommandError, handleError, konsola } from '../../utils'
-import { fetchComponent, fetchComponentGroups, fetchComponentPresets, fetchComponents, pushComponent, readComponentsFiles, saveComponentsToFiles } from './actions'
+import { fakePushComponent, fetchComponent, fetchComponentGroups, fetchComponentPresets, fetchComponents, pushComponent, readComponentsFiles, saveComponentsToFiles } from './actions'
 import type { PullComponentsOptions, PushComponentsOptions } from './constants'
 
 import ora from 'ora'
@@ -54,7 +54,7 @@ componentsCommand
       const presets = await fetchComponentPresets(space, state.password, state.region)
       spinner2.succeed()
 
-      const spinner3 = ora(`Saving ${chalk.hex(colorPalette.COMPONENTS)('components')}`).start()
+      const spinner3 = ora(`Fetching ${chalk.hex(colorPalette.COMPONENTS)('components')}`).start()
       // Save everything using the new structure
       let components
       if (componentName) {
@@ -139,46 +139,32 @@ componentsCommand
         failed: [] as Array<{ name: string, error: unknown }>,
       }
 
-      try {
-        await pushComponent(space, spaceData.components[0], state.password, state.region)
-        results.successful.push(spaceData.components[0].name)
-      }
-      catch (error) {
-        results.failed.push({
-          name: spaceData.components[0].name,
-          error,
-        })
-      }
-      // Process all components sequentially
-      /* for (const component of spaceData.components) {
+      // Process components sequentially to maintain clear output
+      for (const component of spaceData.components) {
+        const spinner = ora({
+          text: `Pushing component: ${chalk.hex(colorPalette.COMPONENTS)(component.name)}`,
+          stream: process.stdout,
+        }).start()
+
         try {
-          await pushComponent(space, component, state.password, state.region)
+          await fakePushComponent(component)
+          spinner.succeed(`Pushed component: ${chalk.hex(colorPalette.COMPONENTS)(component.name)}`)
           results.successful.push(component.name)
         }
         catch (error) {
-          results.failed.push({
-            name: component.name,
-            error,
-          })
+          spinner.fail(`Failed to push component: ${chalk.hex(colorPalette.COMPONENTS)(component.name)}`)
+          results.failed.push({ name: component.name, error })
         }
-      } */
-
-      console.log(results)
-
-      // Display summary
-      konsola.ok(`Successfully pushed ${results.successful.length} components:`)
-      if (results.successful.length > 0) {
-        results.successful.forEach(name => konsola.info(`✓ ${name}`))
       }
 
       if (results.failed.length > 0) {
-        konsola.error('', null, {
-          header: true,
-        })
-        konsola.error(`Failed to push ${results.failed.length} components:`)
-        results.failed.forEach(({ name, error }) => {
-          konsola.error(`✗ ${name}`, error)
-        })
+        if (!verbose) {
+          konsola.br()
+          konsola.info('For more information about the error, run the command with the `--verbose` flag')
+        }
+        else {
+          konsola.error('Failed to push components:', results.failed)
+        }
       }
 
       if (filter) {

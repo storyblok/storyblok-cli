@@ -47,7 +47,7 @@ export class APIError extends Error {
   code: number
   messageStack: string[]
   error: FetchError | undefined
-
+  response: FetchError['response'] | undefined
   constructor(errorId: keyof typeof API_ERRORS, action: keyof typeof API_ACTIONS, error?: FetchError, customMessage?: string) {
     super(customMessage || API_ERRORS[errorId])
     this.name = 'API Error'
@@ -56,6 +56,7 @@ export class APIError extends Error {
     this.code = error?.response?.status || 0
     this.messageStack = [API_ACTIONS[action], customMessage || API_ERRORS[errorId]]
     this.error = error
+    this.response = error?.response
   }
 
   getInfo() {
@@ -66,7 +67,7 @@ export class APIError extends Error {
       cause: this.cause,
       errorId: this.errorId,
       stack: this.stack,
-      data: this.error?.response?.data,
+      data: this.response?.data,
     }
   }
 }

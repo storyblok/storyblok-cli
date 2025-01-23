@@ -4,7 +4,7 @@ import { join, parse } from 'node:path'
 import { resolvePath, saveToFile } from '../../utils/filesystem'
 import type { ReadComponentsOptions, SaveComponentsOptions, SpaceComponent, SpaceComponentGroup, SpaceComponentPreset, SpaceData } from './constants'
 import { getStoryblokUrl } from '../../utils/api-routes'
-import { customFetch } from '../../utils/fetch'
+import { customFetch, delay } from '../../utils/fetch'
 import { readdir, readFile } from 'node:fs/promises'
 
 export const fetchComponents = async (space: string, token: string, region: RegionCode): Promise<SpaceComponent[] | undefined> => {
@@ -78,6 +78,7 @@ export const fetchComponentPresets = async (space: string, token: string, region
 export const pushComponent = async (space: string, component: SpaceComponent, token: string, region: RegionCode): Promise<SpaceComponent | undefined> => {
   try {
     const url = getStoryblokUrl(region)
+
     const response = await customFetch<{
       component: SpaceComponent
     }>(`${url}/spaces/${space}/components`, {
@@ -87,11 +88,18 @@ export const pushComponent = async (space: string, component: SpaceComponent, to
       },
       body: JSON.stringify(component),
     })
+    await delay(2000)
     return response.component
   }
   catch (error) {
+    await delay(2000)
     handleAPIError('push_component', error as Error)
   }
+}
+
+export const fakePushComponent = async (component: SpaceComponent): Promise<SpaceComponent | undefined> => {
+  await delay(2000)
+  return component
 }
 
 export const saveComponentsToFiles = async (
@@ -194,8 +202,6 @@ export const readComponentsFiles = async (
 
     // Read from separate files
     const files = await readdir(resolvedPath, { recursive: true })
-
-    console.log('Files:', files)
 
     // Then process files
     for (const file of files) {
