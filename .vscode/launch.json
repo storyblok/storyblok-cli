@@ -102,7 +102,7 @@
       "request": "launch",
       "name": "Debug Pull components",
       "program": "${workspaceFolder}/dist/index.mjs",
-      "args": ["components", "pull", "--space", "295018"],
+      "args": ["components", "pull", "--space", "295018", "--verbose"],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "sourceMaps": true,

@@ -2,11 +2,11 @@ import chalk from 'chalk'
 import { colorPalette, commands } from '../../constants'
 import { session } from '../../session'
 import { getProgram } from '../../program'
-import { CommandError, handleError, konsola } from '../../utils'
-import { fakePushComponent, fetchComponent, fetchComponentGroups, fetchComponentPresets, fetchComponents, pushComponent, readComponentsFiles, saveComponentsToFiles } from './actions'
+import { APIError, CommandError, handleError, konsola } from '../../utils'
+import { fetchComponent, fetchComponentGroups, fetchComponentPresets, fetchComponents, pushComponent, readComponentsFiles, saveComponentsToFiles } from './actions'
 import type { PullComponentsOptions, PushComponentsOptions } from './constants'
 
-import ora from 'ora'
+import { Spinner } from '@topcli/spinner'
 
 const program = getProgram() // Get the shared singleton instance
 
@@ -44,17 +44,21 @@ componentsCommand
     }
 
     try {
-      const spinner = ora(`Fetching ${chalk.hex(colorPalette.COMPONENTS)('components groups')}`).start()
+      const spinner = new Spinner()
+        .start(`Fetching ${chalk.hex(colorPalette.COMPONENTS)('components groups')}`)
 
       // Fetch all data first
       const groups = await fetchComponentGroups(space, state.password, state.region)
       spinner.succeed()
-      const spinner2 = ora(`Fetching ${chalk.hex(colorPalette.COMPONENTS)('components presets')}`).start()
+      const spinner2 = new Spinner()
+        .start(`Fetching ${chalk.hex(colorPalette.COMPONENTS)('components presets')}`)
 
       const presets = await fetchComponentPresets(space, state.password, state.region)
       spinner2.succeed()
 
-      const spinner3 = ora(`Fetching ${chalk.hex(colorPalette.COMPONENTS)('components')}`).start()
+      const spinner3 = new Spinner()
+        .start(`Fetching ${chalk.hex(colorPalette.COMPONENTS)('components')}`)
+
       // Save everything using the new structure
       let components
       if (componentName) {
@@ -139,23 +143,24 @@ componentsCommand
         failed: [] as Array<{ name: string, error: unknown }>,
       }
 
-      // Process components sequentially to maintain clear output
-      for (const component of spaceData.components) {
-        const spinner = ora({
-          text: `Pushing component: ${chalk.hex(colorPalette.COMPONENTS)(component.name)}`,
-          stream: process.stdout,
-        }).start()
-
+      await Promise.all(spaceData.components.map(async (component) => {
+        const spinner = new Spinner()
+          .start(`${chalk.hex(colorPalette.COMPONENTS)(component.name)} - Pushing...`)
         try {
-          await fakePushComponent(component)
-          spinner.succeed(`Pushed component: ${chalk.hex(colorPalette.COMPONENTS)(component.name)}`)
-          results.successful.push(component.name)
+          await pushComponent(space, component, state.password, state.region)
+          spinner.succeed(`${chalk.hex(colorPalette.COMPONENTS)(component.name)} - Completed in ${spinner.elapsedTime.toFixed(2)}ms`)
         }
         catch (error) {
-          spinner.fail(`Failed to push component: ${chalk.hex(colorPalette.COMPONENTS)(component.name)}`)
+          let spinnerFailedMessage = `${chalk.hex(colorPalette.COMPONENTS)(component.name)} - Failed`
+          if (error instanceof APIError && error.code === 422) {
+            if (error.response?.data?.name && error.response?.data?.name[0] === 'has already been taken') {
+              spinnerFailedMessage = `${chalk.hex(colorPalette.COMPONENTS)(component.name)} - Failed: a component with this name already exists.`
+            }
+          }
+          spinner.failed(spinnerFailedMessage)
           results.failed.push({ name: component.name, error })
         }
-      }
+      }))
 
       if (results.failed.length > 0) {
         if (!verbose) {
@@ -163,7 +168,9 @@ componentsCommand
           konsola.info('For more information about the error, run the command with the `--verbose` flag')
         }
         else {
-          konsola.error('Failed to push components:', results.failed)
+          results.failed.forEach((failed) => {
+            handleError(failed.error as Error, verbose)
+          })
         }
       }
 

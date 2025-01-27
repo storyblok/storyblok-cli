@@ -23,22 +23,22 @@ export const API_ERRORS = {
   unprocessable_entity: 'The request was well-formed but was unable to be followed due to semantic errors',
 } as const
 
-export function handleAPIError(action: keyof typeof API_ACTIONS, error: unknown): void {
+export function handleAPIError(action: keyof typeof API_ACTIONS, error: unknown, customMessage?: string): void {
   if (error instanceof FetchError) {
     const status = error.response.status
 
     switch (status) {
       case 401:
-        throw new APIError('unauthorized', action, error)
+        throw new APIError('unauthorized', action, error, customMessage)
       case 404:
-        throw new APIError('not_found', action, error)
+        throw new APIError('not_found', action, error, customMessage)
       case 422:
-        throw new APIError('unprocessable_entity', action, error)
+        throw new APIError('unprocessable_entity', action, error, customMessage)
       default:
-        throw new APIError('network_error', action, error)
+        throw new APIError('network_error', action, error, customMessage)
     }
   }
-  throw new APIError('generic', action, error as FetchError)
+  throw new APIError('generic', action, error as FetchError, customMessage)
 }
 
 export class APIError extends Error {
@@ -54,9 +54,27 @@ export class APIError extends Error {
     this.errorId = errorId
     this.cause = API_ERRORS[errorId]
     this.code = error?.response?.status || 0
-    this.messageStack = [API_ACTIONS[action], customMessage || API_ERRORS[errorId]]
+    this.messageStack = []
     this.error = error
     this.response = error?.response
+
+    if (!customMessage) {
+      this.messageStack.push(API_ACTIONS[action])
+    }
+    this.messageStack.push(customMessage || API_ERRORS[errorId])
+
+    if (this.code === 422) {
+      Object.entries(this.response?.data || {}).forEach(([key, error]: [string, string[]]) => {
+        if (key === 'name' && error[0] === 'has already been taken') {
+          this.message = 'A component with this name already exists'
+        }
+        if (Array.isArray(error)) {
+          error.forEach((e: string) => {
+            this.messageStack.push(`${key}: ${e}`)
+          })
+        }
+      })
+    }
   }
 
   getInfo() {
@@ -67,7 +85,7 @@ export class APIError extends Error {
       cause: this.cause,
       errorId: this.errorId,
       stack: this.stack,
-      data: this.response?.data,
+      responseData: this.response?.data,
     }
   }
 }

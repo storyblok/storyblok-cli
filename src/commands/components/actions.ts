@@ -6,6 +6,7 @@ import type { ReadComponentsOptions, SaveComponentsOptions, SpaceComponent, Spac
 import { getStoryblokUrl } from '../../utils/api-routes'
 import { customFetch, delay } from '../../utils/fetch'
 import { readdir, readFile } from 'node:fs/promises'
+import * as timers from 'node:timers/promises'
 
 export const fetchComponents = async (space: string, token: string, region: RegionCode): Promise<SpaceComponent[] | undefined> => {
   try {
@@ -37,7 +38,7 @@ export const fetchComponent = async (space: string, componentName: string, token
     return response.components?.[0]
   }
   catch (error) {
-    handleAPIError('pull_components', error as Error)
+    handleAPIError('pull_components', error as Error, `Failed to fetch component ${componentName}`)
   }
 }
 
@@ -88,17 +89,20 @@ export const pushComponent = async (space: string, component: SpaceComponent, to
       },
       body: JSON.stringify(component),
     })
-    await delay(2000)
+
     return response.component
   }
   catch (error) {
     await delay(2000)
-    handleAPIError('push_component', error as Error)
+    handleAPIError('push_component', error as Error, `Failed to push component ${component.name}`)
   }
 }
 
 export const fakePushComponent = async (component: SpaceComponent): Promise<SpaceComponent | undefined> => {
-  await delay(2000)
+  await timers.setTimeout(Math.random() * 1000 + 1000)
+  if (Math.random() < 0.5) {
+    throw new Error('Random failure')
+  }
   return component
 }
 
