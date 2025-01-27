@@ -3,7 +3,7 @@ import { colorPalette, commands } from '../../constants'
 import { session } from '../../session'
 import { getProgram } from '../../program'
 import { APIError, CommandError, handleError, konsola } from '../../utils'
-import { fakePushComponent, fetchComponent, fetchComponentGroups, fetchComponentPresets, fetchComponents, pushComponent, readComponentsFiles, saveComponentsToFiles } from './actions'
+import { fakePushComponent, fakePushComponentInternalTag, fetchComponent, fetchComponentGroups, fetchComponentInternalTags, fetchComponentPresets, fetchComponents, pushComponent, pushComponentInternalTag, readComponentsFiles, saveComponentsToFiles } from './actions'
 import type { PullComponentsOptions, PushComponentsOptions } from './constants'
 
 import { Spinner } from '@topcli/spinner'
@@ -44,23 +44,32 @@ componentsCommand
     }
 
     try {
-      const spinner = new Spinner()
+      // Fetch components groups
+      const spinnerGroups = new Spinner()
         .start(`Fetching ${chalk.hex(colorPalette.COMPONENTS)('components groups')}`)
 
-      // Fetch all data first
       const groups = await fetchComponentGroups(space, state.password, state.region)
-      spinner.succeed()
-      const spinner2 = new Spinner()
+      spinnerGroups.succeed(`${chalk.hex(colorPalette.COMPONENTS)('Groups')} - Completed in ${spinnerGroups.elapsedTime.toFixed(2)}ms`)
+
+      // Fetch components presets
+      const spinnerPresets = new Spinner()
         .start(`Fetching ${chalk.hex(colorPalette.COMPONENTS)('components presets')}`)
 
       const presets = await fetchComponentPresets(space, state.password, state.region)
-      spinner2.succeed()
+      spinnerPresets.succeed(`${chalk.hex(colorPalette.COMPONENTS)('Presets')} - Completed in ${spinnerPresets.elapsedTime.toFixed(2)}ms`)
 
-      const spinner3 = new Spinner()
-        .start(`Fetching ${chalk.hex(colorPalette.COMPONENTS)('components')}`)
+      // Fetch components internal tags
+      const spinnerInternalTags = new Spinner()
+        .start(`Fetching ${chalk.hex(colorPalette.COMPONENTS)('components internal tags')}`)
+
+      const internalTags = await fetchComponentInternalTags(space, state.password, state.region)
+      spinnerInternalTags.succeed(`${chalk.hex(colorPalette.COMPONENTS)('Tags')} - Completed in ${spinnerInternalTags.elapsedTime.toFixed(2)}ms`)
 
       // Save everything using the new structure
       let components
+      const spinnerComponents = new Spinner()
+        .start(`Fetching ${chalk.hex(colorPalette.COMPONENTS)('components')}`)
+
       if (componentName) {
         const component = await fetchComponent(space, componentName, state.password, state.region)
         if (!component) {
@@ -76,18 +85,19 @@ componentsCommand
           return
         }
       }
-      spinner3.succeed()
+      spinnerComponents.succeed(`${chalk.hex(colorPalette.COMPONENTS)('Components')} - Completed in ${spinnerComponents.elapsedTime.toFixed(2)}ms`)
       await saveComponentsToFiles(
         space,
-        { components, groups: groups || [], presets: presets || [] },
+        { components, groups: groups || [], presets: presets || [], internalTags: internalTags || [] },
         { ...options, path, separateFiles: separateFiles || !!componentName },
       )
-
+      konsola.br()
       if (separateFiles) {
         if (filename !== 'components') {
           konsola.warn(`The --filename option is ignored when using --separate-files`)
         }
         const filePath = path ? `${path}/` : `.storyblok/components/${space}/`
+
         konsola.ok(`Components downloaded successfully to ${chalk.hex(colorPalette.PRIMARY)(filePath)}`)
       }
       else if (componentName) {
@@ -156,7 +166,21 @@ componentsCommand
         const spinner = new Spinner()
           .start(`${chalk.hex(colorPalette.COMPONENTS)(component.name)} - Pushing...`)
         try {
-          await fakePushComponent(component)
+          if (component.internal_tag_ids.length > 0) {
+            spinner.text = `Pushing ${chalk.hex(colorPalette.COMPONENTS)(component.name)} internal tags...`
+            await Promise.all(component.internal_tag_ids.map(async (tagId) => {
+              const tag = spaceData.internalTags.find(tag => tag.id === Number(tagId))
+              if (tag) {
+                try {
+                  await pushComponentInternalTag(space, tag, state.password, state.region)
+                }
+                catch (error) {
+                  konsola.warn(`Failed to push internal tag ${tag.name}`)
+                }
+              }
+            }))
+          }
+          await pushComponent(space, component, state.password, state.region)
           // await pushComponent(space, component, state.password, state.region)
           spinner.succeed(`${chalk.hex(colorPalette.COMPONENTS)(component.name)} - Completed in ${spinner.elapsedTime.toFixed(2)}ms`)
         }

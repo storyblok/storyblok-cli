@@ -10,7 +10,11 @@ export const API_ACTIONS = {
   pull_components: 'Failed to pull components',
   pull_component_groups: 'Failed to pull component groups',
   pull_component_presets: 'Failed to pull component presets',
+  pull_component_internal_tags: 'Failed to pull component internal tags',
   push_component: 'Failed to push component',
+  push_component_group: 'Failed to push component group',
+  push_component_preset: 'Failed to push component preset',
+  push_component_internal_tag: 'Failed to push component internal tag',
 } as const
 
 export const API_ERRORS = {

@@ -17,8 +17,8 @@ export interface SpaceComponent {
   real_name?: string
   component_group_uuid?: string
   color: null
-  internal_tags_list: string[]
-  interntal_tags_ids: number[]
+  internal_tags_list: SpaceComponentInternalTag[]
+  internal_tag_ids: string[]
   content_type_asset_preview?: string
 }
 
@@ -44,10 +44,17 @@ export interface SpaceComponentPreset {
   description: string
 }
 
+export interface SpaceComponentInternalTag {
+  id: number
+  name: string
+  object_type?: 'asset' | 'component'
+}
+
 export interface SpaceData {
   components: SpaceComponent[]
   groups: SpaceComponentGroup[]
   presets: SpaceComponentPreset[]
+  internalTags: SpaceComponentInternalTag[]
 }
 /**
  * Interface representing the options for the `pull-components` command.
