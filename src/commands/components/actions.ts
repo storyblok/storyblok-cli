@@ -7,6 +7,7 @@ import { getStoryblokUrl } from '../../utils/api-routes'
 import { customFetch } from '../../utils/fetch'
 import { readdir, readFile } from 'node:fs/promises'
 import * as timers from 'node:timers/promises'
+import { APIError } from '../../utils/error/api-error'
 
 // Component actions
 export const fetchComponents = async (space: string, token: string, region: RegionCode): Promise<SpaceComponent[] | undefined> => {
@@ -367,5 +368,82 @@ export const readComponentsFiles = async (
   catch (error) {
     handleFileSystemError('read', error as Error)
     return spaceData
+  }
+}
+
+export const updateComponent = async (space: string, componentId: number, component: SpaceComponent, token: string, region: RegionCode): Promise<SpaceComponent | undefined> => {
+  try {
+    const url = getStoryblokUrl(region)
+    const response = await customFetch<{
+      component: SpaceComponent
+    }>(`${url}/spaces/${space}/components/${componentId}`, {
+      method: 'PUT',
+      headers: {
+        Authorization: token,
+      },
+      body: JSON.stringify(component),
+    })
+    return response.component
+  }
+  catch (error) {
+    handleAPIError('update_component', error as Error, `Failed to update component ${component.name}`)
+  }
+}
+
+export const updateComponentInternalTag = async (space: string, tagId: number, componentInternalTag: SpaceComponentInternalTag, token: string, region: RegionCode): Promise<SpaceComponentInternalTag | undefined> => {
+  try {
+    const url = getStoryblokUrl(region)
+    const response = await customFetch<{
+      internal_tag: SpaceComponentInternalTag
+    }>(`${url}/spaces/${space}/internal_tags/${tagId}`, {
+      method: 'PUT',
+      headers: {
+        Authorization: token,
+      },
+      body: JSON.stringify(componentInternalTag),
+    })
+    return response.internal_tag
+  }
+  catch (error) {
+    handleAPIError('update_component_internal_tag', error as Error, `Failed to update component internal tag ${componentInternalTag.name}`)
+  }
+}
+
+export const upsertComponent = async (space: string, component: SpaceComponent, token: string, region: RegionCode): Promise<SpaceComponent | undefined> => {
+  try {
+    return await pushComponent(space, component, token, region)
+  }
+  catch (error) {
+    if (error instanceof APIError && error.code === 422) {
+      if (error.response?.data?.name && error.response?.data?.name[0] === 'has already been taken') {
+        // Find existing component by name
+        const existingComponent = await fetchComponent(space, component.name, token, region)
+        if (existingComponent) {
+          // Update existing component
+          return await updateComponent(space, existingComponent.id, component, token, region)
+        }
+      }
+    }
+    throw error
+  }
+}
+
+export const upsertComponentInternalTag = async (space: string, tag: SpaceComponentInternalTag, token: string, region: RegionCode): Promise<SpaceComponentInternalTag | undefined> => {
+  try {
+    return await pushComponentInternalTag(space, tag, token, region)
+  }
+  catch (error) {
+    if (error instanceof APIError && error.code === 422) {
+      if (error.response?.data?.name && error.response?.data?.name[0] === 'has already been taken') {
+        // Find existing tag by name
+        const existingTags = await fetchComponentInternalTags(space, token, region)
+        const existingTag = existingTags?.find(t => t.name === tag.name)
+        if (existingTag) {
+          // Update existing tag
+          return await updateComponentInternalTag(space, existingTag.id, tag, token, region)
+        }
+      }
+    }
+    throw error
   }
 }

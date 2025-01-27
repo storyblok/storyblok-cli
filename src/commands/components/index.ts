@@ -3,8 +3,8 @@ import { colorPalette, commands } from '../../constants'
 import { session } from '../../session'
 import { getProgram } from '../../program'
 import { APIError, CommandError, handleError, konsola } from '../../utils'
-import { fakePushComponent, fakePushComponentInternalTag, fetchComponent, fetchComponentGroups, fetchComponentInternalTags, fetchComponentPresets, fetchComponents, pushComponent, pushComponentInternalTag, readComponentsFiles, saveComponentsToFiles } from './actions'
-import type { PullComponentsOptions, PushComponentsOptions } from './constants'
+import { fakePushComponent, fakePushComponentInternalTag, fetchComponent, fetchComponentGroups, fetchComponentInternalTags, fetchComponentPresets, fetchComponents, pushComponent, pushComponentInternalTag, readComponentsFiles, saveComponentsToFiles, upsertComponent, upsertComponentInternalTag } from './actions'
+import type { PullComponentsOptions, PushComponentsOptions, SpaceComponentInternalTag } from './constants'
 
 import { Spinner } from '@topcli/spinner'
 
@@ -120,7 +120,7 @@ componentsCommand
 componentsCommand
   .command('push [componentName]')
   .description(`Push your space's components schema as json`)
-  .option('-f, --from <from>', 'source space id')
+  .requiredOption('-f, --from <from>', 'source space id')
   .option('--fi, --filter <filter>', 'glob filter to apply to the components before pushing')
   .option('--sf, --separate-files', 'Read from separate files instead of consolidated files')
   .action(async (componentName: string | undefined, options: PushComponentsOptions) => {
@@ -166,31 +166,44 @@ componentsCommand
         const spinner = new Spinner()
           .start(`${chalk.hex(colorPalette.COMPONENTS)(component.name)} - Pushing...`)
         try {
-          if (component.internal_tag_ids.length > 0) {
+          const processedTags: { ids: string[], tags: SpaceComponentInternalTag[] } = { ids: [], tags: [] }
+
+          if (component.internal_tag_ids?.length > 0) {
             spinner.text = `Pushing ${chalk.hex(colorPalette.COMPONENTS)(component.name)} internal tags...`
-            await Promise.all(component.internal_tag_ids.map(async (tagId) => {
+            // Process tags sequentially to ensure order
+            for (const tagId of component.internal_tag_ids) {
               const tag = spaceData.internalTags.find(tag => tag.id === Number(tagId))
-              if (tag) {
+              if (tag && state.password && state.region) {
                 try {
-                  await pushComponentInternalTag(space, tag, state.password, state.region)
+                  const updatedTag = await upsertComponentInternalTag(space, tag, state.password, state.region)
+                  if (updatedTag) {
+                    processedTags.tags.push(updatedTag)
+                    processedTags.ids.push(updatedTag.id.toString())
+                  }
                 }
                 catch (error) {
-                  konsola.warn(`Failed to push internal tag ${tag.name}`)
+                  const spinnerFailedMessage = `${chalk.hex(colorPalette.COMPONENTS)(component.name)} - Failed`
+                  spinner.failed(spinnerFailedMessage)
+                  results.failed.push({ name: tag.name, error })
                 }
               }
-            }))
-          }
-          await pushComponent(space, component, state.password, state.region)
-          // await pushComponent(space, component, state.password, state.region)
-          spinner.succeed(`${chalk.hex(colorPalette.COMPONENTS)(component.name)} - Completed in ${spinner.elapsedTime.toFixed(2)}ms`)
-        }
-        catch (error) {
-          let spinnerFailedMessage = `${chalk.hex(colorPalette.COMPONENTS)(component.name)} - Failed`
-          if (error instanceof APIError && error.code === 422) {
-            if (error.response?.data?.name && error.response?.data?.name[0] === 'has already been taken') {
-              spinnerFailedMessage = `${chalk.hex(colorPalette.COMPONENTS)(component.name)} - Failed: a component with this name already exists.`
             }
           }
+
+          if (state.password && state.region) {
+            // Create a new component object with the processed tags
+            const componentToUpdate = {
+              ...component,
+              internal_tag_ids: processedTags.ids,
+              internal_tags_list: processedTags.tags,
+            }
+            await upsertComponent(space, componentToUpdate, state.password, state.region)
+            spinner.succeed(`${chalk.hex(colorPalette.COMPONENTS)(component.name)} - Completed in ${spinner.elapsedTime.toFixed(2)}ms`)
+            results.successful.push(component.name)
+          }
+        }
+        catch (error) {
+          const spinnerFailedMessage = `${chalk.hex(colorPalette.COMPONENTS)(component.name)} - Failed`
           spinner.failed(spinnerFailedMessage)
           results.failed.push({ name: component.name, error })
         }
@@ -209,7 +222,7 @@ componentsCommand
       }
 
       if (filter) {
-        konsola.info('Filter applied:', filter)
+        konsola.info(`Filter applied: ${filter}`)
       }
     }
     catch (error) {

@@ -15,6 +15,10 @@ export const API_ACTIONS = {
   push_component_group: 'Failed to push component group',
   push_component_preset: 'Failed to push component preset',
   push_component_internal_tag: 'Failed to push component internal tag',
+  update_component: 'Failed to update component',
+  update_component_internal_tag: 'Failed to update component internal tag',
+  update_component_group: 'Failed to update component group',
+  update_component_preset: 'Failed to update component preset',
 } as const
 
 export const API_ERRORS = {
