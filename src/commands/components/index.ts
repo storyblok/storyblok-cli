@@ -43,26 +43,28 @@ componentsCommand
       return
     }
 
+    const { password, region } = state
+
     try {
       // Fetch components groups
       const spinnerGroups = new Spinner()
         .start(`Fetching ${chalk.hex(colorPalette.COMPONENTS)('components groups')}`)
 
-      const groups = await fetchComponentGroups(space, state.password, state.region)
+      const groups = await fetchComponentGroups(space, password, region)
       spinnerGroups.succeed(`${chalk.hex(colorPalette.COMPONENTS)('Groups')} - Completed in ${spinnerGroups.elapsedTime.toFixed(2)}ms`)
 
       // Fetch components presets
       const spinnerPresets = new Spinner()
         .start(`Fetching ${chalk.hex(colorPalette.COMPONENTS)('components presets')}`)
 
-      const presets = await fetchComponentPresets(space, state.password, state.region)
+      const presets = await fetchComponentPresets(space, password, region)
       spinnerPresets.succeed(`${chalk.hex(colorPalette.COMPONENTS)('Presets')} - Completed in ${spinnerPresets.elapsedTime.toFixed(2)}ms`)
 
       // Fetch components internal tags
       const spinnerInternalTags = new Spinner()
         .start(`Fetching ${chalk.hex(colorPalette.COMPONENTS)('components internal tags')}`)
 
-      const internalTags = await fetchComponentInternalTags(space, state.password, state.region)
+      const internalTags = await fetchComponentInternalTags(space, password, region)
       spinnerInternalTags.succeed(`${chalk.hex(colorPalette.COMPONENTS)('Tags')} - Completed in ${spinnerInternalTags.elapsedTime.toFixed(2)}ms`)
 
       // Save everything using the new structure
@@ -71,7 +73,7 @@ componentsCommand
         .start(`Fetching ${chalk.hex(colorPalette.COMPONENTS)('components')}`)
 
       if (componentName) {
-        const component = await fetchComponent(space, componentName, state.password, state.region)
+        const component = await fetchComponent(space, componentName, password, region)
         if (!component) {
           konsola.warn(`No component found with name "${componentName}"`)
           return
@@ -79,7 +81,7 @@ componentsCommand
         components = [component]
       }
       else {
-        components = await fetchComponents(space, state.password, state.region)
+        components = await fetchComponents(space, password, region)
         if (!components || components.length === 0) {
           konsola.warn(`No components found in the space ${space}`)
           return
@@ -142,6 +144,8 @@ componentsCommand
       return
     }
 
+    const { password, region } = state
+
     try {
       const spaceData = await readComponentsFiles({
         ...options,
@@ -173,9 +177,9 @@ componentsCommand
             // Process tags sequentially to ensure order
             for (const tagId of component.internal_tag_ids) {
               const tag = spaceData.internalTags.find(tag => tag.id === Number(tagId))
-              if (tag && state.password && state.region) {
+              if (tag) {
                 try {
-                  const updatedTag = await upsertComponentInternalTag(space, tag, state.password, state.region)
+                  const updatedTag = await upsertComponentInternalTag(space, tag, password, region)
                   if (updatedTag) {
                     processedTags.tags.push(updatedTag)
                     processedTags.ids.push(updatedTag.id.toString())
@@ -190,17 +194,15 @@ componentsCommand
             }
           }
 
-          if (state.password && state.region) {
-            // Create a new component object with the processed tags
-            const componentToUpdate = {
-              ...component,
-              internal_tag_ids: processedTags.ids,
-              internal_tags_list: processedTags.tags,
-            }
-            await upsertComponent(space, componentToUpdate, state.password, state.region)
-            spinner.succeed(`${chalk.hex(colorPalette.COMPONENTS)(component.name)} - Completed in ${spinner.elapsedTime.toFixed(2)}ms`)
-            results.successful.push(component.name)
+          // Create a new component object with the processed tags
+          const componentToUpdate = {
+            ...component,
+            internal_tag_ids: processedTags.ids,
+            internal_tags_list: processedTags.tags,
           }
+          await upsertComponent(space, componentToUpdate, password, region)
+          spinner.succeed(`${chalk.hex(colorPalette.COMPONENTS)(component.name)} - Completed in ${spinner.elapsedTime.toFixed(2)}ms`)
+          results.successful.push(component.name)
         }
         catch (error) {
           const spinnerFailedMessage = `${chalk.hex(colorPalette.COMPONENTS)(component.name)} - Failed`
