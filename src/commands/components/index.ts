@@ -3,7 +3,7 @@ import { colorPalette, commands } from '../../constants'
 import { session } from '../../session'
 import { getProgram } from '../../program'
 import { APIError, CommandError, handleError, konsola } from '../../utils'
-import { fetchComponent, fetchComponentGroups, fetchComponentPresets, fetchComponents, pushComponent, readComponentsFiles, saveComponentsToFiles } from './actions'
+import { fakePushComponent, fetchComponent, fetchComponentGroups, fetchComponentPresets, fetchComponents, pushComponent, readComponentsFiles, saveComponentsToFiles } from './actions'
 import type { PullComponentsOptions, PushComponentsOptions } from './constants'
 
 import { Spinner } from '@topcli/spinner'
@@ -138,6 +138,15 @@ componentsCommand
         path,
       })
 
+      if (!spaceData.components.length) {
+        let message = 'No components found that meet the filter criteria. Please make sure you have pulled the components first and that the filter is correct.'
+        if (options.separateFiles) {
+          message = 'No components found that meet the filter criteria with the separate files. Please make sure you have pulled the components first and that the filter is correct.'
+        }
+        konsola.warn(message)
+        return
+      }
+
       const results = {
         successful: [] as string[],
         failed: [] as Array<{ name: string, error: unknown }>,
@@ -147,7 +156,8 @@ componentsCommand
         const spinner = new Spinner()
           .start(`${chalk.hex(colorPalette.COMPONENTS)(component.name)} - Pushing...`)
         try {
-          await pushComponent(space, component, state.password, state.region)
+          await fakePushComponent(component)
+          // await pushComponent(space, component, state.password, state.region)
           spinner.succeed(`${chalk.hex(colorPalette.COMPONENTS)(component.name)} - Completed in ${spinner.elapsedTime.toFixed(2)}ms`)
         }
         catch (error) {
