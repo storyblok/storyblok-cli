@@ -63,7 +63,7 @@ export async function customFetch<T>(url: string, options: FetchOptions = {}): P
 
       if (!response.ok) {
         // If we hit rate limit and have retries left
-        if (response.status === 429 && attempt < maxRetries) {
+        if ((response.status === 429) && (attempt < maxRetries)) {
           const waitTime = baseDelay * 2 ** attempt
           await delay(waitTime)
           attempt++

@@ -289,7 +289,9 @@ export const readComponentsFiles = async (
       const files = await readdir(resolvedPath, { recursive: !separateFiles })
 
       for (const file of files) {
-        if (!file.endsWith('.json') || !componentsPattern.test(file) && !groupsPattern.test(file) && !presetsPattern.test(file) && !internalTagsPattern.test(file)) { continue }
+        if (!file.endsWith('.json') || (!componentsPattern.test(file) && !groupsPattern.test(file) && !presetsPattern.test(file) && !internalTagsPattern.test(file))) {
+          continue
+        }
 
         try {
           const content = await readFile(join(resolvedPath, file), 'utf-8')
@@ -325,17 +327,23 @@ export const readComponentsFiles = async (
 
     // Then process files
     for (const file of files) {
-      if (!file.endsWith('.json')) { continue }
+      if (!file.endsWith('.json')) {
+        continue
+      }
 
       // Skip consolidated files in separate files mode
-      if (/^(?:components|presets)\.json$/.test(file)) { continue }
+      if (/^(?:components|presets)\.json$/.test(file)) {
+        continue
+      }
 
       const { dir, name } = parse(file)
       const isPreset = /\.preset\.json$/.test(file)
       const baseName = name.replace(/\.preset$/, '').split('.')[0]
 
       // Skip if filter is set and doesn't match the base component name
-      if (regex && !regex.test(baseName)) { continue }
+      if (regex && !regex.test(baseName)) {
+        continue
+      }
 
       const content = await readFile(join(resolvedPath, file), 'utf-8')
       const data = JSON.parse(content)

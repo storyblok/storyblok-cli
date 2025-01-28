@@ -2,8 +2,8 @@ import chalk from 'chalk'
 import { colorPalette, commands } from '../../constants'
 import { session } from '../../session'
 import { getProgram } from '../../program'
-import { APIError, CommandError, handleError, konsola } from '../../utils'
-import { fakePushComponent, fakePushComponentInternalTag, fetchComponent, fetchComponentGroups, fetchComponentInternalTags, fetchComponentPresets, fetchComponents, pushComponent, pushComponentInternalTag, readComponentsFiles, saveComponentsToFiles, upsertComponent, upsertComponentInternalTag } from './actions'
+import { CommandError, handleError, konsola } from '../../utils'
+import { fetchComponent, fetchComponentGroups, fetchComponentInternalTags, fetchComponentPresets, fetchComponents, readComponentsFiles, saveComponentsToFiles, upsertComponent, upsertComponentInternalTag } from './actions'
 import type { PullComponentsOptions, PushComponentsOptions, SpaceComponentInternalTag } from './constants'
 
 import { Spinner } from '@topcli/spinner'
@@ -177,6 +177,7 @@ componentsCommand
             // Process tags sequentially to ensure order
             for (const tagId of component.internal_tag_ids) {
               const tag = spaceData.internalTags.find(tag => tag.id === Number(tagId))
+
               if (tag) {
                 try {
                   const updatedTag = await upsertComponentInternalTag(space, tag, password, region)
