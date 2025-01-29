@@ -2,8 +2,8 @@ import chalk from 'chalk'
 import { colorPalette, commands } from '../../constants'
 import { session } from '../../session'
 import { getProgram } from '../../program'
-import { CommandError, handleError, konsola } from '../../utils'
-import { fetchComponent, fetchComponentGroups, fetchComponentInternalTags, fetchComponentPresets, fetchComponents, readComponentsFiles, saveComponentsToFiles, upsertComponent, upsertComponentInternalTag } from './actions'
+import { CommandError, handleError, konsola, removePropertyRecursively, removeUidRecursively } from '../../utils'
+import { fetchComponent, fetchComponentGroups, fetchComponentInternalTags, fetchComponentPresets, fetchComponents, readComponentsFiles, saveComponentsToFiles, upsertComponent, upsertComponentGroup, upsertComponentInternalTag, upsertComponentPreset } from './actions'
 import type { PullComponentsOptions, PushComponentsOptions, SpaceComponentInternalTag } from './constants'
 
 import { Spinner } from '@topcli/spinner'
@@ -14,7 +14,7 @@ export const componentsCommand = program
   .command('components')
   .alias('comp')
   .description(`Manage your space's block schema`)
-  .requiredOption('-s, --space <space>', 'space ID')
+  .option('-s, --space <space>', 'space ID')
   .option('-p, --path <path>', 'path to save the file. Default is .storyblok/components')
 
 componentsCommand
@@ -122,7 +122,7 @@ componentsCommand
 componentsCommand
   .command('push [componentName]')
   .description(`Push your space's components schema as json`)
-  .requiredOption('-f, --from <from>', 'source space id')
+  .option('-f, --from <from>', 'source space id')
   .option('--fi, --filter <filter>', 'glob filter to apply to the components before pushing')
   .option('--sf, --separate-files', 'Read from separate files instead of consolidated files')
   .action(async (componentName: string | undefined, options: PushComponentsOptions) => {
@@ -130,7 +130,7 @@ componentsCommand
     // Global options
     const verbose = program.opts().verbose
     const { space, path } = componentsCommand.opts()
-    const { filter } = options
+    const { from, filter, separateFiles } = options
 
     const { state, initializeSession } = session()
     await initializeSession()
@@ -140,8 +140,13 @@ componentsCommand
       return
     }
     if (!space) {
-      handleError(new CommandError(`Please provide the space as argument --space YOUR_SPACE_ID.`), verbose)
+      handleError(new CommandError(`Please provide the target space as argument --space TARGET_SPACE_ID.`), verbose)
       return
+    }
+
+    if (!from) {
+      // If no source space is provided, use the target space as source
+      options.from = space
     }
 
     const { password, region } = state
@@ -166,16 +171,47 @@ componentsCommand
         failed: [] as Array<{ name: string, error: unknown }>,
       }
 
+      if (!separateFiles) {
+        // If separate files are not used, we need to upsert the tags first
+        await Promise.all(spaceData.internalTags.map(async (tag) => {
+          const consolidatedSpinner = new Spinner()
+          consolidatedSpinner.start('Upserting tags...')
+          try {
+            await upsertComponentInternalTag(space, tag, password, region)
+            consolidatedSpinner.succeed(`Tag-> ${chalk.hex(colorPalette.COMPONENTS)(tag.name)} - Completed in ${consolidatedSpinner.elapsedTime.toFixed(2)}ms`)
+          }
+          catch (error) {
+            consolidatedSpinner.failed(`Tag-> ${chalk.hex(colorPalette.COMPONENTS)(tag.name)} - Failed`)
+            results.failed.push({ name: tag.name, error })
+          }
+        }))
+        // Upsert groups
+        await Promise.all(spaceData.groups.map(async (group) => {
+          const consolidatedSpinner = new Spinner()
+          consolidatedSpinner.start('Upserting groups...')
+          try {
+            await upsertComponentGroup(space, group, password, region)
+            consolidatedSpinner.succeed(`Group-> ${chalk.hex(colorPalette.COMPONENTS)(group.name)} - Completed in ${consolidatedSpinner.elapsedTime.toFixed(2)}ms`)
+          }
+          catch (error) {
+            consolidatedSpinner.failed(`Group-> ${chalk.hex(colorPalette.COMPONENTS)(group.name)} - Failed`)
+            results.failed.push({ name: group.name, error })
+          }
+        }))
+      }
+
       await Promise.all(spaceData.components.map(async (component) => {
         const spinner = new Spinner()
           .start(`${chalk.hex(colorPalette.COMPONENTS)(component.name)} - Pushing...`)
         try {
           const processedTags: { ids: string[], tags: SpaceComponentInternalTag[] } = { ids: [], tags: [] }
 
-          if (component.internal_tag_ids?.length > 0) {
-            spinner.text = `Pushing ${chalk.hex(colorPalette.COMPONENTS)(component.name)} internal tags...`
+          if (component.internal_tag_ids?.length > 0 && separateFiles) {
+            // spinner.text = `Pushing ${chalk.hex(colorPalette.COMPONENTS)(component.name)} internal tags...`
             // Process tags sequentially to ensure order
-            for (const tagId of component.internal_tag_ids) {
+            await Promise.all(component.internal_tag_ids.map(async (tagId) => {
+              const internalTagsSpinner = new Spinner()
+              internalTagsSpinner.start(`Pushing ${chalk.hex(colorPalette.COMPONENTS)(component.name)} internal tags...`)
               const tag = spaceData.internalTags.find(tag => tag.id === Number(tagId))
 
               if (tag) {
@@ -184,15 +220,15 @@ componentsCommand
                   if (updatedTag) {
                     processedTags.tags.push(updatedTag)
                     processedTags.ids.push(updatedTag.id.toString())
+                    internalTagsSpinner.succeed(`Tag-> ${chalk.hex(colorPalette.COMPONENTS)(tag.name)} - Completed in ${internalTagsSpinner.elapsedTime.toFixed(2)}ms`)
                   }
                 }
                 catch (error) {
-                  const spinnerFailedMessage = `${chalk.hex(colorPalette.COMPONENTS)(component.name)} - Failed`
-                  spinner.failed(spinnerFailedMessage)
+                  internalTagsSpinner.failed(`Tag-> ${chalk.hex(colorPalette.COMPONENTS)(tag.name)} - Failed`)
                   results.failed.push({ name: tag.name, error })
                 }
               }
-            }
+            }))
           }
 
           // Create a new component object with the processed tags
@@ -201,12 +237,37 @@ componentsCommand
             internal_tag_ids: processedTags.ids,
             internal_tags_list: processedTags.tags,
           }
-          await upsertComponent(space, componentToUpdate, password, region)
-          spinner.succeed(`${chalk.hex(colorPalette.COMPONENTS)(component.name)} - Completed in ${spinner.elapsedTime.toFixed(2)}ms`)
+          const updatedComponent = await upsertComponent(space, componentToUpdate, password, region)
+          if (updatedComponent) {
+            const relatedPresets = spaceData.presets.filter(preset => preset.component_id === component.id)
+            if (relatedPresets.length > 0) {
+              await Promise.all(relatedPresets.map(async (preset) => {
+                const presetSpinner = new Spinner()
+                presetSpinner.start(`Upserting ${chalk.hex(colorPalette.COMPONENTS)(preset.name)}...`)
+                try {
+                  const presetToUpdate = {
+                    name: preset.name,
+                    preset: removePropertyRecursively(
+                      removePropertyRecursively(preset.preset, '_uid'),
+                      'component',
+                    ),
+                    component_id: updatedComponent.id,
+                  }
+                  await upsertComponentPreset(space, presetToUpdate, password, region)
+                  presetSpinner.succeed(`Preset-> ${chalk.hex(colorPalette.COMPONENTS)(preset.name)} - Completed in ${presetSpinner.elapsedTime.toFixed(2)}ms`)
+                }
+                catch (error) {
+                  presetSpinner.failed(`Preset-> ${chalk.hex(colorPalette.COMPONENTS)(preset.name)} - Failed`)
+                  results.failed.push({ name: preset.name, error })
+                }
+              }))
+            }
+          }
+          spinner.succeed(`Component-> ${chalk.hex(colorPalette.COMPONENTS)(component.name)} - Completed in ${spinner.elapsedTime.toFixed(2)}ms`)
           results.successful.push(component.name)
         }
         catch (error) {
-          const spinnerFailedMessage = `${chalk.hex(colorPalette.COMPONENTS)(component.name)} - Failed`
+          const spinnerFailedMessage = `Component-> ${chalk.hex(colorPalette.COMPONENTS)(component.name)} - Failed`
           spinner.failed(spinnerFailedMessage)
           results.failed.push({ name: component.name, error })
         }

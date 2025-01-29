@@ -1,4 +1,4 @@
-import { handleAPIError, handleFileSystemError } from '../../utils'
+import { FileSystemError, handleAPIError, handleFileSystemError } from '../../utils'
 import type { RegionCode } from '../../constants'
 import { join, parse } from 'node:path'
 import { resolvePath, saveToFile } from '../../utils/filesystem'
@@ -136,7 +136,7 @@ export const fetchComponentPresets = async (space: string, token: string, region
   }
 }
 
-export const pushComponentPreset = async (space: string, componentPreset: SpaceComponentPreset, token: string, region: RegionCode): Promise<SpaceComponentPreset | undefined> => {
+export const pushComponentPreset = async (space: string, componentPreset: { preset: Partial<SpaceComponentPreset> }, token: string, region: RegionCode): Promise<SpaceComponentPreset | undefined> => {
   try {
     const url = getStoryblokUrl(region)
     const response = await customFetch<{
@@ -270,6 +270,18 @@ export const readComponentsFiles = async (
   options: ReadComponentsOptions): Promise<SpaceData> => {
   const { filter, separateFiles, path, from } = options
   const resolvedPath = resolvePath(path, `components/${from}`)
+
+  // Check if the path exists first
+  try {
+    await readdir(resolvedPath)
+  }
+  catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      throw new FileSystemError('file_not_found', 'read', error as Error, `The space folder '${from}' doesn't exist yet. Please run 'storyblok components pull -s=${from}' first to fetch the components.`)
+    }
+    throw error
+  }
+
   const regex = filter ? new RegExp(filter) : null
 
   const spaceData: SpaceData = {
@@ -398,6 +410,44 @@ export const updateComponent = async (space: string, componentId: number, compon
   }
 }
 
+export const updateComponentGroup = async (space: string, groupId: number, componentGroup: SpaceComponentGroup, token: string, region: RegionCode): Promise<SpaceComponentGroup | undefined> => {
+  try {
+    const url = getStoryblokUrl(region)
+    const response = await customFetch<{
+      component_group: SpaceComponentGroup
+    }>(`${url}/spaces/${space}/component_groups/${groupId}`, {
+      method: 'PUT',
+      headers: {
+        Authorization: token,
+      },
+      body: JSON.stringify(componentGroup),
+    })
+    return response.component_group
+  }
+  catch (error) {
+    handleAPIError('update_component_group', error as Error, `Failed to update component group ${componentGroup.name}`)
+  }
+}
+
+export const updateComponentPreset = async (space: string, presetId: number, componentPreset: { preset: Partial<SpaceComponentPreset> }, token: string, region: RegionCode): Promise<SpaceComponentPreset | undefined> => {
+  try {
+    const url = getStoryblokUrl(region)
+    const response = await customFetch<{
+      preset: SpaceComponentPreset
+    }>(`${url}/spaces/${space}/presets/${presetId}`, {
+      method: 'PUT',
+      headers: {
+        Authorization: token,
+      },
+      body: JSON.stringify(componentPreset),
+    })
+    return response.preset
+  }
+  catch (error) {
+    handleAPIError('update_component_preset', error as Error, `Failed to update component preset ${componentPreset.name}`)
+  }
+}
+
 export const updateComponentInternalTag = async (space: string, tagId: number, componentInternalTag: SpaceComponentInternalTag, token: string, region: RegionCode): Promise<SpaceComponentInternalTag | undefined> => {
   try {
     const url = getStoryblokUrl(region)
@@ -423,7 +473,8 @@ export const upsertComponent = async (space: string, component: SpaceComponent, 
   }
   catch (error) {
     if (error instanceof APIError && error.code === 422) {
-      if (error.response?.data?.name && error.response?.data?.name[0] === 'has already been taken') {
+      const responseData = error.response?.data as { [key: string]: string[] } | undefined
+      if (responseData?.name?.[0] === 'has already been taken') {
         // Find existing component by name
         const existingComponent = await fetchComponent(space, component.name, token, region)
         if (existingComponent) {
@@ -442,13 +493,56 @@ export const upsertComponentInternalTag = async (space: string, tag: SpaceCompon
   }
   catch (error) {
     if (error instanceof APIError && error.code === 422) {
-      if (error.response?.data?.name && error.response?.data?.name[0] === 'has already been taken') {
+      const responseData = error.response?.data as { [key: string]: string[] } | undefined
+      if (responseData?.name?.[0] === 'has already been taken') {
         // Find existing tag by name
         const existingTags = await fetchComponentInternalTags(space, token, region)
         const existingTag = existingTags?.find(t => t.name === tag.name)
         if (existingTag) {
           // Update existing tag
           return await updateComponentInternalTag(space, existingTag.id, tag, token, region)
+        }
+      }
+    }
+    throw error
+  }
+}
+
+export const upsertComponentGroup = async (space: string, group: SpaceComponentGroup, token: string, region: RegionCode): Promise<SpaceComponentGroup | undefined> => {
+  try {
+    return await pushComponentGroup(space, group, token, region)
+  }
+  catch (error) {
+    if (error instanceof APIError && error.code === 422) {
+      const responseData = error.response?.data as { [key: string]: string[] } | undefined
+      if (responseData?.name?.[0] === 'has already been taken') {
+        // Find existing group by name
+        const existingGroups = await fetchComponentGroups(space, token, region)
+        const existingGroup = existingGroups?.find(g => g.name === group.name)
+        if (existingGroup) {
+          // Update existing group
+          return await updateComponentGroup(space, existingGroup.id, group, token, region)
+        }
+      }
+    }
+    throw error
+  }
+}
+
+export const upsertComponentPreset = async (space: string, preset: Partial<SpaceComponentPreset>, token: string, region: RegionCode): Promise<SpaceComponentPreset | undefined> => {
+  try {
+    return await pushComponentPreset(space, { preset }, token, region)
+  }
+  catch (error) {
+    if (error instanceof APIError && error.code === 422) {
+      const responseData = error.response?.data as { [key: string]: string[] } | undefined
+      if (responseData?.name?.[0] === 'has already been taken') {
+        // Find existing preset by name
+        const existingPresets = await fetchComponentPresets(space, token, region)
+        const existingPreset = existingPresets?.find(p => p.name === preset.name)
+        if (existingPreset) {
+          // Update existing preset
+          return await updateComponentPreset(space, existingPreset.id, { preset }, token, region)
         }
       }
     }

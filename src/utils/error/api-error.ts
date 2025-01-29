@@ -72,12 +72,13 @@ export class APIError extends Error {
     this.messageStack.push(customMessage || API_ERRORS[errorId])
 
     if (this.code === 422) {
-      Object.entries(this.response?.data || {}).forEach(([key, error]: [string, string[]]) => {
-        if (key === 'name' && error[0] === 'has already been taken') {
-          this.message = 'A component with this name already exists'
-        }
-        if (Array.isArray(error)) {
-          error.forEach((e: string) => {
+      const responseData = this.response?.data as { [key: string]: string[] } | undefined
+      if (responseData?.name?.[0] === 'has already been taken') {
+        this.message = 'A component with this name already exists'
+      }
+      Object.entries(responseData || {}).forEach(([key, errors]) => {
+        if (Array.isArray(errors)) {
+          errors.forEach((e) => {
             this.messageStack.push(`${key}: ${e}`)
           })
         }

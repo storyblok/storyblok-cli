@@ -32,3 +32,21 @@ export const slugify = (text: string): string =>
     .replace(/-{2,}/g, '-') // Replace multiple - with single -
     .replace(/^-+/, '') // Trim - from start of text
     .replace(/-+$/, '')
+
+export const removePropertyRecursively = (obj: Record<string, any>, property: string): Record<string, any> => {
+  if (typeof obj !== 'object' || obj === null) {
+    return obj
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(item => removePropertyRecursively(item, property))
+  }
+
+  const result: Record<string, any> = {}
+  for (const [key, value] of Object.entries(obj)) {
+    if (key !== property) {
+      result[key] = removePropertyRecursively(value, property)
+    }
+  }
+  return result
+}
