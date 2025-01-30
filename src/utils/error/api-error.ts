@@ -1,4 +1,4 @@
-import { FetchError } from '../fetch'
+import { FetchError } from '../fetch';
 
 export const API_ACTIONS = {
   login: 'login',
@@ -10,7 +10,7 @@ export const API_ACTIONS = {
   pull_components: 'Failed to pull components',
   pull_component_groups: 'Failed to pull component groups',
   pull_component_presets: 'Failed to pull component presets',
-} as const
+} as const;
 
 export const API_ERRORS = {
   unauthorized: 'The user is not authorized to access the API',
@@ -19,41 +19,41 @@ export const API_ERRORS = {
   timeout: 'The API request timed out',
   generic: 'Error fetching data from the API',
   not_found: 'The requested resource was not found',
-} as const
+} as const;
 
 export function handleAPIError(action: keyof typeof API_ACTIONS, error: unknown): void {
   if (error instanceof FetchError) {
-    const status = error.response.status
+    const status = error.response.status;
 
     switch (status) {
       case 401:
-        throw new APIError('unauthorized', action, error)
+        throw new APIError('unauthorized', action, error);
       case 404:
-        throw new APIError('not_found', action, error)
+        throw new APIError('not_found', action, error);
       case 422:
-        throw new APIError('invalid_credentials', action, error)
+        throw new APIError('invalid_credentials', action, error);
       default:
-        throw new APIError('network_error', action, error)
+        throw new APIError('network_error', action, error);
     }
   }
-  throw new APIError('generic', action, error as FetchError)
+  throw new APIError('generic', action, error as FetchError);
 }
 
 export class APIError extends Error {
-  errorId: string
-  cause: string
-  code: number
-  messageStack: string[]
-  error: FetchError | undefined
+  errorId: string;
+  cause: string;
+  code: number;
+  messageStack: string[];
+  error: FetchError | undefined;
 
   constructor(errorId: keyof typeof API_ERRORS, action: keyof typeof API_ACTIONS, error?: FetchError, customMessage?: string) {
-    super(customMessage || API_ERRORS[errorId])
-    this.name = 'API Error'
-    this.errorId = errorId
-    this.cause = API_ERRORS[errorId]
-    this.code = error?.response?.status || 0
-    this.messageStack = [API_ACTIONS[action], customMessage || API_ERRORS[errorId]]
-    this.error = error
+    super(customMessage || API_ERRORS[errorId]);
+    this.name = 'API Error';
+    this.errorId = errorId;
+    this.cause = API_ERRORS[errorId];
+    this.code = error?.response?.status || 0;
+    this.messageStack = [API_ACTIONS[action], customMessage || API_ERRORS[errorId]];
+    this.error = error;
   }
 
   getInfo() {
@@ -64,6 +64,6 @@ export class APIError extends Error {
       cause: this.cause,
       errorId: this.errorId,
       stack: this.stack,
-    }
+    };
   }
 }
