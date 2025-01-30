@@ -15,6 +15,7 @@
   - [ ] It should upsert groups if consolidated files are found `.storyblok/components/<TARGET_SPACE_ID>/groups.json`
     - [ ] It should upsert deep nested groups if consolidated files are found `.storyblok/components/<TARGET_SPACE_ID>/groups.json`
   - [ ] It should upsert the components to the target space `.storyblok/components/<TARGET_SPACE_ID>/components.json`
+  - [ ] It should resolve component whitelists (folders, components, tags)
 
 #### Error handling
 - [ ] It should throw and error if the space is not provided: `Please provide the target space as argument --space YOUR_SPACE_ID. `

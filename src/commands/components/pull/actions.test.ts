@@ -119,6 +119,7 @@ describe('pull components actions', () => {
       await saveComponentsToFiles('12345', { components, groups: [], presets: [] }, {
         path: '/path/to/components',
         verbose: false,
+        space: '12345',
       })
 
       const files = vol.readdirSync('/path/to/components')
@@ -213,7 +214,7 @@ describe('pull components actions', () => {
       })
 
       const files = vol.readdirSync('/path/to/components4')
-      expect(files).toEqual(['component-name-2.json', 'component-name.json'])
+      expect(files).toEqual(['component-name-2.json', 'component-name.json', 'groups.json', 'tags.json'])
     })
   })
 })
