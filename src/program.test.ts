@@ -1,28 +1,28 @@
 // program.test.ts
-import { beforeAll, describe, expect, it } from 'vitest'
+import { beforeAll, describe, expect, it } from 'vitest';
 
 // Import the function after setting up mocks
-import { getProgram } from './program' // Import resolve to mock
-import type { Command } from 'commander'
+import { getProgram } from './program'; // Import resolve to mock
+import type { Command } from 'commander';
 
-let program: Command
+let program: Command;
 describe('program', () => {
   beforeAll(() => {
-    program = getProgram()
-  })
+    program = getProgram();
+  });
   it('should be defined', () => {
     // Reset the program instance and mock return values before each test
-    expect(program).toBeDefined()
-  })
+    expect(program).toBeDefined();
+  });
 
   it('should have the same name as package.json', () => {
-    expect(program.name()).toBe('storyblok')
-  })
+    expect(program.name()).toBe('storyblok');
+  });
 
   it('should have the same description as package.json', () => {
-    expect(program.description()).toBe('Storyblok CLI')
-  })
+    expect(program.description()).toBe('Storyblok CLI');
+  });
 
   // TODO:
   // Add test for handlingError L30-32
-})
+});

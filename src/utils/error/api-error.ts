@@ -1,4 +1,4 @@
-import { FetchError } from '../fetch'
+import { FetchError } from '../fetch';
 
 export const API_ACTIONS = {
   login: 'login',
@@ -19,7 +19,7 @@ export const API_ACTIONS = {
   update_component_internal_tag: 'Failed to update component internal tag',
   update_component_group: 'Failed to update component group',
   update_component_preset: 'Failed to update component preset',
-} as const
+} as const;
 
 export const API_ERRORS = {
   unauthorized: 'The user is not authorized to access the API',
@@ -29,60 +29,60 @@ export const API_ERRORS = {
   generic: 'Error fetching data from the API',
   not_found: 'The requested resource was not found',
   unprocessable_entity: 'The request was well-formed but was unable to be followed due to semantic errors',
-} as const
+} as const;
 
 export function handleAPIError(action: keyof typeof API_ACTIONS, error: unknown, customMessage?: string): void {
   if (error instanceof FetchError) {
-    const status = error.response.status
+    const status = error.response.status;
 
     switch (status) {
       case 401:
-        throw new APIError('unauthorized', action, error, customMessage)
+        throw new APIError('unauthorized', action, error, customMessage);
       case 404:
-        throw new APIError('not_found', action, error, customMessage)
+        throw new APIError('not_found', action, error, customMessage);
       case 422:
-        throw new APIError('unprocessable_entity', action, error, customMessage)
+        throw new APIError('unprocessable_entity', action, error, customMessage);
       default:
-        throw new APIError('network_error', action, error, customMessage)
+        throw new APIError('network_error', action, error, customMessage);
     }
   }
-  throw new APIError('generic', action, error as FetchError, customMessage)
+  throw new APIError('generic', action, error as FetchError, customMessage);
 }
 
 export class APIError extends Error {
-  errorId: string
-  cause: string
-  code: number
-  messageStack: string[]
-  error: FetchError | undefined
-  response: FetchError['response'] | undefined
+  errorId: string;
+  cause: string;
+  code: number;
+  messageStack: string[];
+  error: FetchError | undefined;
+  response: FetchError['response'] | undefined;
   constructor(errorId: keyof typeof API_ERRORS, action: keyof typeof API_ACTIONS, error?: FetchError, customMessage?: string) {
-    super(customMessage || API_ERRORS[errorId])
-    this.name = 'API Error'
-    this.errorId = errorId
-    this.cause = API_ERRORS[errorId]
-    this.code = error?.response?.status || 0
-    this.messageStack = []
-    this.error = error
-    this.response = error?.response
+    super(customMessage || API_ERRORS[errorId]);
+    this.name = 'API Error';
+    this.errorId = errorId;
+    this.cause = API_ERRORS[errorId];
+    this.code = error?.response?.status || 0;
+    this.messageStack = [];
+    this.error = error;
+    this.response = error?.response;
 
     if (!customMessage) {
-      this.messageStack.push(API_ACTIONS[action])
+      this.messageStack.push(API_ACTIONS[action]);
     }
-    this.messageStack.push(customMessage || API_ERRORS[errorId])
+    this.messageStack.push(customMessage || API_ERRORS[errorId]);
 
     if (this.code === 422) {
-      const responseData = this.response?.data as { [key: string]: string[] } | undefined
+      const responseData = this.response?.data as { [key: string]: string[] } | undefined;
       if (responseData?.name?.[0] === 'has already been taken') {
-        this.message = 'A component with this name already exists'
+        this.message = 'A component with this name already exists';
       }
       Object.entries(responseData || {}).forEach(([key, errors]) => {
         if (Array.isArray(errors)) {
           errors.forEach((e) => {
-            this.messageStack.push(`${key}: ${e}`)
-          })
+            this.messageStack.push(`${key}: ${e}`);
+          });
         }
-      })
+      });
     }
   }
 
@@ -95,6 +95,6 @@ export class APIError extends Error {
       errorId: this.errorId,
       stack: this.stack,
       responseData: this.response?.data,
-    }
+    };
   }
 }

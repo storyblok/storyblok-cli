@@ -4,7 +4,7 @@ export const commands = {
   USER: 'user',
   COMPONENTS: 'Components',
   LANGUAGES: 'languages',
-} as const
+} as const;
 
 export const colorPalette = {
   PRIMARY: '#45bfb9',
@@ -12,13 +12,13 @@ export const colorPalette = {
   USER: '#8BC34A',
   COMPONENTS: '#a185ff',
   LANGUAGES: '#FFC107',
-} as const
+} as const;
 
 export interface ReadonlyArray<T> {
-  includes: (searchElement: any, fromIndex?: number) => searchElement is T
+  includes: (searchElement: any, fromIndex?: number) => searchElement is T;
 }
-export const regionCodes = ['eu', 'us', 'cn', 'ca', 'ap'] as const
-export type RegionCode = typeof regionCodes[number]
+export const regionCodes = ['eu', 'us', 'cn', 'ca', 'ap'] as const;
+export type RegionCode = typeof regionCodes[number];
 
 export const regions: Record<Uppercase<RegionCode>, RegionCode> = {
   EU: 'eu',
@@ -26,7 +26,7 @@ export const regions: Record<Uppercase<RegionCode>, RegionCode> = {
   CN: 'cn',
   CA: 'ca',
   AP: 'ap',
-} as const
+} as const;
 
 export const regionsDomain: Record<RegionCode, string> = {
   eu: 'api.storyblok.com',
@@ -34,7 +34,7 @@ export const regionsDomain: Record<RegionCode, string> = {
   cn: 'app.storyblokchina.cn',
   ca: 'api-ca.storyblok.com',
   ap: 'api-ap.storyblok.com',
-} as const
+} as const;
 
 export const managementApiRegions: Record<RegionCode, string> = {
   eu: 'mapi.storyblok.com',
@@ -42,7 +42,7 @@ export const managementApiRegions: Record<RegionCode, string> = {
   cn: 'mapi.storyblokchina.cn',
   ca: 'mapi-ca.storyblok.com',
   ap: 'mapi-ap.storyblok.com',
-} as const
+} as const;
 
 export const regionNames: Record<RegionCode, string> = {
   eu: 'Europe',
@@ -50,9 +50,9 @@ export const regionNames: Record<RegionCode, string> = {
   cn: 'China',
   ca: 'Canada',
   ap: 'Australia',
-} as const
+} as const;
 
 export const DEFAULT_AGENT = {
   SB_Agent: 'SB-CLI',
   SB_Agent_Version: process.env.npm_package_version || '4.x',
-} as const
+} as const;

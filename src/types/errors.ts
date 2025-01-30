@@ -3,8 +3,8 @@
  */
 export interface ResponseError extends Error {
   response?: {
-    status: number
-    statusText: string
-    data?: any
-  }
+    status: number;
+    statusText: string;
+    data?: any;
+  };
 }
