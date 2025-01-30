@@ -1,6 +1,6 @@
 import { userCommand } from './'
 import { getUser } from './actions'
-import { konsola } from '../../utils'
+import { CommandError, konsola } from '../../utils'
 import { session } from '../../session'
 import chalk from 'chalk'
 
@@ -83,7 +83,7 @@ describe('userCommand', () => {
     }
     await userCommand.parseAsync(['node', 'test'])
 
-    expect(konsola.error).toHaveBeenCalledWith(new Error(`You are currently not logged in. Please login first to get your user info.`), false)
+    expect(konsola.error).toHaveBeenCalledWith(new CommandError(`You are currently not logged in. Please login first to get your user info.`), false)
   })
 
   it('should show an error if the user information cannot be fetched', async () => {

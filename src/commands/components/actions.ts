@@ -19,7 +19,7 @@ export const fetchComponents = async (space: string, token: string, region: Regi
     return response.components
   }
   catch (error) {
-    handleAPIError('pull_components', error as Error)
+    handleAPIError('pull_components', error)
   }
 }
 

@@ -4,6 +4,8 @@ import { setupServer } from 'msw/node'
 import { http, HttpResponse } from 'msw'
 import { loginWithEmailAndPassword, loginWithOtp, loginWithToken } from './actions'
 import chalk from 'chalk'
+import { FetchError } from '../../utils/fetch'
+import { APIError } from '../../utils'
 
 const emailRegex = /^[^\s@]+@[^\s@][^\s.@]*\.[^\s@]+$/
 
@@ -47,8 +49,9 @@ describe('login actions', () => {
     })
 
     it('should throw an masked error for invalid token', async () => {
+      const error = new FetchError('Non-JSON response', { status: 401, statusText: 'Unauthorized', data: null })
       await expect(loginWithToken('invalid-token', 'eu')).rejects.toThrow(
-        new Error(`The token provided ${chalk.bold('inva*********')} is invalid.
+        new APIError('unauthorized', 'login_with_token', error, `The token provided ${chalk.bold('inva*********')} is invalid.
         Please make sure you are using the correct token and try again.`),
       )
     })

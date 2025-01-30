@@ -25,7 +25,7 @@ export const fetchLanguages = async (space: string, token: string, region: Regio
     }
   }
   catch (error) {
-    handleAPIError('pull_languages', error as FetchError)
+    handleAPIError('pull_languages', error)
   }
 }
 
