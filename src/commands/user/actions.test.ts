@@ -1,4 +1,3 @@
-import chalk from 'chalk'
 import { getUser } from './actions'
 import { http, HttpResponse } from 'msw'
 import { setupServer } from 'msw/node'
@@ -23,7 +22,7 @@ beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
 afterEach(() => server.resetHandlers())
 afterAll(() => server.close())
 
-describe.only('user actions', () => {
+describe('user actions', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })

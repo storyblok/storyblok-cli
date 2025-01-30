@@ -1,7 +1,7 @@
 export class CommandError extends Error {
   constructor(message: string) {
-    super(message)
-    this.name = 'Command Error'
+    super(message);
+    this.name = 'Command Error';
   }
 
   getInfo() {
@@ -9,6 +9,6 @@ export class CommandError extends Error {
       name: this.name,
       message: this.message,
       stack: this.stack,
-    }
+    };
   }
 }
