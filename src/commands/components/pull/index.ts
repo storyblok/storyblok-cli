@@ -1,15 +1,17 @@
 import type { PullComponentsOptions } from './constants';
 
 import { Spinner } from '@topcli/spinner';
-import { program } from 'commander';
 import { colorPalette, commands } from '../../../constants';
 import { CommandError, handleError, isVitest, konsola } from '../../../utils';
 import { session } from '../../../session';
 import { fetchComponent, fetchComponentGroups, fetchComponentInternalTags, fetchComponentPresets, fetchComponents, saveComponentsToFiles } from '../actions';
 import { componentsCommand } from '../command';
 import chalk from 'chalk';
+import { getProgram } from '../../../program';
 
-export const pullComponentsCommand = componentsCommand
+const program = getProgram();
+
+componentsCommand
   .command('pull [componentName]')
   .option('-f, --filename <filename>', 'custom name to be used in file(s) name instead of space id')
   .option('--sf, --separate-files [value]', 'Argument to create a single file for each component')
@@ -19,6 +21,7 @@ export const pullComponentsCommand = componentsCommand
     konsola.title(` ${commands.COMPONENTS} `, colorPalette.COMPONENTS, componentName ? `Pulling component ${componentName}...` : 'Pulling components...');
     // Global options
     const verbose = program.opts().verbose;
+
     // Command options
     const { space, path } = componentsCommand.opts();
     const { separateFiles, suffix, filename = 'components' } = options;

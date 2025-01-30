@@ -26,6 +26,7 @@ languagesCommand
 
     // Global options
     const verbose = program.opts().verbose;
+    console.log('program', program.opts());
     // Command options
     const { space, path } = languagesCommand.opts();
     const { filename = 'languages', suffix = options.space } = options;
