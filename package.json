@@ -35,10 +35,10 @@
   },
   "dependencies": {
     "@inquirer/prompts": "^7.2.4",
+    "@topcli/spinner": "^2.1.2",
     "chalk": "^5.4.1",
     "commander": "^13.1.0",
     "dotenv": "^16.4.7",
-    "ora": "^8.1.1",
     "storyblok-js-client": "^6.10.7"
   },
   "devDependencies": {

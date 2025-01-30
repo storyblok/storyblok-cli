@@ -1,17 +1,17 @@
-import chalk from 'chalk';
-import { input, password, select } from '@inquirer/prompts';
-import type { RegionCode } from '../../constants';
-import { colorPalette, commands, regionNames, regions } from '../../constants';
-import { getProgram } from '../../program';
-import { CommandError, handleError, isRegion, konsola } from '../../utils';
-import { loginWithEmailAndPassword, loginWithOtp, loginWithToken } from './actions';
+import { isVitest } from './../../utils/index'
+import chalk from 'chalk'
+import { input, password, select } from '@inquirer/prompts'
+import type { RegionCode } from '../../constants'
+import { colorPalette, commands, regionNames, regions } from '../../constants'
+import { getProgram } from '../../program'
+import { CommandError, handleError, isRegion, konsola } from '../../utils'
+import { loginWithEmailAndPassword, loginWithOtp, loginWithToken } from './actions'
+import { Spinner } from '@topcli/spinner'
+import { session } from '../../session'
 
-import { session } from '../../session';
-import ora from 'ora';
+const program = getProgram() // Get the shared singleton instance
 
-const program = getProgram(); // Get the shared singleton instance
-
-const allRegionsText = Object.values(regions).join(',');
+const allRegionsText = Object.values(regions).join(',')
 const loginStrategy = {
   message: 'How would you like to login?',
   choices: [
@@ -26,7 +26,7 @@ const loginStrategy = {
       short: 'Token',
     },
   ],
-};
+}
 
 export const loginCommand = program
   .command(commands.LOGIN)
@@ -38,58 +38,62 @@ export const loginCommand = program
     regions.EU,
   )
   .action(async (options: {
-    token: string;
-    region: RegionCode;
+    token: string
+    region: RegionCode
   }) => {
-    konsola.title(` ${commands.LOGIN} `, colorPalette.LOGIN);
+    konsola.title(` ${commands.LOGIN} `, colorPalette.LOGIN)
     // Global options
-    const verbose = program.opts().verbose;
+    const verbose = program.opts().verbose
     // Command options
-    const { token, region } = options;
+    const { token, region } = options
 
     if (!isRegion(region)) {
-      handleError(new CommandError(`The provided region: ${region} is not valid. Please use one of the following values: ${Object.values(regions).join(' | ')}`));
+      handleError(new CommandError(`The provided region: ${region} is not valid. Please use one of the following values: ${Object.values(regions).join(' | ')}`))
     }
 
-    const { state, updateSession, persistCredentials, initializeSession } = session();
+    const { state, updateSession, persistCredentials, initializeSession } = session()
 
-    await initializeSession();
+    await initializeSession()
 
     if (state.isLoggedIn && !state.envLogin) {
-      konsola.ok(`You are already logged in. If you want to login with a different account, please logout first.`);
-      return;
+      konsola.ok(`You are already logged in. If you want to login with a different account, please logout first.`)
+      return
     }
 
     if (token) {
       try {
-        const spinner = ora(`Logging in with token`).start();
-        const { user } = await loginWithToken(token, region);
-        updateSession(user.email, token, region);
-        await persistCredentials(region);
-        spinner.succeed();
-        konsola.ok(`Successfully logged in with token`);
+        const spinner = new Spinner({
+          verbose: !isVitest,
+        }).start(`Logging in with token`)
+        const { user } = await loginWithToken(token, region)
+        updateSession(user.email, token, region)
+        await persistCredentials(region)
+        spinner.succeed()
+        konsola.ok(`Successfully logged in with token`)
       }
       catch (error) {
-        handleError(error as Error, verbose);
+        handleError(error as Error, verbose)
       }
     }
     else {
       try {
-        const strategy = await select(loginStrategy);
+        const strategy = await select(loginStrategy)
         if (strategy === 'login-with-token') {
           const userToken = await password({
             message: 'Please enter your token:',
             validate: (value: string) => {
-              return value.length > 0;
+              return value.length > 0
             },
-          });
-          const spinner = ora(`Logging in with token`).start();
-          const { user } = await loginWithToken(userToken, region);
-          spinner.succeed();
-          updateSession(user.email, userToken, region);
-          await persistCredentials(region);
+          })
+          const spinner = new Spinner({
+            verbose: !isVitest,
+          }).start(`Logging in with token`)
+          const { user } = await loginWithToken(userToken, region)
+          spinner.succeed()
+          updateSession(user.email, userToken, region)
+          await persistCredentials(region)
 
-          konsola.ok(`Successfully logged in with token`);
+          konsola.ok(`Successfully logged in with token`)
         }
 
         else {
@@ -97,13 +101,13 @@ export const loginCommand = program
             message: 'Please enter your email address:',
             required: true,
             validate: (value: string) => {
-              const emailRegex = /^[^\s@]+@[^\s@][^\s.@]*\.[^\s@]+$/;
-              return emailRegex.test(value);
+              const emailRegex = /^[^\s@]+@[^\s@][^\s.@]*\.[^\s@]+$/
+              return emailRegex.test(value)
             },
-          });
+          })
           const userPassword = await password({
             message: 'Please enter your password:',
-          });
+          })
           const userRegion = await select({
             message: 'Please select the region you would like to work in:',
             choices: Object.values(regions).map((region: RegionCode) => ({
@@ -111,31 +115,33 @@ export const loginCommand = program
               value: region,
             })),
             default: regions.EU,
-          });
-          const spinner = ora(`Logging in with email`).start();
-          const response = await loginWithEmailAndPassword(userEmail, userPassword, userRegion);
-          spinner.succeed();
+          })
+          const spinner = new Spinner({
+            verbose: !isVitest,
+          }).start(`Logging in with email`)
+          const response = await loginWithEmailAndPassword(userEmail, userPassword, userRegion)
+          spinner.succeed()
 
           if (response?.otp_required) {
             const otp = await input({
               message: 'Add the code from your Authenticator app, or the one we sent to your e-mail / phone:',
               required: true,
-            });
+            })
 
-            const otpResponse = await loginWithOtp(userEmail, userPassword, otp, userRegion);
+            const otpResponse = await loginWithOtp(userEmail, userPassword, otp, userRegion)
             if (otpResponse?.access_token) {
-              updateSession(userEmail, otpResponse?.access_token, userRegion);
+              updateSession(userEmail, otpResponse?.access_token, userRegion)
             }
           }
           else if (response?.access_token) {
-            updateSession(userEmail, response.access_token, userRegion);
+            updateSession(userEmail, response.access_token, userRegion)
           }
-          await persistCredentials(region);
-          konsola.ok(`Successfully logged in with email ${chalk.hex(colorPalette.PRIMARY)(userEmail)}`);
+          await persistCredentials(region)
+          konsola.ok(`Successfully logged in with email ${chalk.hex(colorPalette.PRIMARY)(userEmail)}`)
         }
       }
       catch (error) {
-        handleError(error as Error, verbose);
+        handleError(error as Error, verbose)
       }
     }
-  });
+  })
