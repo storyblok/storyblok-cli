@@ -1,26 +1,26 @@
-import { fileURLToPath } from 'node:url'
-import { dirname } from 'pathe'
-import type { RegionCode } from '../constants'
-import { regions } from '../constants'
+import { fileURLToPath } from 'node:url';
+import { dirname } from 'pathe';
+import type { RegionCode } from '../constants';
+import { regions } from '../constants';
 
-export * from './error/'
-export * from './konsola'
-export const __filename = fileURLToPath(import.meta.url)
-export const __dirname = dirname(__filename)
+export * from './error/';
+export * from './konsola';
+export const __filename = fileURLToPath(import.meta.url);
+export const __dirname = dirname(__filename);
 
 export function isRegion(value: RegionCode): value is RegionCode {
-  return Object.values(regions).includes(value)
+  return Object.values(regions).includes(value);
 }
 
 export function maskToken(token: string): string {
   // Show only the first 4 characters and replace the rest with asterisks
   if (token.length <= 4) {
     // If the token is too short, just return it as is
-    return token
+    return token;
   }
-  const visiblePart = token.slice(0, 4)
-  const maskedPart = '*'.repeat(token.length - 4)
-  return `${visiblePart}${maskedPart}`
+  const visiblePart = token.slice(0, 4);
+  const maskedPart = '*'.repeat(token.length - 4);
+  return `${visiblePart}${maskedPart}`;
 }
 
 export const slugify = (text: string): string =>
@@ -31,24 +31,24 @@ export const slugify = (text: string): string =>
     .replace(/[^\w-]+/g, '') // Remove all non-word chars
     .replace(/-{2,}/g, '-') // Replace multiple - with single -
     .replace(/^-+/, '') // Trim - from start of text
-    .replace(/-+$/, '')
+    .replace(/-+$/, '');
 
 export const removePropertyRecursively = (obj: Record<string, any>, property: string): Record<string, any> => {
   if (typeof obj !== 'object' || obj === null) {
-    return obj
+    return obj;
   }
 
   if (Array.isArray(obj)) {
-    return obj.map(item => removePropertyRecursively(item, property))
+    return obj.map(item => removePropertyRecursively(item, property));
   }
 
-  const result: Record<string, any> = {}
+  const result: Record<string, any> = {};
   for (const [key, value] of Object.entries(obj)) {
     if (key !== property) {
-      result[key] = removePropertyRecursively(value, property)
+      result[key] = removePropertyRecursively(value, property);
     }
   }
-  return result
-}
+  return result;
+};
 
-export const isVitest = process.env.VITEST === 'true'
+export const isVitest = process.env.VITEST === 'true';

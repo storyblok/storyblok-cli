@@ -1,11 +1,11 @@
-import { session } from '../../../session'
-import { konsola } from '../../../utils'
-import { fetchComponents, saveComponentsToFiles } from './actions'
-import chalk from 'chalk'
-import { colorPalette } from '../../../constants'
+import { session } from '../../../session';
+import { konsola } from '../../../utils';
+import { fetchComponents, saveComponentsToFiles } from './actions';
+import chalk from 'chalk';
+import { colorPalette } from '../../../constants';
 // Import the main components module first to ensure proper initialization
-import '../index'
-import { componentsCommand } from '../command'
+import '../index';
+import { componentsCommand } from '../command';
 
 vi.mock('./actions', () => ({
   fetchComponents: vi.fn(),
@@ -14,11 +14,11 @@ vi.mock('./actions', () => ({
   fetchComponentPresets: vi.fn(),
   fetchComponentInternalTags: vi.fn(),
   saveComponentsToFiles: vi.fn(),
-}))
+}));
 
 // Mocking the session module
 vi.mock('../../../session', () => {
-  let _cache: Record<string, any> | null = null
+  let _cache: Record<string, any> | null = null;
   const session = () => {
     if (!_cache) {
       _cache = {
@@ -28,18 +28,18 @@ vi.mock('../../../session', () => {
         updateSession: vi.fn(),
         persistCredentials: vi.fn(),
         initializeSession: vi.fn(),
-      }
+      };
     }
-    return _cache
-  }
+    return _cache;
+  };
 
   return {
     session,
-  }
-})
+  };
+});
 
 vi.mock('../../../utils', async () => {
-  const actualUtils = await vi.importActual('../../../utils')
+  const actualUtils = await vi.importActual('../../../utils');
   return {
     ...actualUtils,
     isVitestRunning: true,
@@ -51,24 +51,24 @@ vi.mock('../../../utils', async () => {
       br: vi.fn(),
     },
     handleError: (error: unknown, header = false) => {
-      konsola.error(error as string, header)
+      konsola.error(error as string, header);
       // Optionally, prevent process.exit during tests
     },
-  }
-})
+  };
+});
 
 describe('pull', () => {
   beforeEach(() => {
-    vi.resetAllMocks()
-    vi.clearAllMocks()
+    vi.resetAllMocks();
+    vi.clearAllMocks();
     // Reset the option values
-    componentsCommand._optionValues = {}
-    componentsCommand._optionValueSources = {}
+    componentsCommand._optionValues = {};
+    componentsCommand._optionValueSources = {};
     for (const command of componentsCommand.commands) {
-      command._optionValueSources = {}
-      command._optionValues = {}
+      command._optionValueSources = {};
+      command._optionValues = {};
     }
-  })
+  });
 
   describe('default mode', () => {
     it('should prompt the user if the operation was sucessfull', async () => {
@@ -92,19 +92,19 @@ describe('pull', () => {
         color: null,
         internal_tags_list: [],
         internal_tag_ids: [],
-      }]
+      }];
 
       session().state = {
         isLoggedIn: true,
         password: 'valid-token',
         region: 'eu',
-      }
+      };
 
-      vi.mocked(fetchComponents).mockResolvedValue(mockResponse)
+      vi.mocked(fetchComponents).mockResolvedValue(mockResponse);
 
-      await componentsCommand.parseAsync(['node', 'test', 'pull', '--space', '12345'])
+      await componentsCommand.parseAsync(['node', 'test', 'pull', '--space', '12345']);
 
-      expect(fetchComponents).toHaveBeenCalledWith('12345', 'valid-token', 'eu')
+      expect(fetchComponents).toHaveBeenCalledWith('12345', 'valid-token', 'eu');
       expect(saveComponentsToFiles).toHaveBeenCalledWith('12345', {
         components: mockResponse,
         groups: [],
@@ -113,9 +113,9 @@ describe('pull', () => {
       }, {
         path: undefined,
         separateFiles: false,
-      })
-      expect(konsola.ok).toHaveBeenCalledWith(`Components downloaded successfully to ${chalk.hex(colorPalette.PRIMARY)(`.storyblok/components/12345/components.json`)}`)
-    })
+      });
+      expect(konsola.ok).toHaveBeenCalledWith(`Components downloaded successfully to ${chalk.hex(colorPalette.PRIMARY)(`.storyblok/components/12345/components.json`)}`);
+    });
 
     /* it('should fetch a component by name', async () => {
       const mockResponse = {
@@ -175,7 +175,7 @@ describe('pull', () => {
       await pullComponentsCommand.parseAsync(['node', 'test', 'pull'])
       expect(konsola.error).toHaveBeenCalledWith(mockError, false)
     }) */
-  })
+  });
 
   /*  describe('--path option', () => {
     it('should save the file at the provided path', async () => {
@@ -316,4 +316,4 @@ describe('pull', () => {
       expect(konsola.warn).toHaveBeenCalledWith(`The --filename option is ignored when using --separate-files`)
     })
   }) */
-})
+});
