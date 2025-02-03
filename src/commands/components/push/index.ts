@@ -6,7 +6,7 @@ import { CommandError, handleError, konsola } from '../../../utils';
 import { session } from '../../../session';
 import { readComponentsFiles } from './actions';
 import { componentsCommand } from '../command';
-import { handleTags } from './operations';
+import { handleComponentGroups, handleTags } from './operations';
 
 const program = getProgram(); // Get the shared singleton instance
 
@@ -72,7 +72,12 @@ componentsCommand
         const tagsResults = await handleTags(space, password, region, spaceData.internalTags);
         results.successful.push(...tagsResults.successful);
         results.failed.push(...tagsResults.failed);
+
         // Upsert groups
+        const groupsResults = await handleComponentGroups(space, password, region, spaceData.groups);
+        results.successful.push(...groupsResults.successful);
+        results.failed.push(...groupsResults.failed);
+
         /*  await Promise.all(spaceData.groups.map(async (group) => {
           const consolidatedSpinner = new Spinner()
           consolidatedSpinner.start('Upserting groups...')

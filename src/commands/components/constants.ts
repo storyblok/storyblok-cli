@@ -24,8 +24,8 @@ export interface SpaceComponentGroup {
   name: string;
   id: number;
   uuid: string;
-  parent_id: number;
-  parent_uuid: string;
+  parent_id: number | null;
+  parent_uuid: string | null;
 }
 
 export interface SpaceComponentPreset {
