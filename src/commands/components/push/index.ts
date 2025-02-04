@@ -6,7 +6,7 @@ import { CommandError, handleError, konsola } from '../../../utils';
 import { session } from '../../../session';
 import { readComponentsFiles } from './actions';
 import { componentsCommand } from '../command';
-import { handleComponentGroups, handleTags } from './operations';
+import { handleComponentGroups, handleComponents, handleTags } from './operations';
 
 const program = getProgram(); // Get the shared singleton instance
 
@@ -78,92 +78,18 @@ componentsCommand
         results.successful.push(...groupsResults.successful);
         results.failed.push(...groupsResults.failed);
 
-        /*  await Promise.all(spaceData.groups.map(async (group) => {
-          const consolidatedSpinner = new Spinner()
-          consolidatedSpinner.start('Upserting groups...')
-          try {
-            await upsertComponentGroup(space, group, password, region)
-            consolidatedSpinner.succeed(`Group-> ${chalk.hex(colorPalette.COMPONENTS)(group.name)} - Completed in ${consolidatedSpinner.elapsedTime.toFixed(2)}ms`)
-          }
-          catch (error) {
-            consolidatedSpinner.failed(`Group-> ${chalk.hex(colorPalette.COMPONENTS)(group.name)} - Failed`)
-            results.failed.push({ name: group.name, error })
-          }
-        })) */
+        // Process components with mapped UUIDs and IDs
+        const componentsResults = await handleComponents({
+          space,
+          password,
+          region,
+          spaceData,
+          groupsUuidMap: groupsResults.uuidMap,
+          tagsIdMaps: tagsResults.idMap,
+        });
+        results.successful.push(...componentsResults.successful);
+        results.failed.push(...componentsResults.failed);
       }
-
-      /* await Promise.all(spaceData.components.map(async (component) => {
-        const spinner = new Spinner()
-          .start(`${chalk.hex(colorPalette.COMPONENTS)(component.name)} - Pushing...`)
-        try {
-          const processedTags: { ids: string[], tags: SpaceComponentInternalTag[] } = { ids: [], tags: [] }
-
-          if (component.internal_tag_ids?.length > 0 && separateFiles) {
-            // spinner.text = `Pushing ${chalk.hex(colorPalette.COMPONENTS)(component.name)} internal tags...`
-            // Process tags sequentially to ensure order
-            await Promise.all(component.internal_tag_ids.map(async (tagId) => {
-              const internalTagsSpinner = new Spinner()
-              internalTagsSpinner.start(`Pushing ${chalk.hex(colorPalette.COMPONENTS)(component.name)} internal tags...`)
-              const tag = spaceData.internalTags.find(tag => tag.id === Number(tagId))
-
-              if (tag) {
-                try {
-                  const updatedTag = await upsertComponentInternalTag(space, tag, password, region)
-                  if (updatedTag) {
-                    processedTags.tags.push(updatedTag)
-                    processedTags.ids.push(updatedTag.id.toString())
-                    internalTagsSpinner.succeed(`Tag-> ${chalk.hex(colorPalette.COMPONENTS)(tag.name)} - Completed in ${internalTagsSpinner.elapsedTime.toFixed(2)}ms`)
-                  }
-                }
-                catch (error) {
-                  internalTagsSpinner.failed(`Tag-> ${chalk.hex(colorPalette.COMPONENTS)(tag.name)} - Failed`)
-                  results.failed.push({ name: tag.name, error })
-                }
-              }
-            }))
-          }
-
-          // Create a new component object with the processed tags
-          const componentToUpdate = {
-            ...component,
-            internal_tag_ids: processedTags.ids,
-            internal_tags_list: processedTags.tags,
-          }
-          const updatedComponent = await upsertComponent(space, componentToUpdate, password, region)
-          if (updatedComponent) {
-            const relatedPresets = spaceData.presets.filter(preset => preset.component_id === component.id)
-            if (relatedPresets.length > 0) {
-              await Promise.all(relatedPresets.map(async (preset) => {
-                const presetSpinner = new Spinner()
-                presetSpinner.start(`Upserting ${chalk.hex(colorPalette.COMPONENTS)(preset.name)}...`)
-                try {
-                  const presetToUpdate = {
-                    name: preset.name,
-                    preset: removePropertyRecursively(
-                      removePropertyRecursively(preset.preset, '_uid'),
-                      'component',
-                    ),
-                    component_id: updatedComponent.id,
-                  }
-                  await upsertComponentPreset(space, presetToUpdate, password, region)
-                  presetSpinner.succeed(`Preset-> ${chalk.hex(colorPalette.COMPONENTS)(preset.name)} - Completed in ${presetSpinner.elapsedTime.toFixed(2)}ms`)
-                }
-                catch (error) {
-                  presetSpinner.failed(`Preset-> ${chalk.hex(colorPalette.COMPONENTS)(preset.name)} - Failed`)
-                  results.failed.push({ name: preset.name, error })
-                }
-              }))
-            }
-          }
-          spinner.succeed(`Component-> ${chalk.hex(colorPalette.COMPONENTS)(component.name)} - Completed in ${spinner.elapsedTime.toFixed(2)}ms`)
-          results.successful.push(component.name)
-        }
-        catch (error) {
-          const spinnerFailedMessage = `Component-> ${chalk.hex(colorPalette.COMPONENTS)(component.name)} - Failed`
-          spinner.failed(spinnerFailedMessage)
-          results.failed.push({ name: component.name, error })
-        }
-      })) */
 
       if (results.failed.length > 0) {
         if (!verbose) {

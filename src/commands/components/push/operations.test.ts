@@ -1,12 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { handleComponentGroups, handleTags } from './operations';
-import { upsertComponentGroup, upsertComponentInternalTag } from './actions';
-import type { SpaceComponentGroup } from '../constants';
+import { handleComponentGroups, handleComponents, handleTags } from './operations';
+import { upsertComponent, upsertComponentGroup, upsertComponentInternalTag, upsertComponentPreset } from './actions';
+import type { SpaceComponent, SpaceComponentGroup, SpaceComponentInternalTag, SpaceComponentPreset } from '../constants';
 
 // Mock the actions module
 vi.mock('./actions', () => ({
   upsertComponentInternalTag: vi.fn(),
   upsertComponentGroup: vi.fn(),
+  upsertComponent: vi.fn(),
+  upsertComponentPreset: vi.fn(),
 }));
 
 // Mock the spinner
@@ -211,6 +213,180 @@ describe('operations', () => {
       expect(result.failed).toHaveLength(0);
       expect(result.uuidMap.size).toBe(0);
       expect(result.idMap.size).toBe(0);
+    });
+  });
+
+  describe('handleComponents', () => {
+    const mockComponents = [
+      {
+        name: 'Hero',
+        id: 123,
+        display_name: 'Hero',
+        created_at: '2024-01-01',
+        updated_at: '2024-01-01',
+        schema: {},
+        component_group_uuid: 'a6e35ba1-505e-4941-8bb2-eaac3d0a26a4',
+        internal_tag_ids: ['1', '2'],
+        internal_tags_list: [],
+        color: null,
+      },
+      {
+        name: 'Footer',
+        id: 124,
+        display_name: 'Footer',
+        created_at: '2024-01-01',
+        updated_at: '2024-01-01',
+        schema: {},
+        component_group_uuid: '558e0d2a-d1d2-4753-9a18-a37d3bb6f505',
+        internal_tag_ids: ['2'],
+        internal_tags_list: [],
+        color: null,
+      },
+    ];
+
+    const mockInternalTags = [
+      { id: 1, name: 'tag1' },
+      { id: 2, name: 'tag2' },
+    ];
+
+    const mockPresets = [
+      {
+        id: 1,
+        name: 'Hero Preset',
+        component_id: 123,
+        preset: { title: 'Hello' },
+        space_id: 1,
+        created_at: '2024-01-01',
+        updated_at: '2024-01-01',
+        image: '',
+        color: '',
+        icon: '',
+        description: '',
+      },
+    ];
+
+    const mockSpaceData = {
+      components: mockComponents,
+      internalTags: mockInternalTags,
+      presets: mockPresets,
+      groups: [],
+    };
+
+    const mockGroupsUuidMap = new Map([
+      ['a6e35ba1-505e-4941-8bb2-eaac3d0a26a4', 'new-uuid-a'],
+      ['558e0d2a-d1d2-4753-9a18-a37d3bb6f505', 'new-uuid-b'],
+    ]);
+
+    const mockTagsIdMap = new Map([
+      [1, 101],
+      [2, 102],
+    ]);
+
+    it('should process components with mapped group UUIDs and tag IDs', async () => {
+      // Mock successful component update
+      vi.mocked(upsertComponent).mockImplementation(async (space, component) => ({
+        ...component,
+        id: component.id + 1000, // Just to make it different
+      }));
+
+      // Mock successful preset update
+      vi.mocked(upsertComponentPreset).mockResolvedValue(mockPresets[0]);
+
+      const result = await handleComponents({
+        space: mockSpace,
+        password: mockPassword,
+        region: mockRegion,
+        spaceData: mockSpaceData,
+        groupsUuidMap: mockGroupsUuidMap,
+        tagsIdMaps: mockTagsIdMap,
+      });
+
+      // Verify successful processing
+      expect(result.successful).toEqual(['Hero', 'Footer']);
+      expect(result.failed).toHaveLength(0);
+
+      // Verify component updates
+      const componentCalls = vi.mocked(upsertComponent).mock.calls;
+      expect(componentCalls).toHaveLength(2);
+
+      // Verify first component (Hero)
+      expect(componentCalls[0][1]).toEqual(expect.objectContaining({
+        name: 'Hero',
+        component_group_uuid: 'new-uuid-a',
+        internal_tag_ids: ['101', '102'],
+      }));
+
+      // Verify second component (Footer)
+      expect(componentCalls[1][1]).toEqual(expect.objectContaining({
+        name: 'Footer',
+        component_group_uuid: 'new-uuid-b',
+        internal_tag_ids: ['102'],
+      }));
+
+      // Verify preset update
+      const presetCalls = vi.mocked(upsertComponentPreset).mock.calls;
+      expect(presetCalls).toHaveLength(1);
+      expect(presetCalls[0][1]).toEqual(expect.objectContaining({
+        name: 'Hero Preset',
+        component_id: 1123, // Original 123 + 1000
+      }));
+    });
+
+    it('should handle component update failures', async () => {
+      // Mock Hero component failing
+      vi.mocked(upsertComponent).mockImplementation(async (space, component) => {
+        if (component.name === 'Hero') {
+          throw new Error('Failed to update Hero component');
+        }
+        return {
+          ...component,
+          id: component.id + 1000,
+        };
+      });
+
+      const result = await handleComponents({
+        space: mockSpace,
+        password: mockPassword,
+        region: mockRegion,
+        spaceData: mockSpaceData,
+        groupsUuidMap: mockGroupsUuidMap,
+        tagsIdMaps: mockTagsIdMap,
+      });
+
+      // Verify one failure and one success
+      expect(result.successful).toEqual(['Footer']);
+      expect(result.failed).toHaveLength(1);
+      expect(result.failed[0]).toEqual({
+        name: 'Hero',
+        error: new Error('Failed to update Hero component'),
+      });
+    });
+
+    it('should handle preset update failures', async () => {
+      // Mock successful component update but failed preset
+      vi.mocked(upsertComponent).mockImplementation(async (space, component) => ({
+        ...component,
+        id: component.id + 1000,
+      }));
+
+      vi.mocked(upsertComponentPreset).mockRejectedValue(new Error('Failed to update preset'));
+
+      const result = await handleComponents({
+        space: mockSpace,
+        password: mockPassword,
+        region: mockRegion,
+        spaceData: mockSpaceData,
+        groupsUuidMap: mockGroupsUuidMap,
+        tagsIdMaps: mockTagsIdMap,
+      });
+
+      // Verify components succeeded but preset failed
+      expect(result.successful).toEqual(['Hero', 'Footer']);
+      expect(result.failed).toHaveLength(1);
+      expect(result.failed[0]).toEqual({
+        name: 'Hero Preset',
+        error: new Error('Failed to update preset'),
+      });
     });
   });
 });

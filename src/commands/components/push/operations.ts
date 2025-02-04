@@ -3,13 +3,14 @@ import chalk from 'chalk';
 import { colorPalette } from '../../../constants';
 import { isVitest } from '../../../utils';
 import type { RegionCode } from '../../../constants';
-import type { SpaceComponentGroup, SpaceComponentInternalTag } from '../constants';
-import { upsertComponentGroup, upsertComponentInternalTag } from './actions';
+import type { SpaceComponentGroup, SpaceComponentInternalTag, SpaceData } from '../constants';
+import { upsertComponent, upsertComponentGroup, upsertComponentInternalTag, upsertComponentPreset } from './actions';
 
 export async function handleTags(space: string, password: string, region: RegionCode, spaceData: SpaceComponentInternalTag[]) {
   const results = {
     successful: [] as string[],
     failed: [] as Array<{ name: string; error: unknown }>,
+    idMap: new Map<number, number>(),
   };
   await Promise.all(spaceData.map(async (tag) => {
     const consolidatedSpinner = new Spinner({
@@ -17,8 +18,12 @@ export async function handleTags(space: string, password: string, region: Region
     });
     consolidatedSpinner.start('Upserting tags...');
     try {
-      await upsertComponentInternalTag(space, tag, password, region);
-      consolidatedSpinner.succeed(`Tag-> ${chalk.hex(colorPalette.COMPONENTS)(tag.name)} - Completed in ${consolidatedSpinner.elapsedTime.toFixed(2)}ms`);
+      const updatedTag = await upsertComponentInternalTag(space, tag, password, region);
+      if (updatedTag) {
+        results.idMap.set(tag.id, updatedTag.id);
+        results.successful.push(tag.name);
+        consolidatedSpinner.succeed(`Tag-> ${chalk.hex(colorPalette.COMPONENTS)(tag.name)} - Completed in ${consolidatedSpinner.elapsedTime.toFixed(2)}ms`);
+      }
     }
     catch (error) {
       consolidatedSpinner.failed(`Tag-> ${chalk.hex(colorPalette.COMPONENTS)(tag.name)} - Failed`);
@@ -111,5 +116,113 @@ export async function handleComponentGroups(space: string, password: string, reg
   }
 
   await processChildGroups();
+  return results;
+}
+
+interface HandleComponentsOptions {
+  space: string;
+  password: string;
+  region: RegionCode;
+  spaceData: SpaceData;
+  groupsUuidMap: Map<string, string>;
+  tagsIdMaps: Map<number, number>;
+}
+
+export async function handleComponents(options: HandleComponentsOptions) {
+  const {
+    space,
+    password,
+    region,
+    spaceData: { components, internalTags, presets },
+    groupsUuidMap,
+    tagsIdMaps,
+  } = options;
+
+  const results = {
+    successful: [] as string[],
+    failed: [] as Array<{ name: string; error: unknown }>,
+  };
+
+  for (const component of components) {
+    const spinner = new Spinner({
+      verbose: !isVitest,
+    });
+    spinner.start(`Processing component ${component.name}...`);
+
+    try {
+      // Map component_group_uuid if it exists
+      const componentToUpdate = { ...component };
+      if (component.component_group_uuid) {
+        const newGroupUuid = groupsUuidMap.get(component.component_group_uuid);
+        if (newGroupUuid) {
+          componentToUpdate.component_group_uuid = newGroupUuid;
+        }
+      }
+
+      // Process internal tags if they exist
+      if (component.internal_tag_ids?.length > 0) {
+        const processedTags: { ids: string[]; tags: SpaceComponentInternalTag[] } = {
+          ids: [],
+          tags: [],
+        };
+
+        // Map existing tag IDs to new ones
+        for (const tagId of component.internal_tag_ids) {
+          const tag = internalTags.find(t => t.id === Number(tagId));
+          if (tag) {
+            const newTagId = tagsIdMaps.get(tag.id);
+            if (newTagId) {
+              processedTags.ids.push(newTagId.toString());
+              processedTags.tags.push({
+                ...tag,
+                id: newTagId,
+              });
+            }
+          }
+        }
+
+        componentToUpdate.internal_tag_ids = processedTags.ids;
+        componentToUpdate.internal_tags_list = processedTags.tags;
+      }
+
+      // Upsert the component
+      const updatedComponent = await upsertComponent(space, componentToUpdate, password, region);
+      if (updatedComponent) {
+        results.successful.push(component.name);
+        spinner.succeed(`Component-> ${chalk.hex(colorPalette.COMPONENTS)(component.name)} - Completed in ${spinner.elapsedTime.toFixed(2)}ms`);
+
+        // Process related presets
+        const relatedPresets = presets.filter(preset => preset.component_id === component.id);
+        if (relatedPresets.length > 0) {
+          for (const preset of relatedPresets) {
+            const presetSpinner = new Spinner({
+              verbose: !isVitest,
+            });
+            presetSpinner.start(`Processing preset ${preset.name}...`);
+
+            try {
+              const presetToUpdate = {
+                name: preset.name,
+                preset: preset.preset,
+                component_id: updatedComponent.id,
+              };
+
+              await upsertComponentPreset(space, presetToUpdate, password, region);
+              presetSpinner.succeed(`Preset-> ${chalk.hex(colorPalette.COMPONENTS)(preset.name)} - Completed in ${presetSpinner.elapsedTime.toFixed(2)}ms`);
+            }
+            catch (error) {
+              presetSpinner.failed(`Preset-> ${chalk.hex(colorPalette.COMPONENTS)(preset.name)} - Failed`);
+              results.failed.push({ name: preset.name, error });
+            }
+          }
+        }
+      }
+    }
+    catch (error) {
+      spinner.failed(`Component-> ${chalk.hex(colorPalette.COMPONENTS)(component.name)} - Failed`);
+      results.failed.push({ name: component.name, error });
+    }
+  }
+
   return results;
 }
