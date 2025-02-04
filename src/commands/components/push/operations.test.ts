@@ -1,7 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { handleComponentGroups, handleComponents, handleTags } from './operations';
+import {
+  filterSpaceDataByComponent,
+  filterSpaceDataByPattern,
+  handleComponentGroups,
+  handleComponents,
+  handleTags,
+} from './operations';
 import { upsertComponent, upsertComponentGroup, upsertComponentInternalTag, upsertComponentPreset } from './actions';
-import type { SpaceComponent, SpaceComponentGroup, SpaceComponentInternalTag, SpaceComponentPreset } from '../constants';
+import type { SpaceComponent, SpaceComponentGroup, SpaceComponentInternalTag, SpaceComponentPreset, SpaceData } from '../constants';
 
 // Mock the actions module
 vi.mock('./actions', () => ({
@@ -387,6 +393,252 @@ describe('operations', () => {
         name: 'Hero Preset',
         error: new Error('Failed to update preset'),
       });
+    });
+  });
+
+  describe('filterSpaceDataByPattern', () => {
+    const mockSpaceData: SpaceData = {
+      components: [
+        {
+          name: 'component-tags',
+          id: 123,
+          display_name: 'Component Tags',
+          created_at: '2024-01-01',
+          updated_at: '2024-01-01',
+          schema: {},
+          component_group_uuid: 'group-a-uuid',
+          internal_tag_ids: ['1', '2'],
+          internal_tags_list: [],
+          color: null,
+        },
+        {
+          name: 'component-inside-folder-a',
+          id: 124,
+          display_name: 'Component Inside Folder A',
+          created_at: '2024-01-01',
+          updated_at: '2024-01-01',
+          schema: {},
+          component_group_uuid: 'group-b-uuid',
+          internal_tag_ids: ['2'],
+          internal_tags_list: [],
+          color: null,
+        },
+        {
+          name: 'component-inside-deep-folder',
+          id: 125,
+          display_name: 'Component Inside Deep Folder',
+          created_at: '2024-01-01',
+          updated_at: '2024-01-01',
+          schema: {},
+          component_group_uuid: 'group-c-uuid',
+          internal_tag_ids: ['1'],
+          internal_tags_list: [],
+          color: null,
+        },
+      ],
+      groups: [
+        {
+          name: 'Group A',
+          id: 1,
+          uuid: 'group-a-uuid',
+          parent_id: 0,
+          parent_uuid: '',
+        },
+        {
+          name: 'Group B',
+          id: 2,
+          uuid: 'group-b-uuid',
+          parent_id: 1,
+          parent_uuid: 'group-a-uuid',
+        },
+        {
+          name: 'Group C',
+          id: 3,
+          uuid: 'group-c-uuid',
+          parent_id: 2,
+          parent_uuid: 'group-b-uuid',
+        },
+      ],
+      presets: [
+        {
+          id: 1,
+          name: 'Tags Preset',
+          component_id: 123,
+          preset: { title: 'Hello' },
+          space_id: 1,
+          created_at: '2024-01-01',
+          updated_at: '2024-01-01',
+          image: '',
+          color: '',
+          icon: '',
+          description: '',
+        },
+      ],
+      internalTags: [
+        { id: 1, name: 'tag1' },
+        { id: 2, name: 'tag2' },
+      ],
+    };
+
+    it('should match exact component name', () => {
+      const result = filterSpaceDataByPattern(mockSpaceData, 'component-tags');
+
+      expect(result.components).toHaveLength(1);
+      expect(result.components[0].name).toBe('component-tags');
+      expect(result.internalTags).toHaveLength(2); // Should have both tags
+      expect(result.presets).toHaveLength(1); // Should have the preset
+      expect(result.groups).toHaveLength(1); // Should have Group A
+    });
+
+    it('should match components using wildcard pattern', () => {
+      const result = filterSpaceDataByPattern(mockSpaceData, 'component-inside-*');
+
+      expect(result.components).toHaveLength(2);
+      expect(result.components.map(c => c.name)).toEqual([
+        'component-inside-folder-a',
+        'component-inside-deep-folder',
+      ]);
+      expect(result.internalTags).toHaveLength(2); // Should have both tags as they're used
+      expect(result.presets).toHaveLength(0); // No presets for these components
+      expect(result.groups).toHaveLength(3); // Should have all groups due to hierarchy
+    });
+
+    it('should handle no matches', () => {
+      const result = filterSpaceDataByPattern(mockSpaceData, 'non-existent-*');
+
+      expect(result.components).toHaveLength(0);
+      expect(result.internalTags).toHaveLength(0);
+      expect(result.presets).toHaveLength(0);
+      expect(result.groups).toHaveLength(0);
+    });
+
+    it('should escape special regex characters in pattern', () => {
+      const result = filterSpaceDataByPattern(mockSpaceData, 'component-tags.+$');
+
+      expect(result.components).toHaveLength(0); // Should not match as it's treated as literal
+    });
+  });
+
+  describe('filterSpaceDataByComponent', () => {
+    const mockSpaceData: SpaceData = {
+      components: [
+        {
+          name: 'component-tags',
+          id: 123,
+          display_name: 'Component Tags',
+          created_at: '2024-01-01',
+          updated_at: '2024-01-01',
+          schema: {},
+          component_group_uuid: 'group-a-uuid',
+          internal_tag_ids: ['1', '2'],
+          internal_tags_list: [],
+          color: null,
+        },
+        {
+          name: 'component-inside-folder-a',
+          id: 124,
+          display_name: 'Component Inside Folder A',
+          created_at: '2024-01-01',
+          updated_at: '2024-01-01',
+          schema: {},
+          component_group_uuid: 'group-b-uuid',
+          internal_tag_ids: ['2'],
+          internal_tags_list: [],
+          color: null,
+        },
+      ],
+      groups: [
+        {
+          name: 'Group A',
+          id: 1,
+          uuid: 'group-a-uuid',
+          parent_id: 0,
+          parent_uuid: '',
+        },
+        {
+          name: 'Group B',
+          id: 2,
+          uuid: 'group-b-uuid',
+          parent_id: 1,
+          parent_uuid: 'group-a-uuid',
+        },
+      ],
+      presets: [
+        {
+          id: 1,
+          name: 'Tags Preset',
+          component_id: 123,
+          preset: { title: 'Hello' },
+          space_id: 1,
+          created_at: '2024-01-01',
+          updated_at: '2024-01-01',
+          image: '',
+          color: '',
+          icon: '',
+          description: '',
+        },
+      ],
+      internalTags: [
+        { id: 1, name: 'tag1' },
+        { id: 2, name: 'tag2' },
+      ],
+    };
+
+    it('should filter data for exact component name match', () => {
+      const result = filterSpaceDataByComponent(mockSpaceData, 'component-tags');
+
+      expect(result.components).toHaveLength(1);
+      expect(result.components[0].name).toBe('component-tags');
+      expect(result.internalTags).toHaveLength(2); // Should include both tags as they're used
+      expect(result.presets).toHaveLength(1); // Should include the preset for this component
+      expect(result.groups).toHaveLength(1); // Should only include Group A
+    });
+
+    it('should filter data for component with single tag and no presets', () => {
+      const result = filterSpaceDataByComponent(mockSpaceData, 'component-inside-folder-a');
+
+      expect(result.components).toHaveLength(1);
+      expect(result.components[0].name).toBe('component-inside-folder-a');
+      expect(result.internalTags).toHaveLength(1); // Should only include tag2
+      expect(result.presets).toHaveLength(0); // Should have no presets
+      expect(result.groups).toHaveLength(2); // Should include both groups due to hierarchy
+    });
+
+    it('should return empty data for non-existent component', () => {
+      const result = filterSpaceDataByComponent(mockSpaceData, 'non-existent-component');
+
+      expect(result.components).toHaveLength(0);
+      expect(result.internalTags).toHaveLength(0);
+      expect(result.presets).toHaveLength(0);
+      expect(result.groups).toHaveLength(0);
+    });
+
+    it('should handle component with no tags or groups', () => {
+      const testData: SpaceData = {
+        ...mockSpaceData,
+        components: [
+          {
+            name: 'standalone-component',
+            id: 999,
+            display_name: 'Standalone Component',
+            created_at: '2024-01-01',
+            updated_at: '2024-01-01',
+            schema: {},
+            component_group_uuid: '',
+            internal_tag_ids: [],
+            internal_tags_list: [],
+            color: null,
+          },
+        ],
+      };
+
+      const result = filterSpaceDataByComponent(testData, 'standalone-component');
+
+      expect(result.components).toHaveLength(1);
+      expect(result.components[0].name).toBe('standalone-component');
+      expect(result.internalTags).toHaveLength(0);
+      expect(result.presets).toHaveLength(0);
+      expect(result.groups).toHaveLength(0);
     });
   });
 });

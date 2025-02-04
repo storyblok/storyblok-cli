@@ -138,6 +138,34 @@
       "env": {
         "STUB": "true"
       }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Push component component-tags",
+      "program": "${workspaceFolder}/dist/index.mjs",
+      "args": ["components", "push", "component-tags", "--space", "295018", "--from", "295017"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "sourceMaps": true,
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "env": {
+        "STUB": "true"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Push component filtered by pattern",
+      "program": "${workspaceFolder}/dist/index.mjs",
+      "args": ["components", "push", "--space", "295018", "--from", "295017", "--filter", "component-inside-*"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "sourceMaps": true,
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "env": {
+        "STUB": "true"
+      }
     }
   ]
 }

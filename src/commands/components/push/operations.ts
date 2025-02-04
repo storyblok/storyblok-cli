@@ -3,8 +3,120 @@ import chalk from 'chalk';
 import { colorPalette } from '../../../constants';
 import { isVitest } from '../../../utils';
 import type { RegionCode } from '../../../constants';
-import type { SpaceComponentGroup, SpaceComponentInternalTag, SpaceData } from '../constants';
+import type {
+  SpaceComponent,
+  SpaceComponentGroup,
+  SpaceComponentInternalTag,
+  SpaceComponentPreset,
+  SpaceData,
+} from '../constants';
 import { upsertComponent, upsertComponentGroup, upsertComponentInternalTag, upsertComponentPreset } from './actions';
+
+function findRelatedResources(
+  components: SpaceComponent[],
+  spaceData: SpaceData,
+): {
+    groups: SpaceComponentGroup[];
+    presets: SpaceComponentPreset[];
+    internalTags: SpaceComponentInternalTag[];
+  } {
+  // Get all component IDs and UUIDs for filtering related resources
+  const componentIds = new Set(components.map(c => c.id));
+
+  // Get all group UUIDs from components, filtering out empty/falsy values
+  const componentGroupUuids = new Set(
+    components
+      .map(c => c.component_group_uuid)
+      .filter((uuid): uuid is string => typeof uuid === 'string' && uuid.length > 0),
+  );
+
+  const tagIds = new Set<number>();
+
+  // Collect all tag IDs from components
+  components.forEach((component) => {
+    component.internal_tag_ids?.forEach(id => tagIds.add(Number(id)));
+  });
+
+  // Get related presets for all components
+  const relatedPresets = spaceData.presets.filter(p => componentIds.has(p.component_id));
+
+  // Get related tags
+  const relatedTags = spaceData.internalTags.filter(tag => tagIds.has(tag.id));
+
+  // Get related groups (including parent hierarchy) for all components
+  const relatedGroups = new Set<SpaceComponentGroup>();
+
+  // Create a map of all groups for efficient lookup
+  const groupsMap = new Map(spaceData.groups.map(g => [g.uuid, g]));
+
+  // For each component's group UUID, traverse up the hierarchy
+  componentGroupUuids.forEach((groupUuid) => {
+    let currentGroup = groupsMap.get(groupUuid);
+
+    while (currentGroup) {
+      relatedGroups.add(currentGroup);
+
+      // If the group has a parent, get it from the map
+      if (currentGroup.parent_uuid && currentGroup.parent_uuid.length > 0) {
+        currentGroup = groupsMap.get(currentGroup.parent_uuid);
+      }
+      else {
+        currentGroup = undefined;
+      }
+    }
+  });
+
+  const result = {
+    groups: Array.from(relatedGroups),
+    presets: relatedPresets,
+    internalTags: relatedTags,
+  };
+
+  return result;
+}
+
+// TODO: Consider implementing filter-by pattern (default is to filter by component name)
+export function filterSpaceDataByPattern(spaceData: SpaceData, pattern: string): SpaceData {
+  // Add ^ and $ to ensure exact match, escape the pattern to handle special characters
+  const regex = new RegExp(`^${pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\\\*/g, '.*')}$`);
+  const matchedComponents = spaceData.components.filter(c => regex.test(c.name));
+
+  if (!matchedComponents.length) {
+    return {
+      components: [],
+      groups: [],
+      presets: [],
+      internalTags: [],
+    };
+  }
+
+  const relatedResources = findRelatedResources(matchedComponents, spaceData);
+
+  return {
+    components: matchedComponents,
+    ...relatedResources,
+  };
+}
+
+export function filterSpaceDataByComponent(spaceData: SpaceData, componentName: string): SpaceData {
+  // Find the specific component
+  const component = spaceData.components.find(c => c.name === componentName);
+  if (!component) {
+    return {
+      components: [],
+      groups: [],
+      presets: [],
+      internalTags: [],
+    };
+  }
+
+  const relatedResources = findRelatedResources([component], spaceData);
+
+  return {
+    components: [component],
+    ...relatedResources,
+  };
+}
 
 export async function handleTags(space: string, password: string, region: RegionCode, spaceData: SpaceComponentInternalTag[]) {
   const results = {

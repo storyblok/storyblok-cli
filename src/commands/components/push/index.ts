@@ -6,7 +6,13 @@ import { CommandError, handleError, konsola } from '../../../utils';
 import { session } from '../../../session';
 import { readComponentsFiles } from './actions';
 import { componentsCommand } from '../command';
-import { handleComponentGroups, handleComponents, handleTags } from './operations';
+import {
+  filterSpaceDataByComponent,
+  filterSpaceDataByPattern,
+  handleComponentGroups,
+  handleComponents,
+  handleTags,
+} from './operations';
 
 const program = getProgram(); // Get the shared singleton instance
 
@@ -23,7 +29,7 @@ componentsCommand
     const verbose = program.opts().verbose;
     const { space, path } = componentsCommand.opts();
 
-    const { from, filter, separateFiles } = options;
+    const { from, filter } = options;
 
     // Check if the user is logged in
     const { state, initializeSession } = session();
@@ -48,17 +54,31 @@ componentsCommand
     const { password, region } = state;
 
     try {
-      const spaceData = await readComponentsFiles({
+      let spaceData = await readComponentsFiles({
         ...options,
         path,
       });
 
-      if (!spaceData.components.length) {
-        let message = 'No components found that meet the filter criteria. Please make sure you have pulled the components first and that the filter is correct.';
-        if (options.separateFiles) {
-          message = 'No components found that meet the filter criteria with the separate files. Please make sure you have pulled the components first and that the filter is correct.';
+      // If componentName is provided, filter space data to only include related resources
+      if (componentName) {
+        spaceData = filterSpaceDataByComponent(spaceData, componentName);
+        if (!spaceData.components.length) {
+          konsola.error(`Component "${componentName}" not found.`);
+          return;
         }
-        konsola.warn(message);
+      }
+      // If filter pattern is provided, filter space data to match the pattern
+      else if (filter) {
+        spaceData = filterSpaceDataByPattern(spaceData, filter);
+        if (!spaceData.components.length) {
+          konsola.error(`No components found matching pattern "${filter}".`);
+          return;
+        }
+        konsola.info(`Filter applied: ${filter}`);
+      }
+
+      if (!spaceData.components.length) {
+        konsola.warn('No components found. Please make sure you have pulled the components first.');
         return;
       }
 
@@ -67,29 +87,24 @@ componentsCommand
         failed: [] as Array<{ name: string; error: unknown }>,
       };
 
-      if (!separateFiles) {
-        // If separate files are not used, we need to upsert the tags first
-        const tagsResults = await handleTags(space, password, region, spaceData.internalTags);
-        results.successful.push(...tagsResults.successful);
-        results.failed.push(...tagsResults.failed);
+      const tagsResults = await handleTags(space, password, region, spaceData.internalTags);
+      results.successful.push(...tagsResults.successful);
+      results.failed.push(...tagsResults.failed);
 
-        // Upsert groups
-        const groupsResults = await handleComponentGroups(space, password, region, spaceData.groups);
-        results.successful.push(...groupsResults.successful);
-        results.failed.push(...groupsResults.failed);
+      const groupsResults = await handleComponentGroups(space, password, region, spaceData.groups);
+      results.successful.push(...groupsResults.successful);
+      results.failed.push(...groupsResults.failed);
 
-        // Process components with mapped UUIDs and IDs
-        const componentsResults = await handleComponents({
-          space,
-          password,
-          region,
-          spaceData,
-          groupsUuidMap: groupsResults.uuidMap,
-          tagsIdMaps: tagsResults.idMap,
-        });
-        results.successful.push(...componentsResults.successful);
-        results.failed.push(...componentsResults.failed);
-      }
+      const componentsResults = await handleComponents({
+        space,
+        password,
+        region,
+        spaceData,
+        groupsUuidMap: groupsResults.uuidMap,
+        tagsIdMaps: tagsResults.idMap,
+      });
+      results.successful.push(...componentsResults.successful);
+      results.failed.push(...componentsResults.failed);
 
       if (results.failed.length > 0) {
         if (!verbose) {
@@ -101,10 +116,6 @@ componentsCommand
             handleError(failed.error as Error, verbose);
           });
         }
-      }
-
-      if (filter) {
-        konsola.info(`Filter applied: ${filter}`);
       }
     }
     catch (error) {

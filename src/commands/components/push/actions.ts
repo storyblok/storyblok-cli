@@ -256,7 +256,7 @@ export const upsertComponentInternalTag = async (space: string, tag: SpaceCompon
 
 export const readComponentsFiles = async (
   options: ReadComponentsOptions): Promise<SpaceData> => {
-  const { filter, separateFiles, path, from } = options;
+  const { separateFiles, path, from } = options;
   const resolvedPath = resolvePath(path, `components/${from}`);
 
   // Check if the path exists first
@@ -269,8 +269,6 @@ export const readComponentsFiles = async (
     }
     throw error;
   }
-
-  const regex = filter ? new RegExp(filter) : null;
 
   const spaceData: SpaceData = {
     components: [],
@@ -296,11 +294,8 @@ export const readComponentsFiles = async (
         try {
           const content = await readFile(join(resolvedPath, file), 'utf-8');
           const data = JSON.parse(content);
-
           if (componentsPattern.test(file)) {
-            spaceData.components = regex
-              ? data.filter((c: SpaceComponent) => regex.test(c.name))
-              : data;
+            spaceData.components = data;
           }
           else if (groupsPattern.test(file)) {
             spaceData.groups = data;
@@ -336,14 +331,8 @@ export const readComponentsFiles = async (
         continue;
       }
 
-      const { dir, name } = parse(file);
+      const { dir } = parse(file);
       const isPreset = /\.preset\.json$/.test(file);
-      const baseName = name.replace(/\.preset$/, '').split('.')[0];
-
-      // Skip if filter is set and doesn't match the base component name
-      if (regex && !regex.test(baseName)) {
-        continue;
-      }
 
       const content = await readFile(join(resolvedPath, file), 'utf-8');
       const data = JSON.parse(content);
