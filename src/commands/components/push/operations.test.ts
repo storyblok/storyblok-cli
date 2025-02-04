@@ -7,7 +7,7 @@ import {
   handleTags,
 } from './operations';
 import { upsertComponent, upsertComponentGroup, upsertComponentInternalTag, upsertComponentPreset } from './actions';
-import type { SpaceComponent, SpaceComponentGroup, SpaceComponentInternalTag, SpaceComponentPreset, SpaceData } from '../constants';
+import type { SpaceComponentGroup, SpaceData } from '../constants';
 
 // Mock the actions module
 vi.mock('./actions', () => ({

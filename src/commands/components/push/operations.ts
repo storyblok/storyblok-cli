@@ -184,12 +184,16 @@ export async function handleComponentGroups(space: string, password: string, reg
     const remainingGroups = spaceData.filter(group => !processedGroups.has(group.uuid));
 
     for (const group of remainingGroups) {
-      if (!group.parent_uuid || !group.parent_id) { continue; }
+      if (!group.parent_uuid || !group.parent_id) {
+        continue;
+      }
 
       // Check if parent has been processed
       const newParentUuid = results.uuidMap.get(group.parent_uuid);
       const newParentId = results.idMap.get(group.parent_id);
-      if (!newParentUuid || !newParentId) { continue; }
+      if (!newParentUuid || !newParentId) {
+        continue;
+      }
 
       const spinner = new Spinner({
         verbose: !isVitest,
