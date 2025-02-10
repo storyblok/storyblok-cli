@@ -75,7 +75,7 @@ describe('pull languages actions', () => {
   });
 
   describe('saveLanguagesToFile', () => {
-    it('should save languages to a json file with space number', async () => {
+    it('should save a consolidated languages file', async () => {
       const mockResponse = {
         default_lang_name: 'en',
         languages: [
@@ -95,7 +95,7 @@ describe('pull languages actions', () => {
         verbose: false,
         space: '12345',
       });
-      const content = vol.readFileSync('/temp/languages.json', 'utf8');
+      const content = vol.readFileSync('/temp/languages/12345/languages.json', 'utf8');
       expect(content).toBe(JSON.stringify(mockResponse, null, 2));
     });
   });
