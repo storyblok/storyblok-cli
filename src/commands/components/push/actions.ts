@@ -4,7 +4,7 @@ import { APIError, FileSystemError, handleAPIError, handleFileSystemError } from
 import type { RegionCode } from '../../../constants';
 import type { SpaceComponent, SpaceComponentGroup, SpaceComponentInternalTag, SpaceComponentPreset, SpaceData } from '../constants';
 import type { ReadComponentsOptions } from './constants';
-import { join, parse } from 'node:path';
+import { join } from 'node:path';
 import { readdir, readFile } from 'node:fs/promises';
 import { resolvePath } from '../../../utils/filesystem';
 import { fetchComponent, fetchComponentGroups, fetchComponentInternalTags, fetchComponentPresets } from '../actions';
