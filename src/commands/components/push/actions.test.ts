@@ -225,7 +225,7 @@ describe('push components actions', () => {
       });
 
       const result = await readComponentsFiles({
-        path: '/path/to/components/12345/',
+        path: '/path/to/',
         from: '12345',
         separateFiles: false,
         verbose: false,
@@ -241,15 +241,15 @@ describe('push components actions', () => {
 
     it('should read components from separate files successfully', async () => {
       vol.fromJSON({
-        '/path/to/components/12345/component-name.json': JSON.stringify(mockComponent),
-        '/path/to/components/12345/component-name.preset.json': JSON.stringify([mockComponentPreset]),
-        '/path/to/components/12345/groups.json': JSON.stringify([mockComponentGroup]),
-        '/path/to/components/12345/tags.json': JSON.stringify([mockInternalTag]),
+        '/path/to/components/23746/component-name.json': JSON.stringify(mockComponent),
+        '/path/to/components/23746/component-name.preset.json': JSON.stringify([mockComponentPreset]),
+        '/path/to/components/23746/groups.json': JSON.stringify([mockComponentGroup]),
+        '/path/to/components/23746/tags.json': JSON.stringify([mockInternalTag]),
       });
 
       const result = await readComponentsFiles({
-        path: '/path/to/components/12345/',
-        from: '12345',
+        path: '/path/to/',
+        from: '23746',
         separateFiles: true,
         verbose: false,
       });
@@ -271,8 +271,18 @@ describe('push components actions', () => {
       })).rejects.toThrow(
         expect.objectContaining({
           name: 'File System Error',
-          message: 'The space folder \'non-existent\' doesn\'t exist yet. Please run \'storyblok components pull -s=non-existent\' first to fetch the components.',
           errorId: 'file_not_found',
+          message: 'The file requested was not found',
+          cause: 'The file requested was not found',
+          code: 'ENOENT',
+          messageStack: expect.arrayContaining([
+            'Failed to read/parse file:',
+            'The file requested was not found',
+          ]),
+          error: expect.objectContaining({
+            code: 'ENOENT',
+            message: expect.stringContaining('ENOENT: no such file or directory'),
+          }),
         }),
       );
     });
