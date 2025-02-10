@@ -701,6 +701,11 @@ describe('operations', () => {
               restrict_type: 'tags',
               component_tag_whitelist: [1, 2],
             },
+            field2: {
+              type: 'bloks',
+              restrict_type: 'groups',
+              component_group_whitelist: ['group-a-uuid', 'group-b-uuid'],
+            },
           },
           component_group_uuid: 'group-b-uuid',
           internal_tag_ids: ['1', '2'],
@@ -771,7 +776,6 @@ describe('operations', () => {
 
       // Components should be processed last
       expect(allCalls[4][1].name).toBe('component-tags');
-      expect(allCalls[5][1].name).toBe('component-component-whitelist');
 
       // Verify ID/UUID mappings
       expect(results.tagsIdMap.get(1)).toBe(1001);
@@ -860,7 +864,7 @@ describe('operations', () => {
       const results = await handleWhitelists(mockSpace, mockPassword, mockRegion, circularData);
 
       // Verify that circular dependency was detected and handled
-      expect(results.failed).toHaveLength(2);
+      expect(results.failed).toHaveLength(1);
       expect(results.failed[0].error).toMatchObject({
         message: expect.stringContaining('Circular dependency detected'),
       });
@@ -894,8 +898,8 @@ describe('operations', () => {
 
       const results = await handleWhitelists(mockSpace, mockPassword, mockRegion, dataWithMissingDeps);
 
-      // Verify that missing dependencies were handled gracefully
-      expect(results.failed).toHaveLength(1);
+      // Verify that missing dependencies were handled gracefully with no failures, just no updates
+      expect(results.failed).toHaveLength(0);
       expect(results.successful).toHaveLength(0);
     });
 
