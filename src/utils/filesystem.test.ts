@@ -144,10 +144,10 @@ describe('filesystem utils', async () => {
       const folder = 'folder';
 
       const resolvedPath = resolvePath(path, folder);
-      expect(resolvedPath).toBe(resolve(process.cwd(), path));
+      expect(resolvedPath).toBe(resolve(process.cwd(), path, folder));
 
       const resolvedPathWithoutPath = resolvePath(undefined, folder);
-      expect(resolvedPathWithoutPath).toBe(resolve(process.cwd(), '.storyblok/folder'));
+      expect(resolvedPathWithoutPath).toBe(resolve(process.cwd(), '.storyblok', folder));
     });
   });
 });
