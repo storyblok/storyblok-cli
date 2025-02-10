@@ -3,7 +3,7 @@ import type { RegionCode } from '../../../constants';
 import { customFetch } from '../../../utils/fetch';
 import { getStoryblokUrl } from '../../../utils/api-routes';
 import type { SpaceComponent, SpaceComponentGroup, SpaceComponentInternalTag, SpaceComponentPreset, SpaceData } from '../constants';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { resolvePath, saveToFile } from '../../../utils/filesystem';
 import type { SaveComponentsOptions } from './constants';
 // Components
@@ -105,7 +105,10 @@ export const saveComponentsToFiles = async (
 ) => {
   const { components = [], groups = [], presets = [], internalTags = [] } = spaceData;
   const { filename = 'components', suffix, path, separateFiles } = options;
-  const resolvedPath = resolvePath(path, `components/${space}`);
+  // Ensure we always include the components/space folder structure regardless of custom path
+  const resolvedPath = path
+    ? resolve(process.cwd(), path, 'components', space)
+    : resolvePath(path, `components/${space}`);
 
   try {
     if (separateFiles) {

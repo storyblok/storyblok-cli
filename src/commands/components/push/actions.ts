@@ -256,114 +256,133 @@ export const upsertComponentInternalTag = async (space: string, tag: SpaceCompon
 
 export const readComponentsFiles = async (
   options: ReadComponentsOptions): Promise<SpaceData> => {
-  const { separateFiles, path, from } = options;
+  const { from, path, separateFiles = false } = options;
   const resolvedPath = resolvePath(path, `components/${from}`);
 
-  // Check if the path exists first
   try {
-    await readdir(resolvedPath);
-  }
-  catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
-      throw new FileSystemError('file_not_found', 'read', error as Error, `The space folder '${from}' doesn't exist yet. Please run 'storyblok components pull -s=${from}' first to fetch the components.`);
-    }
-    throw error;
-  }
+    if (separateFiles) {
+      // Read from separate files
+      const files = await readdir(resolvedPath);
+      const components: SpaceComponent[] = [];
+      const presets: SpaceComponentPreset[] = [];
+      let groups: SpaceComponentGroup[] = [];
+      let internalTags: SpaceComponentInternalTag[] = [];
 
-  const spaceData: SpaceData = {
-    components: [],
-    groups: [],
-    presets: [],
-    internalTags: [],
-  };
-  // Add regex patterns to match file structures
-  const componentsPattern = /^components(?:\..+)?\.json$/;
-  const groupsPattern = /^groups(?:\..+)?\.json$/;
-  const presetsPattern = /^presets(?:\..+)?\.json$/;
-  const internalTagsPattern = /^tags(?:\..+)?\.json$/;
-  try {
-    if (!separateFiles) {
-      // Read from consolidated files
-      const files = await readdir(resolvedPath, { recursive: !separateFiles });
-
+      // Read each file
       for (const file of files) {
-        if (!file.endsWith('.json') || (!componentsPattern.test(file) && !groupsPattern.test(file) && !presetsPattern.test(file) && !internalTagsPattern.test(file))) {
+        const filePath = join(resolvedPath, file);
+        const fileContent = (await readFile(filePath)).toString();
+
+        if (!fileContent) {
           continue;
         }
 
         try {
-          const content = await readFile(join(resolvedPath, file), 'utf-8');
-          const data = JSON.parse(content);
-          if (componentsPattern.test(file)) {
-            spaceData.components = data;
+          const parsed = JSON.parse(fileContent);
+
+          if (file === 'groups.json') {
+            groups = parsed;
           }
-          else if (groupsPattern.test(file)) {
-            spaceData.groups = data;
+          else if (file === 'tags.json') {
+            internalTags = parsed;
           }
-          else if (presetsPattern.test(file)) {
-            spaceData.presets = data;
+          else if (file.endsWith('.preset.json')) {
+            presets.push(...parsed);
           }
-          else if (internalTagsPattern.test(file)) {
-            spaceData.internalTags = data;
+          else if (file.endsWith('.json')) {
+            components.push(parsed);
           }
         }
         catch (error) {
-          // Ignore file not found errors
-          if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
-            throw error;
-          }
+          handleFileSystemError('read', error as Error);
         }
       }
-      return spaceData;
+
+      return {
+        components,
+        groups,
+        presets,
+        internalTags,
+      };
     }
 
-    // Read from separate files
-    const files = await readdir(resolvedPath, { recursive: true });
+    // Read from consolidated files
+    const componentsPath = join(resolvedPath, 'components.json');
+    let components: SpaceComponent[] = [];
+    let groups: SpaceComponentGroup[] = [];
+    let presets: SpaceComponentPreset[] = [];
+    let internalTags: SpaceComponentInternalTag[] = [];
 
-    // Then process files
-    for (const file of files) {
-      if (!file.endsWith('.json')) {
-        continue;
-      }
-
-      // Skip consolidated files in separate files mode
-      if (/^(?:components|presets)\.json$/.test(file)) {
-        continue;
-      }
-
-      const { dir } = parse(file);
-      const isPreset = /\.preset\.json$/.test(file);
-
-      const content = await readFile(join(resolvedPath, file), 'utf-8');
-      const data = JSON.parse(content);
-
-      if (isPreset) {
-        spaceData.presets.push(...data);
-      }
-      else if (groupsPattern.test(file)) {
-        spaceData.groups = data;
-      }
-      else if (internalTagsPattern.test(file)) {
-        spaceData.internalTags = data;
+    try {
+      // First try to read components.json as it's required
+      const componentsContent = (await readFile(componentsPath)).toString();
+      if (componentsContent) {
+        components = JSON.parse(componentsContent);
       }
       else {
-        // Regular component file
-        const component = Array.isArray(data) ? data[0] : data;
-        if (dir) {
-          // If component is in a directory, find the corresponding group
-          const group = spaceData.groups.find(g => g.name === dir.split('/').pop());
-          if (group) {
-            component.component_group_uuid = group.uuid;
-          }
+        throw new FileSystemError(
+          'file_not_found',
+          'read',
+          new Error('Components file not found'),
+          `No components found in ${componentsPath}. Please make sure you have pulled the components first.`,
+        );
+      }
+
+      // Then try to read optional files
+      try {
+        const groupsContent = (await readFile(join(resolvedPath, 'groups.json'))).toString();
+        if (groupsContent) {
+          groups = JSON.parse(groupsContent);
         }
-        spaceData.components.push(component);
+      }
+      catch {
+        // Ignore file not found errors for optional files
+      }
+
+      try {
+        const presetsContent = (await readFile(join(resolvedPath, 'presets.json'))).toString();
+        if (presetsContent) {
+          presets = JSON.parse(presetsContent);
+        }
+      }
+      catch {
+        // Ignore file not found errors for optional files
+      }
+
+      try {
+        const tagsContent = (await readFile(join(resolvedPath, 'tags.json'))).toString();
+        if (tagsContent) {
+          internalTags = JSON.parse(tagsContent);
+        }
+      }
+      catch {
+        // Ignore file not found errors for optional files
       }
     }
+    catch (error) {
+      if (error instanceof FileSystemError) {
+        throw error;
+      }
+      handleFileSystemError('read', error as Error);
+    }
 
-    return spaceData;
+    return {
+      components,
+      groups,
+      presets,
+      internalTags,
+    };
   }
   catch (error) {
+    if (error instanceof FileSystemError) {
+      throw error;
+    }
     handleFileSystemError('read', error as Error);
-    return spaceData;
+    return {
+      components: [],
+      groups: [],
+      presets: [],
+      internalTags: [],
+    };
   }
 };

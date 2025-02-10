@@ -5,6 +5,7 @@ import {
   handleComponentGroups,
   handleComponents,
   handleTags,
+  handleWhitelists,
 } from './operations';
 import { upsertComponent, upsertComponentGroup, upsertComponentInternalTag, upsertComponentPreset } from './actions';
 import type { SpaceComponentGroup, SpaceData } from '../constants';
@@ -313,8 +314,10 @@ describe('operations', () => {
 
       // Verify component updates
       const componentCalls = vi.mocked(upsertComponent).mock.calls;
-      expect(componentCalls).toHaveLength(2);
+      // We expect 4 calls total: 2 components × 2 passes
+      expect(componentCalls).toHaveLength(4);
 
+      // First pass: Initial component updates
       // Verify first component (Hero)
       expect(componentCalls[0][1]).toEqual(expect.objectContaining({
         name: 'Hero',
@@ -324,6 +327,21 @@ describe('operations', () => {
 
       // Verify second component (Footer)
       expect(componentCalls[1][1]).toEqual(expect.objectContaining({
+        name: 'Footer',
+        component_group_uuid: 'new-uuid-b',
+        internal_tag_ids: ['102'],
+      }));
+
+      // Second pass: Whitelist updates
+      // Verify Hero whitelist update
+      expect(componentCalls[2][1]).toEqual(expect.objectContaining({
+        name: 'Hero',
+        component_group_uuid: 'new-uuid-a',
+        internal_tag_ids: ['101', '102'],
+      }));
+
+      // Verify Footer whitelist update
+      expect(componentCalls[3][1]).toEqual(expect.objectContaining({
         name: 'Footer',
         component_group_uuid: 'new-uuid-b',
         internal_tag_ids: ['102'],
@@ -639,6 +657,293 @@ describe('operations', () => {
       expect(result.internalTags).toHaveLength(0);
       expect(result.presets).toHaveLength(0);
       expect(result.groups).toHaveLength(0);
+    });
+  });
+
+  describe('handleWhitelists', () => {
+    const mockSpaceData: SpaceData = {
+      components: [
+        {
+          name: 'component-component-whitelist',
+          id: 123,
+          display_name: 'Component Component Whitelist',
+          created_at: '2024-01-01',
+          updated_at: '2024-01-01',
+          schema: {
+            tab1: {
+              type: 'tab',
+              display_name: 'Tab 1',
+              keys: ['field1'],
+            },
+            field1: {
+              type: 'bloks',
+              restrict_type: 'components',
+              component_whitelist: ['component-tags'],
+            },
+          },
+          component_group_uuid: 'group-a-uuid',
+          internal_tag_ids: [],
+          internal_tags_list: [],
+          color: null,
+        },
+        {
+          name: 'component-tags',
+          id: 124,
+          display_name: 'Component Tags',
+          created_at: '2024-01-01',
+          updated_at: '2024-01-01',
+          schema: {
+            tab1: {
+              type: 'tab',
+              display_name: 'Tab 1',
+              keys: ['field1'],
+            },
+            field1: {
+              type: 'bloks',
+              restrict_type: 'tags',
+              component_tag_whitelist: [1, 2],
+            },
+          },
+          component_group_uuid: 'group-b-uuid',
+          internal_tag_ids: ['1', '2'],
+          internal_tags_list: [],
+          color: null,
+        },
+      ],
+      groups: [
+        {
+          name: 'Group A',
+          id: 1,
+          uuid: 'group-a-uuid',
+          parent_id: 0,
+          parent_uuid: '',
+        },
+        {
+          name: 'Group B',
+          id: 2,
+          uuid: 'group-b-uuid',
+          parent_id: 1,
+          parent_uuid: 'group-a-uuid',
+        },
+      ],
+      presets: [],
+      internalTags: [
+        { id: 1, name: 'tag1' },
+        { id: 2, name: 'tag2' },
+      ],
+    };
+
+    beforeEach(() => {
+      vi.clearAllMocks();
+    });
+
+    it('should process dependencies in correct order: tags -> groups -> components', async () => {
+      // Mock successful responses
+      vi.mocked(upsertComponentInternalTag).mockImplementation(async (space, tag) => ({
+        ...tag,
+        id: tag.id + 1000, // New ID = old ID + 1000
+      }));
+
+      vi.mocked(upsertComponentGroup).mockImplementation(async (space, group) => ({
+        ...group,
+        uuid: `new-${group.uuid}`, // New UUID = new-{old-uuid}
+        id: group.id + 1000, // New ID = old ID + 1000
+      }));
+
+      vi.mocked(upsertComponent).mockImplementation(async (space, component) => ({
+        ...component,
+        id: component.id + 1000, // New ID = old ID + 1000
+      }));
+
+      const results = await handleWhitelists(mockSpace, mockPassword, mockRegion, mockSpaceData);
+
+      // Verify order of operations through mock calls
+      const allCalls = vi.mocked(upsertComponentInternalTag).mock.calls.concat(
+        vi.mocked(upsertComponentGroup).mock.calls,
+        vi.mocked(upsertComponent).mock.calls,
+      );
+
+      // Tags should be processed first
+      expect(allCalls[0][1].name).toBe('tag1');
+      expect(allCalls[1][1].name).toBe('tag2');
+
+      // Groups should be processed next
+      expect(allCalls[2][1].name).toBe('Group A');
+      expect(allCalls[3][1].name).toBe('Group B');
+
+      // Components should be processed last
+      expect(allCalls[4][1].name).toBe('component-tags');
+      expect(allCalls[5][1].name).toBe('component-component-whitelist');
+
+      // Verify ID/UUID mappings
+      expect(results.tagsIdMap.get(1)).toBe(1001);
+      expect(results.tagsIdMap.get(2)).toBe(1002);
+      expect(results.groupsUuidMap.get('group-a-uuid')).toBe('new-group-a-uuid');
+      expect(results.groupsUuidMap.get('group-b-uuid')).toBe('new-group-b-uuid');
+    });
+
+    it('should update component schema with new tag IDs and group UUIDs', async () => {
+      // Mock successful responses
+      vi.mocked(upsertComponentInternalTag).mockImplementation(async (space, tag) => ({
+        ...tag,
+        id: tag.id + 1000,
+      }));
+
+      vi.mocked(upsertComponentGroup).mockImplementation(async (space, group) => ({
+        ...group,
+        uuid: `new-${group.uuid}`,
+        id: group.id + 1000,
+      }));
+
+      vi.mocked(upsertComponent).mockImplementation(async (space, component) => {
+        // Verify that the component's schema has been updated with new IDs/UUIDs
+        if (component.name === 'component-tags') {
+          const schema = component.schema as {
+            tab1: { type: 'tab'; display_name: string; keys: string[] };
+            field1: { type: 'bloks'; restrict_type: string; component_tag_whitelist: number[] };
+          };
+          expect(schema.field1.component_tag_whitelist).toEqual([1001, 1002]);
+          expect(component.component_group_uuid).toBe('new-group-b-uuid');
+          expect(component.internal_tag_ids).toEqual(['1001', '1002']);
+        }
+        return {
+          ...component,
+          id: component.id + 1000,
+        };
+      });
+
+      await handleWhitelists(mockSpace, mockPassword, mockRegion, mockSpaceData);
+
+      // Verify that upsertComponent was called with updated schemas
+      expect(vi.mocked(upsertComponent)).toHaveBeenCalled();
+    });
+
+    it('should handle circular dependencies between components', async () => {
+      const circularData: SpaceData = {
+        ...mockSpaceData,
+        components: [
+          {
+            name: 'component-a',
+            id: 1,
+            display_name: 'Component A',
+            created_at: '2024-01-01',
+            updated_at: '2024-01-01',
+            schema: {
+              field1: {
+                type: 'bloks',
+                component_whitelist: ['component-b'],
+              },
+            },
+            component_group_uuid: '',
+            internal_tag_ids: [],
+            internal_tags_list: [],
+            color: null,
+          },
+          {
+            name: 'component-b',
+            id: 2,
+            display_name: 'Component B',
+            created_at: '2024-01-01',
+            updated_at: '2024-01-01',
+            schema: {
+              field1: {
+                type: 'bloks',
+                component_whitelist: ['component-a'],
+              },
+            },
+            component_group_uuid: '',
+            internal_tag_ids: [],
+            internal_tags_list: [],
+            color: null,
+          },
+        ],
+      };
+
+      const results = await handleWhitelists(mockSpace, mockPassword, mockRegion, circularData);
+
+      // Verify that circular dependency was detected and handled
+      expect(results.failed).toHaveLength(2);
+      expect(results.failed[0].error).toMatchObject({
+        message: expect.stringContaining('Circular dependency detected'),
+      });
+    });
+
+    it('should handle missing dependencies gracefully', async () => {
+      const dataWithMissingDeps: SpaceData = {
+        ...mockSpaceData,
+        components: [
+          {
+            name: 'component-with-missing-deps',
+            id: 1,
+            display_name: 'Component With Missing Dependencies',
+            created_at: '2024-01-01',
+            updated_at: '2024-01-01',
+            schema: {
+              field1: {
+                type: 'bloks',
+                component_whitelist: ['non-existent-component'],
+                component_tag_whitelist: [999], // Non-existent tag
+                component_group_whitelist: ['non-existent-group-uuid'],
+              },
+            },
+            component_group_uuid: 'non-existent-group-uuid',
+            internal_tag_ids: ['999'],
+            internal_tags_list: [],
+            color: null,
+          },
+        ],
+      };
+
+      const results = await handleWhitelists(mockSpace, mockPassword, mockRegion, dataWithMissingDeps);
+
+      // Verify that missing dependencies were handled gracefully
+      expect(results.failed).toHaveLength(1);
+      expect(results.successful).toHaveLength(0);
+    });
+
+    it('should skip already processed tags and groups', async () => {
+      // Mock successful responses
+      vi.mocked(upsertComponentInternalTag).mockImplementation(async (space, tag) => ({
+        ...tag,
+        id: tag.id + 1000,
+      }));
+
+      vi.mocked(upsertComponentGroup).mockImplementation(async (space, group) => ({
+        ...group,
+        uuid: `new-${group.uuid}`,
+        id: group.id + 1000,
+      }));
+
+      // Create data with duplicate dependencies
+      const dataWithDuplicates: SpaceData = {
+        ...mockSpaceData,
+        components: [
+          ...mockSpaceData.components,
+          {
+            name: 'another-component',
+            id: 125,
+            display_name: 'Another Component',
+            created_at: '2024-01-01',
+            updated_at: '2024-01-01',
+            schema: {
+              field1: {
+                type: 'bloks',
+                component_tag_whitelist: [1], // Duplicate tag reference
+              },
+            },
+            component_group_uuid: 'group-a-uuid', // Duplicate group reference
+            internal_tag_ids: [],
+            internal_tags_list: [],
+            color: null,
+          },
+        ],
+      };
+
+      await handleWhitelists(mockSpace, mockPassword, mockRegion, dataWithDuplicates);
+
+      // Verify that each tag and group was only processed once
+      expect(vi.mocked(upsertComponentInternalTag)).toHaveBeenCalledTimes(2); // Only two tags
+      expect(vi.mocked(upsertComponentGroup)).toHaveBeenCalledTimes(2); // Only two groups
     });
   });
 });

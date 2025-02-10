@@ -95,18 +95,18 @@ componentsCommand
         if (filename !== 'components') {
           konsola.warn(`The --filename option is ignored when using --separate-files`);
         }
-        const filePath = path ? `${path}/` : `.storyblok/components/${space}/`;
+        const filePath = path ? `${path}/components/${space}/` : `.storyblok/components/${space}/`;
 
         konsola.ok(`Components downloaded successfully to ${chalk.hex(colorPalette.PRIMARY)(filePath)}`);
       }
       else if (componentName) {
         const fileName = suffix ? `${filename}.${suffix}.json` : `${componentName}.json`;
-        const filePath = path ? `${path}/${fileName}` : `.storyblok/components/${space}/${fileName}`;
+        const filePath = path ? `${path}/components/${space}/${fileName}` : `.storyblok/components/${space}/${fileName}`;
         konsola.ok(`Component ${chalk.hex(colorPalette.PRIMARY)(componentName)} downloaded successfully in ${chalk.hex(colorPalette.PRIMARY)(filePath)}`);
       }
       else {
         const fileName = suffix ? `${filename}.${suffix}.json` : `${filename}.json`;
-        const filePath = path ? `${path}/${fileName}` : `.storyblok/components/${space}/${fileName}`;
+        const filePath = path ? `${path}/components/${space}/${fileName}` : `.storyblok/components/${space}/${fileName}`;
 
         konsola.ok(`Components downloaded successfully to ${chalk.hex(colorPalette.PRIMARY)(filePath)}`);
       }

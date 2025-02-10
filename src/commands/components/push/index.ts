@@ -12,6 +12,7 @@ import {
   handleComponentGroups,
   handleComponents,
   handleTags,
+  handleWhitelists,
 } from './operations';
 
 const program = getProgram(); // Get the shared singleton instance
@@ -87,21 +88,41 @@ componentsCommand
         failed: [] as Array<{ name: string; error: unknown }>,
       };
 
-      const tagsResults = await handleTags(space, password, region, spaceData.internalTags);
+      // First, process whitelist dependencies
+      const whitelistResults = await handleWhitelists(space, password, region, spaceData);
+      results.successful.push(...whitelistResults.successful);
+      results.failed.push(...whitelistResults.failed);
+
+      // Then process remaining tags (skip those already processed in whitelists)
+      const tagsResults = await handleTags(space, password, region, spaceData.internalTags, whitelistResults.processedTagIds);
       results.successful.push(...tagsResults.successful);
       results.failed.push(...tagsResults.failed);
 
-      const groupsResults = await handleComponentGroups(space, password, region, spaceData.groups);
+      // Then process remaining groups (skip those already processed in whitelists)
+      const groupsResults = await handleComponentGroups(space, password, region, spaceData.groups, whitelistResults.processedGroupUuids);
       results.successful.push(...groupsResults.successful);
       results.failed.push(...groupsResults.failed);
+
+      // Finally process remaining components (skip those already processed in whitelists)
+      const remainingComponents = spaceData.components.filter(
+        component => !whitelistResults.processedComponentNames.has(component.name),
+      );
 
       const componentsResults = await handleComponents({
         space,
         password,
         region,
-        spaceData,
-        groupsUuidMap: groupsResults.uuidMap,
-        tagsIdMaps: tagsResults.idMap,
+        spaceData: {
+          ...spaceData,
+          components: remainingComponents,
+        },
+        groupsUuidMap: new Map([...whitelistResults.groupsUuidMap, ...groupsResults.uuidMap]), // Merge both group maps
+        tagsIdMaps: new Map([...whitelistResults.tagsIdMap, ...tagsResults.idMap]), // Merge both tag maps
+        whitelistMaps: {
+          groupsUuidMap: whitelistResults.groupsUuidMap,
+          tagsIdMap: whitelistResults.tagsIdMap,
+          componentNameMap: whitelistResults.componentNameMap,
+        },
       });
       results.successful.push(...componentsResults.successful);
       results.failed.push(...componentsResults.failed);
