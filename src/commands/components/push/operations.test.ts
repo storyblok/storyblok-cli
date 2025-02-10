@@ -243,7 +243,6 @@ describe('operations', () => {
         display_name: 'Footer',
         created_at: '2024-01-01',
         updated_at: '2024-01-01',
-        schema: {},
         component_group_uuid: '558e0d2a-d1d2-4753-9a18-a37d3bb6f505',
         internal_tag_ids: ['2'],
         internal_tags_list: [],
@@ -272,11 +271,24 @@ describe('operations', () => {
       },
     ];
 
+    const mockGroups = [
+      {
+        name: 'Folder A',
+        id: 487969,
+        uuid: 'a6e35ba1-505e-4941-8bb2-eaac3d0a26a4',
+      },
+      {
+        name: 'Folder B',
+        id: 489043,
+        uuid: '558e0d2a-d1d2-4753-9a18-a37d3bb6f505',
+      },
+    ];
+
     const mockSpaceData = {
       components: mockComponents,
       internalTags: mockInternalTags,
       presets: mockPresets,
-      groups: [],
+      groups: mockGroups,
     };
 
     const mockGroupsUuidMap = new Map([
@@ -314,8 +326,8 @@ describe('operations', () => {
 
       // Verify component updates
       const componentCalls = vi.mocked(upsertComponent).mock.calls;
-      // We expect 4 calls total: 2 components × 2 passes
-      expect(componentCalls).toHaveLength(4);
+      // We expect 2 calls total: one for each component because they don't have component whitelists
+      expect(componentCalls).toHaveLength(2);
 
       // First pass: Initial component updates
       // Verify first component (Hero)
@@ -327,21 +339,6 @@ describe('operations', () => {
 
       // Verify second component (Footer)
       expect(componentCalls[1][1]).toEqual(expect.objectContaining({
-        name: 'Footer',
-        component_group_uuid: 'new-uuid-b',
-        internal_tag_ids: ['102'],
-      }));
-
-      // Second pass: Whitelist updates
-      // Verify Hero whitelist update
-      expect(componentCalls[2][1]).toEqual(expect.objectContaining({
-        name: 'Hero',
-        component_group_uuid: 'new-uuid-a',
-        internal_tag_ids: ['101', '102'],
-      }));
-
-      // Verify Footer whitelist update
-      expect(componentCalls[3][1]).toEqual(expect.objectContaining({
         name: 'Footer',
         component_group_uuid: 'new-uuid-b',
         internal_tag_ids: ['102'],
@@ -379,7 +376,8 @@ describe('operations', () => {
 
       // Verify one failure and one success
       expect(result.successful).toEqual(['Footer']);
-      expect(result.failed).toHaveLength(1);
+      // We expect 2 failures, one for the Hero component and one for the preset
+      expect(result.failed).toHaveLength(2);
       expect(result.failed[0]).toEqual({
         name: 'Hero',
         error: new Error('Failed to update Hero component'),
