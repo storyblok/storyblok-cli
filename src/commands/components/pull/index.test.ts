@@ -1,6 +1,6 @@
 import { session } from '../../../session';
-import { konsola } from '../../../utils';
-import { fetchComponents, saveComponentsToFiles } from './actions';
+import { CommandError, konsola } from '../../../utils';
+import { fetchComponent, fetchComponents, saveComponentsToFiles } from './actions';
 import chalk from 'chalk';
 import { colorPalette } from '../../../constants';
 // Import the main components module first to ensure proper initialization
@@ -117,7 +117,7 @@ describe('pull', () => {
       expect(konsola.ok).toHaveBeenCalledWith(`Components downloaded successfully to ${chalk.hex(colorPalette.PRIMARY)(`.storyblok/components/12345/components.json`)}`);
     });
 
-    /* it('should fetch a component by name', async () => {
+    it('should fetch a component by name', async () => {
       const mockResponse = {
         name: 'component-name',
         display_name: 'Component Name',
@@ -136,21 +136,20 @@ describe('pull', () => {
         region: 'eu',
       };
       vi.mocked(fetchComponent).mockResolvedValue(mockResponse);
-      await pullComponentsCommand.parseAsync(['node', 'test', 'pull', 'component-name', '--space', '12345']);
+      await componentsCommand.parseAsync(['node', 'test', 'pull', 'component-name', '--space', '12345']);
       expect(fetchComponent).toHaveBeenCalledWith('12345', 'component-name', 'valid-token', 'eu');
       expect(saveComponentsToFiles).toHaveBeenCalledWith('12345', {
         components: [mockResponse],
         groups: [],
         presets: [],
-      }, { separateFiles: true, path: undefined })
-    }) */
-
-    /*
+        internalTags: [],
+      }, { separateFiles: true, path: undefined });
+    });
 
     it('should throw an error if the component is not found', async () => {
       const componentName = 'component-name';
       vi.mocked(fetchComponent).mockResolvedValue(undefined);
-      await pullComponentsCommand.parseAsync(['node', 'test', 'pull', 'component-name', '--space', '12345']);
+      await componentsCommand.parseAsync(['node', 'test', 'pull', 'component-name', '--space', '12345']);
       expect(konsola.warn).toHaveBeenCalledWith(`No component found with name "${componentName}"`);
     });
 
@@ -159,7 +158,7 @@ describe('pull', () => {
         isLoggedIn: false,
       };
       const mockError = new CommandError(`You are currently not logged in. Please login first to get your user info.`);
-      await pullComponentsCommand.parseAsync(['node', 'test', 'pull', '--space', '12345']);
+      await componentsCommand.parseAsync(['node', 'test', 'pull', '--space', '12345']);
       expect(konsola.error).toHaveBeenCalledWith(mockError, false);
     });
 
@@ -172,12 +171,12 @@ describe('pull', () => {
 
       const mockError = new CommandError(`Please provide the space as argument --space YOUR_SPACE_ID.`);
 
-      await pullComponentsCommand.parseAsync(['node', 'test', 'pull'])
-      expect(konsola.error).toHaveBeenCalledWith(mockError, false)
-    }) */
+      await componentsCommand.parseAsync(['node', 'test', 'pull']);
+      expect(konsola.error).toHaveBeenCalledWith(mockError, false);
+    });
   });
 
-  /*  describe('--path option', () => {
+  describe('--path option', () => {
     it('should save the file at the provided path', async () => {
       const mockResponse = [{
         name: 'component-name',
@@ -199,18 +198,19 @@ describe('pull', () => {
 
       vi.mocked(fetchComponents).mockResolvedValue(mockResponse);
 
-      await pullComponentsCommand.parseAsync(['node', 'test', 'pull', '--space', '12345', '--path', '/path/to/components']);
+      await componentsCommand.parseAsync(['node', 'test', 'pull', '--space', '12345', '--path', '/path/to/components']);
       expect(fetchComponents).toHaveBeenCalledWith('12345', 'valid-token', 'eu');
       expect(saveComponentsToFiles).toHaveBeenCalledWith('12345', {
         components: mockResponse,
         groups: [],
         presets: [],
-      }, { path: '/path/to/components', separateFiles: false })
-      expect(konsola.ok).toHaveBeenCalledWith(`Components downloaded successfully to ${chalk.hex(colorPalette.PRIMARY)(`/path/to/components/components.json`)}`)
-    })
-  }) */
+        internalTags: [],
+      }, { path: '/path/to/components', separateFiles: false });
+      expect(konsola.ok).toHaveBeenCalledWith(`Components downloaded successfully to ${chalk.hex(colorPalette.PRIMARY)(`/path/to/components/components/12345/components.json`)}`);
+    });
+  });
 
-  /* describe('--filename option', () => {
+  describe('--filename option', () => {
     it('should save the file with the custom filename', async () => {
       const mockResponse = [{
         name: 'component-name',
@@ -232,18 +232,19 @@ describe('pull', () => {
 
       vi.mocked(fetchComponents).mockResolvedValue(mockResponse);
 
-      await pullComponentsCommand.parseAsync(['node', 'test', 'pull', '--space', '12345', '--filename', 'custom']);
+      await componentsCommand.parseAsync(['node', 'test', 'pull', '--space', '12345', '--filename', 'custom']);
       expect(fetchComponents).toHaveBeenCalledWith('12345', 'valid-token', 'eu');
       expect(saveComponentsToFiles).toHaveBeenCalledWith('12345', {
         components: mockResponse,
         groups: [],
         presets: [],
-      }, { filename: 'custom', separateFiles: false })
-      expect(konsola.ok).toHaveBeenCalledWith(`Components downloaded successfully to ${chalk.hex(colorPalette.PRIMARY)(`.storyblok/components/12345/custom.json`)}`)
-    })
-  }) */
+        internalTags: [],
+      }, { filename: 'custom', separateFiles: false });
+      expect(konsola.ok).toHaveBeenCalledWith(`Components downloaded successfully to ${chalk.hex(colorPalette.PRIMARY)(`.storyblok/components/12345/custom.json`)}`);
+    });
+  });
 
-  /* describe('--separate-files option', () => {
+  describe('--separate-files option', () => {
     it('should save each component in a separate file', async () => {
       const mockResponse = [{
         name: 'component-name',
@@ -275,12 +276,13 @@ describe('pull', () => {
 
       vi.mocked(fetchComponents).mockResolvedValue(mockResponse);
 
-      await pullComponentsCommand.parseAsync(['node', 'test', 'pull', '--space', '12345', '--separate-files']);
+      await componentsCommand.parseAsync(['node', 'test', 'pull', '--space', '12345', '--separate-files']);
       expect(fetchComponents).toHaveBeenCalledWith('12345', 'valid-token', 'eu');
       expect(saveComponentsToFiles).toHaveBeenCalledWith('12345', {
         components: mockResponse,
         groups: [],
         presets: [],
+        internalTags: [],
       }, { separateFiles: true, path: undefined });
       expect(konsola.ok).toHaveBeenCalledWith(`Components downloaded successfully to ${chalk.hex(colorPalette.PRIMARY)(`.storyblok/components/12345/`)}`);
     });
@@ -306,14 +308,15 @@ describe('pull', () => {
 
       vi.mocked(fetchComponents).mockResolvedValue(mockResponse);
 
-      await pullComponentsCommand.parseAsync(['node', 'test', 'pull', '--space', '12345', '--separate-files', '--filename', 'custom']);
+      await componentsCommand.parseAsync(['node', 'test', 'pull', '--space', '12345', '--separate-files', '--filename', 'custom']);
       expect(fetchComponents).toHaveBeenCalledWith('12345', 'valid-token', 'eu');
       expect(saveComponentsToFiles).toHaveBeenCalledWith('12345', {
         components: mockResponse,
         groups: [],
         presets: [],
-      }, { separateFiles: true, filename: 'custom' })
-      expect(konsola.warn).toHaveBeenCalledWith(`The --filename option is ignored when using --separate-files`)
-    })
-  }) */
+        internalTags: [],
+      }, { separateFiles: true, filename: 'custom' });
+      expect(konsola.warn).toHaveBeenCalledWith(`The --filename option is ignored when using --separate-files`);
+    });
+  });
 });
