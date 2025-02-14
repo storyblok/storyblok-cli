@@ -700,11 +700,7 @@ interface HandleComponentsOptions {
   spaceData: SpaceData;
   groupsUuidMap: Map<string, string>;
   tagsIdMaps: Map<number, number>;
-  whitelistMaps?: {
-    groupsUuidMap: Map<string, string>;
-    tagsIdMap: Map<number, number>;
-    componentNameMap: Map<string, string>;
-  };
+  componentNameMap: Map<string, string>;
 }
 
 export async function handleComponents(options: HandleComponentsOptions) {
@@ -715,7 +711,7 @@ export async function handleComponents(options: HandleComponentsOptions) {
     spaceData: { components, internalTags, presets },
     groupsUuidMap,
     tagsIdMaps,
-    whitelistMaps,
+    componentNameMap,
   } = options;
 
   const results = {
@@ -792,14 +788,14 @@ export async function handleComponents(options: HandleComponentsOptions) {
       }
 
       // Update schema whitelists with new IDs/UUIDs if the component has whitelists
-      if (componentToUpdate.schema && (whitelistMaps || hasWhitelists(componentToUpdate.schema))) {
+      if (componentToUpdate.schema && (hasWhitelists(componentToUpdate.schema))) {
         // Deep clone the schema to avoid modifying the original
         componentToUpdate.schema = JSON.parse(JSON.stringify(componentToUpdate.schema));
         updateSchemaWhitelists(
           componentToUpdate.schema,
-          whitelistMaps?.groupsUuidMap || groupsUuidMap,
-          whitelistMaps?.tagsIdMap || tagsIdMaps,
-          whitelistMaps?.componentNameMap,
+          groupsUuidMap,
+          tagsIdMaps,
+          componentNameMap,
         );
       }
 
@@ -821,8 +817,8 @@ export async function handleComponents(options: HandleComponentsOptions) {
   const componentsWithUnmappedWhitelists = components.filter(component =>
     component.schema
     && hasWhitelists(component.schema)
-    && whitelistMaps?.componentNameMap
-    && whitelistMaps.componentNameMap.size > 0,
+    && componentNameMap
+    && componentNameMap.size > 0,
   );
 
   if (componentsWithUnmappedWhitelists.length > 0) {
@@ -845,9 +841,9 @@ export async function handleComponents(options: HandleComponentsOptions) {
         // Update schema whitelists including component whitelists
         updateSchemaWhitelists(
           componentToUpdate.schema,
-          whitelistMaps?.groupsUuidMap || groupsUuidMap,
-          whitelistMaps?.tagsIdMap || tagsIdMaps,
-          whitelistMaps?.componentNameMap,
+          groupsUuidMap,
+          tagsIdMaps,
+          componentNameMap,
         );
 
         // Upsert the component again with updated component whitelists

@@ -108,6 +108,19 @@ componentsCommand
         component => !whitelistResults.processedComponentNames.has(component.name),
       );
 
+      /* console.log('handleComponents', {
+        space,
+        password,
+        region,
+        spaceData: {
+          ...spaceData,
+          components: remainingComponents,
+        },
+        groupsUuidMap: new Map([...whitelistResults.groupsUuidMap, ...groupsResults.uuidMap]), // Merge both group maps
+        tagsIdMaps: new Map([...whitelistResults.tagsIdMap, ...tagsResults.idMap]), // Merge both tag maps
+        componentNameMap: whitelistResults.componentNameMap,
+      }); */
+
       const componentsResults = await handleComponents({
         space,
         password,
@@ -118,11 +131,7 @@ componentsCommand
         },
         groupsUuidMap: new Map([...whitelistResults.groupsUuidMap, ...groupsResults.uuidMap]), // Merge both group maps
         tagsIdMaps: new Map([...whitelistResults.tagsIdMap, ...tagsResults.idMap]), // Merge both tag maps
-        whitelistMaps: {
-          groupsUuidMap: whitelistResults.groupsUuidMap,
-          tagsIdMap: whitelistResults.tagsIdMap,
-          componentNameMap: whitelistResults.componentNameMap,
-        },
+        componentNameMap: whitelistResults.componentNameMap,
       });
       results.successful.push(...componentsResults.successful);
       results.failed.push(...componentsResults.failed);
