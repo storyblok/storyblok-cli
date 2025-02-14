@@ -1,8 +1,6 @@
 import { session } from '../../../session';
-import { CommandError, konsola } from '../../../utils';
+import { konsola } from '../../../utils';
 import { readComponentsFiles } from './actions';
-import { colorPalette } from '../../../constants';
-import chalk from 'chalk';
 
 // Import the main components module first to ensure proper initialization
 import '../index';
@@ -459,6 +457,199 @@ describe('push', () => {
         groupsUuidMap: new Map(),
         tagsIdMaps: new Map([...mockedWhitelistResults.tagsIdMap]),
         componentNameMap: new Map(),
+      });
+    });
+
+    it('should push components with group whitelist', async () => {
+      const mockedSpaceData = {
+        components: [{
+          name: 'component-name',
+          display_name: 'Component Name',
+          created_at: '2021-08-09T12:00:00Z',
+          updated_at: '2021-08-09T12:00:00Z',
+          id: 12345,
+          schema: {
+            field1: {
+              type: 'bloks',
+              restrict_type: 'groups',
+              component_group_uuid: 'group-uuid',
+            },
+          },
+        }],
+        groups: [{
+          id: 1,
+          name: 'group-name',
+          color: '#000000',
+          uuid: 'group-uuid',
+          parent_id: null,
+          parent_uuid: null,
+        }],
+        presets: [],
+        internalTags: [],
+      };
+
+      const mockedWhitelistResults = {
+        successful: [],
+        failed: [],
+        groupsUuidMap: new Map(),
+        tagsIdMap: new Map(),
+        componentNameMap: new Map(),
+        processedTagIds: new Set(),
+        processedGroupUuids: new Set(),
+        processedComponentNames: new Set(),
+      };
+
+      const mockedTagsResults = {
+        successful: [],
+        failed: [],
+        idMap: new Map(),
+      };
+
+      const mockedGroupsResults = {
+        successful: [],
+        failed: [],
+        uuidMap: new Map(),
+        idMap: new Map(),
+      };
+
+      session().state = {
+        isLoggedIn: true,
+        password: 'valid-token',
+        region: 'eu',
+      };
+
+      vi.mocked(readComponentsFiles).mockResolvedValue(mockedSpaceData);
+
+      // We need these mocks for the final expect handleComponents call
+      vi.mocked(handleWhitelists).mockResolvedValue(mockedWhitelistResults);
+      vi.mocked(handleTags).mockResolvedValue(mockedTagsResults);
+      vi.mocked(handleComponentGroups).mockResolvedValue(mockedGroupsResults);
+
+      await componentsCommand.parseAsync(['node', 'test', 'push', '--space', '12345']);
+
+      // Groups phase.
+      expect(handleComponentGroups).toHaveBeenCalledWith('12345', 'valid-token', 'eu', mockedSpaceData.groups, mockedWhitelistResults.processedGroupUuids);
+
+      // Components phase.
+      expect(handleComponents).toHaveBeenCalledWith({
+        space: '12345',
+        password: 'valid-token',
+        region: 'eu',
+        spaceData: {
+          components: mockedSpaceData.components,
+          groups: [
+            {
+              id: 1,
+              name: 'group-name',
+              color: '#000000',
+              uuid: 'group-uuid',
+              parent_id: null,
+              parent_uuid: null,
+            },
+          ],
+          presets: [],
+          internalTags: [],
+        },
+        groupsUuidMap: new Map([...mockedGroupsResults.uuidMap]),
+        tagsIdMaps: new Map(),
+        componentNameMap: new Map(),
+      });
+    });
+
+    it('should push components with component whitelist', async () => {
+      const mockedSpaceData = {
+        components: [
+          {
+            name: 'component-tags',
+            display_name: 'Component Tags',
+            created_at: '2021-08-09T12:00:00Z',
+            updated_at: '2021-08-09T12:00:00Z',
+            id: 12346,
+            schema: { type: 'object' },
+          },
+          {
+            name: 'component-name',
+            display_name: 'Component Name',
+            created_at: '2021-08-09T12:00:00Z',
+            updated_at: '2021-08-09T12:00:00Z',
+            id: 12345,
+            schema: {
+              field1: {
+                type: 'bloks',
+                restrict_type: 'component',
+                restrict_components: true,
+                component_whitelist: ['component-tags'],
+              },
+            },
+          },
+        ],
+        groups: [],
+        presets: [],
+        internalTags: [],
+      };
+
+      const mockedWhitelistResults = {
+        successful: [],
+        failed: [],
+        groupsUuidMap: new Map(),
+        tagsIdMap: new Map(),
+        componentNameMap: new Map([
+          ['component-tags', 'component-tags'],
+        ]),
+        processedTagIds: new Set(),
+        processedGroupUuids: new Set(),
+        processedComponentNames: new Set([
+          'component-tags',
+        ]),
+      };
+
+      const mockedTagsResults = {
+        successful: [],
+        failed: [],
+        idMap: new Map(),
+      };
+
+      const mockedGroupsResults = {
+        successful: [],
+        failed: [],
+        uuidMap: new Map(),
+        idMap: new Map(),
+      };
+
+      session().state = {
+        isLoggedIn: true,
+        password: 'valid-token',
+        region: 'eu',
+      };
+
+      vi.mocked(readComponentsFiles).mockResolvedValue(mockedSpaceData);
+
+      // We need these mocks for the final expect handleComponents call
+      vi.mocked(handleWhitelists).mockResolvedValue(mockedWhitelistResults);
+      vi.mocked(handleTags).mockResolvedValue(mockedTagsResults);
+      vi.mocked(handleComponentGroups).mockResolvedValue(mockedGroupsResults);
+
+      await componentsCommand.parseAsync(['node', 'test', 'push', '--space', '12345']);
+
+      // Groups phase.
+      expect(handleComponentGroups).toHaveBeenCalledWith('12345', 'valid-token', 'eu', mockedSpaceData.groups, mockedWhitelistResults.processedGroupUuids);
+
+      // Components phase.
+      expect(handleComponents).toHaveBeenCalledWith({
+        space: '12345',
+        password: 'valid-token',
+        region: 'eu',
+        spaceData: {
+          components: [mockedSpaceData.components[1]], // Only the component with the whitelist
+          groups: [],
+          presets: [],
+          internalTags: [],
+        },
+        groupsUuidMap: new Map(),
+        tagsIdMaps: new Map(),
+        componentNameMap: new Map([
+          ['component-tags', 'component-tags'],
+        ]),
       });
     });
   });
