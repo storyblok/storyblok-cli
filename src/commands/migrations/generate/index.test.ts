@@ -102,7 +102,7 @@ describe('migrations generate command', () => {
 
     await migrationsCommand.parseAsync(['node', 'test', 'generate', 'component-name', '--field', 'field1', '--space', '12345']);
 
-    expect(generateMigration).toHaveBeenCalledWith('12345', undefined, mockComponent, 'field1');
+    expect(generateMigration).toHaveBeenCalledWith('12345', undefined, mockComponent, 'field1', undefined);
     expect(konsola.ok).toHaveBeenCalledWith('You can find the migration file in .storyblok/migrations/12345/component-name-field1.js');
   });
 
@@ -135,7 +135,7 @@ describe('migrations generate command', () => {
 
     await migrationsCommand.parseAsync(['node', 'test', 'generate', 'component-name', '--field', 'field1', '--space', '12345', '--path', 'custom']);
 
-    expect(generateMigration).toHaveBeenCalledWith('12345', 'custom', mockComponent, 'field1');
+    expect(generateMigration).toHaveBeenCalledWith('12345', 'custom', mockComponent, 'field1', undefined);
     expect(konsola.ok).toHaveBeenCalledWith('You can find the migration file in custom/migrations/12345/component-name-field1.js');
   });
 
