@@ -420,23 +420,14 @@ describe('push', () => {
         region: 'eu',
       };
 
-      const handleComponentsSpy = vi.fn().mockImplementation((args) => {
-        console.log('handleComponents called with:', JSON.stringify(args, null, 2));
-        return Promise.resolve({ successful: [], failed: [] });
-      });
-
       vi.mocked(readComponentsFiles).mockResolvedValue(mockedSpaceData);
 
       // We need these mocks for the final expect handleComponents call
       vi.mocked(handleWhitelists).mockResolvedValue(mockedWhitelistResults);
       vi.mocked(handleTags).mockResolvedValue(mockedTagsResults);
       vi.mocked(handleComponentGroups).mockResolvedValue(mockedGroupsResults);
-      vi.mocked(handleComponents).mockImplementation(handleComponentsSpy);
 
       await componentsCommand.parseAsync(['node', 'test', 'push', '--space', '12345']);
-
-      console.log('handleComponents mock calls:', vi.mocked(handleComponents).mock.calls);
-      console.log('handleComponents mock results:', vi.mocked(handleComponents).mock.results);
 
       expect(handleWhitelists).toHaveBeenCalledWith('12345', 'valid-token', 'eu', mockedSpaceData);
 
