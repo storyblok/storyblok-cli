@@ -5,7 +5,7 @@ import { readComponentsFiles } from './actions';
 // Import the main components module first to ensure proper initialization
 import '../index';
 import { componentsCommand } from '../command';
-import { handleComponentGroups, handleComponents, handleTags, handleWhitelists } from './operations';
+import { filterSpaceDataByComponent, filterSpaceDataByPattern, handleComponentGroups, handleComponents, handleTags, handleWhitelists } from './operations';
 
 vi.mock('./actions', () => ({
   readComponentsFiles: vi.fn(),
@@ -650,6 +650,180 @@ describe('push', () => {
         componentNameMap: new Map([
           ['component-tags', 'component-tags'],
         ]),
+      });
+    });
+
+    describe('component name flag', () => {
+      it('should push components matching the component name', async () => {
+        const mockedSpaceData = {
+          components: [
+            {
+              name: 'component-name',
+              display_name: 'Component Name',
+              created_at: '2021-08-09T12:00:00Z',
+              updated_at: '2021-08-09T12:00:00Z',
+              id: 12345,
+              schema: { type: 'object' },
+              color: null,
+              internal_tags_list: [],
+              internal_tag_ids: [],
+            },
+          ],
+        };
+
+        session().state = {
+          isLoggedIn: true,
+          password: 'valid-token',
+          region: 'eu',
+        };
+
+        vi.mocked(readComponentsFiles).mockResolvedValue(mockedSpaceData);
+
+        await componentsCommand.parseAsync(['node', 'test', 'push', 'component-name', '--space', '12345']);
+
+        expect(filterSpaceDataByComponent).toHaveBeenCalledWith(mockedSpaceData, 'component-name');
+      });
+
+      it('should show error if no components match the component name', async () => {
+        session().state = {
+          isLoggedIn: true,
+          password: 'valid-token',
+          region: 'eu',
+        };
+
+        vi.mocked(filterSpaceDataByComponent).mockImplementation(() => {
+          return {
+            components: [],
+            groups: [],
+            presets: [],
+            internalTags: [],
+          };
+        });
+
+        await componentsCommand.parseAsync(['node', 'test', 'push', 'component-name', '--space', '12345']);
+
+        expect(konsola.error).toHaveBeenCalledWith('Component "component-name" not found.');
+      });
+    });
+
+    describe('filter flag', () => {
+      it('should push components matching the filter pattern', async () => {
+        const mockedSpaceData = {
+          components: [
+            {
+              name: 'page',
+              display_name: 'Page',
+              created_at: '2021-08-09T12:00:00Z',
+              updated_at: '2021-08-09T12:00:00Z',
+              id: 12345,
+              schema: { type: 'object' },
+              color: null,
+              internal_tags_list: [],
+              internal_tag_ids: [],
+            },
+            {
+              name: 'blog-post',
+              display_name: 'Blog Post',
+              created_at: '2021-08-09T12:00:00Z',
+              updated_at: '2021-08-09T12:00:00Z',
+              id: 12346,
+              schema: { type: 'object' },
+              color: null,
+              internal_tags_list: [],
+              internal_tag_ids: [],
+            },
+          ],
+          groups: [],
+          presets: [],
+          internalTags: [],
+        };
+
+        const mockedWhitelistResults = {
+          successful: [],
+          failed: [],
+          groupsUuidMap: new Map<string, string>(),
+          tagsIdMap: new Map<number, number>(),
+          componentNameMap: new Map<string, string>(),
+          processedTagIds: new Set<number>(),
+          processedGroupUuids: new Set<string>(),
+          processedComponentNames: new Set<string>(),
+        };
+
+        const mockedTagsResults = {
+          successful: [],
+          failed: [],
+          idMap: new Map<number, number>(),
+        };
+
+        const mockedGroupsResults = {
+          successful: [],
+          failed: [],
+          uuidMap: new Map<string, string>(),
+          idMap: new Map<number, number>(),
+        };
+
+        session().state = {
+          isLoggedIn: true,
+          password: 'valid-token',
+          region: 'eu',
+        };
+
+        vi.mocked(readComponentsFiles).mockResolvedValue(mockedSpaceData);
+
+        // We need these mocks for the final expect handleComponents call
+        vi.mocked(handleWhitelists).mockResolvedValue(mockedWhitelistResults);
+        vi.mocked(handleTags).mockResolvedValue(mockedTagsResults);
+        vi.mocked(handleComponentGroups).mockResolvedValue(mockedGroupsResults);
+
+        await componentsCommand.parseAsync(['node', 'test', 'push', '--space', '12345', '--filter', 'blog-*']);
+
+        // Components phase - should only include the blog-post component
+        expect(filterSpaceDataByPattern).toHaveBeenCalledWith(mockedSpaceData, 'blog-*');
+      });
+
+      it('should handle no components matching filter pattern', async () => {
+        const mockedSpaceData = {
+          components: [
+            {
+              name: 'page',
+              display_name: 'Page',
+              created_at: '2021-08-09T12:00:00Z',
+              updated_at: '2021-08-09T12:00:00Z',
+              id: 12345,
+              schema: { type: 'object' },
+              color: null,
+              internal_tags_list: [],
+              internal_tag_ids: [],
+            },
+          ],
+          groups: [],
+          presets: [],
+          internalTags: [],
+        };
+
+        session().state = {
+          isLoggedIn: true,
+          password: 'valid-token',
+          region: 'eu',
+        };
+
+        vi.mocked(readComponentsFiles).mockResolvedValue(mockedSpaceData);
+        vi.mocked(konsola.error).mockImplementation(() => {});
+        vi.mocked(filterSpaceDataByPattern).mockImplementation(() => {
+          return {
+            components: [],
+            groups: [],
+            presets: [],
+            internalTags: [],
+          };
+        });
+        await componentsCommand.parseAsync(['node', 'test', 'push', '--space', '12345', '--filter', 'blog-*']);
+
+        // Should show error message when no components match the pattern
+        expect(konsola.error).toHaveBeenCalledWith('No components found matching pattern "blog-*".');
+
+        // Components phase should not be called
+        expect(handleComponents).not.toHaveBeenCalled();
       });
     });
   });
