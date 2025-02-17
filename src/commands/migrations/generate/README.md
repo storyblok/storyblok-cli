@@ -10,6 +10,9 @@ storyblok migrations generate my-component --field my-field --space 295017
 
 # Generate a migration with a custom path
 storyblok migrations generate my-component --field my-field --space 295017 --path ./custom-path
+
+# Generate a migration with a custom suffix
+storyblok migrations generate my-component --field my-field --space 295017 --suffix staging
 ```
 
 ## Command Options
@@ -19,6 +22,7 @@ storyblok migrations generate my-component --field my-field --space 295017 --pat
 | `--space <spaceId>` | `-s` | (Required) The ID of the space to generate migrations for |
 | `--field <fieldName>` | `--fi` | (Required) The name of the field to migrate |
 | `--path <path>` | `-p` | Custom path to store the migration files (default: ".storyblok/migrations/{spaceId}") |
+| `--suffix <suffix>` | `--su` | Suffix to add to the file name (e.g. {component-name}-{field}.<suffix>.js) |
 | `--verbose` | `-v` | Show detailed logs and error messages |
 
 ## Output Structure
@@ -29,7 +33,15 @@ The command will create a migration file in the following structure:
 .storyblok/
 └── migrations/
     └── {spaceId}/
-        └── {component-name}-{field-name}.js
+        └── {component-name}-{field}.js
+```
+
+If a suffix is provided, the file will be named:
+```markdown
+.storyblok/
+└── migrations/
+    └── {spaceId}/
+        └── {component-name}-{field}.<suffix>.js
 ```
 
 ## Migration File Structure
@@ -37,17 +49,13 @@ The command will create a migration file in the following structure:
 Each generated migration file follows this structure:
 
 ```javascript
-module.exports = {
-  // The name of the component to migrate
-  component: 'component-name',
-  // The field that will be migrated
-  field: 'field-name',
-  // The migration function that will be applied to the field
-  migrate: (field) => {
-    // Your migration logic here
-    return field;
-  }
-};
+export default function (block) {
+  // Example to change a string to boolean
+  // block.fullname = !!(block.fullname)
+
+  // Example to transfer content from other field
+  // block.fullname = block.other_field
+}
 ```
 
 ## Examples
@@ -81,6 +89,21 @@ migrations/
     └── hero-title.js
 ```
 
+### Generate with Custom Suffix
+
+```bash
+storyblok migrations generate hero --field title --space 295017 --suffix staging
+```
+
+This will create:
+
+```markdown
+.storyblok/
+└── migrations/
+    └── 295017/
+        └── hero-title.staging.js
+```
+
 ## Error Cases
 
 The command will fail with helpful error messages in the following cases:
@@ -103,6 +126,7 @@ The command will fail with helpful error messages in the following cases:
 2. Path Options
    - [ ] Test default path generation
    - [ ] Test custom path generation
+   - [ ] Test custom suffix generation
    - [ ] Verify directory structure is maintained
 
 3. Error Handling
@@ -117,6 +141,7 @@ The command will fail with helpful error messages in the following cases:
    - [ ] Test with complex component names
    - [ ] Test with nested field paths
    - [ ] Test verbose mode output
+   - [ ] Test with various suffix values
    - [ ] Verify file permissions are correct
 
 ## Best Practices
@@ -124,6 +149,7 @@ The command will fail with helpful error messages in the following cases:
 1. **Naming Conventions**
    - Use clear, descriptive names for your migration files
    - Follow a consistent pattern for field names
+   - Use meaningful suffixes (e.g., 'staging', 'prod', 'v1')
 
 2. **Migration Logic**
    - Keep migrations atomic (one change per migration)
@@ -133,6 +159,7 @@ The command will fail with helpful error messages in the following cases:
 3. **Version Control**
    - Commit migration files to version control
    - Include clear documentation of what each migration does
+   - Use suffixes to differentiate between environments
 
 ## Related Commands
 

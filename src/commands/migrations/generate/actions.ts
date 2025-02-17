@@ -14,12 +14,13 @@ const getMigrationTemplate = (fieldName: string) => {
 `;
 };
 
-export const generateMigration = async (space: string, path: string, component: SpaceComponent, field: string) => {
+export const generateMigration = async (space: string, path: string | undefined, component: SpaceComponent, field: string, suffix?: string) => {
   const resolvedPath = path
     ? resolve(process.cwd(), path, 'migrations', space)
     : resolvePath(path, `migrations/${space}`);
 
-  const migrationPath = join(resolvedPath, `${component.name}-${field}.js`);
+  const fileName = suffix ? `${component.name}-${field}.${suffix}.js` : `${component.name}-${field}.js`;
+  const migrationPath = join(resolvedPath, fileName);
 
   try {
     await saveToFile(migrationPath, getMigrationTemplate(field));
