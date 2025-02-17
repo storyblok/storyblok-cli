@@ -1,11 +1,12 @@
-import { konsola } from '../../../utils';
-import { fetchComponent } from '../../../commands/components';
+import { session } from '../../../session';
+import { CommandError, konsola } from '../../../utils';
 import { generateMigration } from './actions';
 // Import the main components module first to ensure proper initialization
+
 import '../index';
 import { migrationsCommand } from '../command';
+import { fetchComponent } from '../../../commands/components';
 
-// Mock dependencies
 vi.mock('../../../utils', async () => {
   const actualUtils = await vi.importActual('../../../utils');
   return {
@@ -58,17 +59,10 @@ vi.mock('./actions', () => ({
   generateMigration: vi.fn(),
 }));
 
-vi.mock('../../../program', () => ({
-  getProgram: vi.fn(() => ({
-    opts: () => ({ verbose: false }),
-  })),
-}));
-
 describe('migrations generate command', () => {
   beforeEach(() => {
+    vi.resetAllMocks();
     vi.clearAllMocks();
-    vi.mocked(fetchComponent).mockResolvedValue(mockComponent);
-    vi.mocked(generateMigration).mockResolvedValue(undefined);
 
     // Reset the option values
     migrationsCommand._optionValues = {};
@@ -79,117 +73,108 @@ describe('migrations generate command', () => {
     }
   });
 
-  afterEach(() => {
-    vi.resetAllMocks();
-  });
-
-/*   it('should throw error if component name is not provided', async () => {
-    // Act
-    await migrationsCommand.parseAsync(['node', 'test', 'generate']);
-
-    // Assert
-    expect(handleError).toHaveBeenCalledWith(
-      expect.any(CommandError),
-      false,
-    );
-    expect(fetchComponent).not.toHaveBeenCalled();
-    expect(generateMigration).not.toHaveBeenCalled();
-  });
-
-  it('should throw error if user is not logged in', async () => {
-    // Arrange
-    vi.mocked(session).mockReturnValueOnce({
-      state: {
-        isLoggedIn: false,
-        password: undefined,
-        region: undefined,
+  it('should generate a migration', async () => {
+    const mockComponent = {
+      name: 'component-name',
+      display_name: 'Component Name',
+      created_at: '2021-08-09T12:00:00Z',
+      updated_at: '2021-08-09T12:00:00Z',
+      id: 12345,
+      schema: {
+        field1: {
+          type: 'bloks',
+          restrict_type: 'tags',
+          component_tag_whitelist: [1, 2],
+        },
       },
-      initializeSession: vi.fn(),
-      updateSession: vi.fn(),
-      persistCredentials: vi.fn(),
-      logout: vi.fn(),
-    });
+      color: null,
+      internal_tags_list: [],
+      internal_tag_ids: [],
+    };
 
-    // Act
-    await migrationsCommand.parseAsync(['node', 'test', 'generate', 'test-component', '--field', 'title']);
+    session().state = {
+      isLoggedIn: true,
+      password: 'valid-token',
+      region: 'eu',
+    };
 
-    // Assert
-    expect(handleError).toHaveBeenCalledWith(
-      expect.any(CommandError),
-      false,
-    );
-    expect(fetchComponent).not.toHaveBeenCalled();
-    expect(generateMigration).not.toHaveBeenCalled();
+    vi.mocked(fetchComponent).mockResolvedValue(mockComponent);
+
+    await migrationsCommand.parseAsync(['node', 'test', 'generate', 'component-name', '--field', 'field1', '--space', '12345']);
+
+    expect(generateMigration).toHaveBeenCalledWith('12345', undefined, mockComponent, 'field1');
+    expect(konsola.ok).toHaveBeenCalledWith('You can find the migration file in .storyblok/migrations/12345/component-name-field1.js');
   });
 
-  it('should throw error if space is not provided', async () => {
-    // Arrange
-    migrationsCommand.opts = vi.fn().mockReturnValue({ space: undefined, path: '' });
+  it('should generate a migration with a path', async () => {
+    const mockComponent = {
+      name: 'component-name',
+      display_name: 'Component Name',
+      created_at: '2021-08-09T12:00:00Z',
+      updated_at: '2021-08-09T12:00:00Z',
+      id: 12345,
+      schema: {
+        field1: {
+          type: 'bloks',
+          restrict_type: 'tags',
+          component_tag_whitelist: [1, 2],
+        },
+      },
+      color: null,
+      internal_tags_list: [],
+      internal_tag_ids: [],
+    };
 
-    // Act
-    await migrationsCommand.parseAsync(['node', 'test', 'generate', 'test-component', '--field', 'title']);
+    session().state = {
+      isLoggedIn: true,
+      password: 'valid-token',
+      region: 'eu',
+    };
 
-    // Assert
-    expect(handleError).toHaveBeenCalledWith(
-      expect.any(CommandError),
-      false,
-    );
-    expect(fetchComponent).not.toHaveBeenCalled();
-    expect(generateMigration).not.toHaveBeenCalled();
+    vi.mocked(fetchComponent).mockResolvedValue(mockComponent);
+
+    await migrationsCommand.parseAsync(['node', 'test', 'generate', 'component-name', '--field', 'field1', '--space', '12345', '--path', 'custom']);
+
+    expect(generateMigration).toHaveBeenCalledWith('12345', 'custom', mockComponent, 'field1');
+    expect(konsola.ok).toHaveBeenCalledWith('You can find the migration file in custom/migrations/12345/component-name-field1.js');
   });
 
-  it('should throw error if component is not found', async () => {
-    // Arrange
+  it('should throw an error if the component is not found', async () => {
+    session().state = {
+      isLoggedIn: true,
+      password: 'valid-token',
+      region: 'eu',
+    };
+
     vi.mocked(fetchComponent).mockResolvedValue(undefined);
 
-    // Act
-    await migrationsCommand.parseAsync(['node', 'test', 'generate', 'non-existent-component', '--field', 'title']);
+    await migrationsCommand.parseAsync(['node', 'test', 'generate', 'component-name', '--field', 'field1', '--space', '12345']);
 
-    // Assert
-    expect(handleError).toHaveBeenCalledWith(
-      expect.any(CommandError),
-      false,
-    );
-    expect(fetchComponent).toHaveBeenCalledWith(
-      '123456',
-      'non-existent-component',
-      'mock-token',
-      'eu',
-    );
-    expect(generateMigration).not.toHaveBeenCalled();
+    const mockError = new CommandError('No component found with name "component-name"');
+    expect(konsola.error).toHaveBeenCalledWith(mockError, false);
   });
 
-  it('should generate migration file successfully', async () => {
-    // Act
-    await migrationsCommand.parseAsync(['node', 'test', 'generate', 'test-component', '--field', 'title']);
+  it('should throw an error if the component name is not provided', async () => {
+    session().state = {
+      isLoggedIn: true,
+      password: 'valid-token',
+      region: 'eu',
+    };
 
-    // Assert
-    expect(fetchComponent).toHaveBeenCalledWith(
-      '123456',
-      'test-component',
-      'mock-token',
-      'eu',
-    );
-    expect(generateMigration).toHaveBeenCalledWith(
-      '123456',
-      '',
-      mockComponent,
-      'title',
-    );
-    expect(konsola.ok).toHaveBeenCalled();
-    expect(handleError).not.toHaveBeenCalled();
+    const mockError = new CommandError('Please provide the component name as argument --componentName YOUR_COMPONENT_NAME.');
+    await migrationsCommand.parseAsync(['node', 'test', 'generate', '--field', 'field1', '--space', '12345']);
+    expect(konsola.error).toHaveBeenCalledWith(mockError, false);
   });
 
-  it('should handle errors during execution', async () => {
-    // Arrange
-    const mockError = new Error('Something went wrong');
-    vi.mocked(fetchComponent).mockRejectedValue(mockError);
+  it('should throw an error if the field is not provided', async () => {
+    session().state = {
+      isLoggedIn: true,
+      password: 'valid-token',
+      region: 'eu',
+    };
 
-    // Act
-    await migrationsCommand.parseAsync(['node', 'test', 'generate', 'test-component', '--field', 'title']);
-
-    // Assert
-    expect(handleError).toHaveBeenCalledWith(mockError, false);
-    expect(generateMigration).not.toHaveBeenCalled();
-  }); */
+    const mockError = new CommandError('Please provide the field name as argument --field YOUR_FIELD_NAME.');
+    await migrationsCommand.parseAsync(['node', 'test', 'generate', 'component-name', '--space', '12345']);
+    expect(konsola.error).toHaveBeenCalledWith(mockError, false);
+  });
 });

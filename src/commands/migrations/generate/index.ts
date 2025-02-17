@@ -31,6 +31,11 @@ migrationsCommand
       return;
     }
 
+    if (!field) {
+      handleError(new CommandError(`Please provide the field name as argument --field YOUR_FIELD_NAME.`), verbose);
+      return;
+    }
+
     const { state, initializeSession } = session();
     await initializeSession();
 
