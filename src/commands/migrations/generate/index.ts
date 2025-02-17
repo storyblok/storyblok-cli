@@ -3,12 +3,12 @@ import chalk from 'chalk';
 
 import type { MigrationsGenerateOptions } from './constants';
 import { colorPalette, commands } from '../../../constants';
+import { getProgram } from '../../../program';
 import { CommandError, handleError, isVitest, konsola } from '../../../utils';
 import { session } from '../../../session';
-import { migrationsCommand } from '../command';
 import { fetchComponent } from '../../../commands/components';
+import { migrationsCommand } from '../command';
 import { generateMigration } from './actions';
-import { getProgram } from '../../../program';
 
 const program = getProgram();
 
