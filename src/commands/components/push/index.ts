@@ -108,22 +108,6 @@ componentsCommand
         component => !whitelistResults.processedComponentNames.has(component.name),
       );
 
-      console.log('handleComponents', {
-        space,
-        password,
-        region,
-        spaceData: {
-          ...spaceData,
-          components: remainingComponents,
-        },
-        groupsUuidMap: new Map([...whitelistResults.groupsUuidMap, ...groupsResults.uuidMap]), // Merge both group maps
-        tagsIdMaps: new Map([...whitelistResults.tagsIdMap, ...tagsResults.idMap]), // Merge both tag maps
-        componentNameMap: whitelistResults.componentNameMap,
-        processedGroupUuids: whitelistResults.processedGroupUuids,
-        processedTagIds: whitelistResults.processedTagIds,
-        processedComponentNames: whitelistResults.processedComponentNames,
-      });
-
       const componentsResults = await handleComponents({
         space,
         password,
