@@ -4,7 +4,6 @@ import { vol } from 'memfs';
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { pushComponent, pushComponentGroup, pushComponentInternalTag, pushComponentPreset, readComponentsFiles, updateComponent, updateComponentGroup, updateComponentInternalTag, updateComponentPreset, upsertComponent, upsertComponentGroup, upsertComponentInternalTag, upsertComponentPreset } from './actions';
 import type { SpaceComponent, SpaceComponentGroup, SpaceComponentInternalTag, SpaceComponentPreset } from '../constants';
-import { FileSystemError } from '../../../utils/error/filesystem-error';
 
 const mockComponent: SpaceComponent = {
   name: 'component-name',

@@ -1,6 +1,6 @@
 import { getStoryblokUrl } from '../../../utils/api-routes';
 import { customFetch } from '../../../utils/fetch';
-import { APIError, CommandError, FileSystemError, handleAPIError, handleFileSystemError } from '../../../utils';
+import { APIError, FileSystemError, handleAPIError, handleFileSystemError } from '../../../utils';
 import type { RegionCode } from '../../../constants';
 import type { SpaceComponent, SpaceComponentGroup, SpaceComponentInternalTag, SpaceComponentPreset, SpaceData } from '../constants';
 import type { ReadComponentsOptions } from './constants';
