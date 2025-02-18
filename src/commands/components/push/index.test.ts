@@ -1,5 +1,5 @@
 import { session } from '../../../session';
-import { konsola } from '../../../utils';
+import { CommandError, konsola } from '../../../utils';
 import { readComponentsFiles } from './actions';
 
 // Import the main components module first to ensure proper initialization
@@ -692,7 +692,7 @@ describe('push', () => {
 
         await componentsCommand.parseAsync(['node', 'test', 'push', 'component-name', '--space', '12345']);
 
-        expect(konsola.error).toHaveBeenCalledWith('Component "component-name" not found.');
+        expect(konsola.error).toHaveBeenCalledWith(new CommandError('Component "component-name" not found.'), false);
       });
     });
 
@@ -810,7 +810,7 @@ describe('push', () => {
         await componentsCommand.parseAsync(['node', 'test', 'push', '--space', '12345', '--filter', 'blog-*']);
 
         // Should show error message when no components match the pattern
-        expect(konsola.error).toHaveBeenCalledWith('No components found matching pattern "blog-*".');
+        expect(konsola.error).toHaveBeenCalledWith(new CommandError('No components found matching pattern "blog-*".'), false);
 
         // Components phase should not be called
         expect(handleComponents).not.toHaveBeenCalled();

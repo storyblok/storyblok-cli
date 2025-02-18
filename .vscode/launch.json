@@ -142,9 +142,37 @@
     {
       "type": "node",
       "request": "launch",
+      "name": "Debug Push components from non-existing space",
+      "program": "${workspaceFolder}/dist/index.mjs",
+      "args": ["components", "push", "--space", "295018", "--from", "non-existing"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "sourceMaps": true,
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "env": {
+        "STUB": "true"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
       "name": "Debug Push component component-tags",
       "program": "${workspaceFolder}/dist/index.mjs",
       "args": ["components", "push", "component-tags", "--space", "295018", "--from", "295017"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "sourceMaps": true,
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "env": {
+        "STUB": "true"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Push component non-existing",
+      "program": "${workspaceFolder}/dist/index.mjs",
+      "args": ["components", "push", "non-existing", "--space", "295018", "--from", "295017"],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "sourceMaps": true,

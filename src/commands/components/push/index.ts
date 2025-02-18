@@ -26,8 +26,7 @@ componentsCommand
   .action(async (componentName: string | undefined, options: PushComponentsOptions) => {
     konsola.title(` ${commands.COMPONENTS} `, colorPalette.COMPONENTS, componentName ? `Pushing component ${componentName}...` : 'Pushing components...');
     // Global options
-
-    const verbose = program.opts().verbose;
+    const { verbose } = program.opts();
     const { space, path } = componentsCommand.opts();
 
     const { from, filter } = options;
@@ -64,7 +63,7 @@ componentsCommand
       if (componentName) {
         spaceData = filterSpaceDataByComponent(spaceData, componentName);
         if (!spaceData.components.length) {
-          konsola.error(`Component "${componentName}" not found.`);
+          handleError(new CommandError(`Component "${componentName}" not found.`), verbose);
           return;
         }
       }
@@ -72,7 +71,7 @@ componentsCommand
       else if (filter) {
         spaceData = filterSpaceDataByPattern(spaceData, filter);
         if (!spaceData.components.length) {
-          konsola.error(`No components found matching pattern "${filter}".`);
+          handleError(new CommandError(`No components found matching pattern "${filter}".`), verbose);
           return;
         }
         konsola.info(`Filter applied: ${filter}`);
