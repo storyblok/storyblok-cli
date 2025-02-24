@@ -1,5 +1,3 @@
-import type { CommandOptions } from '../../types';
-
 export interface SpaceComponent {
   name: string;
   display_name: string;
@@ -17,8 +15,8 @@ export interface SpaceComponent {
   real_name?: string;
   component_group_uuid?: string;
   color: null;
-  internal_tags_list: string[];
-  interntal_tags_ids: number[];
+  internal_tags_list: SpaceComponentInternalTag[];
+  internal_tag_ids: string[];
   content_type_asset_preview?: string;
 }
 
@@ -26,15 +24,8 @@ export interface SpaceComponentGroup {
   name: string;
   id: number;
   uuid: string;
-  parent_id: number;
-  parent_uuid: string;
-}
-
-export interface ComponentsSaveOptions {
-  path?: string;
-  filename?: string;
-  separateFiles?: boolean;
-  suffix?: string;
+  parent_id: number | null;
+  parent_uuid: string | null;
 }
 
 export interface SpaceComponentPreset {
@@ -51,40 +42,15 @@ export interface SpaceComponentPreset {
   description: string;
 }
 
+export interface SpaceComponentInternalTag {
+  id: number;
+  name: string;
+  object_type?: 'asset' | 'component';
+}
+
 export interface SpaceData {
   components: SpaceComponent[];
   groups: SpaceComponentGroup[];
   presets: SpaceComponentPreset[];
-}
-/**
- * Interface representing the options for the `pull-components` command.
- */
-export interface PullComponentsOptions extends CommandOptions {
-
-  /**
-   * The filename to save the file as.
-   * Defaults to `components`. The file will be saved as `<filename>.<space>.json`.
-   * @default `components
-   */
-  filename?: string;
-  /**
-   * The suffix to add to the filename.
-   * Defaults to the space ID.
-   * @default space
-   */
-  suffix?: string;
-  /**
-   * Indicates whether to save each component to a separate file.
-   * @default false
-   */
-  separateFiles?: boolean;
-}
-
-export interface SaveComponentsOptions extends PullComponentsOptions {
-  /**
-   * The path to save the components file to.
-   * Defaults to `.storyblok/components`.
-   * @default `.storyblok/components`
-   */
-  path?: string;
+  internalTags: SpaceComponentInternalTag[];
 }

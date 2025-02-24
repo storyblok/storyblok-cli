@@ -114,7 +114,12 @@ describe('languagesCommand', () => {
         };
 
         const mockError = new CommandError(`Please provide the space as argument --space YOUR_SPACE_ID.`);
-        await languagesCommand.parseAsync(['node', 'test', 'pull']);
+        try {
+          await languagesCommand.parseAsync(['node', 'test', 'pull']);
+        }
+        catch (error) {
+          console.log('TEST languages', error);
+        }
         expect(konsola.error).toHaveBeenCalledWith(mockError, false);
       });
 

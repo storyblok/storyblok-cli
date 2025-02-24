@@ -46,4 +46,11 @@ export const readFile = async (filePath: string) => {
   }
 };
 
-export const resolvePath = (path: string | undefined, folder: string) => path ? resolve(process.cwd(), path) : resolve(resolve(process.cwd(), '.storyblok'), folder);
+export const resolvePath = (path: string | undefined, folder: string) => {
+  // If a custom path is provided, append the folder structure to it
+  if (path) {
+    return resolve(process.cwd(), path, folder);
+  }
+  // Otherwise use the default .storyblok path
+  return resolve(resolve(process.cwd(), '.storyblok'), folder);
+};

@@ -20,8 +20,8 @@ export function handleError(error: Error | FetchError, verbose = false): void {
       header: true,
     });
   }
-  if (verbose && (error instanceof APIError || error instanceof FileSystemError)) {
-    const errorDetails = error.getInfo();
+  if (verbose && (error instanceof CommandError || error instanceof APIError || error instanceof FileSystemError)) {
+    const errorDetails = 'getInfo' in error ? error.getInfo() : {};
     if (error instanceof CommandError) {
       konsola.error(`Command Error: ${error.getInfo().message}`, errorDetails);
     }
@@ -42,6 +42,6 @@ export function handleError(error: Error | FetchError, verbose = false): void {
 
   if (!process.env.VITEST) {
     console.log(''); // Add a line break for readability
-    process.exit(1); // Exit process if not in a test environment
+    // process.exit(1) // Exit process if not in a test environment
   }
 }

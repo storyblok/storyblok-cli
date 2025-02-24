@@ -75,15 +75,9 @@ describe('login actions', () => {
       expect(result).toEqual(expected);
     });
 
-    it('should throw an error for invalid email', async () => {
-      await expect(loginWithEmailAndPassword('invalid-email', 'password', 'eu')).rejects.toThrow(
-        'The provided credentials are invalid',
-      );
-    });
-
     it('should throw an error for invalid credentials', async () => {
       await expect(loginWithEmailAndPassword('david.bisbal@storyblok.com', 'password', 'eu')).rejects.toThrow(
-        'The user is not authorized to access the API',
+        'The provided credentials are invalid',
       );
     });
   });

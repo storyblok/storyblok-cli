@@ -3,35 +3,35 @@ import { setupServer } from 'msw/node';
 import { vol } from 'memfs';
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { fetchComponent, fetchComponents, saveComponentsToFiles } from './actions';
-import { FetchError } from '../../utils/fetch';
-import { APIError } from '../../utils';
+
+const mockedComponents = [{
+  name: 'component-name',
+  display_name: 'Component Name',
+  created_at: '2021-08-09T12:00:00Z',
+  updated_at: '2021-08-09T12:00:00Z',
+  id: 12345,
+  schema: { type: 'object' },
+  color: null,
+  internal_tags_list: ['tag'],
+  internal_tag_ids: [1],
+}, {
+  name: 'component-name-2',
+  display_name: 'Component Name 2',
+  created_at: '2021-08-09T12:00:00Z',
+  updated_at: '2021-08-09T12:00:00Z',
+  id: 12346,
+  schema: { type: 'object' },
+  color: null,
+  internal_tags_list: ['tag'],
+  internal_tag_ids: [1],
+}];
 
 const handlers = [
   http.get('https://api.storyblok.com/v1/spaces/12345/components', async ({ request }) => {
     const token = request.headers.get('Authorization');
     if (token === 'valid-token') {
       return HttpResponse.json({
-        components: [{
-          name: 'component-name',
-          display_name: 'Component Name',
-          created_at: '2021-08-09T12:00:00Z',
-          updated_at: '2021-08-09T12:00:00Z',
-          id: 12345,
-          schema: { type: 'object' },
-          color: null,
-          internal_tags_list: ['tag'],
-          interntal_tags_ids: [1],
-        }, {
-          name: 'component-name-2',
-          display_name: 'Component Name 2',
-          created_at: '2021-08-09T12:00:00Z',
-          updated_at: '2021-08-09T12:00:00Z',
-          id: 12346,
-          schema: { type: 'object' },
-          color: null,
-          internal_tags_list: ['tag'],
-          interntal_tags_ids: [1],
-        }],
+        components: mockedComponents,
       });
     }
     return new HttpResponse('Unauthorized', { status: 401 });
@@ -59,7 +59,7 @@ describe('pull components actions', () => {
       schema: { type: 'object' },
       color: null,
       internal_tags_list: ['tag'],
-      interntal_tags_ids: [1],
+      internal_tag_ids: [1],
     }, {
       name: 'component-name-2',
       display_name: 'Component Name 2',
@@ -69,7 +69,7 @@ describe('pull components actions', () => {
       schema: { type: 'object' },
       color: null,
       internal_tags_list: ['tag'],
-      interntal_tags_ids: [1],
+      internal_tag_ids: [1],
     }];
 
     const result = await fetchComponents('12345', 'valid-token', 'eu');
@@ -87,7 +87,7 @@ describe('pull components actions', () => {
         schema: { type: 'object' },
         color: null,
         internal_tags_list: ['tag'],
-        interntal_tags_ids: [1],
+        internal_tag_ids: [1],
       }],
     };
     const result = await fetchComponent('12345', 'component-name', 'valid-token', 'eu');
@@ -95,16 +95,25 @@ describe('pull components actions', () => {
   });
 
   it('should throw an masked error for invalid token', async () => {
-    const error = new FetchError('Non-JSON response', { status: 401, statusText: 'Unauthorized', data: null });
     await expect(fetchComponents('12345', 'invalid-token', 'eu')).rejects.toThrow(
-      new APIError('unauthorized', 'pull_components', error, `The user is not authorized to access the API`),
+      expect.objectContaining({
+        name: 'API Error',
+        message: 'The user is not authorized to access the API',
+        cause: 'The user is not authorized to access the API',
+        errorId: 'unauthorized',
+        code: 401,
+        messageStack: [
+          'Failed to pull components',
+          'The user is not authorized to access the API',
+        ],
+      }),
     );
   });
 
   describe('saveComponentsToFiles', () => {
     it('should save components to files successfully', async () => {
       vol.fromJSON({
-        '/path/to/components': null,
+        '/path/to/components/12345': null,
       });
 
       const components = [{
@@ -116,21 +125,22 @@ describe('pull components actions', () => {
         schema: { type: 'object' },
         color: null,
         internal_tags_list: ['tag'],
-        interntal_tags_ids: [1],
+        internal_tag_ids: [1],
       }];
 
-      await saveComponentsToFiles('12345', { components, groups: [], presets: [] }, {
-        path: '/path/to/components',
+      await saveComponentsToFiles('12345', { components }, {
+        path: '/path/to/',
         verbose: false,
+        space: '12345',
       });
 
-      const files = vol.readdirSync('/path/to/components');
+      const files = vol.readdirSync('/path/to/components/12345');
       expect(files).toEqual(['components.json']);
     });
 
     it('should save components to files with custom filename', async () => {
       vol.fromJSON({
-        '/path/to/components2': null,
+        '/path/to2/': null,
       });
 
       const components = [{
@@ -142,22 +152,22 @@ describe('pull components actions', () => {
         schema: { type: 'object' },
         color: null,
         internal_tags_list: ['tag'],
-        interntal_tags_ids: [1],
+        internal_tag_ids: [1],
       }];
 
-      await saveComponentsToFiles('12345', { components, groups: [], presets: [] }, {
-        path: '/path/to/components2',
+      await saveComponentsToFiles('12345', { components }, {
+        path: '/path/to2/',
         filename: 'custom',
         verbose: false,
       });
 
-      const files = vol.readdirSync('/path/to/components2');
+      const files = vol.readdirSync('/path/to2/components/12345');
       expect(files).toEqual(['custom.json']);
     });
 
     it('should save components to files with custom suffix', async () => {
       vol.fromJSON({
-        '/path/to/components3': null,
+        '/path/to3/': null,
       });
 
       const components = [{
@@ -169,22 +179,27 @@ describe('pull components actions', () => {
         schema: { type: 'object' },
         color: null,
         internal_tags_list: ['tag'],
-        interntal_tags_ids: [1],
+        internal_tag_ids: [1],
       }];
 
-      await saveComponentsToFiles('12345', { components, groups: [], presets: [] }, {
-        path: '/path/to/components3',
-        suffix: 'custom',
-        verbose: false,
-      });
+      try {
+        await saveComponentsToFiles('12345', { components }, {
+          path: '/path/to3/',
+          suffix: 'custom',
+          verbose: false,
+        });
+      }
+      catch (error) {
+        console.log('TEST', error);
+      }
 
-      const files = vol.readdirSync('/path/to/components3');
+      const files = vol.readdirSync('/path/to3/components/12345');
       expect(files).toEqual(['components.custom.json']);
     });
 
     it('should save components to separate files', async () => {
       vol.fromJSON({
-        '/path/to/components4': null,
+        '/path/to4/': null,
       });
 
       const components = [{
@@ -196,7 +211,7 @@ describe('pull components actions', () => {
         schema: { type: 'object' },
         color: null,
         internal_tags_list: ['tag'],
-        interntal_tags_ids: [1],
+        internal_tag_ids: [1],
       }, {
         name: 'component-name-2',
         display_name: 'Component Name 2',
@@ -206,17 +221,17 @@ describe('pull components actions', () => {
         schema: { type: 'object' },
         color: null,
         internal_tags_list: ['tag'],
-        interntal_tags_ids: [1],
+        internal_tag_ids: [1],
       }];
 
-      await saveComponentsToFiles('12345', { components, groups: [], presets: [] }, {
-        path: '/path/to/components4',
+      await saveComponentsToFiles('12345', { components }, {
+        path: '/path/to4/',
         separateFiles: true,
         verbose: false,
       });
 
-      const files = vol.readdirSync('/path/to/components4');
-      expect(files).toEqual(['component-name-2.json', 'component-name.json']);
+      const files = vol.readdirSync('/path/to4/components/12345');
+      expect(files).toEqual(['component-name-2.json', 'component-name.json', 'groups.json', 'tags.json']);
     });
   });
 });

@@ -1,3 +1,4 @@
+import { isVitest } from './../../utils/index';
 import chalk from 'chalk';
 import { input, password, select } from '@inquirer/prompts';
 import type { RegionCode } from '../../constants';
@@ -5,9 +6,8 @@ import { colorPalette, commands, regionNames, regions } from '../../constants';
 import { getProgram } from '../../program';
 import { CommandError, handleError, isRegion, konsola } from '../../utils';
 import { loginWithEmailAndPassword, loginWithOtp, loginWithToken } from './actions';
-
+import { Spinner } from '@topcli/spinner';
 import { session } from '../../session';
-import ora from 'ora';
 
 const program = getProgram(); // Get the shared singleton instance
 
@@ -62,7 +62,9 @@ export const loginCommand = program
 
     if (token) {
       try {
-        const spinner = ora(`Logging in with token`).start();
+        const spinner = new Spinner({
+          verbose: !isVitest,
+        }).start(`Logging in with token`);
         const { user } = await loginWithToken(token, region);
         updateSession(user.email, token, region);
         await persistCredentials(region);
@@ -83,7 +85,9 @@ export const loginCommand = program
               return value.length > 0;
             },
           });
-          const spinner = ora(`Logging in with token`).start();
+          const spinner = new Spinner({
+            verbose: !isVitest,
+          }).start(`Logging in with token`);
           const { user } = await loginWithToken(userToken, region);
           spinner.succeed();
           updateSession(user.email, userToken, region);
@@ -112,7 +116,9 @@ export const loginCommand = program
             })),
             default: regions.EU,
           });
-          const spinner = ora(`Logging in with email`).start();
+          const spinner = new Spinner({
+            verbose: !isVitest,
+          }).start(`Logging in with email`);
           const response = await loginWithEmailAndPassword(userEmail, userPassword, userRegion);
           spinner.succeed();
 

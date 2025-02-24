@@ -9,16 +9,16 @@ const FS_ERRORS = {
   no_space_left: 'No space left on the device',
   invalid_argument: 'An invalid argument was provided',
   unknown_error: 'An unknown error occurred',
-};
+} as const;
 
 const FS_ACTIONS = {
-  read: 'Failed to read/parse the .netrc file:',
+  read: 'Failed to read/parse file:',
   write: 'Writing file',
   delete: 'Deleting file',
   mkdir: 'Creating directory',
   rmdir: 'Removing directory',
   authorization_check: 'Failed to check authorization in .netrc file:',
-};
+} as const;
 
 export function handleFileSystemError(action: keyof typeof FS_ACTIONS, error: NodeJS.ErrnoException): void {
   if (error.code) {
@@ -65,8 +65,13 @@ export class FileSystemError extends Error {
     this.errorId = errorId;
     this.cause = FS_ERRORS[errorId];
     this.code = error.code;
-    this.messageStack = [FS_ACTIONS[action], customMessage || FS_ERRORS[errorId]];
+    this.messageStack = [];
     this.error = error;
+
+    if (!customMessage) {
+      this.messageStack.push(FS_ACTIONS[action]);
+    }
+    this.messageStack.push(customMessage || FS_ERRORS[errorId]);
   }
 
   getInfo() {

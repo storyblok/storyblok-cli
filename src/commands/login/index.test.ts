@@ -51,6 +51,7 @@ vi.mock('../../utils', async () => {
       title: vi.fn(),
       error: vi.fn(),
     },
+    isVitestRunning: true,
     handleError: (error: Error, header = false) => {
       konsola.error(error, header);
       // Optionally, prevent process.exit during tests

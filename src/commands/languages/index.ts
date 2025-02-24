@@ -1,11 +1,11 @@
 import { colorPalette, commands } from '../../constants';
-import { CommandError, handleError, konsola } from '../../utils';
+import { CommandError, handleError, isVitest, konsola } from '../../utils';
 import { getProgram } from '../../program';
 import { session } from '../../session';
 import { fetchLanguages, saveLanguagesToFile } from './actions';
 import chalk from 'chalk';
 import type { PullLanguagesOptions } from './constants';
-import ora from 'ora';
+import { Spinner } from '@topcli/spinner';
 
 const program = getProgram(); // Get the shared singleton instance
 
@@ -26,6 +26,7 @@ languagesCommand
 
     // Global options
     const verbose = program.opts().verbose;
+
     // Command options
     const { space, path } = languagesCommand.opts();
     const { filename = 'languages', suffix = options.space } = options;
@@ -43,7 +44,10 @@ languagesCommand
     }
 
     try {
-      const spinner = ora(`Fetching ${chalk.hex(colorPalette.LANGUAGES)('languages')}`).start();
+      const spinner = new Spinner({
+        verbose: !isVitest,
+      })
+        .start(`Fetching ${chalk.hex(colorPalette.LANGUAGES)('languages')}`);
 
       const internationalization = await fetchLanguages(space, state.password, state.region);
       spinner.succeed();

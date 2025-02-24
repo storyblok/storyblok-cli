@@ -1,27 +1,23 @@
-import { session } from '../../session';
-import { CommandError, konsola } from '../../utils';
+import { session } from '../../../session';
+import { CommandError, konsola } from '../../../utils';
 import { fetchComponent, fetchComponents, saveComponentsToFiles } from './actions';
-import { componentsCommand } from '.';
 import chalk from 'chalk';
-import { colorPalette } from '../../constants';
+import { colorPalette } from '../../../constants';
+// Import the main components module first to ensure proper initialization
+import '../index';
+import { componentsCommand } from '../command';
 
 vi.mock('./actions', () => ({
   fetchComponents: vi.fn(),
   fetchComponent: vi.fn(),
   fetchComponentGroups: vi.fn(),
   fetchComponentPresets: vi.fn(),
+  fetchComponentInternalTags: vi.fn(),
   saveComponentsToFiles: vi.fn(),
 }));
 
-vi.mock('../../creds', () => ({
-  getCredentials: vi.fn(),
-  addCredentials: vi.fn(),
-  removeCredentials: vi.fn(),
-  removeAllCredentials: vi.fn(),
-}));
-
 // Mocking the session module
-vi.mock('../../session', () => {
+vi.mock('../../../session', () => {
   let _cache: Record<string, any> | null = null;
   const session = () => {
     if (!_cache) {
@@ -42,18 +38,20 @@ vi.mock('../../session', () => {
   };
 });
 
-vi.mock('../../utils', async () => {
-  const actualUtils = await vi.importActual('../../utils');
+vi.mock('../../../utils', async () => {
+  const actualUtils = await vi.importActual('../../../utils');
   return {
     ...actualUtils,
+    isVitestRunning: true,
     konsola: {
       ok: vi.fn(),
       title: vi.fn(),
       warn: vi.fn(),
       error: vi.fn(),
+      br: vi.fn(),
     },
-    handleError: (error: Error, header = false) => {
-      konsola.error(error, header);
+    handleError: (error: unknown, header = false) => {
+      konsola.error(error as string, header);
       // Optionally, prevent process.exit during tests
     },
   };
@@ -65,7 +63,9 @@ describe('pull', () => {
     vi.clearAllMocks();
     // Reset the option values
     componentsCommand._optionValues = {};
+    componentsCommand._optionValueSources = {};
     for (const command of componentsCommand.commands) {
+      command._optionValueSources = {};
       command._optionValues = {};
     }
   });
@@ -80,8 +80,8 @@ describe('pull', () => {
         id: 12345,
         schema: { type: 'object' },
         color: null,
-        internal_tags_list: ['tag'],
-        interntal_tags_ids: [1],
+        internal_tags_list: [],
+        internal_tag_ids: [],
       }, {
         name: 'component-name-2',
         display_name: 'Component Name 2',
@@ -90,8 +90,8 @@ describe('pull', () => {
         id: 12346,
         schema: { type: 'object' },
         color: null,
-        internal_tags_list: ['tag'],
-        interntal_tags_ids: [1],
+        internal_tags_list: [],
+        internal_tag_ids: [],
       }];
 
       session().state = {
@@ -101,12 +101,15 @@ describe('pull', () => {
       };
 
       vi.mocked(fetchComponents).mockResolvedValue(mockResponse);
+
       await componentsCommand.parseAsync(['node', 'test', 'pull', '--space', '12345']);
+
       expect(fetchComponents).toHaveBeenCalledWith('12345', 'valid-token', 'eu');
       expect(saveComponentsToFiles).toHaveBeenCalledWith('12345', {
         components: mockResponse,
         groups: [],
         presets: [],
+        internalTags: [],
       }, {
         path: undefined,
         separateFiles: false,
@@ -124,7 +127,7 @@ describe('pull', () => {
         schema: { type: 'object' },
         color: null,
         internal_tags_list: ['tag'],
-        interntal_tags_ids: [1],
+        internal_tag_ids: [1],
       };
 
       session().state = {
@@ -139,6 +142,7 @@ describe('pull', () => {
         components: [mockResponse],
         groups: [],
         presets: [],
+        internalTags: [],
       }, { separateFiles: true, path: undefined });
     });
 
@@ -183,7 +187,7 @@ describe('pull', () => {
         schema: { type: 'object' },
         color: null,
         internal_tags_list: ['tag'],
-        interntal_tags_ids: [1],
+        internal_tag_ids: [1],
       }];
 
       session().state = {
@@ -200,8 +204,9 @@ describe('pull', () => {
         components: mockResponse,
         groups: [],
         presets: [],
+        internalTags: [],
       }, { path: '/path/to/components', separateFiles: false });
-      expect(konsola.ok).toHaveBeenCalledWith(`Components downloaded successfully to ${chalk.hex(colorPalette.PRIMARY)(`/path/to/components/components.json`)}`);
+      expect(konsola.ok).toHaveBeenCalledWith(`Components downloaded successfully to ${chalk.hex(colorPalette.PRIMARY)(`/path/to/components/components/12345/components.json`)}`);
     });
   });
 
@@ -216,7 +221,7 @@ describe('pull', () => {
         schema: { type: 'object' },
         color: null,
         internal_tags_list: ['tag'],
-        interntal_tags_ids: [1],
+        internal_tag_ids: [1],
       }];
 
       session().state = {
@@ -233,6 +238,7 @@ describe('pull', () => {
         components: mockResponse,
         groups: [],
         presets: [],
+        internalTags: [],
       }, { filename: 'custom', separateFiles: false });
       expect(konsola.ok).toHaveBeenCalledWith(`Components downloaded successfully to ${chalk.hex(colorPalette.PRIMARY)(`.storyblok/components/12345/custom.json`)}`);
     });
@@ -249,7 +255,7 @@ describe('pull', () => {
         schema: { type: 'object' },
         color: null,
         internal_tags_list: ['tag'],
-        interntal_tags_ids: [1],
+        internal_tag_ids: [1],
       }, {
         name: 'component-name-2',
         display_name: 'Component Name 2',
@@ -259,7 +265,7 @@ describe('pull', () => {
         schema: { type: 'object' },
         color: null,
         internal_tags_list: ['tag'],
-        interntal_tags_ids: [1],
+        internal_tag_ids: [1],
       }];
 
       session().state = {
@@ -276,6 +282,7 @@ describe('pull', () => {
         components: mockResponse,
         groups: [],
         presets: [],
+        internalTags: [],
       }, { separateFiles: true, path: undefined });
       expect(konsola.ok).toHaveBeenCalledWith(`Components downloaded successfully to ${chalk.hex(colorPalette.PRIMARY)(`.storyblok/components/12345/`)}`);
     });
@@ -290,7 +297,7 @@ describe('pull', () => {
         schema: { type: 'object' },
         color: null,
         internal_tags_list: ['tag'],
-        interntal_tags_ids: [1],
+        internal_tag_ids: [1],
       }];
 
       session().state = {
@@ -307,6 +314,7 @@ describe('pull', () => {
         components: mockResponse,
         groups: [],
         presets: [],
+        internalTags: [],
       }, { separateFiles: true, filename: 'custom' });
       expect(konsola.warn).toHaveBeenCalledWith(`The --filename option is ignored when using --separate-files`);
     });
