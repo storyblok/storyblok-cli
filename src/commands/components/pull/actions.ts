@@ -60,7 +60,6 @@ export const fetchComponentGroups = async (space: string, token: string, region:
 };
 
 // Component preset actions
-// Component preset actions
 export const fetchComponentPresets = async (space: string, token: string, region: RegionCode): Promise<SpaceComponentPreset[] | undefined> => {
   try {
     const url = getStoryblokUrl(region);
