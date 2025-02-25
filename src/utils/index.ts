@@ -51,4 +51,28 @@ export const removePropertyRecursively = (obj: Record<string, any>, property: st
   return result;
 };
 
+/**
+ * Converts an object with potential non-string values to an object with string values
+ * for use with URLSearchParams
+ *
+ * @param obj - The object to convert
+ * @returns An object with all values converted to strings
+ */
+export const objectToStringParams = (obj: Record<string, any>): Record<string, string> => {
+  return Object.entries(obj).reduce((acc, [key, value]) => {
+    // Skip undefined values
+    if (value === undefined) { return acc; }
+
+    // Convert objects/arrays to JSON strings
+    if (typeof value === 'object' && value !== null) {
+      acc[key] = JSON.stringify(value);
+    }
+    else {
+      // Convert other types to strings
+      acc[key] = String(value);
+    }
+    return acc;
+  }, {} as Record<string, string>);
+};
+
 export const isVitest = process.env.VITEST === 'true';
