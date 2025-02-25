@@ -272,17 +272,13 @@ describe('push components actions', () => {
         expect.objectContaining({
           name: 'File System Error',
           errorId: 'file_not_found',
-          message: 'The file requested was not found',
           cause: 'The file requested was not found',
           code: 'ENOENT',
-          messageStack: expect.arrayContaining([
-            'Failed to read/parse file:',
-            'The file requested was not found',
-          ]),
           error: expect.objectContaining({
             code: 'ENOENT',
             message: expect.stringContaining('ENOENT: no such file or directory'),
           }),
+          message: 'No directory found for space "non-existent". Please make sure you have pulled the components first by running:\n\n  storyblok components pull --space non-existent',
         }),
       );
     });

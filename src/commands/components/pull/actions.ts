@@ -60,7 +60,6 @@ export const fetchComponentGroups = async (space: string, token: string, region:
 };
 
 // Component preset actions
-// Component preset actions
 export const fetchComponentPresets = async (space: string, token: string, region: RegionCode): Promise<SpaceComponentPreset[] | undefined> => {
   try {
     const url = getStoryblokUrl(region);
@@ -89,7 +88,7 @@ export const fetchComponentInternalTags = async (space: string, token: string, r
         Authorization: token,
       },
     });
-    return response.internal_tags;
+    return response.internal_tags.filter(tag => tag.object_type === 'component');
   }
   catch (error) {
     handleAPIError('pull_component_internal_tags', error as Error);

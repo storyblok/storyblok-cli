@@ -254,135 +254,128 @@ export const upsertComponentInternalTag = async (space: string, tag: SpaceCompon
 
 // Filesystem actions
 
+interface FileReaderResult<T> {
+  data: T[];
+  error?: Error;
+}
+
+async function readJsonFile<T>(filePath: string): Promise<FileReaderResult<T>> {
+  try {
+    const content = (await readFile(filePath)).toString();
+    if (!content) {
+      return { data: [] };
+    }
+    const parsed = JSON.parse(content);
+    return { data: Array.isArray(parsed) ? parsed : [parsed] };
+  }
+  catch (error) {
+    return { data: [], error: error as Error };
+  }
+}
+
 export const readComponentsFiles = async (
   options: ReadComponentsOptions): Promise<SpaceData> => {
   const { from, path, separateFiles = false } = options;
   const resolvedPath = resolvePath(path, `components/${from}`);
 
+  // Check if directory exists first
   try {
-    if (separateFiles) {
-      // Read from separate files
-      const files = await readdir(resolvedPath);
-      const components: SpaceComponent[] = [];
-      const presets: SpaceComponentPreset[] = [];
-      let groups: SpaceComponentGroup[] = [];
-      let internalTags: SpaceComponentInternalTag[] = [];
-
-      // Read each file
-      for (const file of files) {
-        const filePath = join(resolvedPath, file);
-        const fileContent = (await readFile(filePath)).toString();
-
-        if (!fileContent) {
-          continue;
-        }
-
-        try {
-          const parsed = JSON.parse(fileContent);
-
-          if (file === 'groups.json') {
-            groups = parsed;
-          }
-          else if (file === 'tags.json') {
-            internalTags = parsed;
-          }
-          else if (file.endsWith('.preset.json')) {
-            presets.push(...parsed);
-          }
-          else if (file.endsWith('.json')) {
-            components.push(parsed);
-          }
-        }
-        catch (error) {
-          handleFileSystemError('read', error as Error);
-        }
-      }
-
-      return {
-        components,
-        groups,
-        presets,
-        internalTags,
-      };
-    }
-
-    // Read from consolidated files
-    const componentsPath = join(resolvedPath, 'components.json');
-    let components: SpaceComponent[] = [];
-    let groups: SpaceComponentGroup[] = [];
-    let presets: SpaceComponentPreset[] = [];
-    let internalTags: SpaceComponentInternalTag[] = [];
-
-    try {
-      // First try to read components.json as it's required
-      const componentsContent = (await readFile(componentsPath)).toString();
-      if (componentsContent) {
-        components = JSON.parse(componentsContent);
-      }
-      else {
-        throw new FileSystemError(
-          'file_not_found',
-          'read',
-          new Error('Components file not found'),
-          `No components found in ${componentsPath}. Please make sure you have pulled the components first.`,
-        );
-      }
-
-      // Then try to read optional files
-      try {
-        const groupsContent = (await readFile(join(resolvedPath, 'groups.json'))).toString();
-        if (groupsContent) {
-          groups = JSON.parse(groupsContent);
-        }
-      }
-      catch {
-        // Ignore file not found errors for optional files
-      }
-
-      try {
-        const presetsContent = (await readFile(join(resolvedPath, 'presets.json'))).toString();
-        if (presetsContent) {
-          presets = JSON.parse(presetsContent);
-        }
-      }
-      catch {
-        // Ignore file not found errors for optional files
-      }
-
-      try {
-        const tagsContent = (await readFile(join(resolvedPath, 'tags.json'))).toString();
-        if (tagsContent) {
-          internalTags = JSON.parse(tagsContent);
-        }
-      }
-      catch {
-        // Ignore file not found errors for optional files
-      }
-    }
-    catch (error) {
-      if (error instanceof FileSystemError) {
-        throw error;
-      }
-      handleFileSystemError('read', error as Error);
-    }
-
-    return {
-      components,
-      groups,
-      presets,
-      internalTags,
-    };
+    await readdir(resolvedPath);
   }
   catch (error) {
-    if (error instanceof FileSystemError) {
-      throw error;
-    }
-    handleFileSystemError('read', error as Error);
-    return {
-      components: [],
-      groups: [],
-      presets: [],
-      internalTags: [],
-    };
+    const message = `No directory found for space "${from}". Please make sure you have pulled the components first by running:\n\n  storyblok components pull --space ${from}`;
+    throw new FileSystemError(
+      'file_not_found',
+      'read',
+      error as Error,
+      message,
+    );
   }
+
+  if (separateFiles) {
+    return await readSeparateFiles(resolvedPath);
+  }
+
+  return await readConsolidatedFiles(resolvedPath);
 };
+
+async function readSeparateFiles(resolvedPath: string): Promise<SpaceData> {
+  const files = await readdir(resolvedPath);
+  const components: SpaceComponent[] = [];
+  const presets: SpaceComponentPreset[] = [];
+  let groups: SpaceComponentGroup[] = [];
+  let internalTags: SpaceComponentInternalTag[] = [];
+
+  for (const file of files) {
+    const filePath = join(resolvedPath, file);
+
+    if (file === 'groups.json') {
+      const result = await readJsonFile<SpaceComponentGroup>(filePath);
+      if (result.error) {
+        handleFileSystemError('read', result.error);
+        continue;
+      }
+      groups = result.data;
+    }
+    else if (file === 'tags.json') {
+      const result = await readJsonFile<SpaceComponentInternalTag>(filePath);
+      if (result.error) {
+        handleFileSystemError('read', result.error);
+        continue;
+      }
+      internalTags = result.data;
+    }
+    else if (file.endsWith('.preset.json')) {
+      const result = await readJsonFile<SpaceComponentPreset>(filePath);
+      if (result.error) {
+        handleFileSystemError('read', result.error);
+        continue;
+      }
+      presets.push(...result.data);
+    }
+    else if (file.endsWith('.json')) {
+      const result = await readJsonFile<SpaceComponent>(filePath);
+      if (result.error) {
+        handleFileSystemError('read', result.error);
+        continue;
+      }
+      components.push(...result.data);
+    }
+  }
+
+  return {
+    components,
+    groups,
+    presets,
+    internalTags,
+  };
+}
+
+async function readConsolidatedFiles(resolvedPath: string): Promise<SpaceData> {
+  // Read required components file
+  const componentsPath = join(resolvedPath, 'components.json');
+  const componentsResult = await readJsonFile<SpaceComponent>(componentsPath);
+
+  if (componentsResult.error || !componentsResult.data.length) {
+    throw new FileSystemError(
+      'file_not_found',
+      'read',
+      componentsResult.error || new Error('Components file is empty'),
+      `No components found in ${componentsPath}. Please make sure you have pulled the components first.`,
+    );
+  }
+
+  // Read optional files
+  const [groupsResult, presetsResult, tagsResult] = await Promise.all([
+    readJsonFile<SpaceComponentGroup>(join(resolvedPath, 'groups.json')),
+    readJsonFile<SpaceComponentPreset>(join(resolvedPath, 'presets.json')),
+    readJsonFile<SpaceComponentInternalTag>(join(resolvedPath, 'tags.json')),
+  ]);
+
+  return {
+    components: componentsResult.data,
+    groups: groupsResult.data,
+    presets: presetsResult.data,
+    internalTags: tagsResult.data,
+  };
+}

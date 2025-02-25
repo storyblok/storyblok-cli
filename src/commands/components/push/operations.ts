@@ -11,6 +11,7 @@ import type {
   SpaceData,
 } from '../constants';
 import { upsertComponent, upsertComponentGroup, upsertComponentInternalTag, upsertComponentPreset } from './actions';
+import { delay } from '../../../utils/fetch';
 
 function findRelatedResources(
   components: SpaceComponent[],
@@ -749,6 +750,15 @@ export async function handleComponents(options: HandleComponentsOptions) {
     const spinner = new Spinner({
       verbose: !isVitest,
     });
+
+    if (!component.name) {
+      spinner.start(`Processing component...`);
+      await delay(100);
+      spinner.failed(`Component-> ${chalk.hex(colorPalette.COMPONENTS)('unknown')} is missing the name property - Failed`);
+      results.failed.push({ name: 'unknown', error: new Error('Component name is required') });
+      continue;
+    }
+
     spinner.start(`Processing component ${component.name}...`);
 
     try {
