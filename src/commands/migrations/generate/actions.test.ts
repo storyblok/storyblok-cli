@@ -39,7 +39,6 @@ describe('generateMigration', () => {
     internal_tags_list: [],
     internal_tag_ids: [],
   };
-  const mockField = 'fullname';
 
   beforeEach(() => {
     // Reset all mocks before each test
@@ -55,19 +54,24 @@ describe('generateMigration', () => {
   it('should generate migration file with correct template', async () => {
     // Arrange
     const expectedPath = join(process.cwd(), '.storyblok', `migrations/${mockSpace}`);
-    const expectedFilePath = join(expectedPath, `${mockComponent.name}-${mockField}.js`);
+    const expectedFilePath = join(expectedPath, `${mockComponent.name}.js`);
 
     const expectedTemplate = `export default function (block) {
   // Example to change a string to boolean
-  // block.${mockField} = !!(block.${mockField})
+  // block.field_name = !!(block.field_name)
 
   // Example to transfer content from other field
-  // block.${mockField} = block.other_field
+  // block.target_field = block.source_field
+
+  // Example to transform an array
+  // block.array_field = block.array_field.map(item => ({ ...item, new_prop: 'value' }))
+
+  return block;
 }
 `;
 
     // Act
-    await generateMigration(mockSpace, mockPath, mockComponent, mockField);
+    await generateMigration(mockSpace, mockPath, mockComponent);
 
     // Assert
     expect(saveToFile).toHaveBeenCalledWith(expectedFilePath, expectedTemplate);
@@ -77,10 +81,10 @@ describe('generateMigration', () => {
     // Arrange
     const customPath = '/custom/path';
     const expectedPath = resolve(process.cwd(), customPath, 'migrations', mockSpace);
-    const expectedFilePath = join(expectedPath, `${mockComponent.name}-${mockField}.js`);
+    const expectedFilePath = join(expectedPath, `${mockComponent.name}.js`);
 
     // Act
-    await generateMigration(mockSpace, customPath, mockComponent, mockField);
+    await generateMigration(mockSpace, customPath, mockComponent);
 
     // Assert
     expect(saveToFile).toHaveBeenCalledTimes(1);
@@ -96,7 +100,7 @@ describe('generateMigration', () => {
     vi.mocked(saveToFile).mockRejectedValueOnce(mockError);
 
     // Act
-    await generateMigration(mockSpace, mockPath, mockComponent, mockField);
+    await generateMigration(mockSpace, mockPath, mockComponent);
 
     // Assert
     expect(handleFileSystemError).toHaveBeenCalledWith('write', mockError);

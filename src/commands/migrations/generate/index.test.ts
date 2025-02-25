@@ -100,10 +100,10 @@ describe('migrations generate command', () => {
 
     vi.mocked(fetchComponent).mockResolvedValue(mockComponent);
 
-    await migrationsCommand.parseAsync(['node', 'test', 'generate', 'component-name', '--field', 'field1', '--space', '12345']);
+    await migrationsCommand.parseAsync(['node', 'test', 'generate', 'component-name', '--space', '12345']);
 
-    expect(generateMigration).toHaveBeenCalledWith('12345', undefined, mockComponent, 'field1', undefined);
-    expect(konsola.ok).toHaveBeenCalledWith('You can find the migration file in .storyblok/migrations/12345/component-name-field1.js');
+    expect(generateMigration).toHaveBeenCalledWith('12345', undefined, mockComponent, undefined);
+    expect(konsola.ok).toHaveBeenCalledWith('You can find the migration file in .storyblok/migrations/12345/component-name.js');
   });
 
   it('should generate a migration with a path', async () => {
@@ -133,10 +133,10 @@ describe('migrations generate command', () => {
 
     vi.mocked(fetchComponent).mockResolvedValue(mockComponent);
 
-    await migrationsCommand.parseAsync(['node', 'test', 'generate', 'component-name', '--field', 'field1', '--space', '12345', '--path', 'custom']);
+    await migrationsCommand.parseAsync(['node', 'test', 'generate', 'component-name', '--space', '12345', '--path', 'custom']);
 
-    expect(generateMigration).toHaveBeenCalledWith('12345', 'custom', mockComponent, 'field1', undefined);
-    expect(konsola.ok).toHaveBeenCalledWith('You can find the migration file in custom/migrations/12345/component-name-field1.js');
+    expect(generateMigration).toHaveBeenCalledWith('12345', 'custom', mockComponent, undefined);
+    expect(konsola.ok).toHaveBeenCalledWith('You can find the migration file in custom/migrations/12345/component-name.js');
   });
 
   it('should throw an error if the component is not found', async () => {
@@ -148,7 +148,7 @@ describe('migrations generate command', () => {
 
     vi.mocked(fetchComponent).mockResolvedValue(undefined);
 
-    await migrationsCommand.parseAsync(['node', 'test', 'generate', 'component-name', '--field', 'field1', '--space', '12345']);
+    await migrationsCommand.parseAsync(['node', 'test', 'generate', 'component-name', '--space', '12345']);
 
     const mockError = new CommandError('No component found with name "component-name"');
     expect(konsola.error).toHaveBeenCalledWith(mockError, false);
@@ -162,19 +162,7 @@ describe('migrations generate command', () => {
     };
 
     const mockError = new CommandError('Please provide the component name as argument --componentName YOUR_COMPONENT_NAME.');
-    await migrationsCommand.parseAsync(['node', 'test', 'generate', '--field', 'field1', '--space', '12345']);
-    expect(konsola.error).toHaveBeenCalledWith(mockError, false);
-  });
-
-  it('should throw an error if the field is not provided', async () => {
-    session().state = {
-      isLoggedIn: true,
-      password: 'valid-token',
-      region: 'eu',
-    };
-
-    const mockError = new CommandError('Please provide the field name as argument --field YOUR_FIELD_NAME.');
-    await migrationsCommand.parseAsync(['node', 'test', 'generate', 'component-name', '--space', '12345']);
+    await migrationsCommand.parseAsync(['node', 'test', 'generate', '--space', '12345']);
     expect(konsola.error).toHaveBeenCalledWith(mockError, false);
   });
 });
