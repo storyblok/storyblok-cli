@@ -149,7 +149,10 @@ const SyncSpaces = {
     for (const folder of sourceFolders) {
       try {
         const folderResult = await this.client.get(`spaces/${this.sourceSpaceId}/stories/${folder.id}`)
-        const { data } = await this.client.get(`spaces/${this.targetSpaceId}/stories`, { with_slug: folder.full_slug })
+        const { data } = await this.client.get(`spaces/${this.targetSpaceId}/stories`, {
+            with_slug: folder.full_slug,
+            ...(this.startsWith ? { starts_with: this.startsWith } : {}),
+        })
         const existingFolder = data.stories[0] || null
         const folderData = await this.getStoryWithTranslatedSlugs(folderResult.data.story, existingFolder)
         delete folderData.id
@@ -236,7 +239,7 @@ const SyncSpaces = {
       componentsGroups: this.componentsGroups,
       componentsFullSync: this.componentsFullSync
     })
-    
+
     try {
       await syncComponentsInstance.sync()
     } catch (e) {
