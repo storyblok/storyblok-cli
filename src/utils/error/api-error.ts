@@ -20,6 +20,8 @@ export const API_ACTIONS = {
   update_component_group: 'Failed to update component group',
   update_component_preset: 'Failed to update component preset',
   pull_stories: 'Failed to pull stories',
+  pull_story: 'Failed to pull story',
+  update_story: 'Failed to update story',
 } as const;
 
 export const API_ERRORS = {

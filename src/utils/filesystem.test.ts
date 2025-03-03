@@ -1,5 +1,5 @@
 import { vol } from 'memfs';
-import { getStoryblokGlobalPath, resolvePath, saveToFile } from './filesystem';
+import { getComponentNameFromFilename, getStoryblokGlobalPath, resolvePath, saveToFile } from './filesystem';
 import { join, resolve } from 'node:path';
 
 // tell vitest to use fs mock from __mocks__ folder
@@ -148,6 +148,26 @@ describe('filesystem utils', async () => {
 
       const resolvedPathWithoutPath = resolvePath(undefined, folder);
       expect(resolvedPathWithoutPath).toBe(resolve(process.cwd(), '.storyblok', folder));
+    });
+  });
+
+  describe('getComponentNameFromFilename', async () => {
+    it('should extract the component name from a JavaScript file', () => {
+      expect(getComponentNameFromFilename('simple_component.js')).toBe('simple_component');
+      expect(getComponentNameFromFilename('nested-component.js')).toBe('nested-component');
+      expect(getComponentNameFromFilename('camelCaseComponent.js')).toBe('camelCaseComponent');
+    });
+
+    it('should return the original name if no .js extension is present', () => {
+      expect(getComponentNameFromFilename('component_without_extension')).toBe('component_without_extension');
+    });
+
+    it('should handle filenames with multiple dots', () => {
+      expect(getComponentNameFromFilename('component.with.dots.js')).toBe('component.with.dots');
+    });
+
+    it('should handle filenames with paths', () => {
+      expect(getComponentNameFromFilename('/path/to/my_component.js')).toBe('/path/to/my_component');
     });
   });
 });

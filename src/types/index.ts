@@ -49,3 +49,8 @@ export interface StoryblokLoginWithOtpResponse {
   role: string;
   has_partner: boolean;
 }
+
+export interface FileReaderResult<T> {
+  data: T[];
+  error?: Error;
+}
