@@ -119,6 +119,5 @@ export const updateStory = async (
   }
   catch (error) {
     handleAPIError('update_story', error as Error);
-    return undefined;
   }
 };
