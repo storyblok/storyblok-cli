@@ -76,3 +76,13 @@ export const objectToStringParams = (obj: Record<string, any>): Record<string, s
 };
 
 export const isVitest = process.env.VITEST === 'true';
+
+/**
+ * Creates a regex pattern from a glob pattern
+ * @param pattern - The glob pattern to convert
+ * @returns A regex that matches the glob pattern
+ */
+export function createRegexFromGlob(pattern: string): RegExp {
+  // Add ^ and $ to ensure exact match, escape the pattern to handle special characters
+  return new RegExp(`^${pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\\\*/g, '.*')}$`);
+}
