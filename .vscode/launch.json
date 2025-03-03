@@ -222,7 +222,7 @@
       "env": {
         "STUB": "true"
       }
-    }
+    },
     {
       "type": "node",
       "request": "launch",

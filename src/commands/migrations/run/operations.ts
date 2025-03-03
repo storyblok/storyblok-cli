@@ -12,7 +12,32 @@ import { hash } from 'ohash';
 /**
  * Handles the processing of migration files for stories
  * @param options - Options for handling migrations
- * @returns Results of the migration operations
+ * @param options.migrationFiles - Array of migration files to process
+ * @param options.stories - Array of stories to apply migrations to
+ * @param options.space - Space ID where the stories are located
+ * @param options.path - Path to the migrations directory
+ * @param options.componentName - Optional component name to filter migrations
+ * @param options.password - Optional password for authentication
+ * @param options.region - Optional region code for API requests
+ * @returns {Promise<{
+ *   successful: Array<{
+ *     storyId: number;
+ *     name: string;
+ *     migrationName: string;
+ *     content: StoryContent;
+ *   }>;
+ *   failed: Array<{
+ *     storyId: number;
+ *     migrationName: string;
+ *     error: unknown;
+ *   }>;
+ *   skipped: Array<{
+ *     storyId: number;
+ *     name: string;
+ *     migrationName: string;
+ *     reason: string;
+ *   }>;
+ * }>} Object containing arrays of successful, failed, and skipped migrations
  */
 export async function handleMigrations({
   migrationFiles,
@@ -159,7 +184,10 @@ export async function handleMigrations({
 
 /**
  * Summarizes the results of the migration operations
- * @param results - Results of the migration operations
+ * @param results - Object containing migration operation results
+ * @param results.successful - Array of successfully applied migrations
+ * @param results.failed - Array of failed migrations
+ * @param results.skipped - Array of skipped migrations
  */
 export function summarizeMigrationResults(results: {
   successful: Array<{
@@ -193,7 +221,7 @@ export function summarizeMigrationResults(results: {
   }, {} as Record<string, typeof skipped>);
 
   if (Object.keys(skippedByReason).length > 0) {
-    konsola.info(`- Skipped migrations:`);
+    konsola.info(`Skipped migrations:`);
     for (const [reason, items] of Object.entries(skippedByReason)) {
       const uniqueStories = new Set(items.map(item => item.storyId));
       konsola.info(`  • ${reason}: ${uniqueStories.size} stories`);
@@ -217,7 +245,7 @@ export function summarizeMigrationResults(results: {
     failuresByStory.forEach((failures, storyId) => {
       konsola.error(`Story ID ${storyId}:`);
       failures.forEach(({ migrationName, error }) => {
-        konsola.error(`  - Migration ${migrationName}: ${(error as Error).message}`);
+        konsola.error(`- Migration ${migrationName}: ${(error as Error).message}`);
       });
     });
   }

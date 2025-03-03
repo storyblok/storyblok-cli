@@ -61,7 +61,9 @@ export const removePropertyRecursively = (obj: Record<string, any>, property: st
 export const objectToStringParams = (obj: Record<string, any>): Record<string, string> => {
   return Object.entries(obj).reduce((acc, [key, value]) => {
     // Skip undefined values
-    if (value === undefined) { return acc; }
+    if (value === undefined) {
+      return acc;
+    }
 
     // Convert objects/arrays to JSON strings
     if (typeof value === 'object' && value !== null) {

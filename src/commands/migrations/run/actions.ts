@@ -45,7 +45,9 @@ export async function readMigrationFiles(options: ReadMigrationFilesOptions): Pr
 
     if (dirFiles.length > 0) {
       for (const file of dirFiles) {
-        if (!file.endsWith('.js')) { continue; }
+        if (!file.endsWith('.js')) {
+          continue;
+        }
 
         // Apply glob filter if provided
         if (filterRegex && !filterRegex.test(file)) {
