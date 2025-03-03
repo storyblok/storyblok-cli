@@ -1,5 +1,5 @@
 import { vol } from 'memfs';
-import { readJavascriptFile, readMigrationFiles } from './actions';
+import { getMigrationFunction, readJavascriptFile, readMigrationFiles } from './actions';
 import { FileSystemError } from '../../../utils/error';
 
 vi.mock('node:fs');
@@ -126,5 +126,54 @@ describe('readMigrationFiles', () => {
     });
 
     expect(result).toEqual([]);
+  });
+});
+
+describe('getMigrationFunction', () => {
+  beforeEach(() => {
+    vol.reset();
+    vi.resetModules();
+  });
+
+  it('should return migration function successfully', async () => {
+    const mockMigrationFn = (block: any) => ({ ...block, migrated: true });
+
+    vol.fromJSON({
+      '/path/to/migrations/12351/migration-1.js': 'export default function (block) { return block; }',
+    });
+
+    // Mock the module system to handle dynamic imports
+    vi.doMock('/path/to/migrations/12351/migration-1.js', () => ({
+      default: mockMigrationFn,
+    }));
+
+    const result = await getMigrationFunction('migration-1.js', '12351', '/path/to/');
+
+    expect(result).toBe(mockMigrationFn);
+    expect(typeof result).toBe('function');
+
+    // Test the function works
+    const testBlock = { foo: 'bar' };
+    expect(result!(testBlock)).toEqual({ foo: 'bar', migrated: true });
+  });
+
+  it('should return null when module does not export a default function', async () => {
+    vol.fromJSON({
+      '/path/to/migrations/12351/migration-2.js': 'export const something = true;',
+    });
+
+    // Mock the module without a default export
+    vi.doMock('/path/to/migrations/12351/migration-2.js', () => ({
+      something: true,
+    }));
+
+    const result = await getMigrationFunction('migration-2.js', '12351', '/path/to/');
+    expect(result).toBeNull();
+  });
+
+  it('should return null when file does not exist', async () => {
+    // No need to mock anything - the import will fail naturally
+    const result = await getMigrationFunction('non-existent.js', '12351', '/path/to/');
+    expect(result).toBeNull();
   });
 });
