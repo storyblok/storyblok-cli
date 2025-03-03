@@ -49,6 +49,14 @@ export async function handleMigrations({
     skipped: [] as Array<{ storyId: number; name: string; migrationName: string; reason: string }>,
   };
 
+  // Filter migrations based on component name if provided
+  const relevantMigrations = componentName
+    ? migrationFiles.filter((file) => {
+        const targetComponent = getComponentNameFromFilename(file.name);
+        return targetComponent.split('.')[0] === componentName;
+      })
+    : migrationFiles;
+
   // Process each story with each migration
   for (const story of stories) {
     if (!story.content) {
@@ -68,19 +76,12 @@ export async function handleMigrations({
     const originalContentHash = hash(story.content);
 
     // Process the story with each migration file
-    for (const migrationFile of migrationFiles) {
-      const spinner = new Spinner({
-        verbose: !isVitest,
-      });
-
-      spinner.start(`Applying migration ${chalk.hex(colorPalette.MIGRATIONS)(migrationFile.name)} to story ${chalk.hex(colorPalette.PRIMARY)(story.name || story.id.toString())}...`);
-
+    for (const migrationFile of relevantMigrations) {
       try {
         // Load the migration function using dynamic import
         const migrationFunction = await getMigrationFunction(migrationFile.name, space, path);
 
         if (!migrationFunction) {
-          spinner.failed(`Failed to load migration function from file "${migrationFile.name}". Skipping...`);
           results.failed.push({
             storyId: story.id,
             migrationName: migrationFile.name,
@@ -102,6 +103,8 @@ export async function handleMigrations({
         const contentChanged = originalContentHash !== newContentHash;
 
         if (modified && contentChanged) {
+          const spinner = new Spinner({ verbose: !isVitest });
+          spinner.start(`Applying migration ${chalk.hex(colorPalette.MIGRATIONS)(migrationFile.name)} to story ${chalk.hex(colorPalette.PRIMARY)(story.name || story.id.toString())}...`);
           spinner.succeed(`Migration ${chalk.hex(colorPalette.MIGRATIONS)(migrationFile.name)} applied to story ${chalk.hex(colorPalette.PRIMARY)(story.name || story.id.toString())} - Completed in ${spinner.elapsedTime.toFixed(2)}ms`);
           storyModified = true;
 
@@ -114,7 +117,6 @@ export async function handleMigrations({
           });
         }
         else if (modified && !contentChanged) {
-          spinner.succeed(`Migration ${chalk.hex(colorPalette.MIGRATIONS)(migrationFile.name)} applied to story ${chalk.hex(colorPalette.PRIMARY)(story.name || story.id.toString())} but no changes detected - Skipping update`);
           results.skipped.push({
             storyId: story.id,
             name: story.name,
@@ -125,21 +127,18 @@ export async function handleMigrations({
         else {
           // Get the base component name from the target component
           const baseComponent = targetComponent.split('.')[0];
-          if (baseComponent === componentName) {
-            spinner.succeed(`Migration ${chalk.hex(colorPalette.MIGRATIONS)(migrationFile.name)} skipped for story ${chalk.hex(colorPalette.PRIMARY)(story.name || story.id.toString())} - No matching components found`);
-          }
-          else {
-            spinner.succeed(`Migration ${chalk.hex(colorPalette.MIGRATIONS)(migrationFile.name)} skipped for story ${chalk.hex(colorPalette.PRIMARY)(story.name || story.id.toString())} - Different component target`);
-          }
+          // Only add to skipped without logging
           results.skipped.push({
             storyId: story.id,
             name: story.name,
             migrationName: migrationFile.name,
-            reason: 'No matching components found',
+            reason: baseComponent === componentName ? 'No matching components found' : 'Different component target',
           });
         }
       }
       catch (error) {
+        const spinner = new Spinner({ verbose: !isVitest });
+        spinner.start(`Applying migration ${chalk.hex(colorPalette.MIGRATIONS)(migrationFile.name)} to story ${chalk.hex(colorPalette.PRIMARY)(story.name || story.id.toString())}...`);
         spinner.failed(`Failed to apply migration ${chalk.hex(colorPalette.MIGRATIONS)(migrationFile.name)} to story ${chalk.hex(colorPalette.PRIMARY)(story.name || story.id.toString())}`);
         results.failed.push({
           storyId: story.id,
