@@ -16,7 +16,6 @@ const program = getProgram();
 migrationsCommand.command('run [componentName]')
   .description('Run migrations')
   .option('--fi, --filter <filter>', 'glob filter to apply to the components before pushing')
-
   .option('-d, --dry-run', 'Preview changes without applying them to Storyblok')
   .action(async (componentName: string | undefined, options: MigrationsRunOptions) => {
     konsola.title(` ${commands.MIGRATIONS} `, colorPalette.MIGRATIONS, componentName ? `Running migrations for component ${componentName}...` : 'Running migrations...');
@@ -90,8 +89,7 @@ migrationsCommand.command('run [componentName]')
       const storiesWithContent = await Promise.all(stories.map(async (story) => {
         const fullStory = await fetchStory(space, password, region, story.id.toString());
         return {
-          id: story.id,
-          name: story.name,
+          ...story,
           content: fullStory?.content,
         };
       }));
