@@ -21,7 +21,18 @@ export const fetchStories = async (
 ) => {
   try {
     const url = getStoryblokUrl(region);
-    const queryString = params ? new URLSearchParams(objectToStringParams(params)).toString() : '';
+
+    // Extract filter_query params to handle them separately
+    const { filter_query, ...restParams } = params || {};
+
+    // Handle regular params with URLSearchParams
+    const regularParams = new URLSearchParams(objectToStringParams(restParams)).toString();
+
+    // Combine regular params with filter_query params (if any)
+    const queryString = filter_query
+      ? `${regularParams ? `${regularParams}&` : ''}${filter_query}`
+      : regularParams;
+
     const endpoint = `${url}/spaces/${space}/stories${queryString ? `?${queryString}` : ''}`;
 
     const response = await customFetch<{
@@ -42,12 +53,24 @@ export const fetchStoriesByComponent = async (
   space: string,
   token: string,
   region: RegionCode,
-  componentName: string,
+  componentName?: string,
+  filterQuery?: string,
 ) => {
   try {
-    const stories = await fetchStories(space, token, region, {
-      contain_component: componentName,
-    });
+    // Create params object
+    const params: StoriesQueryParams = {};
+
+    // Only add contain_component if componentName is defined
+    if (componentName) {
+      params.contain_component = componentName;
+    }
+
+    // If filterQuery is provided, add it with the filter_query prefix
+    if (filterQuery) {
+      params.filter_query = `filter_query${filterQuery}`;
+    }
+
+    const stories = await fetchStories(space, token, region, params);
 
     return stories;
   }

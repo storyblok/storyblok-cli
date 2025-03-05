@@ -236,6 +236,34 @@
       "env": {
         "STUB": "true"
       }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Migrations run filter",
+      "program": "${workspaceFolder}/dist/index.mjs",
+      "args": ["migrations", "run", "--space", "295017", "--filter", "component-inside-*"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "sourceMaps": true,
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "env": {
+        "STUB": "true"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Migrations run query",
+      "program": "${workspaceFolder}/dist/index.mjs",
+      "args": ["migrations", "run", "--space", "295017", "--query", "[highlighted][is]=true"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "sourceMaps": true,
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "env": {
+        "STUB": "true"
+      }
     }
   ]
 }

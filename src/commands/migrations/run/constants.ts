@@ -3,6 +3,7 @@ import type { CommandOptions } from '../../../types';
 export interface MigrationsRunOptions extends CommandOptions {
   dryRun?: boolean;
   filter?: string;
+  query?: string;
 }
 
 export interface ReadMigrationFilesOptions {

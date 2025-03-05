@@ -145,7 +145,7 @@ export interface StoriesQueryParams {
   starts_with?: string;
   in_trash?: boolean;
   search?: string;
-  filter_query?: string | Record<string, any>;
+  filter_query?: string;
   in_release?: number;
   is_published?: boolean;
   by_slugs?: string;
@@ -159,4 +159,7 @@ export interface StoriesQueryParams {
   scheduled_at_lt?: string;
   favourite?: boolean;
   reference_search?: string;
+
+  // Allow string indexing for filter_query parameters
+  [key: string]: string | number | boolean | undefined;
 }

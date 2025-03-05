@@ -17,13 +17,14 @@ migrationsCommand.command('run [componentName]')
   .description('Run migrations')
   .option('--fi, --filter <filter>', 'glob filter to apply to the components before pushing')
   .option('-d, --dry-run', 'Preview changes without applying them to Storyblok')
+  .option('-q, --query <query>', 'Filter stories by content attributes using Storyblok filter query syntax. Example: --query="[highlighted][in]=true"')
   .action(async (componentName: string | undefined, options: MigrationsRunOptions) => {
     konsola.title(` ${commands.MIGRATIONS} `, colorPalette.MIGRATIONS, componentName ? `Running migrations for component ${componentName}...` : 'Running migrations...');
 
     // Global options
     const verbose = program.opts().verbose;
 
-    const { filter, dryRun = false } = options;
+    const { filter, dryRun = false, query } = options;
 
     // Command options
     const { space, path } = migrationsCommand.opts();
@@ -78,7 +79,7 @@ migrationsCommand.command('run [componentName]')
       const storiesSpinner = new Spinner({ verbose: !isVitest }).start(`Fetching stories...`);
 
       // Fetch stories using the base component name
-      const stories = await fetchStoriesByComponent(space, password, region, componentName || '');
+      const stories = await fetchStoriesByComponent(space, password, region, componentName, query);
 
       if (!stories || stories.length === 0) {
         storiesSpinner.failed(`No stories found${componentName ? ` for component "${componentName}"` : ''}.`);
