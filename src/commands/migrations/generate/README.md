@@ -1,18 +1,18 @@
 # Migrations Generate Command
 
-The `storyblok migrations generate` command allows you to generate migration files for specific component fields. This is useful when you need to transform or update field values across your Storyblok content.
+The `storyblok migrations generate` command allows you to generate migration files for specific components. This is useful when you need to transform or update field values across your Storyblok content.
 
 ## Basic Usage
 
 ```bash
-# Generate a migration for a specific component field
-storyblok migrations generate my-component --field my-field --space 295017
+# Generate a migration for a specific component
+storyblok migrations generate my-component --space 295017
 
 # Generate a migration with a custom path
-storyblok migrations generate my-component --field my-field --space 295017 --path ./custom-path
+storyblok migrations generate my-component --space 295017 --path ./custom-path
 
 # Generate a migration with a custom suffix
-storyblok migrations generate my-component --field my-field --space 295017 --suffix staging
+storyblok migrations generate my-component --space 295017 --suffix staging
 ```
 
 ## Command Options
@@ -20,9 +20,8 @@ storyblok migrations generate my-component --field my-field --space 295017 --suf
 | Option | Alias | Description |
 |--------|-------|-------------|
 | `--space <spaceId>` | `-s` | (Required) The ID of the space to generate migrations for |
-| `--field <fieldName>` | `--fi` | (Required) The name of the field to migrate |
 | `--path <path>` | `-p` | Custom path to store the migration files (default: ".storyblok/migrations/{spaceId}") |
-| `--suffix <suffix>` | `--su` | Suffix to add to the file name (e.g. {component-name}-{field}.<suffix>.js) |
+| `--suffix <suffix>` | `--su` | Suffix to add to the file name (e.g. {component-name}.<suffix>.js) |
 | `--verbose` | `-v` | Show detailed logs and error messages |
 
 ## Output Structure
@@ -33,7 +32,7 @@ The command will create a migration file in the following structure:
 .storyblok/
 └── migrations/
     └── {spaceId}/
-        └── {component-name}-{field}.js
+        └── {component-name}.js
 ```
 
 If a suffix is provided, the file will be named:
@@ -41,7 +40,7 @@ If a suffix is provided, the file will be named:
 .storyblok/
 └── migrations/
     └── {spaceId}/
-        └── {component-name}-{field}.<suffix>.js
+        └── {component-name}.<suffix>.js
 ```
 
 ## Migration File Structure
@@ -63,7 +62,7 @@ export default function (block) {
 ### Generate a Basic Migration
 
 ```bash
-storyblok migrations generate hero --field title --space 295017
+storyblok migrations generate hero --space 295017
 ```
 
 This will create:
@@ -72,13 +71,13 @@ This will create:
 .storyblok/
 └── migrations/
     └── 295017/
-        └── hero-title.js
+        └── hero.js
 ```
 
 ### Generate with Custom Path
 
 ```bash
-storyblok migrations generate hero --field title --space 295017 --path ./migrations
+storyblok migrations generate hero --space 295017 --path ./migrations
 ```
 
 This will create:
@@ -86,13 +85,13 @@ This will create:
 ```markdown
 migrations/
 └── 295017/
-    └── hero-title.js
+    └── hero.js
 ```
 
 ### Generate with Custom Suffix
 
 ```bash
-storyblok migrations generate hero --field title --space 295017 --suffix staging
+storyblok migrations generate hero --space 295017 --suffix staging
 ```
 
 This will create:
@@ -101,7 +100,7 @@ This will create:
 .storyblok/
 └── migrations/
     └── 295017/
-        └── hero-title.staging.js
+        └── hero.staging.js
 ```
 
 ## Error Cases
@@ -109,7 +108,6 @@ This will create:
 The command will fail with helpful error messages in the following cases:
 
 - No component name provided
-- No field name provided
 - No space ID provided
 - User not logged in
 - Component not found in the space
@@ -118,10 +116,10 @@ The command will fail with helpful error messages in the following cases:
 ## Manual Testing Checklist
 
 1. Basic Generation
-   - [ ] Generate migration for a simple field
+   - [ ] Generate migration for a component
    - [ ] Verify file is created in the correct location
    - [ ] Check if generated file has correct structure
-   - [ ] Verify component and field names are correctly set
+   - [ ] Verify component name is correctly set
 
 2. Path Options
    - [ ] Test default path generation
@@ -131,7 +129,6 @@ The command will fail with helpful error messages in the following cases:
 
 3. Error Handling
    - [ ] Test without component name
-   - [ ] Test without field name
    - [ ] Test without space ID
    - [ ] Test with non-existent component
    - [ ] Test while not logged in
@@ -139,7 +136,6 @@ The command will fail with helpful error messages in the following cases:
 
 4. Special Cases
    - [ ] Test with complex component names
-   - [ ] Test with nested field paths
    - [ ] Test verbose mode output
    - [ ] Test with various suffix values
    - [ ] Verify file permissions are correct
@@ -148,7 +144,7 @@ The command will fail with helpful error messages in the following cases:
 
 1. **Naming Conventions**
    - Use clear, descriptive names for your migration files
-   - Follow a consistent pattern for field names
+   - Follow a consistent pattern for component names
    - Use meaningful suffixes (e.g., 'staging', 'prod', 'v1')
 
 2. **Migration Logic**
