@@ -1,6 +1,4 @@
-import { http, HttpResponse } from 'msw';
-import { setupServer } from 'msw/node';
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { session } from '../../../session';
 import { konsola } from '../../../utils';
 // Import the main components module first to ensure proper initialization

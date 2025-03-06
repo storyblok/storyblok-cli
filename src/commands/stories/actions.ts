@@ -1,7 +1,7 @@
 import { customFetch } from '../../utils/fetch';
 import { getStoryblokUrl } from '../../utils/api-routes';
 import type { RegionCode, SpaceOptions } from '../../constants';
-import type { StoriesFilterOptions, StoriesQueryParams, Story, StoryContent } from './constants';
+import type { StoriesFilterOptions, StoriesQueryParams, Story } from './constants';
 import { handleAPIError } from '../../utils/error';
 import { objectToStringParams } from '../../utils';
 
@@ -111,7 +111,10 @@ export const fetchStory = async (
  * @param token - The authentication token
  * @param region - The region code
  * @param storyId - The ID of the story to update
- * @param content - The new content for the story
+ * @param payload - The payload containing story data and update options
+ * @param payload.story - The story data to update
+ * @param payload.force_update - Whether to force the update (optional)
+ * @param payload.publish - Whether to publish the story (optional)
  * @returns Promise with the updated story or undefined if error occurs
  */
 export const updateStory = async (
