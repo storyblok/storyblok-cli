@@ -8,8 +8,9 @@ import { migrationsCommand } from '../command';
 import { fetchStoriesByComponent, fetchStory, updateStory } from '../../stories/actions';
 import { readMigrationFiles } from './actions';
 import { handleMigrations, summarizeMigrationResults } from './operations';
-import type { StoryContent } from '../../stories/constants';
+import type { Story, StoryContent } from '../../stories/constants';
 import chalk from 'chalk';
+import { isStoryPublishedWithoutChanges, isStoryWithUnpublishedChanges } from '../../stories/utils';
 
 const program = getProgram();
 
@@ -19,13 +20,14 @@ migrationsCommand.command('run [componentName]')
   .option('-d, --dry-run', 'Preview changes without applying them to Storyblok')
   .option('-q, --query <query>', 'Filter stories by content attributes using Storyblok filter query syntax. Example: --query="[highlighted][in]=true"')
   .option('--starts-with <path>', 'Filter stories by path. Example: --starts-with="/en/blog/"')
+  .option('--publish <publish>', 'Options for publication mode: all | published')
   .action(async (componentName: string | undefined, options: MigrationsRunOptions) => {
     konsola.title(` ${commands.MIGRATIONS} `, colorPalette.MIGRATIONS, componentName ? `Running migrations for component ${componentName}...` : 'Running migrations...');
 
     // Global options
     const verbose = program.opts().verbose;
 
-    const { filter, dryRun = false, query, startsWith } = options;
+    const { filter, dryRun = false, query, startsWith, publish } = options;
 
     // Command options
     const { space, path } = migrationsCommand.opts();
@@ -153,14 +155,19 @@ migrationsCommand.command('run [componentName]')
         const updateSpinner = new Spinner({ verbose: !isVitest }).start(`Updating stories in Storyblok...`);
 
         // Group successful migrations by story ID to get the latest content for each story
-        const storiesByIdMap = new Map<number, { id: number; name: string; content: StoryContent }>();
+        const storiesByIdMap = new Map<number, { id: number; name: string; content: StoryContent; published?: boolean; published_at?: string; unpublished_changes?: boolean }>();
 
         // Get the latest content for each story (in case multiple migrations were applied)
         migrationResults.successful.forEach((result) => {
+          // Find the original story to get its published status
+          const originalStory = validStories.find(s => s.id === result.storyId);
           storiesByIdMap.set(result.storyId, {
             id: result.storyId,
             name: result.name,
             content: result.content,
+            published: originalStory?.published,
+            published_at: originalStory?.published_at || undefined,
+            unpublished_changes: originalStory?.unpublished_changes,
           });
         });
 
@@ -178,9 +185,36 @@ migrationsCommand.command('run [componentName]')
 
           for (const story of storiesToUpdate) {
             const storySpinner = new Spinner({ verbose: !isVitest }).start(`Updating story ${chalk.hex(colorPalette.PRIMARY)(story.name || story.id.toString())}...`);
+            const payload: {
+              story: Partial<Story>;
+              force_update?: string;
+              publish?: number;
+            } = {
+              story: {
+                content: story.content,
+                id: story.id,
+                name: story.name,
+              },
+              force_update: '1',
+            };
+
+            // If the story is published and has no unpublished changes, publish it
+            if (publish === 'published' && isStoryPublishedWithoutChanges(story)) {
+              payload.publish = 1;
+            }
+
+            // If the story is published and has unpublished changes, publish it
+            if (publish === 'published-with-changes' && isStoryWithUnpublishedChanges(story)) {
+              payload.publish = 1;
+            }
+
+            // If the story is not published, publish it
+            if (publish === 'all') {
+              payload.publish = 1;
+            }
 
             try {
-              const updatedStory = await updateStory(space, password, region, story.id, story.content);
+              const updatedStory = await updateStory(space, password, region, story.id, payload);
 
               if (updatedStory) {
                 successCount++;

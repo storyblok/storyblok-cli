@@ -1,3 +1,6 @@
+import { http, HttpResponse } from 'msw';
+import { setupServer } from 'msw/node';
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { session } from '../../../session';
 import { konsola } from '../../../utils';
 // Import the main components module first to ensure proper initialization
@@ -5,8 +8,9 @@ import { konsola } from '../../../utils';
 import '../index';
 import { migrationsCommand } from '../command';
 import { readMigrationFiles } from './actions';
-import { fetchStoriesByComponent, fetchStory, updateStory } from '../../../commands/stories/actions';
+import { fetchStoriesByComponent, fetchStory, updateStory } from '../../stories/actions';
 import { handleMigrations, summarizeMigrationResults } from './operations';
+import type { Story } from '../../stories/constants';
 
 vi.mock('../../../utils', async () => {
   const actualUtils = await vi.importActual('../../../utils');
@@ -71,6 +75,83 @@ vi.mock('./operations.ts', () => ({
   summarizeMigrationResults: vi.fn(),
 }));
 
+// Helper function to create mock stories
+const createMockStory = (overrides: Partial<Story> = {}): Story => ({
+  id: 517473243,
+  name: 'Test Story',
+  uuid: 'uuid-1',
+  slug: 'test-story',
+  full_slug: 'test-story',
+  content: {
+    _uid: '4b16d1ea-4306-47c5-b901-9d67d5babf53',
+    component: 'page',
+    body: [
+      {
+        _uid: '216ba4ef-1298-4b7d-8ce0-7487e6db15cc',
+        component: 'migration-component',
+        unchanged: 'unchanged',
+      },
+    ],
+  },
+  created_at: '2023-01-01T00:00:00Z',
+  updated_at: '2023-01-01T00:00:00Z',
+  published_at: '2023-01-01T00:00:00Z',
+  first_published_at: '2023-01-01T00:00:00Z',
+  published: true,
+  unpublished_changes: false,
+  is_startpage: false,
+  is_folder: false,
+  pinned: false,
+  parent_id: null,
+  group_id: 'group-1',
+  parent: null,
+  path: null,
+  position: 0,
+  sort_by_date: null,
+  tag_list: [],
+  disable_fe_editor: false,
+  default_root: null,
+  preview_token: null,
+  meta_data: null,
+  release_id: null,
+  last_author: null,
+  last_author_id: null,
+  alternates: [],
+  translated_slugs: null,
+  translated_slugs_attributes: null,
+  localized_paths: null,
+  breadcrumbs: [],
+  scheduled_dates: null,
+  favourite_for_user_ids: [],
+  imported_at: null,
+  deleted_at: null,
+  ...overrides,
+});
+
+// Mock stories data
+const mockStories: Story[] = [
+  createMockStory({
+    id: 517473243,
+    name: 'Blog Post',
+    uuid: 'uuid-1',
+    slug: 'blog-post',
+    full_slug: 'blog-post',
+    published: true,
+  }),
+  createMockStory({
+    id: 517473244,
+    name: 'Draft Post',
+    uuid: 'uuid-2',
+    slug: 'draft-post',
+    full_slug: 'draft-post',
+    published: false,
+    published_at: null,
+    first_published_at: null,
+  }),
+];
+
+const mockSingleStory = mockStories[0];
+
 describe('migrations run command', () => {
   beforeEach(() => {
     vi.resetAllMocks();
@@ -129,136 +210,6 @@ describe('migrations run command', () => {
       },
     ];
 
-    const mockStories = [
-      {
-        name: 'Home',
-        parent_id: 0,
-        group_id: '24e2bb36-4003-459b-af6c-9115c873be20',
-        updated_at: '2025-03-03T08:47:49.570Z',
-        published_at: '2025-02-26T14:31:33.640Z',
-        id: 517473243,
-        uuid: '68199c8e-a267-4100-8945-70159982db27',
-        slug: 'home',
-        path: null,
-        full_slug: 'home',
-        content: {
-          _uid: '4b16d1ea-4306-47c5-b901-9d67d5babf53',
-          component: 'page',
-          body: [
-            {
-              _uid: '216ba4ef-1298-4b7d-8ce0-7487e6db15cc',
-              games: 'bg3',
-              title: 'Home migration component',
-              amount: 10,
-              component: 'migration-component',
-              unchanged: 'unchanged',
-              highlighted: true,
-            },
-            {
-              _uid: '2168b41b-c0b6-4ac8-9d25-c69ab814feba',
-              name: 'Julio',
-              title: 'Awiwi',
-              visible: true,
-              fullname: 'Julio Iglesias',
-              lastname: 'Iglesias',
-              component: 'simple_component',
-            },
-          ],
-        },
-        created_at: '2025-02-26T14:31:33.640Z',
-        first_published_at: '2025-02-26T14:31:33.640Z',
-        published: true,
-        unpublished_changes: false,
-        is_startpage: false,
-        is_folder: false,
-        pinned: false,
-        parent: null,
-        position: 0,
-        sort_by_date: null,
-        tag_list: [],
-        disable_fe_editor: false,
-        default_root: null,
-        preview_token: null,
-        meta_data: null,
-        release_id: null,
-        last_author: null,
-        last_author_id: null,
-        alternates: [],
-        translated_slugs: null,
-        translated_slugs_attributes: null,
-        localized_paths: null,
-        breadcrumbs: [],
-        scheduled_dates: null,
-        favourite_for_user_ids: [],
-        imported_at: null,
-        deleted_at: null,
-      },
-    ];
-
-    const mockSingleStory = {
-      id: 517473243,
-      name: 'Home',
-      uuid: '68199c8e-a267-4100-8945-70159982db27',
-      slug: 'home',
-      full_slug: 'home',
-      content: {
-        _uid: '4b16d1ea-4306-47c5-b901-9d67d5babf53',
-        body: [
-          {
-            _uid: '216ba4ef-1298-4b7d-8ce0-7487e6db15cc',
-            games: 'bg3',
-            title: 'Home migration component',
-            amount: 10,
-            component: 'migration-component',
-            unchanged: 'unchanged',
-            highlighted: true,
-          },
-          {
-            _uid: '2168b41b-c0b6-4ac8-9d25-c69ab814feba',
-            name: 'Julio',
-            title: 'Awiwi',
-            visible: true,
-            fullname: 'Julio Iglesias',
-            lastname: 'Iglesias',
-            component: 'simple_component',
-          },
-        ],
-        component: 'page',
-      },
-      created_at: '2025-02-26T14:31:33.640Z',
-      updated_at: '2025-03-03T08:47:49.570Z',
-      published_at: '2025-02-26T14:31:33.640Z',
-      first_published_at: '2025-02-26T14:31:33.640Z',
-      published: true,
-      unpublished_changes: false,
-      is_startpage: false,
-      is_folder: false,
-      pinned: false,
-      parent_id: 0,
-      group_id: '24e2bb36-4003-459b-af6c-9115c873be20',
-      parent: null,
-      path: null,
-      position: 0,
-      sort_by_date: null,
-      tag_list: [],
-      disable_fe_editor: false,
-      default_root: null,
-      preview_token: null,
-      meta_data: null,
-      release_id: null,
-      last_author: null,
-      last_author_id: null,
-      alternates: [],
-      translated_slugs: null,
-      translated_slugs_attributes: null,
-      localized_paths: null,
-      breadcrumbs: [],
-      scheduled_dates: null,
-      favourite_for_user_ids: [],
-      imported_at: null,
-      deleted_at: null,
-    };
-
     const mockMigrationResults = {
       successful: [
         {
@@ -309,12 +260,7 @@ describe('migrations run command', () => {
     expect(fetchStory).toHaveBeenCalledWith('12345', 'valid-token', 'eu', '517473243');
     expect(handleMigrations).toHaveBeenCalledWith({
       migrationFiles: mockMigrationFiles,
-      stories: [
-        {
-          ...mockStories[0],
-          content: mockSingleStory.content,
-        },
-      ],
+      stories: mockStories,
       space: '12345',
       path: undefined,
       componentName: undefined,
@@ -329,7 +275,14 @@ describe('migrations run command', () => {
       'valid-token',
       'eu',
       517473243,
-      mockSingleStory.content,
+      {
+        story: {
+          content: mockSingleStory.content,
+          id: 517473243,
+          name: 'Home',
+        },
+        force_update: '1',
+      },
     );
   });
 
@@ -350,67 +303,6 @@ describe('migrations run command', () => {
           + '}\n',
       },
     ];
-
-    const mockStories = [
-      {
-        name: 'Home',
-        parent_id: 0,
-        group_id: '24e2bb36-4003-459b-af6c-9115c873be20',
-        updated_at: '2025-03-03T08:47:49.570Z',
-        published_at: '2025-02-26T14:31:33.640Z',
-        id: 517473243,
-        uuid: '68199c8e-a267-4100-8945-70159982db27',
-        slug: 'home',
-        path: null,
-        full_slug: 'home',
-        content: {
-          _uid: '4b16d1ea-4306-47c5-b901-9d67d5babf53',
-          component: 'page',
-          body: [
-            {
-              _uid: '216ba4ef-1298-4b7d-8ce0-7487e6db15cc',
-              games: 'bg3',
-              title: 'Home migration component',
-              amount: 10,
-              component: 'migration-component',
-              unchanged: 'unchanged',
-              highlighted: true,
-            },
-          ],
-        },
-        created_at: '2025-02-26T14:31:33.640Z',
-        first_published_at: '2025-02-26T14:31:33.640Z',
-        published: true,
-        unpublished_changes: false,
-        is_startpage: false,
-        is_folder: false,
-        pinned: false,
-        parent: null,
-        position: 0,
-        sort_by_date: null,
-        tag_list: [],
-        disable_fe_editor: false,
-        default_root: null,
-        preview_token: null,
-        meta_data: null,
-        release_id: null,
-        last_author: null,
-        last_author_id: null,
-        alternates: [],
-        translated_slugs: null,
-        translated_slugs_attributes: null,
-        localized_paths: null,
-        breadcrumbs: [],
-        scheduled_dates: null,
-        favourite_for_user_ids: [],
-        imported_at: null,
-        deleted_at: null,
-      },
-    ];
-
-    const mockSingleStory = {
-      ...mockStories[0],
-    };
 
     const mockMigrationResults = {
       successful: [
@@ -458,12 +350,7 @@ describe('migrations run command', () => {
     expect(fetchStory).toHaveBeenCalledWith('12345', 'valid-token', 'eu', '517473243');
     expect(handleMigrations).toHaveBeenCalledWith({
       migrationFiles: mockMigrationFiles,
-      stories: [
-        {
-          ...mockStories[0],
-          content: mockSingleStory.content,
-        },
-      ],
+      stories: mockStories,
       space: '12345',
       path: undefined,
       componentName: 'migration-component',
@@ -478,7 +365,14 @@ describe('migrations run command', () => {
       'valid-token',
       'eu',
       517473243,
-      mockSingleStory.content,
+      {
+        story: {
+          content: mockSingleStory.content,
+          id: 517473243,
+          name: 'Home',
+        },
+        force_update: '1',
+      },
     );
   });
 
@@ -492,67 +386,6 @@ describe('migrations run command', () => {
           + '}\n',
       },
     ];
-
-    const mockStories = [
-      {
-        name: 'Home',
-        parent_id: 0,
-        group_id: '24e2bb36-4003-459b-af6c-9115c873be20',
-        updated_at: '2025-03-03T08:47:49.570Z',
-        published_at: '2025-02-26T14:31:33.640Z',
-        id: 517473243,
-        uuid: '68199c8e-a267-4100-8945-70159982db27',
-        slug: 'home',
-        path: null,
-        full_slug: 'home',
-        content: {
-          _uid: '4b16d1ea-4306-47c5-b901-9d67d5babf53',
-          component: 'page',
-          body: [
-            {
-              _uid: '216ba4ef-1298-4b7d-8ce0-7487e6db15cc',
-              games: 'bg3',
-              title: 'Home migration component',
-              amount: 10,
-              component: 'migration-component',
-              unchanged: 'unchanged',
-              highlighted: true,
-            },
-          ],
-        },
-        created_at: '2025-02-26T14:31:33.640Z',
-        first_published_at: '2025-02-26T14:31:33.640Z',
-        published: true,
-        unpublished_changes: false,
-        is_startpage: false,
-        is_folder: false,
-        pinned: false,
-        parent: null,
-        position: 0,
-        sort_by_date: null,
-        tag_list: [],
-        disable_fe_editor: false,
-        default_root: null,
-        preview_token: null,
-        meta_data: null,
-        release_id: null,
-        last_author: null,
-        last_author_id: null,
-        alternates: [],
-        translated_slugs: null,
-        translated_slugs_attributes: null,
-        localized_paths: null,
-        breadcrumbs: [],
-        scheduled_dates: null,
-        favourite_for_user_ids: [],
-        imported_at: null,
-        deleted_at: null,
-      },
-    ];
-
-    const mockSingleStory = {
-      ...mockStories[0],
-    };
 
     const mockMigrationResults = {
       successful: [
@@ -598,12 +431,7 @@ describe('migrations run command', () => {
     expect(fetchStory).toHaveBeenCalledWith('12345', 'valid-token', 'eu', '517473243');
     expect(handleMigrations).toHaveBeenCalledWith({
       migrationFiles: mockMigrationFiles,
-      stories: [
-        {
-          ...mockStories[0],
-          content: mockSingleStory.content,
-        },
-      ],
+      stories: mockStories,
       space: '12345',
       path: undefined,
       componentName: undefined,
@@ -618,7 +446,14 @@ describe('migrations run command', () => {
       'valid-token',
       'eu',
       517473243,
-      mockSingleStory.content,
+      {
+        story: {
+          content: mockSingleStory.content,
+          id: 517473243,
+          name: 'Home',
+        },
+        force_update: '1',
+      },
     );
   });
 
@@ -632,63 +467,6 @@ describe('migrations run command', () => {
           + '}\n',
       },
     ];
-
-    const mockStories = [
-      {
-        name: 'Home',
-        parent_id: 0,
-        group_id: '24e2bb36-4003-459b-af6c-9115c873be20',
-        updated_at: '2025-03-03T08:47:49.570Z',
-        published_at: '2025-02-26T14:31:33.640Z',
-        id: 517473243,
-        uuid: '68199c8e-a267-4100-8945-70159982db27',
-        slug: 'home',
-        path: null,
-        full_slug: 'home',
-        content: {
-          _uid: '4b16d1ea-4306-47c5-b901-9d67d5babf53',
-          component: 'page',
-          body: [
-            {
-              _uid: '216ba4ef-1298-4b7d-8ce0-7487e6db15cc',
-              component: 'migration-component',
-              unchanged: 'unchanged',
-            },
-          ],
-        },
-        created_at: '2025-02-26T14:31:33.640Z',
-        first_published_at: '2025-02-26T14:31:33.640Z',
-        published: true,
-        unpublished_changes: false,
-        is_startpage: false,
-        is_folder: false,
-        pinned: false,
-        parent: null,
-        position: 0,
-        sort_by_date: null,
-        tag_list: [],
-        disable_fe_editor: false,
-        default_root: null,
-        preview_token: null,
-        meta_data: null,
-        release_id: null,
-        last_author: null,
-        last_author_id: null,
-        alternates: [],
-        translated_slugs: null,
-        translated_slugs_attributes: null,
-        localized_paths: null,
-        breadcrumbs: [],
-        scheduled_dates: null,
-        favourite_for_user_ids: [],
-        imported_at: null,
-        deleted_at: null,
-      },
-    ];
-
-    const mockSingleStory = {
-      ...mockStories[0],
-    };
 
     const mockMigrationResults = {
       successful: [
@@ -730,63 +508,6 @@ describe('migrations run command', () => {
           + '}\n',
       },
     ];
-
-    const mockStories = [
-      {
-        name: 'Home',
-        parent_id: 0,
-        group_id: '24e2bb36-4003-459b-af6c-9115c873be20',
-        updated_at: '2025-03-03T08:47:49.570Z',
-        published_at: '2025-02-26T14:31:33.640Z',
-        id: 517473243,
-        uuid: '68199c8e-a267-4100-8945-70159982db27',
-        slug: 'home',
-        path: null,
-        full_slug: 'home',
-        content: {
-          _uid: '4b16d1ea-4306-47c5-b901-9d67d5babf53',
-          component: 'page',
-          body: [
-            {
-              _uid: '216ba4ef-1298-4b7d-8ce0-7487e6db15cc',
-              component: 'migration-component',
-              unchanged: 'unchanged',
-            },
-          ],
-        },
-        created_at: '2025-02-26T14:31:33.640Z',
-        first_published_at: '2025-02-26T14:31:33.640Z',
-        published: true,
-        unpublished_changes: false,
-        is_startpage: false,
-        is_folder: false,
-        pinned: false,
-        parent: null,
-        position: 0,
-        sort_by_date: null,
-        tag_list: [],
-        disable_fe_editor: false,
-        default_root: null,
-        preview_token: null,
-        meta_data: null,
-        release_id: null,
-        last_author: null,
-        last_author_id: null,
-        alternates: [],
-        translated_slugs: null,
-        translated_slugs_attributes: null,
-        localized_paths: null,
-        breadcrumbs: [],
-        scheduled_dates: null,
-        favourite_for_user_ids: [],
-        imported_at: null,
-        deleted_at: null,
-      },
-    ];
-
-    const mockSingleStory = {
-      ...mockStories[0],
-    };
 
     const mockMigrationResults = {
       successful: [],
@@ -831,12 +552,7 @@ describe('migrations run command', () => {
     expect(fetchStory).toHaveBeenCalledWith('12345', 'valid-token', 'eu', '517473243');
     expect(handleMigrations).toHaveBeenCalledWith({
       migrationFiles: mockMigrationFiles,
-      stories: [
-        {
-          ...mockStories[0],
-          content: mockSingleStory.content,
-        },
-      ],
+      stories: mockStories,
       space: '12345',
       path: undefined,
       componentName: undefined,
@@ -861,63 +577,6 @@ describe('migrations run command', () => {
           + '}\n',
       },
     ];
-
-    const mockStories = [
-      {
-        name: 'Blog Post',
-        parent_id: 0,
-        group_id: '24e2bb36-4003-459b-af6c-9115c873be20',
-        updated_at: '2025-03-03T08:47:49.570Z',
-        published_at: '2025-02-26T14:31:33.640Z',
-        id: 517473243,
-        uuid: '68199c8e-a267-4100-8945-70159982db27',
-        slug: 'blog-post',
-        path: '/en/blog/blog-post',
-        full_slug: 'en/blog/blog-post',
-        content: {
-          _uid: '4b16d1ea-4306-47c5-b901-9d67d5babf53',
-          component: 'page',
-          body: [
-            {
-              _uid: '216ba4ef-1298-4b7d-8ce0-7487e6db15cc',
-              component: 'migration-component',
-              unchanged: 'unchanged',
-            },
-          ],
-        },
-        created_at: '2025-02-26T14:31:33.640Z',
-        first_published_at: '2025-02-26T14:31:33.640Z',
-        published: true,
-        unpublished_changes: false,
-        is_startpage: false,
-        is_folder: false,
-        pinned: false,
-        parent: null,
-        position: 0,
-        sort_by_date: null,
-        tag_list: [],
-        disable_fe_editor: false,
-        default_root: null,
-        preview_token: null,
-        meta_data: null,
-        release_id: null,
-        last_author: null,
-        last_author_id: null,
-        alternates: [],
-        translated_slugs: null,
-        translated_slugs_attributes: null,
-        localized_paths: null,
-        breadcrumbs: [],
-        scheduled_dates: null,
-        favourite_for_user_ids: [],
-        imported_at: null,
-        deleted_at: null,
-      },
-    ];
-
-    const mockSingleStory = {
-      ...mockStories[0],
-    };
 
     const mockMigrationResults = {
       successful: [
@@ -965,12 +624,7 @@ describe('migrations run command', () => {
     expect(fetchStory).toHaveBeenCalledWith('12345', 'valid-token', 'eu', '517473243');
     expect(handleMigrations).toHaveBeenCalledWith({
       migrationFiles: mockMigrationFiles,
-      stories: [
-        {
-          ...mockStories[0],
-          content: mockSingleStory.content,
-        },
-      ],
+      stories: mockStories,
       space: '12345',
       path: undefined,
       componentName: undefined,
@@ -985,7 +639,490 @@ describe('migrations run command', () => {
       'valid-token',
       'eu',
       517473243,
-      mockSingleStory.content,
+      {
+        story: {
+          content: mockSingleStory.content,
+          id: 517473243,
+          name: 'Blog Post',
+        },
+        force_update: '1',
+      },
+    );
+  });
+
+  it('should publish all stories when publish=all', async () => {
+    const mockMigrationFiles = [
+      {
+        name: 'migration-component.js',
+        content: 'export default function (block) {\n'
+          + '  block.unchanged = \'unchanged\';\n'
+          + '  return block;\n'
+          + '}\n',
+      },
+    ];
+
+    const mockStories = [
+      {
+        id: 517473243,
+        name: 'Blog Post',
+        uuid: 'uuid-1',
+        slug: 'blog-post',
+        full_slug: 'blog-post',
+        content: {
+          _uid: '4b16d1ea-4306-47c5-b901-9d67d5babf53',
+          component: 'page',
+          body: [
+            {
+              _uid: '216ba4ef-1298-4b7d-8ce0-7487e6db15cc',
+              component: 'migration-component',
+              unchanged: 'unchanged',
+            },
+          ],
+        },
+        created_at: '2023-01-01T00:00:00Z',
+        updated_at: '2023-01-01T00:00:00Z',
+        published_at: '2023-01-01T00:00:00Z',
+        first_published_at: '2023-01-01T00:00:00Z',
+        published: true,
+        unpublished_changes: false,
+        is_startpage: false,
+        is_folder: false,
+        pinned: false,
+        parent_id: null,
+        group_id: 'group-1',
+        parent: null,
+        path: null,
+        position: 0,
+        sort_by_date: null,
+        tag_list: [],
+        disable_fe_editor: false,
+        default_root: null,
+        preview_token: null,
+        meta_data: null,
+        release_id: null,
+        last_author: null,
+        last_author_id: null,
+        alternates: [],
+        translated_slugs: null,
+        translated_slugs_attributes: null,
+        localized_paths: null,
+        breadcrumbs: [],
+        scheduled_dates: null,
+        favourite_for_user_ids: [],
+        imported_at: null,
+        deleted_at: null,
+      },
+      {
+        id: 517473244,
+        name: 'Draft Post',
+        uuid: 'uuid-2',
+        slug: 'draft-post',
+        full_slug: 'draft-post',
+        content: {
+          _uid: '4b16d1ea-4306-47c5-b901-9d67d5babf54',
+          component: 'page',
+          body: [
+            {
+              _uid: '216ba4ef-1298-4b7d-8ce0-7487e6db15cd',
+              component: 'migration-component',
+              unchanged: 'unchanged',
+            },
+          ],
+        },
+        created_at: '2023-01-01T00:00:00Z',
+        updated_at: '2023-01-01T00:00:00Z',
+        published_at: null,
+        first_published_at: null,
+        published: false,
+        unpublished_changes: false,
+        is_startpage: false,
+        is_folder: false,
+        pinned: false,
+        parent_id: null,
+        group_id: 'group-1',
+        parent: null,
+        path: null,
+        position: 0,
+        sort_by_date: null,
+        tag_list: [],
+        disable_fe_editor: false,
+        default_root: null,
+        preview_token: null,
+        meta_data: null,
+        release_id: null,
+        last_author: null,
+        last_author_id: null,
+        alternates: [],
+        translated_slugs: null,
+        translated_slugs_attributes: null,
+        localized_paths: null,
+        breadcrumbs: [],
+        scheduled_dates: null,
+        favourite_for_user_ids: [],
+        imported_at: null,
+        deleted_at: null,
+      },
+    ] as Story[];
+
+    const mockSingleStory = mockStories[0];
+
+    const mockMigrationResults = {
+      successful: [
+        {
+          storyId: 517473243,
+          name: 'Blog Post',
+          migrationName: 'migration-component.js',
+          content: mockSingleStory.content,
+        },
+        {
+          storyId: 517473244,
+          name: 'Draft Post',
+          migrationName: 'migration-component.js',
+          content: mockStories[1].content,
+        },
+      ],
+      failed: [],
+      skipped: [],
+    };
+
+    session().state = {
+      isLoggedIn: true,
+      password: 'valid-token',
+      region: 'eu',
+    };
+
+    vi.mocked(readMigrationFiles).mockResolvedValue(mockMigrationFiles);
+    vi.mocked(fetchStoriesByComponent).mockResolvedValue(mockStories);
+    vi.mocked(fetchStory).mockResolvedValue(mockSingleStory);
+    vi.mocked(handleMigrations).mockResolvedValue(mockMigrationResults);
+    vi.mocked(updateStory).mockResolvedValue(mockSingleStory);
+
+    await migrationsCommand.parseAsync(['node', 'test', 'run', '--space', '12345', '--publish', 'all']);
+
+    // Verify that updateStory was called with publish=1 for all stories
+    expect(updateStory).toHaveBeenCalledWith(
+      '12345',
+      'valid-token',
+      'eu',
+      517473243,
+      {
+        story: {
+          content: mockSingleStory.content,
+          id: 517473243,
+          name: 'Blog Post',
+        },
+        force_update: '1',
+        publish: 1,
+      },
+    );
+
+    expect(updateStory).toHaveBeenCalledWith(
+      '12345',
+      'valid-token',
+      'eu',
+      517473244,
+      {
+        story: {
+          content: mockStories[1].content,
+          id: 517473244,
+          name: 'Draft Post',
+        },
+        force_update: '1',
+        publish: 1,
+      },
+    );
+  });
+
+  it('should only publish already published stories when publish=published', async () => {
+    const mockMigrationFiles = [
+      {
+        name: 'migration-component.js',
+        content: 'export default function (block) {\n'
+          + '  block.unchanged = \'unchanged\';\n'
+          + '  return block;\n'
+          + '}\n',
+      },
+    ];
+
+    const mockStories = [
+      {
+        id: 517473243,
+        name: 'Published Post',
+        uuid: 'uuid-1',
+        slug: 'published-post',
+        full_slug: 'published-post',
+        content: {
+          _uid: '4b16d1ea-4306-47c5-b901-9d67d5babf53',
+          component: 'page',
+          body: [
+            {
+              _uid: '216ba4ef-1298-4b7d-8ce0-7487e6db15cc',
+              component: 'migration-component',
+              unchanged: 'unchanged',
+            },
+          ],
+        },
+        created_at: '2023-01-01T00:00:00Z',
+        updated_at: '2023-01-01T00:00:00Z',
+        published_at: '2023-01-01T00:00:00Z',
+        first_published_at: '2023-01-01T00:00:00Z',
+        published: true,
+        unpublished_changes: false,
+        is_startpage: false,
+        is_folder: false,
+        pinned: false,
+        parent_id: null,
+        group_id: 'group-1',
+        parent: null,
+        path: null,
+        position: 0,
+        sort_by_date: null,
+        tag_list: [],
+        disable_fe_editor: false,
+        default_root: null,
+        preview_token: null,
+        meta_data: null,
+        release_id: null,
+        last_author: null,
+        last_author_id: null,
+        alternates: [],
+        translated_slugs: null,
+        translated_slugs_attributes: null,
+        localized_paths: null,
+        breadcrumbs: [],
+        scheduled_dates: null,
+        favourite_for_user_ids: [],
+        imported_at: null,
+        deleted_at: null,
+      },
+      {
+        id: 517473244,
+        name: 'Draft Post',
+        uuid: 'uuid-2',
+        slug: 'draft-post',
+        full_slug: 'draft-post',
+        content: {
+          _uid: '4b16d1ea-4306-47c5-b901-9d67d5babf54',
+          component: 'page',
+          body: [
+            {
+              _uid: '216ba4ef-1298-4b7d-8ce0-7487e6db15cd',
+              component: 'migration-component',
+              unchanged: 'unchanged',
+            },
+          ],
+        },
+        created_at: '2023-01-01T00:00:00Z',
+        updated_at: '2023-01-01T00:00:00Z',
+        published_at: null,
+        first_published_at: null,
+        published: false,
+        unpublished_changes: false,
+        is_startpage: false,
+        is_folder: false,
+        pinned: false,
+        parent_id: null,
+        group_id: 'group-1',
+        parent: null,
+        path: null,
+        position: 0,
+        sort_by_date: null,
+        tag_list: [],
+        disable_fe_editor: false,
+        default_root: null,
+        preview_token: null,
+        meta_data: null,
+        release_id: null,
+        last_author: null,
+        last_author_id: null,
+        alternates: [],
+        translated_slugs: null,
+        translated_slugs_attributes: null,
+        localized_paths: null,
+        breadcrumbs: [],
+        scheduled_dates: null,
+        favourite_for_user_ids: [],
+        imported_at: null,
+        deleted_at: null,
+      },
+    ] as Story[];
+
+    const mockSingleStory = mockStories[0];
+
+    const mockMigrationResults = {
+      successful: [
+        {
+          storyId: 517473243,
+          name: 'Published Post',
+          migrationName: 'migration-component.js',
+          content: mockSingleStory.content,
+        },
+        {
+          storyId: 517473244,
+          name: 'Draft Post',
+          migrationName: 'migration-component.js',
+          content: mockStories[1].content,
+        },
+      ],
+      failed: [],
+      skipped: [],
+    };
+
+    session().state = {
+      isLoggedIn: true,
+      password: 'valid-token',
+      region: 'eu',
+    };
+
+    vi.mocked(readMigrationFiles).mockResolvedValue(mockMigrationFiles);
+    vi.mocked(fetchStoriesByComponent).mockResolvedValue(mockStories);
+    vi.mocked(fetchStory).mockResolvedValue(mockSingleStory);
+    vi.mocked(handleMigrations).mockResolvedValue(mockMigrationResults);
+    vi.mocked(updateStory).mockResolvedValue(mockSingleStory);
+
+    await migrationsCommand.parseAsync(['node', 'test', 'run', '--space', '12345', '--publish', 'published']);
+
+    // Verify that updateStory was called with publish=1 only for published stories
+    expect(updateStory).toHaveBeenCalledWith(
+      '12345',
+      'valid-token',
+      'eu',
+      517473243,
+      {
+        story: {
+          content: mockSingleStory.content,
+          id: 517473243,
+          name: 'Published Post',
+        },
+        force_update: '1',
+        publish: 1,
+      },
+    );
+
+    // Verify that updateStory was called without publish=1 for unpublished stories
+    expect(updateStory).toHaveBeenCalledWith(
+      '12345',
+      'valid-token',
+      'eu',
+      517473244,
+      {
+        story: {
+          content: mockStories[1].content,
+          id: 517473244,
+          name: 'Draft Post',
+        },
+        force_update: '1',
+      },
+    );
+  });
+
+  it('should not publish any stories when publish option is not set', async () => {
+    const mockMigrationFiles = [
+      {
+        name: 'migration-component.js',
+        content: 'export default function (block) {\n'
+          + '  block.unchanged = \'unchanged\';\n'
+          + '  return block;\n'
+          + '}\n',
+      },
+    ];
+
+    const mockStories = [
+      {
+        id: 517473243,
+        name: 'Published Post',
+        uuid: 'uuid-1',
+        slug: 'published-post',
+        full_slug: 'published-post',
+        content: {
+          _uid: '4b16d1ea-4306-47c5-b901-9d67d5babf53',
+          component: 'page',
+          body: [
+            {
+              _uid: '216ba4ef-1298-4b7d-8ce0-7487e6db15cc',
+              component: 'migration-component',
+              unchanged: 'unchanged',
+            },
+          ],
+        },
+        created_at: '2023-01-01T00:00:00Z',
+        updated_at: '2023-01-01T00:00:00Z',
+        published_at: '2023-01-01T00:00:00Z',
+        first_published_at: '2023-01-01T00:00:00Z',
+        published: true,
+        unpublished_changes: false,
+        is_startpage: false,
+        is_folder: false,
+        pinned: false,
+        parent_id: null,
+        group_id: 'group-1',
+        parent: null,
+        path: null,
+        position: 0,
+        sort_by_date: null,
+        tag_list: [],
+        disable_fe_editor: false,
+        default_root: null,
+        preview_token: null,
+        meta_data: null,
+        release_id: null,
+        last_author: null,
+        last_author_id: null,
+        alternates: [],
+        translated_slugs: null,
+        translated_slugs_attributes: null,
+        localized_paths: null,
+        breadcrumbs: [],
+        scheduled_dates: null,
+        favourite_for_user_ids: [],
+        imported_at: null,
+        deleted_at: null,
+      },
+    ] as Story[];
+
+    const mockSingleStory = mockStories[0];
+
+    const mockMigrationResults = {
+      successful: [
+        {
+          storyId: 517473243,
+          name: 'Published Post',
+          migrationName: 'migration-component.js',
+          content: mockSingleStory.content,
+        },
+      ],
+      failed: [],
+      skipped: [],
+    };
+
+    session().state = {
+      isLoggedIn: true,
+      password: 'valid-token',
+      region: 'eu',
+    };
+
+    vi.mocked(readMigrationFiles).mockResolvedValue(mockMigrationFiles);
+    vi.mocked(fetchStoriesByComponent).mockResolvedValue(mockStories);
+    vi.mocked(fetchStory).mockResolvedValue(mockSingleStory);
+    vi.mocked(handleMigrations).mockResolvedValue(mockMigrationResults);
+    vi.mocked(updateStory).mockResolvedValue(mockSingleStory);
+
+    await migrationsCommand.parseAsync(['node', 'test', 'run', '--space', '12345']);
+
+    // Verify that updateStory was called without publish=1
+    expect(updateStory).toHaveBeenCalledWith(
+      '12345',
+      'valid-token',
+      'eu',
+      517473243,
+      {
+        story: {
+          content: mockSingleStory.content,
+          id: 517473243,
+          name: 'Published Post',
+        },
+        force_update: '1',
+      },
     );
   });
 });

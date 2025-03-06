@@ -119,7 +119,11 @@ export const updateStory = async (
   token: string,
   region: RegionCode,
   storyId: number,
-  content: StoryContent,
+  payload: {
+    story: Partial<Story>;
+    force_update?: string;
+    publish?: number;
+  },
 ): Promise<Story | undefined> => {
   try {
     const url = getStoryblokUrl(region);
@@ -133,11 +137,7 @@ export const updateStory = async (
         'Authorization': token,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        story: {
-          content,
-        },
-      }),
+      body: JSON.stringify(payload),
     });
 
     return response.story;

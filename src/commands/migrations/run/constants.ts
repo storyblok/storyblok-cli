@@ -5,6 +5,7 @@ export interface MigrationsRunOptions extends CommandOptions {
   filter?: string;
   query?: string;
   startsWith?: string;
+  publish?: 'all' | 'published' | 'published-with-changes';
 }
 
 export interface ReadMigrationFilesOptions {
