@@ -298,7 +298,7 @@ describe('migrations run command', () => {
       filter: undefined,
     });
 
-    expect(fetchStoriesByComponent).toHaveBeenCalledWith('12345', 'valid-token', 'eu', '');
+    expect(fetchStoriesByComponent).toHaveBeenCalledWith('12345', 'valid-token', 'eu', undefined, undefined);
     expect(fetchStory).toHaveBeenCalledWith('12345', 'valid-token', 'eu', '517473243');
     expect(handleMigrations).toHaveBeenCalledWith({
       migrationFiles: mockMigrationFiles,
@@ -438,7 +438,7 @@ describe('migrations run command', () => {
       filter: undefined,
     });
 
-    expect(fetchStoriesByComponent).toHaveBeenCalledWith('12345', 'valid-token', 'eu', 'migration-component');
+    expect(fetchStoriesByComponent).toHaveBeenCalledWith('12345', 'valid-token', 'eu', 'migration-component', undefined);
     expect(fetchStory).toHaveBeenCalledWith('12345', 'valid-token', 'eu', '517473243');
     expect(handleMigrations).toHaveBeenCalledWith({
       migrationFiles: mockMigrationFiles,
@@ -571,7 +571,7 @@ describe('migrations run command', () => {
       filter: '*.amount.js',
     });
 
-    expect(fetchStoriesByComponent).toHaveBeenCalledWith('12345', 'valid-token', 'eu', '');
+    expect(fetchStoriesByComponent).toHaveBeenCalledWith('12345', 'valid-token', 'eu', undefined, undefined);
     expect(fetchStory).toHaveBeenCalledWith('12345', 'valid-token', 'eu', '517473243');
     expect(handleMigrations).toHaveBeenCalledWith({
       migrationFiles: mockMigrationFiles,
@@ -797,7 +797,7 @@ describe('migrations run command', () => {
       filter: undefined,
     });
 
-    expect(fetchStoriesByComponent).toHaveBeenCalledWith('12345', 'valid-token', 'eu', '');
+    expect(fetchStoriesByComponent).toHaveBeenCalledWith('12345', 'valid-token', 'eu', undefined, undefined);
     expect(fetchStory).toHaveBeenCalledWith('12345', 'valid-token', 'eu', '517473243');
     expect(handleMigrations).toHaveBeenCalledWith({
       migrationFiles: mockMigrationFiles,

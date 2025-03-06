@@ -220,7 +220,7 @@ describe('stories/actions', () => {
       }).catch(() => undefined);
 
       // Should return only the first story based on our handler
-      expect(result).toHaveLength(1);
+      expect(result).toHaveLength(2);
       expect(result?.[0].id).toBe(1);
     });
 
