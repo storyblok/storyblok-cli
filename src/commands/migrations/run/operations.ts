@@ -95,7 +95,7 @@ export async function handleMigrations({
 
     // Create a deep copy of the story content to avoid modifying the original
     const storyContent = JSON.parse(JSON.stringify(story.content)) as StoryContent;
-    let storyModified = false;
+    const storyModified = false;
 
     // Calculate the original content hash for later comparison
     const originalContentHash = hash(story.content);
@@ -131,7 +131,6 @@ export async function handleMigrations({
           const spinner = new Spinner({ verbose: !isVitest });
           spinner.start(`Applying migration ${chalk.hex(colorPalette.MIGRATIONS)(migrationFile.name)} to story ${chalk.hex(colorPalette.PRIMARY)(story.name || story.id.toString())}...`);
           spinner.succeed(`Migration ${chalk.hex(colorPalette.MIGRATIONS)(migrationFile.name)} applied to story ${chalk.hex(colorPalette.PRIMARY)(story.name || story.id.toString())} - Completed in ${spinner.elapsedTime.toFixed(2)}ms`);
-          storyModified = true;
 
           // Store the migration that was applied
           results.successful.push({
@@ -171,11 +170,6 @@ export async function handleMigrations({
           error,
         });
       }
-    }
-
-    // If no migrations were applied to this story, log it
-    if (!storyModified) {
-      konsola.info(`No migrations were applied to story ${chalk.hex(colorPalette.PRIMARY)(story.name || story.id.toString())}`);
     }
   }
 

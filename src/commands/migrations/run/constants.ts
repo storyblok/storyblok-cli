@@ -4,6 +4,7 @@ export interface MigrationsRunOptions extends CommandOptions {
   dryRun?: boolean;
   filter?: string;
   query?: string;
+  startsWith?: string;
 }
 
 export interface ReadMigrationFilesOptions {

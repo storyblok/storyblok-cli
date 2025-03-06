@@ -1,7 +1,7 @@
 import { customFetch } from '../../utils/fetch';
 import { getStoryblokUrl } from '../../utils/api-routes';
-import type { RegionCode } from '../../constants';
-import type { StoriesQueryParams, Story, StoryContent } from './constants';
+import type { RegionCode, SpaceOptions } from '../../constants';
+import type { StoriesFilterOptions, StoriesQueryParams, Story, StoryContent } from './constants';
 import { handleAPIError } from '../../utils/error';
 import { objectToStringParams } from '../../utils';
 
@@ -49,35 +49,37 @@ export const fetchStories = async (
   }
 };
 
-export const fetchStoriesByComponent = async (
-  space: string,
-  token: string,
-  region: RegionCode,
-  componentName?: string,
-  filterQuery?: string,
-) => {
+export async function fetchStoriesByComponent(
+  spaceOptions: SpaceOptions,
+  filterOptions?: StoriesFilterOptions,
+): Promise<Story[] | undefined> {
+  const { spaceId, token, region } = spaceOptions;
+  const { componentName = '', query, starts_with } = filterOptions || {};
+
+  // Convert filterOptions to StoriesQueryParams
+  const params: StoriesQueryParams = {
+    ...(starts_with && { starts_with }),
+  };
+
+  // Handle component filter
+  if (componentName) {
+    params.contain_component = componentName;
+  }
+
+  // Handle query string if provided
+  if (query) {
+    // Add filter_query prefix to the query parameter if it doesn't have it already
+    params.filter_query = query.startsWith('filter_query') ? query : `filter_query${query}`;
+  }
+
   try {
-    // Create params object
-    const params: StoriesQueryParams = {};
-
-    // Only add contain_component if componentName is defined
-    if (componentName) {
-      params.contain_component = componentName;
-    }
-
-    // If filterQuery is provided, add it with the filter_query prefix
-    if (filterQuery) {
-      params.filter_query = `filter_query${filterQuery}`;
-    }
-
-    const stories = await fetchStories(space, token, region, params);
-
-    return stories;
+    const stories = await fetchStories(spaceId, token, region, params);
+    return stories ?? [];
   }
   catch (error) {
     handleAPIError('pull_stories', error as Error);
   }
-};
+}
 
 export const fetchStory = async (
   space: string,

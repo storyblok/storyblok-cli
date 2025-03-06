@@ -1,9 +1,10 @@
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
-import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
-import { fetchStories } from './actions';
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { fetchStories, fetchStoriesByComponent } from './actions';
 import { handleAPIError } from '../../utils/error';
 import type { Story } from './constants';
+import type { RegionCode } from '../../constants';
 
 // Mock dependencies
 vi.mock('../../utils/error', () => ({
@@ -247,6 +248,83 @@ describe('stories/actions', () => {
           expect.any(Error),
         );
       });
+    });
+  });
+
+  describe('fetchStoriesByComponent', () => {
+    const mockSpaceOptions = {
+      spaceId: '12345',
+      token: 'test-token',
+      region: 'eu' as RegionCode,
+    };
+
+    let requestUrl: string | undefined;
+
+    beforeEach(() => {
+      requestUrl = undefined;
+      server.use(
+        http.get('*/stories*', ({ request }) => {
+          requestUrl = new URL(request.url).search;
+          return HttpResponse.json({ stories: [] });
+        }),
+      );
+    });
+
+    it('should fetch stories without filters', async () => {
+      await fetchStoriesByComponent(mockSpaceOptions);
+      expect(requestUrl).toBe('');
+    });
+
+    it('should fetch stories with component filter', async () => {
+      await fetchStoriesByComponent(mockSpaceOptions, {
+        componentName: 'test-component',
+      });
+      expect(requestUrl).toBe('?contain_component=test-component');
+    });
+
+    it('should fetch stories with starts_with filter', async () => {
+      await fetchStoriesByComponent(mockSpaceOptions, {
+        starts_with: '/en/blog/',
+      });
+      expect(requestUrl).toBe('?starts_with=%2Fen%2Fblog%2F');
+    });
+
+    it('should fetch stories with filter_query parameter', async () => {
+      await fetchStoriesByComponent(mockSpaceOptions, {
+        query: '[highlighted][is]=true',
+      });
+      expect(requestUrl).toBe('?filter_query[highlighted][is]=true');
+    });
+
+    it('should handle already prefixed filter_query parameter', async () => {
+      await fetchStoriesByComponent(mockSpaceOptions, {
+        query: 'filter_query[highlighted][is]=true',
+      });
+      expect(requestUrl).toBe('?filter_query[highlighted][is]=true');
+    });
+
+    it('should handle multiple filters together', async () => {
+      await fetchStoriesByComponent(mockSpaceOptions, {
+        componentName: 'test-component',
+        starts_with: '/en/blog/',
+        query: '[highlighted][is]=true',
+      });
+      expect(requestUrl).toBe('?starts_with=%2Fen%2Fblog%2F&contain_component=test-component&filter_query[highlighted][is]=true');
+    });
+
+    it('should handle error responses', async () => {
+      server.use(
+        http.get('*/stories*', () => {
+          return new HttpResponse(null, { status: 404, statusText: 'Not Found' });
+        }),
+      );
+
+      const result = await fetchStoriesByComponent(mockSpaceOptions);
+      expect(result).toEqual([]);
+      expect(handleAPIError).toHaveBeenCalledWith(
+        'pull_stories',
+        expect.any(Error),
+      );
     });
   });
 });

@@ -163,3 +163,9 @@ export interface StoriesQueryParams {
   // Allow string indexing for filter_query parameters
   [key: string]: string | number | boolean | undefined;
 }
+
+export interface StoriesFilterOptions {
+  componentName?: string;
+  query?: string;
+  starts_with?: string;
+}

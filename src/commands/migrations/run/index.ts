@@ -18,13 +18,14 @@ migrationsCommand.command('run [componentName]')
   .option('--fi, --filter <filter>', 'glob filter to apply to the components before pushing')
   .option('-d, --dry-run', 'Preview changes without applying them to Storyblok')
   .option('-q, --query <query>', 'Filter stories by content attributes using Storyblok filter query syntax. Example: --query="[highlighted][in]=true"')
+  .option('--starts-with <path>', 'Filter stories by path. Example: --starts-with="/en/blog/"')
   .action(async (componentName: string | undefined, options: MigrationsRunOptions) => {
     konsola.title(` ${commands.MIGRATIONS} `, colorPalette.MIGRATIONS, componentName ? `Running migrations for component ${componentName}...` : 'Running migrations...');
 
     // Global options
     const verbose = program.opts().verbose;
 
-    const { filter, dryRun = false, query } = options;
+    const { filter, dryRun = false, query, startsWith } = options;
 
     // Command options
     const { space, path } = migrationsCommand.opts();
@@ -79,7 +80,19 @@ migrationsCommand.command('run [componentName]')
       const storiesSpinner = new Spinner({ verbose: !isVitest }).start(`Fetching stories...`);
 
       // Fetch stories using the base component name
-      const stories = await fetchStoriesByComponent(space, password, region, componentName, query);
+      const stories = await fetchStoriesByComponent(
+        {
+          spaceId: space,
+          token: password,
+          region,
+        },
+        // Filter options
+        {
+          componentName,
+          query,
+          starts_with: startsWith,
+        },
+      );
 
       if (!stories || stories.length === 0) {
         storiesSpinner.failed(`No stories found${componentName ? ` for component "${componentName}"` : ''}.`);
@@ -98,8 +111,25 @@ migrationsCommand.command('run [componentName]')
       // Filter out stories with no content
       const validStories = storiesWithContent.filter(story => story.content);
 
+      // Build filter message parts
+      const filterParts = [];
+      if (componentName) {
+        filterParts.push(`component "${componentName}"`);
+      }
+      if (startsWith) {
+        filterParts.push(chalk.hex(colorPalette.PRIMARY)(`starts_with=${startsWith}`));
+      }
+      if (query) {
+        filterParts.push(chalk.hex(colorPalette.PRIMARY)(`filter_query=${query}`));
+      }
+
+      // Create filter message
+      const filterMessage = filterParts.length > 0
+        ? ` (filtered by ${filterParts.join(' and ')})`
+        : '';
+
       // Spinner doesn't have update method, so we'll stop and start a new one
-      storiesSpinner.succeed(`Fetched ${validStories.length} stories with related content.`);
+      storiesSpinner.succeed(`Fetched ${validStories.length} ${validStories.length === 1 ? 'story' : 'stories'} with related content${filterMessage}.`);
 
       // Process migrations using the new operations module
       const processingSpinner = new Spinner({ verbose: !isVitest }).start(`Processing migrations...`);

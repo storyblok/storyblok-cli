@@ -58,3 +58,9 @@ export const DEFAULT_AGENT = {
   SB_Agent: 'SB-CLI',
   SB_Agent_Version: process.env.npm_package_version || '4.x',
 } as const;
+
+export interface SpaceOptions {
+  spaceId: string;
+  token: string;
+  region: RegionCode;
+}

@@ -264,6 +264,20 @@
       "env": {
         "STUB": "true"
       }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Migrations run starts-with",
+      "program": "${workspaceFolder}/dist/index.mjs",
+      "args": ["migrations", "run", "--space", "295017", "--starts-with", "migrations/"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "sourceMaps": true,
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "env": {
+        "STUB": "true"
+      }
     }
   ]
 }
