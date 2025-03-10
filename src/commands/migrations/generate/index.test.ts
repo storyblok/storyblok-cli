@@ -161,7 +161,7 @@ describe('migrations generate command', () => {
       region: 'eu',
     };
 
-    const mockError = new CommandError('Please provide the component name as argument --componentName YOUR_COMPONENT_NAME.');
+    const mockError = new CommandError('Please provide the component name as argument storyblok migrations generate YOUR_COMPONENT_NAME.');
     await migrationsCommand.parseAsync(['node', 'test', 'generate', '--space', '12345']);
     expect(konsola.error).toHaveBeenCalledWith(mockError, false);
   });
