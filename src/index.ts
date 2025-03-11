@@ -9,6 +9,7 @@ import './commands/logout';
 import './commands/user';
 import './commands/components';
 import './commands/languages';
+import './commands/migrations';
 
 import { session } from './session';
 

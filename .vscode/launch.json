@@ -194,6 +194,34 @@
       "env": {
         "STUB": "true"
       }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Migrations generate",
+      "program": "${workspaceFolder}/dist/index.mjs",
+      "args": ["migrations", "generate", "--space", "295017"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "sourceMaps": true,
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "env": {
+        "STUB": "true"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Migrations generate non-existing component",
+      "program": "${workspaceFolder}/dist/index.mjs",
+      "args": ["migrations", "generate", "non-existing", "--space", "295017"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "sourceMaps": true,
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "env": {
+        "STUB": "true"
+      }
     }
   ]
 }

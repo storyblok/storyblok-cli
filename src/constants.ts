@@ -4,6 +4,7 @@ export const commands = {
   USER: 'user',
   COMPONENTS: 'Components',
   LANGUAGES: 'languages',
+  MIGRATIONS: 'Migrations',
 } as const;
 
 export const colorPalette = {
@@ -12,6 +13,7 @@ export const colorPalette = {
   USER: '#8BC34A',
   COMPONENTS: '#a185ff',
   LANGUAGES: '#FFC107',
+  MIGRATIONS: '#8CE2FF',
 } as const;
 
 export interface ReadonlyArray<T> {

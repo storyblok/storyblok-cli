@@ -428,6 +428,7 @@ describe('push', () => {
       vi.mocked(handleComponentGroups).mockResolvedValue(mockedGroupsResults);
 
       await componentsCommand.parseAsync(['node', 'test', 'push', '--space', '12345']);
+
       expect(handleWhitelists).toHaveBeenCalledWith('12345', 'valid-token', 'eu', mockedSpaceData);
 
       // Tags phase.
