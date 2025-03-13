@@ -54,3 +54,13 @@ export const resolvePath = (path: string | undefined, folder: string) => {
   // Otherwise use the default .storyblok path
   return resolve(resolve(process.cwd(), '.storyblok'), folder);
 };
+
+/**
+ * Extracts the component name from a migration filename
+ * @param filename - The migration filename (e.g., "simple_component.js")
+ * @returns The component name (e.g., "simple_component")
+ */
+export const getComponentNameFromFilename = (filename: string): string => {
+  // Remove the .js extension
+  return filename.replace(/\.js$/, '');
+};

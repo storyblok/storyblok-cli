@@ -23,6 +23,9 @@ importers:
       dotenv:
         specifier: ^16.4.7
         version: 16.4.7
+      ohash:
+        specifier: ^2.0.5
+        version: 2.0.5
       storyblok-js-client:
         specifier: ^6.10.7
         version: 6.10.7
@@ -2077,6 +2080,9 @@ packages:
 
   nth-check@2.1.1:
     resolution: {integrity: sha512-lqjrjmaOoAnWfMmBPL+XNnynZh2+swxiX3WUE0s4yEHI6m+AwrK2UZOimIRl3X/4QctVqS8AiZjFqyOGrMXb/w==}
+
+  ohash@2.0.5:
+    resolution: {integrity: sha512-3k3APZwRRPYyohdIDmPTpe5i0AY5lm7gvu/Oip7tZrTaEGfSlKX+7kXUoWLd9sHX0GDRVwVvlW18yEcD7qS1zw==}
 
   onetime@5.1.2:
     resolution: {integrity: sha512-kbpaSSGJTWdAY5KPVeMOKXSrPtr8C8C7wodJbcsd51jRnmD+GZu8Y0VoU6Dm5Z4vWr0Ig/1NKuWRKf7j5aaYSg==}
@@ -5179,6 +5185,8 @@ snapshots:
   nth-check@2.1.1:
     dependencies:
       boolbase: 1.0.0
+
+  ohash@2.0.5: {}
 
   onetime@5.1.2:
     dependencies:

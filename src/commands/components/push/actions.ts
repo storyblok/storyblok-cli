@@ -8,6 +8,7 @@ import { join } from 'node:path';
 import { readdir, readFile } from 'node:fs/promises';
 import { resolvePath } from '../../../utils/filesystem';
 import { fetchComponent, fetchComponentGroups, fetchComponentInternalTags, fetchComponentPresets } from '../actions';
+import type { FileReaderResult } from '../../../types';
 
 // Component actions
 export const pushComponent = async (space: string, component: SpaceComponent, token: string, region: RegionCode): Promise<SpaceComponent | undefined> => {
@@ -251,13 +252,6 @@ export const upsertComponentInternalTag = async (space: string, tag: SpaceCompon
     throw error;
   }
 };
-
-// Filesystem actions
-
-interface FileReaderResult<T> {
-  data: T[];
-  error?: Error;
-}
 
 async function readJsonFile<T>(filePath: string): Promise<FileReaderResult<T>> {
   try {

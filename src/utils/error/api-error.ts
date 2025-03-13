@@ -19,6 +19,9 @@ export const API_ACTIONS = {
   update_component_internal_tag: 'Failed to update component internal tag',
   update_component_group: 'Failed to update component group',
   update_component_preset: 'Failed to update component preset',
+  pull_stories: 'Failed to pull stories',
+  pull_story: 'Failed to pull story',
+  update_story: 'Failed to update story',
 } as const;
 
 export const API_ERRORS = {
@@ -29,6 +32,7 @@ export const API_ERRORS = {
   generic: 'Error fetching data from the API',
   not_found: 'The requested resource was not found',
   unprocessable_entity: 'The request was well-formed but was unable to be followed due to semantic errors',
+
 } as const;
 
 export function handleAPIError(action: keyof typeof API_ACTIONS, error: unknown, customMessage?: string): void {

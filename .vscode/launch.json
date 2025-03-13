@@ -212,9 +212,77 @@
     {
       "type": "node",
       "request": "launch",
+      "name": "Debug Migrations run",
+      "program": "${workspaceFolder}/dist/index.mjs",
+      "args": ["migrations", "run", "--space", "295017"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "sourceMaps": true,
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "env": {
+        "STUB": "true"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Migrations run component-name",
+      "program": "${workspaceFolder}/dist/index.mjs",
+      "args": ["migrations", "run", "simple_component", "--space", "295017"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "sourceMaps": true,
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "env": {
+        "STUB": "true"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Migrations run filter",
+      "program": "${workspaceFolder}/dist/index.mjs",
+      "args": ["migrations", "run", "--space", "295017", "--filter", "component-inside-*"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "sourceMaps": true,
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "env": {
+        "STUB": "true"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Migrations run query",
+      "program": "${workspaceFolder}/dist/index.mjs",
+      "args": ["migrations", "run", "--space", "295017", "--query", "[highlighted][is]=true"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "sourceMaps": true,
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "env": {
+        "STUB": "true"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Migrations run starts-with",
+      "program": "${workspaceFolder}/dist/index.mjs",
+      "args": ["migrations", "run", "--space", "295017", "--starts-with", "migrations/"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "sourceMaps": true,
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "env": {
+        "STUB": "true"
+     },
+     {
       "name": "Debug Migrations generate non-existing component",
       "program": "${workspaceFolder}/dist/index.mjs",
       "args": ["migrations", "generate", "non-existing", "--space", "295017"],
+
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "sourceMaps": true,

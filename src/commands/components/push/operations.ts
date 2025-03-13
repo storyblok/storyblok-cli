@@ -1,7 +1,7 @@
 import { Spinner } from '@topcli/spinner';
 import chalk from 'chalk';
 import { colorPalette } from '../../../constants';
-import { isVitest } from '../../../utils';
+import { createRegexFromGlob, isVitest } from '../../../utils';
 import type { RegionCode } from '../../../constants';
 import type {
   SpaceComponent,
@@ -160,10 +160,8 @@ function findRelatedResources(
   return result;
 }
 
-// TODO: Consider implementing filter-by pattern (default is to filter by component name)
 export function filterSpaceDataByPattern(spaceData: SpaceData, pattern: string): SpaceData {
-  // Add ^ and $ to ensure exact match, escape the pattern to handle special characters
-  const regex = new RegExp(`^${pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\\\*/g, '.*')}$`);
+  const regex = createRegexFromGlob(pattern);
   const matchedComponents = spaceData.components.filter(c => regex.test(c.name));
 
   if (!matchedComponents.length) {
