@@ -27,7 +27,7 @@ migrationsCommand
     const { suffix } = options;
 
     if (!componentName) {
-      handleError(new CommandError(`Please provide the component name as argument --componentName YOUR_COMPONENT_NAME.`), verbose);
+      handleError(new CommandError(`Please provide the component name as argument ${chalk.hex(colorPalette.MIGRATIONS)('storyblok migrations generate YOUR_COMPONENT_NAME.')}`), verbose);
       return;
     }
 
@@ -45,14 +45,14 @@ migrationsCommand
 
     const { password, region } = state;
 
+    const spinner = new Spinner({
+      verbose: !isVitest,
+    }).start(`Generating migration for component ${componentName}...`);
     try {
-      const spinner = new Spinner({
-        verbose: !isVitest,
-      }).start(`Generating migration for component ${componentName}...`);
-
       const component = await fetchComponent(space, componentName, password, region);
 
       if (!component) {
+        spinner.failed(`Failed to fetch component ${componentName}. Make sure the component exists in your space.`);
         handleError(new CommandError(`No component found with name "${componentName}"`), verbose);
         return;
       }
@@ -66,6 +66,7 @@ migrationsCommand
       konsola.ok(`You can find the migration file in ${chalk.hex(colorPalette.MIGRATIONS)(migrationPath)}`);
     }
     catch (error) {
+      spinner.failed(`Failed to generate migration for component ${componentName}`);
       handleError(error as Error, verbose);
     }
   });
