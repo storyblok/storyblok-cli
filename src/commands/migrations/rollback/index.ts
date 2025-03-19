@@ -3,7 +3,9 @@ import { CommandError, handleError, konsola } from '../../../utils';
 import { getProgram } from '../../../program';
 import { migrationsCommand } from '../command';
 import { session } from '../../../session';
-import { restoreFromRollback } from './actions';
+import { readRollbackFile } from './actions';
+import { updateStory } from '../../stories/actions';
+import { Spinner } from '@topcli/spinner';
 import chalk from 'chalk';
 
 const program = getProgram();
@@ -34,14 +36,31 @@ migrationsCommand.command('rollback [migrationFile]')
     const { password, region } = state;
 
     try {
-      await restoreFromRollback({
+      // Read the rollback data
+      const rollbackData = await readRollbackFile({
         space,
         path,
         migrationFile,
-        password,
-        region,
-        verbose,
       });
+
+      // Restore each story to its original state
+      for (const story of rollbackData.stories) {
+        const spinner = new Spinner({ verbose }).start(`Restoring story ${chalk.hex(colorPalette.PRIMARY)(story.name || story.storyId)}...`);
+        try {
+          await updateStory(space, password, region, story.storyId, {
+            story: {
+              content: story.content,
+              id: story.storyId,
+              name: story.name,
+            },
+            force_update: '1',
+          });
+          spinner.succeed(`Restored story ${chalk.hex(colorPalette.PRIMARY)(story.name || story.storyId)}`);
+        }
+        catch (error) {
+          spinner.failed(`Failed to restore story ${chalk.hex(colorPalette.PRIMARY)(story.name || story.storyId)}: ${(error as Error).message}`);
+        }
+      }
     }
     catch (error) {
       handleError(new CommandError(`Failed to rollback migration: ${(error as Error).message}`), verbose);

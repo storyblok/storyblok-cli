@@ -2,11 +2,7 @@ import { join } from 'node:path';
 import { resolvePath, saveToFile } from '../../../utils/filesystem';
 import type { StoryContent } from '../../stories/constants';
 import { readFile } from 'node:fs/promises';
-import { updateStory } from '../../stories/actions';
-import { Spinner } from '@topcli/spinner';
-import chalk from 'chalk';
 import { CommandError } from '../../../utils';
-import { colorPalette } from '../../../constants';
 
 export interface RollbackData {
   stories: Array<{
@@ -79,58 +75,30 @@ export async function saveRollbackData({
 }
 
 /**
- * Restore stories from a rollback file
- * @param options - Options for restoring stories
+ * Read rollback data from a file
+ * @param options - Options for reading rollback data
  * @param options.space - The space ID
  * @param options.path - Base path for rollback files
  * @param options.migrationFile - Name of the migration file to rollback
- * @param options.password - Password for authentication
- * @param options.region - Region code for API requests
- * @param options.verbose - Verbose mode flag
+ * @returns The rollback data containing stories to restore
  */
-export async function restoreFromRollback({
+export async function readRollbackFile({
   space,
   path,
   migrationFile,
-  password,
-  region,
-  verbose,
 }: {
   space: string;
   path: string;
   migrationFile: string;
-  password: string;
-  region: 'eu' | 'us' | 'cn' | 'ca' | 'ap';
-  verbose: boolean;
-}): Promise<void> {
+}): Promise<RollbackData> {
   try {
-    // Construct the rollback file path
-    const rollbacksPath = join(path || '.storyblok/migrations', space, 'rollbacks');
-    const rollbackFilePath = join(rollbacksPath, migrationFile);
+    const resolvedPath = resolvePath(path, `migrations/${space}/rollbacks`);
+    const rollbackFilePath = join(resolvedPath, migrationFile);
 
     // Read the rollback file
-    const rollbackData: RollbackData = JSON.parse(await readFile(`${rollbackFilePath}.json`, 'utf-8'));
-
-    // Restore each story to its original state
-    for (const story of rollbackData.stories) {
-      const spinner = new Spinner({ verbose }).start(`Restoring story ${chalk.hex(colorPalette.PRIMARY)(story.name || story.storyId)}...`);
-      try {
-        await updateStory(space, password, region, story.storyId, {
-          story: {
-            content: story.content as StoryContent,
-            id: story.storyId,
-            name: story.name,
-          },
-          force_update: '1',
-        });
-        spinner.succeed(`Restored story ${chalk.hex(colorPalette.PRIMARY)(story.name || story.storyId)}`);
-      }
-      catch (error) {
-        spinner.failed(`Failed to restore story ${chalk.hex(colorPalette.PRIMARY)(story.name || story.storyId)}: ${(error as Error).message}`);
-      }
-    }
+    return JSON.parse(await readFile(`${rollbackFilePath}.json`, 'utf-8'));
   }
   catch (error) {
-    throw new CommandError(`Failed to rollback migration: ${(error as Error).message}`);
+    throw new CommandError(`Failed to read rollback file: ${(error as Error).message}`);
   }
 }
