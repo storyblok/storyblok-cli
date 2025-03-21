@@ -140,19 +140,31 @@ const SyncSpaces = {
   async syncFolders () {
     console.log(chalk.green('✓') + ' Syncing folders...')
 
-    const sourceFolders = await this.client.getAll(`spaces/${this.sourceSpaceId}/stories`, {
+    const sourceFolderParams = {
       folder_only: 1,
       sort_by: 'slug:asc'
-    })
+    };
+
+    if (this.startsWith) {
+      sourceFolderParams.starts_with = this.startsWith;
+    }
+
+    const sourceFolders = await this.client.getAll(`spaces/${this.sourceSpaceId}/stories`, sourceFolderParams)
     const syncedFolders = {}
 
     for (const folder of sourceFolders) {
       try {
+
+        const targetFolderParams = {
+          with_slug: folder.full_slug,
+        };
+
+        if (this.startsWith) {
+          targetFolderParams.starts_with = this.startsWith;
+        }
+
         const folderResult = await this.client.get(`spaces/${this.sourceSpaceId}/stories/${folder.id}`)
-        const { data } = await this.client.get(`spaces/${this.targetSpaceId}/stories`, {
-            with_slug: folder.full_slug,
-            ...(this.startsWith ? { starts_with: this.startsWith } : {}),
-        })
+        const { data } = await this.client.get(`spaces/${this.targetSpaceId}/stories`, targetFolderParams)
         const existingFolder = data.stories[0] || null
         const folderData = await this.getStoryWithTranslatedSlugs(folderResult.data.story, existingFolder)
         delete folderData.id
