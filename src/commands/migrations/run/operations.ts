@@ -8,6 +8,7 @@ import { applyMigrationToAllBlocks, getMigrationFunction } from './actions';
 import { getComponentNameFromFilename } from '../../../utils/filesystem';
 import type { MigrationFile } from './constants';
 import { hash } from 'ohash';
+import { saveRollbackData } from '../rollback/actions';
 
 /**
  * Handles the processing of migration files for stories
@@ -82,41 +83,61 @@ export async function handleMigrations({
       })
     : migrationFiles;
 
-  // Process each story with each migration
-  for (const story of stories) {
-    if (!story.content) {
-      results.failed.push({
-        storyId: story.id,
-        migrationName: 'all',
-        error: new Error('Story content is missing'),
+  // Process each migration file
+  for (const migrationFile of relevantMigrations) {
+    // Filter out stories without content
+    const validStories = stories.filter(story => story.content) as Array<{ id: number; name: string; content: StoryContent }>;
+
+    // Skip processing if no valid stories
+    if (validStories.length === 0) {
+      continue;
+    }
+
+    // First save all original states of stories before any modification
+    // This ensures we have a snapshot before any change is made
+    await saveRollbackData({
+      space,
+      path,
+      stories: validStories,
+      migrationFile: migrationFile.name,
+    });
+
+    // Load the migration function using dynamic import
+    const migrationFunction = await getMigrationFunction(migrationFile.name, space, path);
+
+    if (!migrationFunction) {
+      // If migration function fails to load, mark all stories as failed for this migration
+      stories.forEach((story) => {
+        results.failed.push({
+          storyId: story.id,
+          migrationName: migrationFile.name,
+          error: new Error(`Failed to load migration function from file "${migrationFile.name}"`),
+        });
       });
       continue;
     }
 
-    // Create a deep copy of the story content to avoid modifying the original
-    const storyContent = JSON.parse(JSON.stringify(story.content)) as StoryContent;
+    // Determine the target component from the migration filename if not explicitly provided
+    const targetComponent = componentName || getComponentNameFromFilename(migrationFile.name);
 
-    // Calculate the original content hash for later comparison
-    const originalContentHash = hash(story.content);
+    // Process each story
+    for (const story of stories) {
+      if (!story.content) {
+        results.failed.push({
+          storyId: story.id,
+          migrationName: migrationFile.name,
+          error: new Error('Story content is missing'),
+        });
+        continue;
+      }
 
-    // Process the story with each migration file
-    for (const migrationFile of relevantMigrations) {
+      // Create a deep copy of the story content to avoid modifying the original
+      const storyContent = structuredClone(story.content) as StoryContent;
+
+      // Calculate the original content hash for later comparison
+      const originalContentHash = hash(story.content);
+
       try {
-        // Load the migration function using dynamic import
-        const migrationFunction = await getMigrationFunction(migrationFile.name, space, path);
-
-        if (!migrationFunction) {
-          results.failed.push({
-            storyId: story.id,
-            migrationName: migrationFile.name,
-            error: new Error(`Failed to load migration function from file "${migrationFile.name}"`),
-          });
-          continue;
-        }
-
-        // Determine the target component from the migration filename if not explicitly provided
-        const targetComponent = componentName || getComponentNameFromFilename(migrationFile.name);
-
         // Apply the migration function to all matching components in the content
         const modified = applyMigrationToAllBlocks(storyContent, migrationFunction, targetComponent);
 
