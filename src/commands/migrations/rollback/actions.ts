@@ -96,7 +96,11 @@ export async function readRollbackFile({
     const rollbackFilePath = join(resolvedPath, migrationFile);
 
     // Read the rollback file
-    return JSON.parse(await readFile(`${rollbackFilePath}.json`, 'utf-8'));
+    const filePath = rollbackFilePath.endsWith('.json')
+      ? rollbackFilePath
+      : `${rollbackFilePath}.json`;
+
+    return JSON.parse(await readFile(filePath, 'utf-8'));
   }
   catch (error) {
     throw new CommandError(`Failed to read rollback file: ${(error as Error).message}`);

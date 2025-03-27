@@ -132,7 +132,7 @@ export async function handleMigrations({
       }
 
       // Create a deep copy of the story content to avoid modifying the original
-      const storyContent = JSON.parse(JSON.stringify(story.content)) as StoryContent;
+      const storyContent = structuredClone(story.content) as StoryContent;
 
       // Calculate the original content hash for later comparison
       const originalContentHash = hash(story.content);
