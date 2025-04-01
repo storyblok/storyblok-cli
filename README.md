@@ -208,19 +208,19 @@ storyblok delete-components <SOURCE> --space <SPACE_ID>
 Using an **URL**
 
 ```sh
-$ storyblok push-components https://raw.githubusercontent.com/storyblok/nuxtdoc/master/seed.components.json --space 67819
+$ storyblok delete-components https://raw.githubusercontent.com/storyblok/nuxtdoc/master/seed.components.json --space 67819
 ```
 
 Using a **path** to a single file
 
 ```sh
-$ storyblok push-components ./components.json --space 67819
+$ storyblok delete-components ./components.json --space 67819
 ```
 
 Using a **path** to a multiple files
 
 ```sh
-$ storyblok push-components ./page.json,../grid.json,./feature.json --space 67819
+$ storyblok delete-components ./page.json,../grid.json,./feature.json --space 67819
 ```
 
 #### Options
