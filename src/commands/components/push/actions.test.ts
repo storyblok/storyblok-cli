@@ -242,7 +242,7 @@ describe('push components actions', () => {
     it('should read components from separate files successfully', async () => {
       vol.fromJSON({
         '/path/to/components/23746/component-name.json': JSON.stringify(mockComponent),
-        '/path/to/components/23746/component-name.preset.json': JSON.stringify([mockComponentPreset]),
+        '/path/to/components/23746/component-name.presets.json': JSON.stringify([mockComponentPreset]),
         '/path/to/components/23746/groups.json': JSON.stringify([mockComponentGroup]),
         '/path/to/components/23746/tags.json': JSON.stringify([mockInternalTag]),
       });

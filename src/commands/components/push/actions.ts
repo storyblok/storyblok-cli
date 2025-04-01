@@ -319,7 +319,7 @@ async function readSeparateFiles(resolvedPath: string): Promise<SpaceData> {
       }
       internalTags = result.data;
     }
-    else if (file.endsWith('.preset.json')) {
+    else if (file.endsWith('.presets.json')) {
       const result = await readJsonFile<SpaceComponentPreset>(filePath);
       if (result.error) {
         handleFileSystemError('read', result.error);
