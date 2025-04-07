@@ -307,6 +307,20 @@
       "env": {
         "STUB": "true"
       }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Generate types strict",
+      "program": "${workspaceFolder}/dist/index.mjs",
+      "args": ["types", "generate", "--space", "295017", "--strict"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "sourceMaps": true,
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "env": {
+        "STUB": "true"
+      }
     }
   ]
 }

@@ -16,6 +16,7 @@ typesCommand
   .description('Generate types d.ts for your component schemas')
   .option('--fi, --filter <filter>', 'glob filter to apply to the components before generating types')
   .option('--sf, --separate-files', '')
+  .option('--strict', 'strict mode, no loose typing')
   .action(async (componentName: string | undefined, options: GenerateTypesOptions) => {
     konsola.title(` ${commands.TYPES} `, colorPalette.TYPES, componentName ? `Generating types for component ${componentName}...` : 'Generating types...');
     // Global options

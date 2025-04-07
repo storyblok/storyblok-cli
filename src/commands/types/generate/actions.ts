@@ -109,7 +109,9 @@ export const generateComponentGroupsAndComponentNames = (
 
 export const generateTypes = async (
   components: SpaceComponent[],
-  options: GenerateTypesOptions,
+  options: GenerateTypesOptions = {
+    strict: false,
+  },
 ) => {
   /* const { componentGroups, componentNames } = generateComponentGroupsAndComponentNames(components);
   const typedefs = [...DEFAULT_TYPEDEFS_HEADER]; */
@@ -147,9 +149,11 @@ export const generateTypes = async (
     return componentSchema;
   }));
 
+  console.log(options);
+
   const typedefString = await Promise.all(schemas.map(async (schema) => {
     return await compile(schema, schema.$id.replace('#/', ''), {
-      additionalProperties: false,
+      additionalProperties: !options.strict,
       bannerComment: '',
     });
   }));
