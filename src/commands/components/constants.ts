@@ -4,7 +4,7 @@ export interface SpaceComponent {
   created_at: string;
   updated_at: string;
   id: number;
-  schema: Record<string, unknown>;
+  schema: Record<string, any>;
   image?: string;
   preview_field?: string;
   is_root?: boolean;

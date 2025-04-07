@@ -39,6 +39,7 @@
     "chalk": "^5.4.1",
     "commander": "^13.1.0",
     "dotenv": "^16.4.7",
+    "json-schema-to-typescript": "^15.0.4",
     "ohash": "^2.0.5",
     "storyblok-js-client": "^6.10.7"
   },

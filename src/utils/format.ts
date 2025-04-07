@@ -3,11 +3,16 @@ export const toPascalCase = (str: string) => {
 };
 
 export const toCamelCase = (str: string) => {
-  return str.replace(/(?:^|_)(\w)/g, (_, char) => char.toUpperCase()).replace(/_/g, '');
+  return str
+    .replace(/(?:^|_)(\w)/g, (_, char) => char.toUpperCase())
+    .replace(/_/g, '')
+    .replace(/^[A-Z]/, char => char.toLowerCase());
 };
 
 export const toSnakeCase = (str: string) => {
-  return str.replace(/([A-Z])/g, '_$1').toLowerCase();
+  return str
+    .replace(/([A-Z])/g, (_, char) => `_${char.toLowerCase()}`)
+    .replace(/^_/, '');
 };
 
 export function maskToken(token: string): string {

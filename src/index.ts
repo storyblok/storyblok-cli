@@ -10,6 +10,7 @@ import './commands/user';
 import './commands/components';
 import './commands/languages';
 import './commands/migrations';
+import './commands/types';
 
 import { session } from './session';
 
