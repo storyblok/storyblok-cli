@@ -1,43 +1,5 @@
 export type StoryblokPropertyType = 'asset' | 'multiasset' | 'multilink' | 'table' | 'richtext';
 
-export type ComponentPropertySchemaType =
-  | StoryblokPropertyType
-  | 'array'
-  | 'bloks'
-  | 'boolean'
-  | 'custom'
-  | 'datetime'
-  | 'image'
-  | 'markdown'
-  | 'number'
-  | 'option'
-  | 'options'
-  | 'text'
-  | 'textarea';
-
-export interface ComponentPropertySchemaOption {
-  _uid: string;
-  name: string;
-  value: string;
-}
-
-export interface ComponentPropertySchema {
-  asset_link_type?: boolean;
-  component_group_whitelist?: string[];
-  component_whitelist?: string[];
-  email_link_type?: boolean;
-  exclude_empty_option?: boolean;
-  filter_content_type?: string | string[];
-  key: string;
-  options?: ComponentPropertySchemaOption[];
-  pos: number;
-  restrict_components?: boolean;
-  restrict_type?: 'groups' | '';
-  source?: 'internal' | 'external' | 'internal_stories' | 'internal_languages';
-  type: ComponentPropertySchemaType;
-  use_uuid?: boolean;
-};
-
 export interface StoryblokAsset {
   alt: string | null;
   copyright: string | null;
@@ -102,18 +64,22 @@ export interface StoryblokMultilink {
 }
 
 export interface StoryblokTable {
+  fieldtype: 'table';
   thead: Array<{
     _uid: string;
     value: string;
-    component: number;
+    component: '_table_head';
+    _editable?: string;
   }>;
   tbody: Array<{
     _uid: string;
-    component: number;
+    component: '_table_row';
+    _editable?: string;
     body: Array<{
       _uid: string;
       value: string;
-      component: number;
+      component: '_table_col';
+      _editable?: string;
     }>;
   }>;
 }

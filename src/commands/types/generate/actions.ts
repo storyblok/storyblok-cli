@@ -2,10 +2,12 @@ import { compile, type JSONSchema } from 'json-schema-to-typescript';
 import type { SpaceComponent } from '../../../commands/components/constants';
 import { handleFileSystemError, toCamelCase, toPascalCase } from '../../../utils';
 import type { GenerateTypesOptions } from './constants';
-import type { ComponentPropertySchema, StoryblokPropertyType } from '../../../types/storyblok';
+import type { StoryblokPropertyType } from '../../../types/storyblok';
 import { storyblokSchemas } from '../../../utils/storyblok-schemas';
 import { join, resolve } from 'node:path';
 import { resolvePath, saveToFile } from '../../../utils/filesystem';
+import { readFileSync } from 'node:fs';
+import type { ComponentPropertySchema } from '../../../types/schemas';
 
 export interface ComponentGroupsAndNamesObject {
   componentGroups: Map<string, Set<string>>;
@@ -28,7 +30,7 @@ const getPropertyTypeAnnotation = (property: ComponentPropertySchema) => {
   // Initialize property type as any (fallback type)
   // const type: string | string[] = 'any';
 
-  const options = property.options && property.options.length > 0 ? property.options.map(item => item.value) : [];
+  const options = property.options && property.options.length > 0 ? property.options.map((item: { value: string }) => item.value) : [];
 
   // Add empty option to options array
   if (options.length > 0 && property.exclude_empty_option !== true) {
@@ -51,13 +53,27 @@ const getPropertyTypeAnnotation = (property: ComponentPropertySchema) => {
       return { type: 'any' };
   }
 };
-const getComponentType = (
+
+export const getComponentType = (
   componentName: string,
   options: GenerateTypesOptions,
 ): string => {
   const prefix = options.typeNamesPrefix ?? '';
   const suffix = options.typeNamesSuffix ?? '';
-  const componentType = toPascalCase(toCamelCase(`${prefix}_${componentName}_${suffix}`));
+
+  // Sanitize the component name to handle special characters and emojis
+  const sanitizedName = componentName
+    // Replace any character that's not a letter or number with an underscore
+    .replace(/[^a-z0-9]/gi, '_')
+    // Replace multiple consecutive underscores with a single underscore
+    .replace(/_+/g, '_')
+    // Trim underscores from the beginning and end
+    .replace(/^_+|_+$/g, '');
+
+  // Convert to PascalCase
+  const componentType = toPascalCase(toCamelCase(`${prefix}_${sanitizedName}_${suffix}`));
+
+  // If the component type starts with a number, prefix it with an underscore
   const isFirstCharacterNumber = !Number.isNaN(Number.parseInt(componentType.charAt(0)));
   return isFirstCharacterNumber ? `_${componentType}` : componentType;
 };
@@ -89,16 +105,16 @@ const getComponentPropertiesTypeAnnotations = async (
     if (Array.from(storyblokSchemas.keys()).includes(propertyType as StoryblokPropertyType)) {
       const componentType = getComponentType(propertyType, options);
       propertyTypeAnnotation[key].tsType = `Storyblok${componentType}`;
+    }
 
-      /* const typedefForStoryblokPropertyType = storyblokSchemas.get(propertyType as StoryblokPropertyType);
-      if (typedefForStoryblokPropertyType) {
-        typeDef.push(
-          await compile(typedefForStoryblokPropertyType, typedefForStoryblokPropertyType.$id.replace('#/', ''), {
-            additionalProperties: !options.strict,
-            bannerComment: '',
-          }),
-        );
-      } */
+    if (propertyType === 'multilink') {
+      const excludedLinktypes: string[] = [
+        ...(!value.email_link_type ? ['{ linktype?: "email" }'] : []),
+        ...(!value.asset_link_type ? ['{ linktype?: "asset" }'] : []),
+      ];
+      const componentType = getComponentType(propertyType, options);
+      propertyTypeAnnotation[key].tsType
+        = excludedLinktypes.length > 0 ? `Exclude<Storyblok${componentType}, ${excludedLinktypes.join(' | ')}>` : componentType;
     }
 
     return { ...acc, ...propertyTypeAnnotation };
@@ -136,6 +152,7 @@ export const generateTypes = async (
   const storyblokPropertyTypes = new Set<string>();
 
   const schemas = await Promise.all(components.map(async (component) => {
+    // Get the component type name with proper handling of numbers at the start
     const type = getComponentType(component.name, options);
     const componentPropertiesTypeAnnotations = await getComponentPropertiesTypeAnnotations(component, options);
     const requiredFields = Object.entries<Record<string, any>>(component.schema).reduce(
@@ -159,7 +176,7 @@ export const generateTypes = async (
 
     const componentSchema: JSONSchema = {
       $id: `#/${component.name}`,
-      title: type,
+      title: type, // This is the key - we're using the properly formatted type name
       type: 'object',
       required: requiredFields,
       properties: {
@@ -178,7 +195,8 @@ export const generateTypes = async (
   }));
 
   const result = await Promise.all(schemas.map(async (schema) => {
-    return await compile(schema, schema.$id.replace('#/', ''), {
+    // Use the title as the interface name
+    return await compile(schema, schema.title || schema.$id.replace('#/', ''), {
       additionalProperties: !options.strict,
       bannerComment: '',
     });
@@ -231,113 +249,79 @@ export interface SaveTypesOptions {
 export const generateStoryblokTypes = async (options: SaveTypesOptions = {}) => {
   const { filename = 'storyblok', path } = options;
 
-  // Define the content of the d.ts file
-  const typeDefs = [
-    '// This file was generated by the storyblok CLI.',
-    '// DO NOT MODIFY THIS FILE BY HAND.',
-    '',
-    'export type StoryblokPropertyType = \'asset\' | \'multiasset\' | \'multilink\' | \'table\' | \'richtext\';',
-    '',
-    'export interface StoryblokAsset {',
-    '  alt: string | null;',
-    '  copyright: string | null;',
-    '  fieldtype: \'asset\';',
-    '  id: number;',
-    '  filename: string | null;',
-    '  name: string;',
-    '  title: string | null;',
-    '  focus: string | null;',
-    '  meta_data: Record<string, any>;',
-    '  source: string | null;',
-    '  is_external_url: boolean;',
-    '  is_private: boolean;',
-    '  src: string;',
-    '  updated_at: string;',
-    '  // Cloudinary integration keys',
-    '  width: number | null;',
-    '  height: number | null;',
-    '  aspect_ratio: number | null;',
-    '  public_id: string | null;',
-    '  content_type: string;',
-    '}',
-    '',
-    'export interface StoryblokMultiasset extends Array<StoryblokAsset> {}',
-    '',
-    'export interface StoryblokMultilink {',
-    '  fieldtype: \'multilink\';',
-    '  id: string;',
-    '  url: string;',
-    '  cached_url: string;',
-    '  target?: \'_blank\' | \'_self\';',
-    '  anchor?: string;',
-    '  rel?: string;',
-    '  title?: string;',
-    '  prep?: string;',
-    '  linktype: \'story\' | \'url\' | \'email\' | \'asset\';',
-    '  story?: {',
-    '    name: string;',
-    '    created_at: string;',
-    '    published_at: string;',
-    '    id: number;',
-    '    uuid: string;',
-    '    content: Record<string, any>;',
-    '    slug: string;',
-    '    full_slug: string;',
-    '    sort_by_date?: string;',
-    '    position?: number;',
-    '    tag_list?: string[];',
-    '    is_startpage?: boolean;',
-    '    parent_id?: number | null;',
-    '    meta_data?: Record<string, any> | null;',
-    '    group_id?: string;',
-    '    first_published_at?: string;',
-    '    release_id?: number | null;',
-    '    lang?: string;',
-    '    path?: string | null;',
-    '    alternates?: any[];',
-    '    default_full_slug?: string | null;',
-    '    translated_slugs?: any[] | null;',
-    '  };',
-    '  email?: string;',
-    '}',
-    '',
-    'export interface StoryblokTable {',
-    '  thead: Array<{',
-    '    _uid: string;',
-    '    value: string;',
-    '    component: number;',
-    '  }>;',
-    '  tbody: Array<{',
-    '    _uid: string;',
-    '    component: number;',
-    '    body: Array<{',
-    '      _uid: string;',
-    '      value: string;',
-    '      component: number;',
-    '    }>;',
-    '  }>;',
-    '}',
-    '',
-    'export interface StoryblokRichtext {',
-    '  type: string;',
-    '  content?: StoryblokRichtext[];',
-    '  marks?: StoryblokRichtext[];',
-    '  attrs?: Record<string, any>;',
-    '  text?: string;',
-    '}',
-  ].join('\n');
-
-  // Determine the path to save the file
-  const resolvedPath = path
-    ? resolve(process.cwd(), path, 'types')
-    : resolvePath(path, 'types');
-
   try {
+    // Get the path to the storyblok.ts file
+    const storyblokTypesPath = resolve(process.cwd(), 'src', 'types', 'storyblok.ts');
+
+    // Read the content of the storyblok.ts file
+    const storyblokTypesContent = readFileSync(storyblokTypesPath, 'utf-8');
+
+    // Extract the type definitions using a more robust approach
+    const lines = storyblokTypesContent.split('\n');
+    const typeDefinitions: string[] = [];
+    let isCollecting = false;
+    let bracketCount = 0;
+    let currentType = '';
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+
+      // Check if this line starts a type definition
+      if (line.includes('export type StoryblokPropertyType')
+        || line.includes('export interface Storyblok')) {
+        // If we were already collecting a type, add it to our results
+        if (isCollecting) {
+          typeDefinitions.push('');
+        }
+
+        isCollecting = true;
+        typeDefinitions.push(line);
+        currentType = line.includes('type') ? 'type' : 'interface';
+
+        // Count opening and closing braces to handle nested structures
+        bracketCount += (line.match(/\{/g) || []).length;
+        bracketCount -= (line.match(/\}/g) || []).length;
+
+        // For types, we don't need to collect more lines
+        if (currentType === 'type') {
+          isCollecting = false;
+          continue;
+        }
+
+        // For interfaces, continue collecting lines until we've matched all braces
+        let j = i + 1;
+        while (j < lines.length && bracketCount > 0) {
+          const nextLine = lines[j];
+          bracketCount += (nextLine.match(/\{/g) || []).length;
+          bracketCount -= (nextLine.match(/\}/g) || []).length;
+          typeDefinitions.push(nextLine);
+          j++;
+        }
+
+        // Skip the lines we've already processed
+        i = j - 1;
+        isCollecting = false;
+      }
+    }
+
+    // Define the content of the d.ts file
+    const typeDefs = [
+      '// This file was generated by the storyblok CLI.',
+      '// DO NOT MODIFY THIS FILE BY HAND.',
+      '',
+      ...typeDefinitions,
+    ].join('\n');
+
+    // Determine the path to save the file
+    const resolvedPath = path
+      ? resolve(process.cwd(), path, 'types')
+      : resolvePath(path, 'types');
+
     await saveToFile(join(resolvedPath, `${filename}.d.ts`), typeDefs);
     return true;
   }
   catch (error) {
-    handleFileSystemError('write', error as Error);
+    handleFileSystemError('read', error as Error);
     return false;
   }
 };
