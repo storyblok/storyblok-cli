@@ -54,12 +54,20 @@ const getPropertyTypeAnnotation = (property: ComponentPropertySchema) => {
   }
 };
 
+/**
+ * Generates a TypeScript type name for a component
+ * @param componentName - The name of the component
+ * @param options - Options for generating the type name
+ * @returns The generated type name
+ *
+ * The type name can be customized with the following options:
+ * - typePrefix: Prefix to be prepended to all generated component type names (can be set via --type-prefix flag)
+ */
 export const getComponentType = (
   componentName: string,
   options: GenerateTypesOptions,
 ): string => {
-  const prefix = options.typeNamesPrefix ?? '';
-  const suffix = options.typeNamesSuffix ?? '';
+  const prefix = options.typePrefix ?? '';
 
   // Sanitize the component name to handle special characters and emojis
   const sanitizedName = componentName
@@ -71,7 +79,7 @@ export const getComponentType = (
     .replace(/^_+|_+$/g, '');
 
   // Convert to PascalCase
-  const componentType = toPascalCase(toCamelCase(`${prefix}_${sanitizedName}_${suffix}`));
+  const componentType = toPascalCase(toCamelCase(`${prefix}_${sanitizedName}`));
 
   // If the component type starts with a number, prefix it with an underscore
   const isFirstCharacterNumber = !Number.isNaN(Number.parseInt(componentType.charAt(0)));
@@ -104,7 +112,8 @@ const getComponentPropertiesTypeAnnotations = async (
     }
 
     if (Array.from(storyblokSchemas.keys()).includes(propertyType as StoryblokPropertyType)) {
-      const componentType = getComponentType(propertyType, options);
+      // For Storyblok property types, don't apply the prefix
+      const componentType = toPascalCase(toCamelCase(propertyType));
       propertyTypeAnnotation[key].tsType = `Storyblok${componentType}`;
     }
 
@@ -113,7 +122,7 @@ const getComponentPropertiesTypeAnnotations = async (
         ...(!value.email_link_type ? ['{ linktype?: "email" }'] : []),
         ...(!value.asset_link_type ? ['{ linktype?: "asset" }'] : []),
       ];
-      const componentType = getComponentType(propertyType, options);
+      const componentType = toPascalCase(toCamelCase(propertyType));
       propertyTypeAnnotation[key].tsType
         = excludedLinktypes.length > 0 ? `Exclude<Storyblok${componentType}, ${excludedLinktypes.join(' | ')}>` : componentType;
     }

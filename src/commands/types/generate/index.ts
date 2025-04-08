@@ -17,6 +17,7 @@ typesCommand
   .option('--fi, --filter <filter>', 'glob filter to apply to the components before generating types')
   .option('--sf, --separate-files', '')
   .option('--strict', 'strict mode, no loose typing')
+  .option('--type-prefix <prefix>', 'prefix to be prepended to all generated component type names')
   .action(async (componentName: string | undefined, options: GenerateTypesOptions) => {
     konsola.title(` ${commands.TYPES} `, colorPalette.TYPES, componentName ? `Generating types for component ${componentName}...` : 'Generating types...');
     // Global options
