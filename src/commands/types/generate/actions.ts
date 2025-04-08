@@ -81,6 +81,7 @@ export const getComponentType = (
 const getComponentPropertiesTypeAnnotations = async (
   component: SpaceComponent,
   options: GenerateTypesOptions,
+  componentsMaps: ComponentGroupsAndNamesObject,
 ): Promise<JSONSchema['properties']> => {
   return Object.entries<Record<string, any>>(component.schema).reduce(async (accPromise, [key, value]) => {
     const acc = await accPromise;
@@ -117,6 +118,49 @@ const getComponentPropertiesTypeAnnotations = async (
         = excludedLinktypes.length > 0 ? `Exclude<Storyblok${componentType}, ${excludedLinktypes.join(' | ')}>` : componentType;
     }
 
+    if (propertyType === 'bloks') {
+      if (value.restrict_components) {
+        // Components restricted by groups
+        if (value.restrict_type === 'groups') {
+          if (
+            Array.isArray(value.component_group_whitelist)
+            && value.component_group_whitelist.length > 0
+          ) {
+            const componentsInGroupWhitelist = value.component_group_whitelist.reduce(
+              (components: string[], groupUUID: string) => {
+                const componentsInGroup = componentsMaps.componentGroups.get(groupUUID);
+
+                return componentsInGroup
+                  ? [
+                      ...components,
+                      ...Array.from(componentsInGroup).map(componentName => getComponentType(componentName, options)),
+                    ]
+                  : components;
+              },
+              [],
+            );
+
+            propertyTypeAnnotation[key].tsType
+              = componentsInGroupWhitelist.length > 0 ? `(${componentsInGroupWhitelist.join(' | ')})[]` : `never[]`;
+          }
+        }
+        else {
+          // Components restricted by 1-by-1 list
+          if (Array.isArray(value.component_whitelist) && value.component_whitelist.length > 0) {
+            propertyTypeAnnotation[key].tsType = `(${value.component_whitelist
+              .map((name: string) => getComponentType(name, options))
+              .join(' | ')})[]`;
+          }
+        }
+      }
+      else {
+        // All components can be slotted in this property (AKA no restrictions)
+        propertyTypeAnnotation[key].tsType = `(${Array.from(componentsMaps.componentNames)
+          .map(componentName => getComponentType(componentName, options))
+          .join(' | ')})[]`;
+      }
+    }
+
     return { ...acc, ...propertyTypeAnnotation };
   }, Promise.resolve({} as JSONSchema));
 };
@@ -146,6 +190,7 @@ export const generateTypes = async (
     strict: false,
   },
 ) => {
+  const componentsMaps = generateComponentGroupsAndComponentNames(components);
   /* const { componentGroups, componentNames } = generateComponentGroupsAndComponentNames(components);
   const typedefs = [...DEFAULT_TYPEDEFS_HEADER]; */
   const typeDefs = [...DEFAULT_TYPEDEFS_HEADER];
@@ -154,7 +199,7 @@ export const generateTypes = async (
   const schemas = await Promise.all(components.map(async (component) => {
     // Get the component type name with proper handling of numbers at the start
     const type = getComponentType(component.name, options);
-    const componentPropertiesTypeAnnotations = await getComponentPropertiesTypeAnnotations(component, options);
+    const componentPropertiesTypeAnnotations = await getComponentPropertiesTypeAnnotations(component, options, componentsMaps);
     const requiredFields = Object.entries<Record<string, any>>(component.schema).reduce(
       (acc, [key, value]) => {
         if (value.required) {
