@@ -321,6 +321,20 @@
       "env": {
         "STUB": "true"
       }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Generate types from separate files",
+      "program": "${workspaceFolder}/dist/index.mjs",
+      "args": ["types", "generate", "--space", "295017", "--separate-files"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "sourceMaps": true,
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "env": {
+        "STUB": "true"
+      }
     }
   ]
 }
