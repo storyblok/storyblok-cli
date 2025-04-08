@@ -7,7 +7,6 @@ import { readComponentsFiles } from '../../components/push/actions';
 import type { GenerateTypesOptions } from './constants';
 import type { ReadComponentsOptions } from '../../components/push/constants';
 import { typesCommand } from '../command';
-import type { SaveTypesOptions } from './actions';
 import { generateStoryblokTypes, generateTypes, saveTypesToFile } from './actions';
 
 const program = getProgram();
@@ -26,8 +25,6 @@ typesCommand
     // Command options
     const { space, path } = typesCommand.opts();
 
-    console.log(typesCommand.opts());
-
     // const { filter, separateFiles } = options;
 
     const { state, initializeSession } = session();
@@ -42,10 +39,10 @@ typesCommand
       return;
     }
 
-    /*  const spinnerText = componentName ? `Generating types for component ${componentName}...` : 'Generating types...';
+    const spinnerText = componentName ? `Generating types for component ${componentName}...` : 'Generating types...';
     const spinner = new Spinner({
       verbose: !isVitest,
-    }).start(spinnerText); */
+    }).start(spinnerText);
 
     try {
       const spaceData = await readComponentsFiles({
@@ -59,14 +56,16 @@ typesCommand
         path: options.path,
       });
 
-      const typedefString = await generateTypes(spaceData.components, options);
+      const typedefString = await generateTypes(spaceData, options);
 
-      await saveTypesToFile(space, typedefString, options);
+      if (typedefString) {
+        await saveTypesToFile(space, typedefString, options);
+      }
 
-      // spinner.succeed(`Successfully generated types for component ${componentName}`);
+      spinner.succeed(`Successfully generated types for component ${componentName}`);
     }
     catch (error) {
-      // spinner.failed(`Failed to generate types for component ${componentName}`);
+      spinner.failed(`Failed to generate types for component ${componentName}`);
       handleError(error as Error, verbose);
     }
   });

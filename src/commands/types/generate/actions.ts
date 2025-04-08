@@ -1,6 +1,6 @@
 import { compile, type JSONSchema } from 'json-schema-to-typescript';
-import type { SpaceComponent } from '../../../commands/components/constants';
-import { handleFileSystemError, toCamelCase, toPascalCase } from '../../../utils';
+import type { SpaceComponent, SpaceData } from '../../../commands/components/constants';
+import { handleError, handleFileSystemError, toCamelCase, toPascalCase } from '../../../utils';
 import type { GenerateTypesOptions } from './constants';
 import type { StoryblokPropertyType } from '../../../types/storyblok';
 import { storyblokSchemas } from '../../../utils/storyblok-schemas';
@@ -81,7 +81,7 @@ export const getComponentType = (
 const getComponentPropertiesTypeAnnotations = async (
   component: SpaceComponent,
   options: GenerateTypesOptions,
-  componentsMaps: ComponentGroupsAndNamesObject,
+  spaceData: SpaceData,
 ): Promise<JSONSchema['properties']> => {
   return Object.entries<Record<string, any>>(component.schema).reduce(async (accPromise, [key, value]) => {
     const acc = await accPromise;
@@ -126,14 +126,18 @@ const getComponentPropertiesTypeAnnotations = async (
             Array.isArray(value.component_group_whitelist)
             && value.component_group_whitelist.length > 0
           ) {
+            // Find components that belong to the whitelisted groups
             const componentsInGroupWhitelist = value.component_group_whitelist.reduce(
               (components: string[], groupUUID: string) => {
-                const componentsInGroup = componentsMaps.componentGroups.get(groupUUID);
+                // Find components that have this group UUID
+                const componentsInGroup = spaceData.components.filter(
+                  component => component.component_group_uuid === groupUUID,
+                );
 
-                return componentsInGroup
+                return componentsInGroup.length > 0
                   ? [
                       ...components,
-                      ...Array.from(componentsInGroup).map(componentName => getComponentType(componentName, options)),
+                      ...componentsInGroup.map(component => getComponentType(component.name, options)),
                     ]
                   : components;
               },
@@ -155,114 +159,106 @@ const getComponentPropertiesTypeAnnotations = async (
       }
       else {
         // All components can be slotted in this property (AKA no restrictions)
-        propertyTypeAnnotation[key].tsType = `(${Array.from(componentsMaps.componentNames)
-          .map(componentName => getComponentType(componentName, options))
-          .join(' | ')})[]`;
+        // Add null check to ensure spaceData.components is defined
+        if (spaceData && Array.isArray(spaceData.components)) {
+          propertyTypeAnnotation[key].tsType = `(${spaceData.components
+            .map(component => getComponentType(component.name, options))
+            .join(' | ')})[]`;
+        }
+        else {
+          // Fallback to never[] if components is undefined
+          propertyTypeAnnotation[key].tsType = `never[]`;
+        }
       }
     }
 
     return { ...acc, ...propertyTypeAnnotation };
   }, Promise.resolve({} as JSONSchema));
 };
-export const generateComponentGroupsAndComponentNames = (
-  components: SpaceComponent[],
-): ComponentGroupsAndNamesObject => {
-  return components.reduce<ComponentGroupsAndNamesObject>(
-    (acc, currentComponent) => {
-      if (currentComponent.component_group_uuid) {
-        acc.componentGroups.set(
-          currentComponent.component_group_uuid,
-          acc.componentGroups.has(currentComponent.component_group_uuid)
-            ? acc.componentGroups.get(currentComponent.component_group_uuid)!.add(currentComponent.name)
-            : new Set([currentComponent.name]),
-        );
-      }
-      acc.componentNames.add(currentComponent.name);
-      return acc;
-    },
-    { componentGroups: new Map(), componentNames: new Set() },
-  );
-};
 
 export const generateTypes = async (
-  components: SpaceComponent[],
+  spaceData: SpaceData,
   options: GenerateTypesOptions = {
     strict: false,
   },
 ) => {
-  const componentsMaps = generateComponentGroupsAndComponentNames(components);
-  /* const { componentGroups, componentNames } = generateComponentGroupsAndComponentNames(components);
+  try {
+    /* const { componentGroups, componentNames } = generateComponentGroupsAndComponentNames(components);
   const typedefs = [...DEFAULT_TYPEDEFS_HEADER]; */
-  const typeDefs = [...DEFAULT_TYPEDEFS_HEADER];
-  const storyblokPropertyTypes = new Set<string>();
+    const typeDefs = [...DEFAULT_TYPEDEFS_HEADER];
+    const storyblokPropertyTypes = new Set<string>();
 
-  const schemas = await Promise.all(components.map(async (component) => {
+    const schemas = await Promise.all(spaceData.components.map(async (component) => {
     // Get the component type name with proper handling of numbers at the start
-    const type = getComponentType(component.name, options);
-    const componentPropertiesTypeAnnotations = await getComponentPropertiesTypeAnnotations(component, options, componentsMaps);
-    const requiredFields = Object.entries<Record<string, any>>(component.schema).reduce(
-      (acc, [key, value]) => {
-        if (value.required) {
-          return [...acc, key];
-        }
-        return acc;
-      },
-      ['component', '_uid'],
-    );
+      const type = getComponentType(component.name, options);
+      const componentPropertiesTypeAnnotations = await getComponentPropertiesTypeAnnotations(component, options, spaceData);
+      const requiredFields = Object.entries<Record<string, any>>(component.schema).reduce(
+        (acc, [key, value]) => {
+          if (value.required) {
+            return [...acc, key];
+          }
+          return acc;
+        },
+        ['component', '_uid'],
+      );
 
-    // Check if any property has a type that's in storyblokSchemas.keys()
-    if (componentPropertiesTypeAnnotations) {
-      Object.entries(componentPropertiesTypeAnnotations).forEach(([_, property]) => {
-        if (property.type && Array.from(storyblokSchemas.keys()).includes(property.type as StoryblokPropertyType)) {
-          storyblokPropertyTypes.add(property.type as StoryblokPropertyType);
-        }
+      // Check if any property has a type that's in storyblokSchemas.keys()
+      if (componentPropertiesTypeAnnotations) {
+        Object.entries(componentPropertiesTypeAnnotations).forEach(([_, property]) => {
+          if (property.type && Array.from(storyblokSchemas.keys()).includes(property.type as StoryblokPropertyType)) {
+            storyblokPropertyTypes.add(property.type as StoryblokPropertyType);
+          }
+        });
+      }
+
+      const componentSchema: JSONSchema = {
+        $id: `#/${component.name}`,
+        title: type, // This is the key - we're using the properly formatted type name
+        type: 'object',
+        required: requiredFields,
+        properties: {
+          ...componentPropertiesTypeAnnotations,
+          component: {
+            type: 'string',
+            enum: [component.name],
+          },
+          _uid: {
+            type: 'string',
+          },
+        },
+      };
+
+      return componentSchema;
+    }));
+
+    const result = await Promise.all(schemas.map(async (schema) => {
+    // Use the title as the interface name
+      return await compile(schema, schema.title || schema.$id.replace('#/', ''), {
+        additionalProperties: !options.strict,
+        bannerComment: '',
       });
+    }));
+
+    // Add imports for Storyblok types if needed
+    const imports: string[] = [];
+    if (storyblokPropertyTypes.size > 0) {
+      const typeImports = Array.from(storyblokPropertyTypes).map((type) => {
+        const pascalType = toPascalCase(type);
+        return `Storyblok${pascalType}`;
+      });
+
+      imports.push(`import type { ${typeImports.join(', ')} } from '../storyblok.d.ts';`);
     }
 
-    const componentSchema: JSONSchema = {
-      $id: `#/${component.name}`,
-      title: type, // This is the key - we're using the properly formatted type name
-      type: 'object',
-      required: requiredFields,
-      properties: {
-        ...componentPropertiesTypeAnnotations,
-        component: {
-          type: 'string',
-          enum: [component.name],
-        },
-        _uid: {
-          type: 'string',
-        },
-      },
-    };
+    const finalTypeDef = [...typeDefs, ...imports, ...result];
 
-    return componentSchema;
-  }));
-
-  const result = await Promise.all(schemas.map(async (schema) => {
-    // Use the title as the interface name
-    return await compile(schema, schema.title || schema.$id.replace('#/', ''), {
-      additionalProperties: !options.strict,
-      bannerComment: '',
-    });
-  }));
-
-  // Add imports for Storyblok types if needed
-  const imports: string[] = [];
-  if (storyblokPropertyTypes.size > 0) {
-    const typeImports = Array.from(storyblokPropertyTypes).map((type) => {
-      const pascalType = toPascalCase(type);
-      return `Storyblok${pascalType}`;
-    });
-
-    imports.push(`import type { ${typeImports.join(', ')} } from '../storyblok.d.ts';`);
+    return [
+      ...finalTypeDef,
+    ].join('\n');
   }
-
-  const finalTypeDef = [...typeDefs, ...imports, ...result];
-
-  return [
-    ...finalTypeDef,
-  ].join('\n');
+  catch (error) {
+    handleError(error as Error);
+  }
 };
 
 export const saveTypesToFile = async (space: string, typedefString: string, options: SaveTypesOptions) => {
