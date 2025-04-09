@@ -358,7 +358,7 @@ async function readSeparateFiles(resolvedPath: string, suffix?: string): Promise
   };
 }
 
-async function readConsolidatedFiles(resolvedPath: string, suffix: string = ''): Promise<SpaceData> {
+async function readConsolidatedFiles(resolvedPath: string, suffix?: string): Promise<SpaceData> {
   // Read required components file
   const componentsPath = join(resolvedPath, suffix ? `components.${suffix}.json` : 'components.json');
   const componentsResult = await readJsonFile<SpaceComponent>(componentsPath);
