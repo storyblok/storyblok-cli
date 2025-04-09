@@ -16,6 +16,10 @@ export interface PushComponentsOptions extends CommandOptions {
    * The source space id.
    */
   from?: string;
+  /**
+   * Suffix to add to the component name.
+   */
+  suffix?: string;
 }
 
 export interface ReadComponentsOptions extends PushComponentsOptions {

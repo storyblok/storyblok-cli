@@ -269,7 +269,7 @@ async function readJsonFile<T>(filePath: string): Promise<FileReaderResult<T>> {
 
 export const readComponentsFiles = async (
   options: ReadComponentsOptions): Promise<SpaceData> => {
-  const { from, path, separateFiles = false } = options;
+  const { from, path, separateFiles = false, suffix } = options;
   const resolvedPath = resolvePath(path, `components/${from}`);
 
   // Check if directory exists first
@@ -287,23 +287,33 @@ export const readComponentsFiles = async (
   }
 
   if (separateFiles) {
-    return await readSeparateFiles(resolvedPath);
+    return await readSeparateFiles(resolvedPath, suffix);
   }
 
-  return await readConsolidatedFiles(resolvedPath);
+  return await readConsolidatedFiles(resolvedPath, suffix);
 };
 
-async function readSeparateFiles(resolvedPath: string): Promise<SpaceData> {
+async function readSeparateFiles(resolvedPath: string, suffix?: string): Promise<SpaceData> {
   const files = await readdir(resolvedPath);
   const components: SpaceComponent[] = [];
   const presets: SpaceComponentPreset[] = [];
   let groups: SpaceComponentGroup[] = [];
   let internalTags: SpaceComponentInternalTag[] = [];
 
-  for (const file of files) {
+  const filteredFiles = files.filter((file) => {
+    if (suffix) {
+      return file.endsWith(`.${suffix}.json`);
+    }
+    else {
+      // Regex to match files with a pattern like .<suffix>.json
+      return !/\.\w+\.json$/.test(file) || file.endsWith('.presets.json'); ;
+    }
+  });
+
+  for (const file of filteredFiles) {
     const filePath = join(resolvedPath, file);
 
-    if (file === 'groups.json') {
+    if (file === 'groups.json' || file === `groups.${suffix}.json`) {
       const result = await readJsonFile<SpaceComponentGroup>(filePath);
       if (result.error) {
         handleFileSystemError('read', result.error);
@@ -311,7 +321,7 @@ async function readSeparateFiles(resolvedPath: string): Promise<SpaceData> {
       }
       groups = result.data;
     }
-    else if (file === 'tags.json') {
+    else if (file === 'tags.json' || file === `tags.${suffix}.json`) {
       const result = await readJsonFile<SpaceComponentInternalTag>(filePath);
       if (result.error) {
         handleFileSystemError('read', result.error);
@@ -319,7 +329,7 @@ async function readSeparateFiles(resolvedPath: string): Promise<SpaceData> {
       }
       internalTags = result.data;
     }
-    else if (file.endsWith('.presets.json')) {
+    else if (file.endsWith('.presets.json') || file.endsWith(`.presets.${suffix}.json`)) {
       const result = await readJsonFile<SpaceComponentPreset>(filePath);
       if (result.error) {
         handleFileSystemError('read', result.error);
@@ -327,7 +337,10 @@ async function readSeparateFiles(resolvedPath: string): Promise<SpaceData> {
       }
       presets.push(...result.data);
     }
-    else if (file.endsWith('.json')) {
+    else if (file.endsWith('.json') || file.endsWith(`${suffix}.json`)) {
+      if (file === 'components.json' || file === `components.${suffix}.json`) {
+        continue;
+      }
       const result = await readJsonFile<SpaceComponent>(filePath);
       if (result.error) {
         handleFileSystemError('read', result.error);
@@ -345,9 +358,9 @@ async function readSeparateFiles(resolvedPath: string): Promise<SpaceData> {
   };
 }
 
-async function readConsolidatedFiles(resolvedPath: string): Promise<SpaceData> {
+async function readConsolidatedFiles(resolvedPath: string, suffix: string = ''): Promise<SpaceData> {
   // Read required components file
-  const componentsPath = join(resolvedPath, 'components.json');
+  const componentsPath = join(resolvedPath, suffix ? `components.${suffix}.json` : 'components.json');
   const componentsResult = await readJsonFile<SpaceComponent>(componentsPath);
 
   if (componentsResult.error || !componentsResult.data.length) {
@@ -361,9 +374,9 @@ async function readConsolidatedFiles(resolvedPath: string): Promise<SpaceData> {
 
   // Read optional files
   const [groupsResult, presetsResult, tagsResult] = await Promise.all([
-    readJsonFile<SpaceComponentGroup>(join(resolvedPath, 'groups.json')),
-    readJsonFile<SpaceComponentPreset>(join(resolvedPath, 'presets.json')),
-    readJsonFile<SpaceComponentInternalTag>(join(resolvedPath, 'tags.json')),
+    readJsonFile<SpaceComponentGroup>(join(resolvedPath, suffix ? `groups.${suffix}.json` : 'groups.json')),
+    readJsonFile<SpaceComponentPreset>(join(resolvedPath, suffix ? `presets.${suffix}.json` : 'presets.json')),
+    readJsonFile<SpaceComponentInternalTag>(join(resolvedPath, suffix ? `tags.${suffix}.json` : 'tags.json')),
   ]);
 
   return {
