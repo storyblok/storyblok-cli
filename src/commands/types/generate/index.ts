@@ -12,9 +12,8 @@ import { generateStoryblokTypes, generateTypes, saveTypesToFile } from './action
 const program = getProgram();
 
 typesCommand
-  .command('generate [componentName]')
+  .command('generate')
   .description('Generate types d.ts for your component schemas')
-  .option('--fi, --filter <filter>', 'glob filter to apply to the components before generating types')
   .option('--sf, --separate-files', '')
   .option('--strict', 'strict mode, no loose typing')
   .option('--type-prefix <prefix>', 'prefix to be prepended to all generated component type names')
