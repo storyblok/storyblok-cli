@@ -90,6 +90,7 @@ const getComponentPropertiesTypeAnnotations = async (
   component: SpaceComponent,
   options: GenerateTypesOptions,
   spaceData: SpaceData,
+  customFieldsParser?: Record<string, unknown>,
 ): Promise<JSONSchema['properties']> => {
   return Object.entries<Record<string, any>>(component.schema).reduce(async (accPromise, [key, value]) => {
     const acc = await accPromise;
@@ -104,10 +105,11 @@ const getComponentPropertiesTypeAnnotations = async (
       [key]: getPropertyTypeAnnotation(value as ComponentPropertySchema),
     };
 
-    if (propertyType === 'custom') {
+    if (propertyType === 'custom' && customFieldsParser?.default) {
+      const customField = typeof customFieldsParser.default === 'function' ? customFieldsParser.default(key, value) : {};
       return {
         ...acc,
-        // TODO: Add custom type annotation
+        ...customField,
       };
     }
 
@@ -185,6 +187,17 @@ const getComponentPropertiesTypeAnnotations = async (
   }, Promise.resolve({} as JSONSchema));
 };
 
+export const loadCustomFieldsParser = async (path: string) => {
+  try {
+    const customFieldsParser = await import(resolve(path));
+    return customFieldsParser;
+  }
+  catch (error) {
+    handleError(error as Error);
+    return null;
+  }
+};
+
 export const generateTypes = async (
   spaceData: SpaceData,
   options: GenerateTypesOptions = {
@@ -192,15 +205,17 @@ export const generateTypes = async (
   },
 ) => {
   try {
-    /* const { componentGroups, componentNames } = generateComponentGroupsAndComponentNames(components);
-  const typedefs = [...DEFAULT_TYPEDEFS_HEADER]; */
     const typeDefs = [...DEFAULT_TYPEDEFS_HEADER];
     const storyblokPropertyTypes = new Set<string>();
-
+    let customFieldsParser: any;
+    // Custom fields parser
+    if (options.customFieldsParser) {
+      customFieldsParser = await loadCustomFieldsParser(options.customFieldsParser);
+    }
     const schemas = await Promise.all(spaceData.components.map(async (component) => {
     // Get the component type name with proper handling of numbers at the start
       const type = getComponentType(component.name, options);
-      const componentPropertiesTypeAnnotations = await getComponentPropertiesTypeAnnotations(component, options, spaceData);
+      const componentPropertiesTypeAnnotations = await getComponentPropertiesTypeAnnotations(component, options, spaceData, customFieldsParser);
       const requiredFields = Object.entries<Record<string, any>>(component.schema).reduce(
         (acc, [key, value]) => {
           if (value.required) {

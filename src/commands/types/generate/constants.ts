@@ -7,4 +7,5 @@ export interface GenerateTypesOptions {
   filename?: string;
   path?: string;
   suffix?: string;
+  customFieldsParser?: string;
 }
