@@ -8,4 +8,5 @@ export interface GenerateTypesOptions {
   path?: string;
   suffix?: string;
   customFieldsParser?: string;
+  compilerOptions?: string;
 }

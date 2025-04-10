@@ -90,7 +90,7 @@ const getComponentPropertiesTypeAnnotations = async (
   component: SpaceComponent,
   options: GenerateTypesOptions,
   spaceData: SpaceData,
-  customFieldsParser?: Record<string, unknown>,
+  customFieldsParser?: (key: string, value: Record<string, unknown>) => Record<string, unknown>,
 ): Promise<JSONSchema['properties']> => {
   return Object.entries<Record<string, any>>(component.schema).reduce(async (accPromise, [key, value]) => {
     const acc = await accPromise;
@@ -105,8 +105,8 @@ const getComponentPropertiesTypeAnnotations = async (
       [key]: getPropertyTypeAnnotation(value as ComponentPropertySchema),
     };
 
-    if (propertyType === 'custom' && customFieldsParser?.default) {
-      const customField = typeof customFieldsParser.default === 'function' ? customFieldsParser.default(key, value) : {};
+    if (propertyType === 'custom' && customFieldsParser) {
+      const customField = typeof customFieldsParser === 'function' ? customFieldsParser(key, value) : {};
       return {
         ...acc,
         ...customField,
@@ -187,16 +187,24 @@ const getComponentPropertiesTypeAnnotations = async (
   }, Promise.resolve({} as JSONSchema));
 };
 
-export const loadCustomFieldsParser = async (path: string) => {
+const loadCustomFieldsParser = async (path: string) => {
   try {
     const customFieldsParser = await import(resolve(path));
-    return customFieldsParser;
+    return customFieldsParser.default;
   }
   catch (error) {
     handleError(error as Error);
     return null;
   }
 };
+
+async function loadCompilerOptions(path: string) {
+  if (path) {
+    const compilerOptions = await import(resolve(path));
+    return compilerOptions.default;
+  }
+  return {};
+}
 
 export const generateTypes = async (
   spaceData: SpaceData,
@@ -207,11 +215,18 @@ export const generateTypes = async (
   try {
     const typeDefs = [...DEFAULT_TYPEDEFS_HEADER];
     const storyblokPropertyTypes = new Set<string>();
-    let customFieldsParser: any;
+    let customFieldsParser: Record<string, unknown> | undefined;
+    let compilerOptions: Record<string, unknown> | undefined;
     // Custom fields parser
     if (options.customFieldsParser) {
       customFieldsParser = await loadCustomFieldsParser(options.customFieldsParser);
     }
+
+    // Compiler options
+    if (options.compilerOptions) {
+      compilerOptions = await loadCompilerOptions(options.compilerOptions);
+    }
+
     const schemas = await Promise.all(spaceData.components.map(async (component) => {
     // Get the component type name with proper handling of numbers at the start
       const type = getComponentType(component.name, options);
@@ -260,6 +275,7 @@ export const generateTypes = async (
       return await compile(schema, schema.title || schema.$id.replace('#/', ''), {
         additionalProperties: !options.strict,
         bannerComment: '',
+        ...compilerOptions,
       });
     }));
 
