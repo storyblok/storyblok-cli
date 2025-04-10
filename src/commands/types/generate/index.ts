@@ -17,15 +17,14 @@ typesCommand
   .option('--sf, --separate-files', '')
   .option('--strict', 'strict mode, no loose typing')
   .option('--type-prefix <prefix>', 'prefix to be prepended to all generated component type names')
-  .action(async (componentName: string | undefined, options: GenerateTypesOptions) => {
-    konsola.title(` ${commands.TYPES} `, colorPalette.TYPES, componentName ? `Generating types for component ${componentName}...` : 'Generating types...');
+  .option('--suffix <suffix>', 'Components suffix')
+  .action(async (options: GenerateTypesOptions) => {
+    konsola.title(` ${commands.TYPES} `, colorPalette.TYPES, 'Generating types...');
     // Global options
     const verbose = program.opts().verbose;
 
     // Command options
     const { space, path } = typesCommand.opts();
-
-    // const { filter, separateFiles } = options;
 
     const { state, initializeSession } = session();
     await initializeSession();
@@ -39,7 +38,7 @@ typesCommand
       return;
     }
 
-    const spinnerText = componentName ? `Generating types for component ${componentName}...` : 'Generating types...';
+    const spinnerText = 'Generating types...';
     const spinner = new Spinner({
       verbose: !isVitest,
     }).start(spinnerText);
@@ -62,10 +61,10 @@ typesCommand
         await saveTypesToFile(space, typedefString, options);
       }
 
-      spinner.succeed(`Successfully generated types for component ${componentName}`);
+      spinner.succeed(`Successfully generated types for space ${space}`);
     }
     catch (error) {
-      spinner.failed(`Failed to generate types for component ${componentName}`);
+      spinner.failed(`Failed to generate types for space ${space}`);
       handleError(error as Error, verbose);
     }
   });

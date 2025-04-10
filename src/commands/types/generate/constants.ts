@@ -6,4 +6,5 @@ export interface GenerateTypesOptions {
   storyblokTypes?: boolean;
   filename?: string;
   path?: string;
+  suffix?: string;
 }
