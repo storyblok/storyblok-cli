@@ -239,10 +239,34 @@ describe('push components actions', () => {
       });
     });
 
+    it('should read components from consolidated files with suffix successfully', async () => {
+      vol.fromJSON({
+        '/path/to/components/12345/components.dev.json': JSON.stringify([mockComponent]),
+        '/path/to/components/12345/groups.dev.json': JSON.stringify([mockComponentGroup]),
+        '/path/to/components/12345/presets.dev.json': JSON.stringify([mockComponentPreset]),
+        '/path/to/components/12345/tags.dev.json': JSON.stringify([mockInternalTag]),
+      });
+
+      const result = await readComponentsFiles({
+        path: '/path/to/',
+        from: '12345',
+        separateFiles: false,
+        suffix: 'dev',
+        verbose: false,
+      });
+
+      expect(result).toEqual({
+        components: [mockComponent],
+        groups: [mockComponentGroup],
+        presets: [mockComponentPreset],
+        internalTags: [mockInternalTag],
+      });
+    });
+
     it('should read components from separate files successfully', async () => {
       vol.fromJSON({
         '/path/to/components/23746/component-name.json': JSON.stringify(mockComponent),
-        '/path/to/components/23746/component-name.preset.json': JSON.stringify([mockComponentPreset]),
+        '/path/to/components/23746/component-name.presets.json': JSON.stringify([mockComponentPreset]),
         '/path/to/components/23746/groups.json': JSON.stringify([mockComponentGroup]),
         '/path/to/components/23746/tags.json': JSON.stringify([mockInternalTag]),
       });
@@ -250,6 +274,54 @@ describe('push components actions', () => {
       const result = await readComponentsFiles({
         path: '/path/to/',
         from: '23746',
+        separateFiles: true,
+        verbose: false,
+      });
+
+      expect(result).toEqual({
+        components: [mockComponent],
+        groups: [mockComponentGroup],
+        presets: [mockComponentPreset],
+        internalTags: [mockInternalTag],
+      });
+    });
+
+    it('should read components from separate files with suffix successfully', async () => {
+      vol.fromJSON({
+        '/path/to/components/23747/component-name.dev.json': JSON.stringify(mockComponent),
+        '/path/to/components/23747/component-a.presets.dev.json': JSON.stringify([mockComponentPreset]),
+        '/path/to/components/23747/groups.dev.json': JSON.stringify([mockComponentGroup]),
+        '/path/to/components/23747/tags.dev.json': JSON.stringify([mockInternalTag]),
+      });
+
+      const result = await readComponentsFiles({
+        path: '/path/to/',
+        from: '23747',
+        separateFiles: true,
+        suffix: 'dev',
+        verbose: false,
+      });
+
+      expect(result).toEqual({
+        components: [mockComponent],
+        groups: [mockComponentGroup],
+        presets: [mockComponentPreset],
+        internalTags: [mockInternalTag],
+      });
+    });
+
+    it('should ignore component consolidated files if separate files are used', async () => {
+      vol.fromJSON({
+        '/path/to/components/23748/components.json': JSON.stringify([mockComponent]),
+        '/path/to/components/23748/component-name.json': JSON.stringify(mockComponent),
+        '/path/to/components/23748/component-name.presets.json': JSON.stringify([mockComponentPreset]),
+        '/path/to/components/23748/groups.json': JSON.stringify([mockComponentGroup]),
+        '/path/to/components/23748/tags.json': JSON.stringify([mockInternalTag]),
+      });
+
+      const result = await readComponentsFiles({
+        path: '/path/to/',
+        from: '23748',
         separateFiles: true,
         verbose: false,
       });

@@ -119,7 +119,7 @@ export const saveComponentsToFiles = async (
         // Find and save associated presets
         const componentPresets = presets.filter(preset => preset.component_id === component.id);
         if (componentPresets.length > 0) {
-          const presetsFilePath = join(resolvedPath, suffix ? `${component.name}.preset.${suffix}.json` : `${component.name}.preset.json`);
+          const presetsFilePath = join(resolvedPath, suffix ? `${component.name}.presets.${suffix}.json` : `${component.name}.presets.json`);
           await saveToFile(presetsFilePath, JSON.stringify(componentPresets, null, 2));
         }
         // Always save groups in a consolidated file
