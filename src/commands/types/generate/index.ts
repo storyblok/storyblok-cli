@@ -63,7 +63,8 @@ typesCommand
         await saveTypesToFile(space, typedefString, options);
       }
 
-      spinner.succeed(`Successfully generated types for space ${space}`);
+      spinner.succeed();
+      konsola.ok(`Successfully generated types for space ${space}`);
     }
     catch (error) {
       spinner.failed(`Failed to generate types for space ${space}`);
