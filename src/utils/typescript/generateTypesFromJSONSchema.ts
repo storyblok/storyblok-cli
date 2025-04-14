@@ -60,6 +60,7 @@ export class GenerateTypesFromJSONSchemas {
     `import type { ${this.#STORY_TYPE} } from "storyblok";`,
   ];
   #componentGroups: Map<string, Set<string>>;
+  #componentTagGroups: Map<number, Set<string>>;
   #componentNames: Set<string>;
 
   #getSchemaForStoryblokProvidedPropertyType = new Map<
@@ -89,9 +90,10 @@ export class GenerateTypesFromJSONSchemas {
     this.#options = options;
     this.#componentsJSONSchemas = componentsJSONSchemas;
     this.#customTypeParser = customTypeParser;
-    const { componentGroups, componentNames } =
+    const { componentGroups, componentTagGroups, componentNames } =
       this.#generateComponentGroupsAndComponentNamesFromJSONSchemas(componentsJSONSchemas);
     this.#componentGroups = componentGroups;
+    this.#componentTagGroups = componentTagGroups;
     this.#componentNames = componentNames;
   }
 
@@ -133,23 +135,35 @@ export class GenerateTypesFromJSONSchemas {
    * @returns An object with two properties, `componentGroups` that holds the relationship between groups and child components and `componentNames` which is a list of all the component names, including the ones that do not belong to any group.
    */
   #generateComponentGroupsAndComponentNamesFromJSONSchemas(componentsJSONSchemas: JSONSchema[]) {
-    const { componentGroups, componentNames } = componentsJSONSchemas.reduce<ComponentGroupsAndNamesObject>(
-      (acc, currentComponent) => {
-        if (currentComponent.component_group_uuid)
-          acc.componentGroups.set(
-            currentComponent.component_group_uuid,
-            acc.componentGroups.has(currentComponent.component_group_uuid)
-              ? acc.componentGroups.get(currentComponent.component_group_uuid)!.add(currentComponent.name)
-              : new Set([currentComponent.name])
-          );
+    const { componentGroups, componentTagGroups, componentNames } =
+      componentsJSONSchemas.reduce<ComponentGroupsAndNamesObject>(
+        (acc, currentComponent) => {
+          if (currentComponent.component_group_uuid)
+            acc.componentGroups.set(
+              currentComponent.component_group_uuid,
+              acc.componentGroups.has(currentComponent.component_group_uuid)
+                ? acc.componentGroups.get(currentComponent.component_group_uuid)!.add(currentComponent.name)
+                : new Set([currentComponent.name])
+            );
 
-        acc.componentNames.add(currentComponent.name);
-        return acc;
-      },
-      { componentGroups: new Map(), componentNames: new Set() }
-    );
+          if (currentComponent.internal_tag_ids && currentComponent.internal_tag_ids.length > 0) {
+            currentComponent.internal_tag_ids.forEach((tagId) => {
+              acc.componentTagGroups.set(
+                tagId,
+                acc.componentTagGroups.has(tagId)
+                  ? acc.componentTagGroups.get(tagId)!.add(currentComponent.name)
+                  : new Set([currentComponent.name])
+              );
+            });
+          }
 
-    return { componentGroups, componentNames };
+          acc.componentNames.add(currentComponent.name);
+          return acc;
+        },
+        { componentGroups: new Map(), componentTagGroups: new Map(), componentNames: new Set() }
+      );
+
+    return { componentGroups, componentTagGroups, componentNames };
   }
 
   /**
@@ -293,6 +307,29 @@ export class GenerateTypesFromJSONSchemas {
               propertyTypeAnnotation[propertyName].tsType =
                 componentsInGroupWhitelist.length > 0 ? `(${componentsInGroupWhitelist.join(" | ")})[]` : `never[]`;
             }
+          } else if (propertyValue.restrict_type === "tags") {
+            // Components restricted by tags
+            if (
+              Array.isArray(propertyValue.component_tag_whitelist) &&
+              propertyValue.component_tag_whitelist.length > 0
+            ) {
+              const componentsInGroupWhitelist = propertyValue.component_tag_whitelist.reduce(
+                (components: string[], tagId: number) => {
+                  const componentsInGroup = this.#componentTagGroups.get(tagId);
+
+                  return componentsInGroup
+                    ? [
+                        ...components,
+                        ...Array.from(componentsInGroup).map((componentName) => this.#getComponentType(componentName)),
+                      ]
+                    : components;
+                },
+                []
+              );
+
+              propertyTypeAnnotation[propertyName].tsType =
+                componentsInGroupWhitelist.length > 0 ? `(${componentsInGroupWhitelist.join(" | ")})[]` : `never[]`;
+            }
           } else {
             // Components restricted by 1-by-1 list
             if (Array.isArray(propertyValue.component_whitelist) && propertyValue.component_whitelist.length > 0) {
@@ -344,7 +381,9 @@ export class GenerateTypesFromJSONSchemas {
       if (property.filter_content_type) {
         if (typeof property.filter_content_type === "string") {
           return {
-            tsType: `(${this.#getStoryType(property.filter_content_type)} | string )${property.type === "options" ? "[]" : ""}`,
+            tsType: `(${this.#getStoryType(property.filter_content_type)} | string )${
+              property.type === "options" ? "[]" : ""
+            }`,
           };
         }
 

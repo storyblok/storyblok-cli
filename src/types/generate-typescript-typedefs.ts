@@ -38,6 +38,7 @@ export interface ComponentPropertySchemaOption {
 export type ComponentPropertySchema = {
   asset_link_type?: boolean;
   component_group_whitelist?: string[];
+  component_tag_whitelist?: number[];
   component_whitelist?: string[];
   email_link_type?: boolean;
   exclude_empty_option?: boolean;
@@ -46,7 +47,7 @@ export type ComponentPropertySchema = {
   options?: ComponentPropertySchemaOption[];
   pos: number;
   restrict_components?: boolean;
-  restrict_type?: "groups" | "";
+  restrict_type?: "groups" | "tags" | "";
   source?: "internal" | "external" | "internal_stories" | "internal_languages";
   type: ComponentPropertySchemaType;
   use_uuid?: boolean;
@@ -91,5 +92,6 @@ export type GetStoryblokProvidedPropertyTypeSchemaFn = (title: string) => JSONSc
 
 export type ComponentGroupsAndNamesObject = {
   componentGroups: Map<string, Set<string>>;
+  componentTagGroups: Map<number, Set<string>>;
   componentNames: Set<string>;
 };
