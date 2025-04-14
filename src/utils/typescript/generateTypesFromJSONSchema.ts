@@ -60,7 +60,6 @@ export class GenerateTypesFromJSONSchemas {
     `import type { ${this.#STORY_TYPE} } from "storyblok";`,
   ];
   #componentGroups: Map<string, Set<string>>;
-  #componentTagGroups: Map<number, Set<string>>;
   #componentNames: Set<string>;
 
   #getSchemaForStoryblokProvidedPropertyType = new Map<
@@ -90,10 +89,9 @@ export class GenerateTypesFromJSONSchemas {
     this.#options = options;
     this.#componentsJSONSchemas = componentsJSONSchemas;
     this.#customTypeParser = customTypeParser;
-    const { componentGroups, componentTagGroups, componentNames } =
+    const { componentGroups, componentNames } =
       this.#generateComponentGroupsAndComponentNamesFromJSONSchemas(componentsJSONSchemas);
     this.#componentGroups = componentGroups;
-    this.#componentTagGroups = componentTagGroups;
     this.#componentNames = componentNames;
   }
 
@@ -135,35 +133,34 @@ export class GenerateTypesFromJSONSchemas {
    * @returns An object with two properties, `componentGroups` that holds the relationship between groups and child components and `componentNames` which is a list of all the component names, including the ones that do not belong to any group.
    */
   #generateComponentGroupsAndComponentNamesFromJSONSchemas(componentsJSONSchemas: JSONSchema[]) {
-    const { componentGroups, componentTagGroups, componentNames } =
-      componentsJSONSchemas.reduce<ComponentGroupsAndNamesObject>(
-        (acc, currentComponent) => {
-          if (currentComponent.component_group_uuid)
+    const { componentGroups, componentNames } = componentsJSONSchemas.reduce<ComponentGroupsAndNamesObject>(
+      (acc, currentComponent) => {
+        if (currentComponent.component_group_uuid)
+          acc.componentGroups.set(
+            currentComponent.component_group_uuid,
+            acc.componentGroups.has(currentComponent.component_group_uuid)
+              ? acc.componentGroups.get(currentComponent.component_group_uuid)!.add(currentComponent.name)
+              : new Set([currentComponent.name])
+          );
+
+        if (currentComponent.internal_tag_ids && currentComponent.internal_tag_ids.length > 0) {
+          currentComponent.internal_tag_ids.forEach((tagId) => {
             acc.componentGroups.set(
-              currentComponent.component_group_uuid,
-              acc.componentGroups.has(currentComponent.component_group_uuid)
-                ? acc.componentGroups.get(currentComponent.component_group_uuid)!.add(currentComponent.name)
+              tagId,
+              acc.componentGroups.has(tagId)
+                ? acc.componentGroups.get(tagId)!.add(currentComponent.name)
                 : new Set([currentComponent.name])
             );
+          });
+        }
 
-          if (currentComponent.internal_tag_ids && currentComponent.internal_tag_ids.length > 0) {
-            currentComponent.internal_tag_ids.forEach((tagId) => {
-              acc.componentTagGroups.set(
-                tagId,
-                acc.componentTagGroups.has(tagId)
-                  ? acc.componentTagGroups.get(tagId)!.add(currentComponent.name)
-                  : new Set([currentComponent.name])
-              );
-            });
-          }
+        acc.componentNames.add(currentComponent.name);
+        return acc;
+      },
+      { componentGroups: new Map(), componentNames: new Set() }
+    );
 
-          acc.componentNames.add(currentComponent.name);
-          return acc;
-        },
-        { componentGroups: new Map(), componentTagGroups: new Map(), componentNames: new Set() }
-      );
-
-    return { componentGroups, componentTagGroups, componentNames };
+    return { componentGroups, componentNames };
   }
 
   /**
@@ -315,7 +312,8 @@ export class GenerateTypesFromJSONSchemas {
             ) {
               const componentsInGroupWhitelist = propertyValue.component_tag_whitelist.reduce(
                 (components: string[], tagId: number) => {
-                  const componentsInGroup = this.#componentTagGroups.get(tagId);
+                  const componentsInGroup = this.#componentGroups.get(tagId.toString());
+                  console.log("componentsInGroup", { componentsInGroup, tagId });
 
                   return componentsInGroup
                     ? [

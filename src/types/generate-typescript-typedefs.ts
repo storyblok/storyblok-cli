@@ -92,6 +92,5 @@ export type GetStoryblokProvidedPropertyTypeSchemaFn = (title: string) => JSONSc
 
 export type ComponentGroupsAndNamesObject = {
   componentGroups: Map<string, Set<string>>;
-  componentTagGroups: Map<number, Set<string>>;
   componentNames: Set<string>;
 };
