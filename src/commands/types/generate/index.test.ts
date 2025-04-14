@@ -1,5 +1,5 @@
 import { session } from '../../../session';
-import { CommandError, konsola } from '../../../utils';
+import { konsola } from '../../../utils';
 import { generateStoryblokTypes, generateTypes } from './actions';
 import chalk from 'chalk';
 import { colorPalette } from '../../../constants';
