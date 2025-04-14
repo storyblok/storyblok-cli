@@ -10,8 +10,11 @@ import './commands/user';
 import './commands/components';
 import './commands/languages';
 import './commands/migrations';
+import './commands/types';
 
 import { session } from './session';
+
+export * from './types/storyblok';
 
 dotenv.config(); // This will load variables from .env into process.env
 const program = getProgram();

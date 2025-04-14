@@ -308,10 +308,96 @@
       }
     },
     {
+      "type": "node",
+      "request": "launch",
       "name": "Debug Migrations generate non-existing component",
       "program": "${workspaceFolder}/dist/index.mjs",
       "args": ["migrations", "generate", "non-existing", "--space", "295017"],
 
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "sourceMaps": true,
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "env": {
+        "STUB": "true"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Generate types",
+      "program": "${workspaceFolder}/dist/index.mjs",
+      "args": ["types", "generate", "--space", "295017", "--filter", "component-inside-*"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "sourceMaps": true,
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "env": {
+        "STUB": "true"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Generate types strict",
+      "program": "${workspaceFolder}/dist/index.mjs",
+      "args": ["types", "generate", "--space", "295017", "--strict"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "sourceMaps": true,
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "env": {
+        "STUB": "true"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Generate types from separate files",
+      "program": "${workspaceFolder}/dist/index.mjs",
+      "args": ["types", "generate", "--space", "295017", "--separate-files"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "sourceMaps": true,
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "env": {
+        "STUB": "true"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Generate types with suffix",
+      "program": "${workspaceFolder}/dist/index.mjs",
+      "args": ["types", "generate", "--space", "295017", "--suffix", "prod"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "sourceMaps": true,
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "env": {
+        "STUB": "true"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Generate types with custom fields parser",
+      "program": "${workspaceFolder}/dist/index.mjs",
+      "args": ["types", "generate", "--space", "295017", "--custom-fields-parser", "./custom-fields-parser.ts"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "sourceMaps": true,
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "env": {
+        "STUB": "true"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Generate types with compiler options",
+      "program": "${workspaceFolder}/dist/index.mjs",
+      "args": ["types", "generate", "--space", "295017", "--compiler-options", "./compiler-options.ts"],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "sourceMaps": true,

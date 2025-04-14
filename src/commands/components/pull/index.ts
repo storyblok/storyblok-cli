@@ -15,7 +15,7 @@ componentsCommand
   .command('pull [componentName]')
   .option('-f, --filename <filename>', 'custom name to be used in file(s) name instead of space id')
   .option('--sf, --separate-files [value]', 'Argument to create a single file for each component')
-  .option('--su, --suffix <suffix>', 'suffix to add to the file name (e.g. components.<suffix>.json). By default, the space ID is used.')
+  .option('--su, --suffix <suffix>', 'suffix to add to the file name (e.g. components.<suffix>.json)')
   .description(`Download your space's components schema as json. Optionally specify a component name to pull a single component.`)
   .action(async (componentName: string | undefined, options: PullComponentsOptions) => {
     konsola.title(` ${commands.COMPONENTS} `, colorPalette.COMPONENTS, componentName ? `Pulling component ${componentName}...` : 'Pulling components...');
