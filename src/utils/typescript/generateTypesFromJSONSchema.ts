@@ -313,7 +313,6 @@ export class GenerateTypesFromJSONSchemas {
               const componentsInGroupWhitelist = propertyValue.component_tag_whitelist.reduce(
                 (components: string[], tagId: number) => {
                   const componentsInGroup = this.#componentGroups.get(tagId.toString());
-                  console.log("componentsInGroup", { componentsInGroup, tagId });
 
                   return componentsInGroup
                     ? [
