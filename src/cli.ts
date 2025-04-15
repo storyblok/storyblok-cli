@@ -23,11 +23,18 @@ const program = new commander.Command();
 const allRegionsText = ALL_REGIONS.join(", ");
 
 clear();
-console.log(chalk.cyan(figlet.textSync("storyblok")));
-console.log();
-console.log();
-console.log("Hi, welcome to the Storyblok CLI");
-console.log();
+
+program
+  .option("--no-welcome", "Suppress 'welcome' message. Useful for concise output")
+  .action((options) => {
+    if (options.welcome) {
+      console.log(chalk.cyan(figlet.textSync("storyblok")));
+      console.log();
+      console.log();
+      console.log("Hi, welcome to the Storyblok CLI");
+      console.log();
+    }
+  });
 
 // non-intrusive notify users if an update available
 const notifyOptions = {
