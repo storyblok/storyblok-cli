@@ -40,34 +40,41 @@ componentsCommand
 
     const { password, region } = state;
 
+    const spinnerGroups = new Spinner({
+      verbose: !isVitest,
+    });
+    const spinnerPresets = new Spinner({
+      verbose: !isVitest,
+    });
+    const spinnerInternalTags = new Spinner({
+      verbose: !isVitest,
+    });
+    const spinnerComponents = new Spinner({
+      verbose: !isVitest,
+    });
+
     try {
       // Fetch components groups
-      const spinnerGroups = new Spinner({
-        verbose: !isVitest,
-      })
-        .start(`Fetching ${chalk.hex(colorPalette.COMPONENTS)('components groups')}`);
+      spinnerGroups.start(`Fetching ${chalk.hex(colorPalette.COMPONENTS)('components groups')}`);
 
       const groups = await fetchComponentGroups(space, password, region);
       spinnerGroups.succeed(`${chalk.hex(colorPalette.COMPONENTS)('Groups')} - Completed in ${spinnerGroups.elapsedTime.toFixed(2)}ms`);
 
       // Fetch components presets
-      const spinnerPresets = new Spinner()
-        .start(`Fetching ${chalk.hex(colorPalette.COMPONENTS)('components presets')}`);
+      spinnerPresets.start(`Fetching ${chalk.hex(colorPalette.COMPONENTS)('components presets')}`);
 
       const presets = await fetchComponentPresets(space, password, region);
       spinnerPresets.succeed(`${chalk.hex(colorPalette.COMPONENTS)('Presets')} - Completed in ${spinnerPresets.elapsedTime.toFixed(2)}ms`);
 
       // Fetch components internal tags
-      const spinnerInternalTags = new Spinner()
-        .start(`Fetching ${chalk.hex(colorPalette.COMPONENTS)('components internal tags')}`);
+      spinnerInternalTags.start(`Fetching ${chalk.hex(colorPalette.COMPONENTS)('components internal tags')}`);
 
       const internalTags = await fetchComponentInternalTags(space, password, region);
       spinnerInternalTags.succeed(`${chalk.hex(colorPalette.COMPONENTS)('Tags')} - Completed in ${spinnerInternalTags.elapsedTime.toFixed(2)}ms`);
 
       // Save everything using the new structure
       let components;
-      const spinnerComponents = new Spinner()
-        .start(`Fetching ${chalk.hex(colorPalette.COMPONENTS)('components')}`);
+      spinnerComponents.start(`Fetching ${chalk.hex(colorPalette.COMPONENTS)('components')}`);
 
       if (componentName) {
         const component = await fetchComponent(space, componentName, password, region);
@@ -112,6 +119,10 @@ componentsCommand
       }
     }
     catch (error) {
+      spinnerGroups.failed(`Pulling ${chalk.hex(colorPalette.COMPONENTS)('Groups')} - Failed`);
+      spinnerPresets.failed(`Pulling ${chalk.hex(colorPalette.COMPONENTS)('Presets')} - Failed`);
+      spinnerInternalTags.failed(`Pulling ${chalk.hex(colorPalette.COMPONENTS)('Tags')} - Failed`);
+      spinnerComponents.failed(`Pulling ${chalk.hex(colorPalette.COMPONENTS)('Components')} - Failed`);
       handleError(error as Error, verbose);
     }
   });
