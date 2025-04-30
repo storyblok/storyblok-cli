@@ -72,7 +72,7 @@
   },
   "release": {
     "branches": [
-      "master"
+      "main"
     ]
   },
   "prettier": {
