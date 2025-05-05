@@ -61,10 +61,10 @@ export const loginCommand = program
     }
 
     if (token) {
+      const spinner = new Spinner({
+        verbose: !isVitest,
+      }).start(`Logging in with token`);
       try {
-        const spinner = new Spinner({
-          verbose: !isVitest,
-        }).start(`Logging in with token`);
         const { user } = await loginWithToken(token, region);
         updateSession(user.email, token, region);
         await persistCredentials(region);
@@ -72,10 +72,15 @@ export const loginCommand = program
         konsola.ok(`Successfully logged in with token`);
       }
       catch (error) {
+        spinner.failed();
+        konsola.br();
         handleError(error as Error, verbose);
       }
     }
     else {
+      const spinner = new Spinner({
+        verbose: !isVitest,
+      });
       try {
         const strategy = await select(loginStrategy);
         if (strategy === 'login-with-token') {
@@ -85,9 +90,7 @@ export const loginCommand = program
               return value.length > 0;
             },
           });
-          const spinner = new Spinner({
-            verbose: !isVitest,
-          }).start(`Logging in with token`);
+          spinner.start(`Logging in with token`);
           const { user } = await loginWithToken(userToken, region);
           spinner.succeed();
           updateSession(user.email, userToken, region);
@@ -116,9 +119,7 @@ export const loginCommand = program
             })),
             default: regions.EU,
           });
-          const spinner = new Spinner({
-            verbose: !isVitest,
-          }).start(`Logging in with email`);
+          spinner.start(`Logging in with email`);
           const response = await loginWithEmailAndPassword(userEmail, userPassword, userRegion);
           spinner.succeed();
 
@@ -141,6 +142,8 @@ export const loginCommand = program
         }
       }
       catch (error) {
+        spinner.failed();
+        konsola.br();
         handleError(error as Error, verbose);
       }
     }
