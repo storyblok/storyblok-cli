@@ -42,6 +42,7 @@ vi.mock('../../utils', async () => {
       ok: vi.fn(),
       title: vi.fn(),
       error: vi.fn(),
+      br: vi.fn(),
     },
     handleError: (error: Error, header = false) => {
       konsola.error(error, header);
@@ -74,6 +75,7 @@ describe('userCommand', () => {
     expect(getUser).toHaveBeenCalledWith('valid-token', 'eu');
     expect(konsola.ok).toHaveBeenCalledWith(
       `Hi ${chalk.bold('John Doe')}, you are currently logged in with ${chalk.hex('#45bfb9')(mockResponse.user.email)} on ${chalk.bold('eu')} region`,
+      true,
     );
   });
 
