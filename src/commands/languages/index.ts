@@ -43,14 +43,14 @@ languagesCommand
       return;
     }
 
+    const spinner = new Spinner({
+      verbose: !isVitest,
+    });
     try {
-      const spinner = new Spinner({
-        verbose: !isVitest,
-      })
-        .start(`Fetching ${chalk.hex(colorPalette.LANGUAGES)('languages')}`);
+      spinner.start(`Fetching ${chalk.hex(colorPalette.LANGUAGES)('languages')}`);
 
       const internationalization = await fetchLanguages(space, state.password, state.region);
-      spinner.succeed();
+
       if (!internationalization || internationalization.languages?.length === 0) {
         konsola.warn(`No languages found in the space ${space}`);
         return;
@@ -61,9 +61,13 @@ languagesCommand
       });
       const fileName = suffix ? `${filename}.${suffix}.json` : `${filename}.json`;
       const filePath = path ? `${path}/${fileName}` : `.storyblok/languages/${space}/${fileName}`;
-      konsola.ok(`Languages schema downloaded successfully at ${chalk.hex(colorPalette.PRIMARY)(filePath)}`);
+      spinner.succeed();
+      konsola.ok(`Languages schema downloaded successfully at ${chalk.hex(colorPalette.PRIMARY)(filePath)}`, true);
     }
     catch (error) {
+      spinner.failed();
+      konsola.br();
       handleError(error as Error, verbose);
     }
+    konsola.br();
   });
