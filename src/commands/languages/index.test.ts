@@ -48,6 +48,7 @@ vi.mock('../../utils', async () => {
       title: vi.fn(),
       warn: vi.fn(),
       error: vi.fn(),
+      br: vi.fn(),
     },
     handleError: (error: Error, header = false) => {
       konsola.error(error, header);
@@ -94,7 +95,7 @@ describe('languagesCommand', () => {
         expect(saveLanguagesToFile).toHaveBeenCalledWith('12345', mockResponse, {
           path: undefined,
         });
-        expect(konsola.ok).toHaveBeenCalledWith(`Languages schema downloaded successfully at ${chalk.hex(colorPalette.PRIMARY)(`.storyblok/languages/12345/languages.json`)}`);
+        expect(konsola.ok).toHaveBeenCalledWith(`Languages schema downloaded successfully at ${chalk.hex(colorPalette.PRIMARY)(`.storyblok/languages/12345/languages.json`)}`, true);
       });
 
       it('should throw an error if the user is not logged in', async () => {
@@ -168,7 +169,7 @@ describe('languagesCommand', () => {
         expect(saveLanguagesToFile).toHaveBeenCalledWith('12345', mockResponse, {
           path: '/tmp',
         });
-        expect(konsola.ok).toHaveBeenCalledWith(`Languages schema downloaded successfully at ${chalk.hex(colorPalette.PRIMARY)(`/tmp/languages.json`)}`);
+        expect(konsola.ok).toHaveBeenCalledWith(`Languages schema downloaded successfully at ${chalk.hex(colorPalette.PRIMARY)(`/tmp/languages.json`)}`, true);
       });
     });
 
@@ -200,7 +201,7 @@ describe('languagesCommand', () => {
           filename: 'custom-languages',
           path: undefined,
         });
-        expect(konsola.ok).toHaveBeenCalledWith(`Languages schema downloaded successfully at ${chalk.hex(colorPalette.PRIMARY)(`.storyblok/languages/12345/custom-languages.json`)}`);
+        expect(konsola.ok).toHaveBeenCalledWith(`Languages schema downloaded successfully at ${chalk.hex(colorPalette.PRIMARY)(`.storyblok/languages/12345/custom-languages.json`)}`, true);
       });
     });
 
@@ -232,7 +233,7 @@ describe('languagesCommand', () => {
           suffix: 'custom-suffix',
           path: undefined,
         });
-        expect(konsola.ok).toHaveBeenCalledWith(`Languages schema downloaded successfully at ${chalk.hex(colorPalette.PRIMARY)(`.storyblok/languages/12345/languages.custom-suffix.json`)}`);
+        expect(konsola.ok).toHaveBeenCalledWith(`Languages schema downloaded successfully at ${chalk.hex(colorPalette.PRIMARY)(`.storyblok/languages/12345/languages.custom-suffix.json`)}`, true);
       });
     });
   });
