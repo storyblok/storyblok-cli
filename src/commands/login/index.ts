@@ -1,12 +1,11 @@
-import { isVitest } from './../../utils/index';
+import { Spinner } from '@topcli/spinner';
 import chalk from 'chalk';
 import { input, password, select } from '@inquirer/prompts';
 import type { RegionCode } from '../../constants';
 import { colorPalette, commands, regionNames, regions } from '../../constants';
 import { getProgram } from '../../program';
-import { CommandError, handleError, isRegion, konsola } from '../../utils';
+import { CommandError, handleError, isRegion, isVitest, konsola } from '../../utils';
 import { loginWithEmailAndPassword, loginWithOtp, loginWithToken } from './actions';
-import { Spinner } from '@topcli/spinner';
 import { session } from '../../session';
 
 const program = getProgram(); // Get the shared singleton instance
