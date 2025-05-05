@@ -94,7 +94,6 @@ Then you can set breakpoints directly to the typescript files and the debugger w
 
 ![Debugging](/.github/assets/breakpoints.png)
 
-
 ## Community
 
 For help, discussion about best practices, or any other conversation that would benefit from being searchable:
@@ -112,9 +111,9 @@ For bugs or feature requests, please [submit an issue](https://github.com/storyb
 > [!IMPORTANT]
 > Please search existing issues before submitting a new one. Issues without a minimal reproducible example will be closed. [Why reproductions are Required](https://antfu.me/posts/why-reproductions-are-required).
 
-### I can't share my company project code 
+### I can't share my company project code
 
-We understand that you might not be able to share your company's project code. Please provide a minimal reproducible example that demonstrates the issue by using tools like [Stackblitz](https://stackblitz.com) or a link to a Github Repo lease make sure you include a README file with the instructions to build and run the project, important not to include any access token, password or personal information of any kind. 
+We understand that you might not be able to share your company's project code. Please provide a minimal reproducible example that demonstrates the issue by using tools like [Stackblitz](https://stackblitz.com) or a link to a Github Repo lease make sure you include a README file with the instructions to build and run the project, important not to include any access token, password or personal information of any kind.
 
 ### I only have a question
 

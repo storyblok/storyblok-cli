@@ -57,14 +57,14 @@ typesCommand
   });
 
 // 2. Operations Layer (actions.ts)
-  - generateTypes()
-  - generateStoryblokTypes()
-  - saveTypesToFile()
+-generateTypes()
+- generateStoryblokTypes()
+- saveTypesToFile()
 
 // 3. Actions Layer (actions.ts)
-  - getComponentType()
-  - getComponentPropertiesTypeAnnotations()
-  - sanitizeComponentName()
+- getComponentType()
+- getComponentPropertiesTypeAnnotations()
+- sanitizeComponentName();
 ```
 
 ### Processing Flow Examples
@@ -179,12 +179,12 @@ Flow:
 for (const component of spaceData.components) {
   const componentType = getComponentType(component.name, options);
   const properties = getComponentPropertiesTypeAnnotations(component.schema, options);
-  
+
   // 2. Create a separate file for each component
   const fileContent = `export interface ${componentType} {
   ${properties}
 }`;
-  
+
   // 3. Save to a separate file
   await saveToFile(`${component.name}.d.ts`, fileContent);
 }
@@ -317,4 +317,4 @@ The command includes comprehensive test coverage:
 **Error Handling**
 - [ ] It should throw an error if the space is not provided: "Please provide the space as argument --space YOUR_SPACE_ID."
 - [ ] It should handle errors during type generation gracefully
-- [ ] It should provide meaningful error messages for common issues 
+- [ ] It should provide meaningful error messages for common issues
