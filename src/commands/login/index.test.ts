@@ -49,6 +49,7 @@ vi.mock('../../utils', async () => {
     konsola: {
       ok: vi.fn(),
       title: vi.fn(),
+      br: vi.fn(),
       error: vi.fn(),
     },
     isVitestRunning: true,
@@ -179,26 +180,26 @@ describe('loginCommand', () => {
   describe('--token', () => {
     it('should login with a valid token', async () => {
       const mockToken = 'test-token';
-      const mockUser = { email: 'test@example.com' };
+      const mockUser = { email: 'test@example.com', friendly_name: 'Test User' };
       vi.mocked(loginWithToken).mockResolvedValue({ user: mockUser });
 
       await loginCommand.parseAsync(['node', 'test', '--token', mockToken]);
 
       expect(loginWithToken).toHaveBeenCalledWith(mockToken, 'eu');
 
-      expect(konsola.ok).toHaveBeenCalledWith('Successfully logged in with token');
+      expect(konsola.ok).toHaveBeenCalledWith('Successfully logged in. Welcome Test User.', true);
     });
 
     it('should login with a valid token in another region --region', async () => {
       const mockToken = 'test-token';
-      const mockUser = { email: 'test@example.com' };
+      const mockUser = { email: 'test@example.com', friendly_name: 'Test User' };
       vi.mocked(loginWithToken).mockResolvedValue({ user: mockUser });
 
       await loginCommand.parseAsync(['node', 'test', '--token', mockToken, '--region', 'us']);
 
       expect(loginWithToken).toHaveBeenCalledWith(mockToken, 'us');
 
-      expect(konsola.ok).toHaveBeenCalledWith('Successfully logged in with token');
+      expect(konsola.ok).toHaveBeenCalledWith('Successfully logged in. Welcome Test User.', true);
     });
 
     it('should throw an error for an invalid token', async () => {

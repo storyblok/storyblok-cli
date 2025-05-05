@@ -69,7 +69,8 @@ export const loginCommand = program
         updateSession(user.email, token, region);
         await persistCredentials(region);
         spinner.succeed();
-        konsola.ok(`Successfully logged in with token`);
+
+        konsola.ok(`Successfully logged in. Welcome ${chalk.hex(colorPalette.PRIMARY)(user.friendly_name)}.`, true);
       }
       catch (error) {
         spinner.failed();
@@ -96,7 +97,7 @@ export const loginCommand = program
           updateSession(user.email, userToken, region);
           await persistCredentials(region);
 
-          konsola.ok(`Successfully logged in with token`);
+          konsola.ok(`Successfully logged in. Welcome ${chalk.hex(colorPalette.PRIMARY)(user.friendly_name)}.`, true);
         }
 
         else {
@@ -120,8 +121,8 @@ export const loginCommand = program
             default: regions.EU,
           });
           spinner.start(`Logging in with email`);
-          const response = await loginWithEmailAndPassword(userEmail, userPassword, userRegion);
           spinner.succeed();
+          const response = await loginWithEmailAndPassword(userEmail, userPassword, userRegion);
 
           if (response?.otp_required) {
             const otp = await input({
@@ -138,7 +139,8 @@ export const loginCommand = program
             updateSession(userEmail, response.access_token, userRegion);
           }
           await persistCredentials(region);
-          konsola.ok(`Successfully logged in with email ${chalk.hex(colorPalette.PRIMARY)(userEmail)}`);
+
+          konsola.ok(`Successfully logged in. Welcome ${chalk.hex(colorPalette.PRIMARY)(userEmail)}.`, true);
         }
       }
       catch (error) {
@@ -147,4 +149,6 @@ export const loginCommand = program
         handleError(error as Error, verbose);
       }
     }
+
+    konsola.br();
   });

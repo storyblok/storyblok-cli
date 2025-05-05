@@ -11,6 +11,7 @@ export const commands = {
 export const colorPalette = {
   PRIMARY: '#45bfb9',
   LOGIN: '#8556D3',
+  LOGOUT: '#8556D3',
   USER: '#8BC34A',
   COMPONENTS: '#a185ff',
   LANGUAGES: '#FFC107',
