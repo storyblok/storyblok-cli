@@ -57,7 +57,7 @@ typesCommand
   });
 
 // 2. Operations Layer (actions.ts)
-- generateTypes()
+-generateTypes()
 - generateStoryblokTypes()
 - saveTypesToFile()
 
