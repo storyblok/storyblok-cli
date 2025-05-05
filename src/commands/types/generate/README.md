@@ -7,7 +7,7 @@ The Storyblok type generation command allows you to generate TypeScript type def
 Before generating types, ensure you have:
 
 - Access to the target Storyblok space
-- A Storyblok account with appropriate permissions
+- Access to the target Storyblok space and proper permissions
 - TypeScript installed in your project (if you plan to use the generated types)
 - Pull components from the target space using the `storyblok components pull` command
 
