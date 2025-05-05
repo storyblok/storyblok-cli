@@ -143,6 +143,17 @@ export class GenerateTypesFromJSONSchemas {
               : new Set([currentComponent.name])
           );
 
+        if (currentComponent.internal_tag_ids && currentComponent.internal_tag_ids.length > 0) {
+          currentComponent.internal_tag_ids.forEach((tagId) => {
+            acc.componentGroups.set(
+              tagId,
+              acc.componentGroups.has(tagId)
+                ? acc.componentGroups.get(tagId)!.add(currentComponent.name)
+                : new Set([currentComponent.name])
+            );
+          });
+        }
+
         acc.componentNames.add(currentComponent.name);
         return acc;
       },
@@ -293,6 +304,29 @@ export class GenerateTypesFromJSONSchemas {
               propertyTypeAnnotation[propertyName].tsType =
                 componentsInGroupWhitelist.length > 0 ? `(${componentsInGroupWhitelist.join(" | ")})[]` : `never[]`;
             }
+          } else if (propertyValue.restrict_type === "tags") {
+            // Components restricted by tags
+            if (
+              Array.isArray(propertyValue.component_tag_whitelist) &&
+              propertyValue.component_tag_whitelist.length > 0
+            ) {
+              const componentsInGroupWhitelist = propertyValue.component_tag_whitelist.reduce(
+                (components: string[], tagId: number) => {
+                  const componentsInGroup = this.#componentGroups.get(tagId.toString());
+
+                  return componentsInGroup
+                    ? [
+                        ...components,
+                        ...Array.from(componentsInGroup).map((componentName) => this.#getComponentType(componentName)),
+                      ]
+                    : components;
+                },
+                []
+              );
+
+              propertyTypeAnnotation[propertyName].tsType =
+                componentsInGroupWhitelist.length > 0 ? `(${componentsInGroupWhitelist.join(" | ")})[]` : `never[]`;
+            }
           } else {
             // Components restricted by 1-by-1 list
             if (Array.isArray(propertyValue.component_whitelist) && propertyValue.component_whitelist.length > 0) {
@@ -344,7 +378,9 @@ export class GenerateTypesFromJSONSchemas {
       if (property.filter_content_type) {
         if (typeof property.filter_content_type === "string") {
           return {
-            tsType: `(${this.#getStoryType(property.filter_content_type)} | string )${property.type === "options" ? "[]" : ""}`,
+            tsType: `(${this.#getStoryType(property.filter_content_type)} | string )${
+              property.type === "options" ? "[]" : ""
+            }`,
           };
         }
 
