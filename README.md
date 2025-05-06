@@ -48,7 +48,10 @@
 
 ## Documentation
 
-For complete documentation, please visit [https://storyblok.com/docs](https://storyblok.com/docs/packages/my-joyful-package)
+> [!WARNING]
+> Official documentation about this package v4 is not yet available. Please refer to the internal documentation for the [v4 beta](src/README.md).
+
+~~For complete documentation, please visit [https://storyblok.com/docs](https://storyblok.com/docs/packages/my-joyful-package)~~
 
 ## Setup
 
