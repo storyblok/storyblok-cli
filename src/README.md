@@ -16,7 +16,7 @@ Or for an specific beta version:
 npm install storyblok@4.0.0-beta.<version>
 ```
 
-## Command Reference 
+## Command Reference
 
 | Command | Status | Notes |
 |---------|--------|-------|
@@ -39,3 +39,15 @@ npm install storyblok@4.0.0-beta.<version>
 | `quickstart` | 💬 TBD | To be discussed |
 | `spaces` | 💬 TBD | To be discussed |
 | `import` | 💬 TBD | To be discussed |
+
+## Global Options
+
+These options can be used with any command:
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `-v, --verbose` | Enable verbose output for debugging | `false` |
+| `--ci` | Enable CI mode (coming soon) | `false` |
+
+> [!TIP]
+> When reporting a bug or opening a support ticket, please run the command with the `--verbose` flag to provide detailed information that will help us better understand and resolve the issue.
