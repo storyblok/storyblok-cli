@@ -22,7 +22,7 @@ npm install storyblok@4.0.0-beta.<version>
 |---------|--------|-------|
 | [`login`](./commands/login/README.md) | ✅ Ready | Improved DX and credentials storage in ~/.storyblok/credentials.json |
 | [`logout`](./commands/logout/README.md) | ✅ Ready | |
-| `user` | ✅ Ready | |
+| [`user`](./commands/user/README.md) | ✅ Ready | |
 | [`languages pull`](./commands/languages/README.md) | ✅ Ready | Replaces previous pull-languages |
 | `components pull` | ✅ Ready | Replaces previous pull-components |
 | `components push` | ✅ Ready | Replaces previous push-components. Also handles dependencies such as groups, tags, presets and whitelists. (Datasources is pending) |
