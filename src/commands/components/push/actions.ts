@@ -277,7 +277,7 @@ export const readComponentsFiles = async (
     await readdir(resolvedPath);
   }
   catch (error) {
-    const message = `No directory found for space "${from}". Please make sure you have pulled the components first by running:\n\n  storyblok components pull --space ${from}`;
+    const message = `No directory found for space "${from}". Please make sure you have pulled the components first by running:\n\n  storyblok components pull --space ${from} \n\n`;
     throw new FileSystemError(
       'file_not_found',
       'read',

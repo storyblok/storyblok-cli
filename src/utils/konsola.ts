@@ -29,6 +29,7 @@ export const konsola = {
       console.log(''); // Add a line break
       const successHeader = chalk.bgGreen.bold.white(` Success `);
       console.log(formatHeader(successHeader));
+      console.log(''); // Add a line break
     }
 
     console.log(message ? `${chalk.green('✔')} ${message}` : '');

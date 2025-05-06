@@ -350,7 +350,7 @@ describe('push components actions', () => {
             code: 'ENOENT',
             message: expect.stringContaining('ENOENT: no such file or directory'),
           }),
-          message: 'No directory found for space "non-existent". Please make sure you have pulled the components first by running:\n\n  storyblok components pull --space non-existent',
+          message: 'No directory found for space "non-existent". Please make sure you have pulled the components first by running:\n\n  storyblok components pull --space non-existent \n\n',
         }),
       );
     });

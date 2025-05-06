@@ -20,19 +20,21 @@ export const userCommand = program
       handleError(new CommandError(`You are currently not logged in. Please login first to get your user info.`));
       return;
     }
+    const spinner = new Spinner({
+      verbose: !isVitest,
+    }).start(`Fetching user info`);
     try {
       const { password, region } = state;
       if (!password || !region) {
         throw new Error('No password or region found');
       }
-      const spinner = new Spinner({
-        verbose: !isVitest,
-      }).start(`Fetching user info`);
       const { user } = await getUser(password, region);
       spinner.succeed();
-      konsola.ok(`Hi ${chalk.bold(user.friendly_name)}, you are currently logged in with ${chalk.hex(colorPalette.PRIMARY)(user.email)} on ${chalk.bold(region)} region`);
+      konsola.ok(`Hi ${chalk.bold(user.friendly_name)}, you are currently logged in with ${chalk.hex(colorPalette.PRIMARY)(user.email)} on ${chalk.bold(region)} region`, true);
     }
     catch (error) {
+      spinner.failed();
       handleError(error as Error, true);
     }
+    konsola.br();
   });

@@ -1,8 +1,8 @@
 {
   "name": "storyblok",
   "type": "module",
-  "version": "0.0.0",
-  "packageManager": "pnpm@9.9.0",
+  "version": "3.36.1",
+  "packageManager": "pnpm@10.10.0",
   "description": "Storyblok CLI",
   "author": "Alvaro Saburido <hola@alvarosaburido.dev> (https://github.com/alvarosabu/)",
   "license": "MIT",
@@ -34,28 +34,28 @@
     "coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@inquirer/prompts": "^7.2.4",
+    "@inquirer/prompts": "^7.5.0",
     "@topcli/spinner": "^2.1.2",
     "chalk": "^5.4.1",
     "commander": "^13.1.0",
-    "dotenv": "^16.4.7",
+    "dotenv": "^16.5.0",
     "json-schema-to-typescript": "^15.0.4",
-    "ohash": "^2.0.5",
-    "storyblok-js-client": "^6.10.7"
+    "ohash": "^2.0.11",
+    "storyblok-js-client": "^6.10.11"
   },
   "devDependencies": {
     "@storyblok/eslint-config": "^0.3.0",
     "@types/inquirer": "^9.0.7",
-    "@types/node": "^22.12.0",
-    "@vitest/coverage-v8": "^3.0.4",
-    "@vitest/ui": "^3.0.4",
-    "eslint": "^9.19.0",
+    "@types/node": "^22.15.3",
+    "@vitest/coverage-v8": "^3.1.2",
+    "@vitest/ui": "^3.1.2",
+    "eslint": "^9.25.1",
     "memfs": "^4.17.0",
-    "msw": "^2.7.0",
-    "pathe": "^2.0.2",
-    "typescript": "^5.7.3",
-    "unbuild": "^3.3.1",
-    "vite": "^6.0.11",
-    "vitest": "^3.0.4"
+    "msw": "^2.7.5",
+    "pathe": "^2.0.3",
+    "typescript": "^5.8.3",
+    "unbuild": "^3.5.0",
+    "vite": "^6.3.4",
+    "vitest": "^3.1.2"
   }
 }

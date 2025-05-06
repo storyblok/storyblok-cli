@@ -41,8 +41,6 @@ export const addCredentials = async ({
 
   try {
     await saveToFile(filePath, JSON.stringify(credentials, null, 2), { mode: 0o600 });
-
-    konsola.ok(`Successfully added/updated entry for machine ${machineName} in ${chalk.hex(colorPalette.PRIMARY)(filePath)}`, true);
   }
   catch (error) {
     throw new FileSystemError('invalid_argument', 'write', error as NodeJS.ErrnoException, `Error adding/updating entry for machine ${machineName} in credentials.json file`);

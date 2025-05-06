@@ -40,12 +40,12 @@ typesCommand
       return;
     }
 
-    const spinnerText = 'Generating types...';
     const spinner = new Spinner({
       verbose: !isVitest,
-    }).start(spinnerText);
+    });
 
     try {
+      spinner.start(`Generating types...`);
       const spaceData = await readComponentsFiles({
         ...options as ReadComponentsOptions,
         from: space,
@@ -64,10 +64,12 @@ typesCommand
       }
 
       spinner.succeed();
-      konsola.ok(`Successfully generated types for space ${space}`);
+      konsola.ok(`Successfully generated types for space ${space}`, true);
+      konsola.br();
     }
     catch (error) {
       spinner.failed(`Failed to generate types for space ${space}`);
+      konsola.br();
       handleError(error as Error, verbose);
     }
   });

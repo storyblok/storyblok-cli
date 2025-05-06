@@ -1,12 +1,11 @@
-import { isVitest } from './../../utils/index';
+import { Spinner } from '@topcli/spinner';
 import chalk from 'chalk';
 import { input, password, select } from '@inquirer/prompts';
 import type { RegionCode } from '../../constants';
 import { colorPalette, commands, regionNames, regions } from '../../constants';
 import { getProgram } from '../../program';
-import { CommandError, handleError, isRegion, konsola } from '../../utils';
+import { CommandError, handleError, isRegion, isVitest, konsola } from '../../utils';
 import { loginWithEmailAndPassword, loginWithOtp, loginWithToken } from './actions';
-import { Spinner } from '@topcli/spinner';
 import { session } from '../../session';
 
 const program = getProgram(); // Get the shared singleton instance
@@ -61,21 +60,27 @@ export const loginCommand = program
     }
 
     if (token) {
+      const spinner = new Spinner({
+        verbose: !isVitest,
+      }).start(`Logging in with token`);
       try {
-        const spinner = new Spinner({
-          verbose: !isVitest,
-        }).start(`Logging in with token`);
         const { user } = await loginWithToken(token, region);
         updateSession(user.email, token, region);
         await persistCredentials(region);
         spinner.succeed();
-        konsola.ok(`Successfully logged in with token`);
+
+        konsola.ok(`Successfully logged in. Welcome ${chalk.hex(colorPalette.PRIMARY)(user.friendly_name)}.`, true);
       }
       catch (error) {
+        spinner.failed();
+        konsola.br();
         handleError(error as Error, verbose);
       }
     }
     else {
+      const spinner = new Spinner({
+        verbose: !isVitest,
+      });
       try {
         const strategy = await select(loginStrategy);
         if (strategy === 'login-with-token') {
@@ -85,15 +90,13 @@ export const loginCommand = program
               return value.length > 0;
             },
           });
-          const spinner = new Spinner({
-            verbose: !isVitest,
-          }).start(`Logging in with token`);
+          spinner.start(`Logging in with token`);
           const { user } = await loginWithToken(userToken, region);
           spinner.succeed();
           updateSession(user.email, userToken, region);
           await persistCredentials(region);
 
-          konsola.ok(`Successfully logged in with token`);
+          konsola.ok(`Successfully logged in. Welcome ${chalk.hex(colorPalette.PRIMARY)(user.friendly_name)}.`, true);
         }
 
         else {
@@ -116,11 +119,9 @@ export const loginCommand = program
             })),
             default: regions.EU,
           });
-          const spinner = new Spinner({
-            verbose: !isVitest,
-          }).start(`Logging in with email`);
-          const response = await loginWithEmailAndPassword(userEmail, userPassword, userRegion);
+          spinner.start(`Logging in with email`);
           spinner.succeed();
+          const response = await loginWithEmailAndPassword(userEmail, userPassword, userRegion);
 
           if (response?.otp_required) {
             const otp = await input({
@@ -137,11 +138,16 @@ export const loginCommand = program
             updateSession(userEmail, response.access_token, userRegion);
           }
           await persistCredentials(region);
-          konsola.ok(`Successfully logged in with email ${chalk.hex(colorPalette.PRIMARY)(userEmail)}`);
+
+          konsola.ok(`Successfully logged in. Welcome ${chalk.hex(colorPalette.PRIMARY)(userEmail)}.`, true);
         }
       }
       catch (error) {
+        spinner.failed();
+        konsola.br();
         handleError(error as Error, verbose);
       }
     }
+
+    konsola.br();
   });
