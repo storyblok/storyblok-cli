@@ -114,7 +114,7 @@ describe('types generate', () => {
 
       });
 
-      expect(konsola.ok).toHaveBeenCalledWith(`Successfully generated types for space ${chalk.hex(colorPalette.PRIMARY)('12345')}`);
+      expect(konsola.ok).toHaveBeenCalledWith(`Successfully generated types for space ${chalk.hex(colorPalette.PRIMARY)('12345')}`, true);
     });
 
     it('should pass strict mode option to generateTypes when --strict flag is used', async () => {
