@@ -188,4 +188,4 @@ Where:
   - Components
   - Component groups
   - Component presets
-  - Component tags 
+  - Component tags
