@@ -54,4 +54,3 @@ storyblok login --token PERSONAL_ACCESS_TOKEN --region us
 - `us` - United States
 - `cn` - China
 - `au` - Australia
-
