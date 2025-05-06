@@ -24,8 +24,8 @@ npm install storyblok@4.0.0-beta.<version>
 | [`logout`](./commands/logout/README.md) | ✅ Ready | |
 | [`user`](./commands/user/README.md) | ✅ Ready | |
 | [`languages pull`](./commands/languages/README.md) | ✅ Ready | Replaces previous pull-languages |
-| `components pull` | ✅ Ready | Replaces previous pull-components |
-| `components push` | ✅ Ready | Replaces previous push-components. Also handles dependencies such as groups, tags, presets and whitelists. (Datasources is pending) |
+| [`components pull`](./commands/components/pull/README.md) | ✅ Ready | Replaces previous pull-components |
+| [`components push`](./commands/components/push/README.md) | ✅ Ready | Replaces previous push-components. Also handles dependencies such as groups, tags, presets and whitelists. (Datasources is pending) |
 | `components delete` | 📝 Planned | Will replace delete-component and delete-components |
 | `migrations generate` | ✅ Ready | Replaces previous generate-migrations |
 | `migrations run` | ✅ Ready | Replaces previous run-migrations |

@@ -22,7 +22,7 @@ This will download your space's languages configuration and save it to:
 |--------|-------------|---------|
 | `-s, --space <space>` | (Required) The ID of the space to pull languages from | - |
 | `-f, --filename <filename>` | Custom name for the languages file | `languages` |
-| `--su, --suffix <suffix>` | Suffix to add to the file name | Space ID |
+| `--su, --suffix <suffix>` | Suffix to add to the file name |  |
 | `-p, --path <path>` | Custom path to store the file | `.storyblok/languages` |
 
 ## Examples
