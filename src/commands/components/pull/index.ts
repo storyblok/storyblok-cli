@@ -117,12 +117,14 @@ componentsCommand
 
         konsola.ok(`Components downloaded successfully to ${chalk.hex(colorPalette.PRIMARY)(filePath)}`);
       }
+      konsola.br();
     }
     catch (error) {
       spinnerGroups.failed(`Pulling ${chalk.hex(colorPalette.COMPONENTS)('Groups')} - Failed`);
       spinnerPresets.failed(`Pulling ${chalk.hex(colorPalette.COMPONENTS)('Presets')} - Failed`);
       spinnerInternalTags.failed(`Pulling ${chalk.hex(colorPalette.COMPONENTS)('Tags')} - Failed`);
       spinnerComponents.failed(`Pulling ${chalk.hex(colorPalette.COMPONENTS)('Components')} - Failed`);
+      konsola.br();
       handleError(error as Error, verbose);
     }
   });

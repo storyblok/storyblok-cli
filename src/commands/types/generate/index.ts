@@ -65,11 +65,11 @@ typesCommand
 
       spinner.succeed();
       konsola.ok(`Successfully generated types for space ${space}`, true);
+      konsola.br();
     }
     catch (error) {
       spinner.failed(`Failed to generate types for space ${space}`);
       konsola.br();
       handleError(error as Error, verbose);
     }
-    konsola.br();
   });
