@@ -33,5 +33,4 @@ Hi John Doe, you are currently logged in with john@example.com on eu region
 
 ## Notes
 
-- You must be logged in to use this command
 - The command uses your stored authentication token

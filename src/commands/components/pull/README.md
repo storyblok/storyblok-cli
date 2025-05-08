@@ -180,7 +180,6 @@ Where:
 
 ## Notes
 
-- You must be logged in to use this command
 - The space ID is required
 - The command will create the necessary directories if they don't exist
 - When using `--separate-files` or single component, presets are saved in separate files named `{componentName}.presets.json`

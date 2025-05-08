@@ -52,7 +52,6 @@ Where:
 
 ## Notes
 
-- You must be logged in to use this command
 - The space ID is required
 - The migration file name is required
 - The command will:

@@ -93,7 +93,6 @@ Where:
 
 ## Notes
 
-- You must be logged in to use this command
 - The space ID is required
 - The command will create the necessary directories if they don't exist
 - The generated file follows the Storyblok languages schema

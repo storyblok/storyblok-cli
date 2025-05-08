@@ -116,7 +116,6 @@ Where:
 
 ## Notes
 
-- You must be logged in to use this command
 - The space ID is required
 - The command will:
   - Read all migration files (or filtered by component/filter)

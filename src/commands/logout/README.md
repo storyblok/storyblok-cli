@@ -17,7 +17,7 @@ This command will:
 
 - The command will show a warning if you're already logged out
 - All stored credentials are removed from your system
-- You'll need to login again to use other Storyblok CLI commands
+- You'll need to log in again to use other Storyblok CLI commands
 - The command is safe to run multiple times
 
 ## Examples

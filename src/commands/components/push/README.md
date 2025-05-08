@@ -152,7 +152,6 @@ Where:
 
 ## Notes
 
-- You must be logged in to use this command
 - The target space ID is required
 - The command will read from the specified path
 - When using `--separate-files` or single component, presets are read from separate files named `{componentName}.presets.json`
