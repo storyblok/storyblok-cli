@@ -51,7 +51,6 @@
 > [!WARNING]
 > Official documentation for this package v4 is still in development. In the meantime, please refer to the internal documentation for the [v4 beta](src/README.md).
 
-
 ## Setup
 
 This package relies on [pnpm](https://pnpm.io/) to manage dependencies. For instructions on how to install pnpm, please visit [pnpm.io](https://pnpm.io/installation).
