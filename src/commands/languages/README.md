@@ -1,6 +1,6 @@
 # Languages Command
 
-The `languages` command allows you to manage languages in your Storyblok space. Currently, it supports pulling language configurations from your space.
+The `languages` command allows you to pull the available languages in your Storyblok space.
 
 ## Basic Usage
 

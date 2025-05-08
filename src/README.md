@@ -16,29 +16,35 @@ Or for an specific beta version:
 npm install storyblok@4.0.0-beta.<version>
 ```
 
-## Command Reference
+## API
 
 | Command | Status | Notes |
 |---------|--------|-------|
-| [`login`](./commands/login/README.md) | ✅ Ready | Improved DX and credentials storage in ~/.storyblok/credentials.json |
-| [`logout`](./commands/logout/README.md) | ✅ Ready | |
-| [`user`](./commands/user/README.md) | ✅ Ready | |
-| [`languages pull`](./commands/languages/README.md) | ✅ Ready | Replaces previous pull-languages |
-| [`components pull`](./commands/components/pull/README.md) | ✅ Ready | Replaces previous pull-components |
-| [`components push`](./commands/components/push/README.md) | ✅ Ready | Replaces previous push-components. Also handles dependencies such as groups, tags, presets and whitelists. (Datasources is pending) |
-| `components delete` | 📝 Planned | Will replace delete-component and delete-components |
-| [`migrations generate`](./commands/migrations/generate/README.md) | ✅ Ready | Replaces previous generate-migrations |
-| [`migrations run`](./commands/migrations/run/README.md) | ✅ Ready | Replaces previous run-migrations |
-| [`migrations rollback`](./commands/migrations/rollback/README.md) | ✅ Ready | Replaces previous rollback-migrations |
-| [`types generate`](./commands/types/generate/README.md) | ✅ Ready | Replaces previous generate-typescript-typedefs |
-| `sync` | ⚠️ v3 | |
-| `datasources pull` | 📝 Planned | |
-| `datasources push` | 📝 Planned | |
-| `datasources delete` | 📝 Planned | Will replace delete-datasources |
-| `select` | 💬 TBD | To be discussed |
-| `quickstart` | 💬 TBD | To be discussed |
-| `spaces` | 💬 TBD | To be discussed |
-| `import` | 💬 TBD | To be discussed |
+| [`login`](./commands/login/README.md) | ✅ | Improved DX and credentials storage in ~/.storyblok/credentials.json |
+| [`logout`](./commands/logout/README.md) | ✅ | |
+| [`user`](./commands/user/README.md) | ✅ | |
+| [`languages pull`](./commands/languages/README.md) | ✅ | Replaces previous pull-languages |
+| [`components pull`](./commands/components/pull/README.md) | ✅ | Replaces previous pull-components |
+| [`components push`](./commands/components/push/README.md) | ✅ | Replaces previous push-components. Also handles dependencies such as groups, tags, presets and whitelists. (Datasources is pending) |
+| `components delete` | 📝 | Will replace delete-component and delete-components |
+| [`migrations generate`](./commands/migrations/generate/README.md) | ✅ | Replaces previous generate-migrations |
+| [`migrations run`](./commands/migrations/run/README.md) | ✅ | Replaces previous run-migrations |
+| [`migrations rollback`](./commands/migrations/rollback/README.md) | ✅ | Replaces previous rollback-migrations |
+| [`types generate`](./commands/types/generate/README.md) | ✅ | Replaces previous generate-typescript-typedefs |
+| `sync` | ⚠️ | |
+| `datasources pull` | 📝 | |
+| `datasources push` | 📝 | |
+| `datasources delete` | 📝 | Will replace delete-datasources |
+| `select` | 💬 | To be discussed |
+| `quickstart` | 💬 | To be discussed |
+| `spaces` | 💬 | To be discussed |
+| `import` | 💬 | To be discussed |
+
+### Status Legend
+- ✅ Ready: Feature is implemented and ready to use
+- 📝 Planned: Feature is planned for future implementation
+- ⚠️ v3: Feature is available only in v3
+- 💬 TBD: Feature is under discussion
 
 ## Global Options
 
