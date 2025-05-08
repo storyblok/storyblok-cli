@@ -27,10 +27,10 @@ npm install storyblok@4.0.0-beta.<version>
 | [`components pull`](./commands/components/pull/README.md) | ✅ Ready | Replaces previous pull-components |
 | [`components push`](./commands/components/push/README.md) | ✅ Ready | Replaces previous push-components. Also handles dependencies such as groups, tags, presets and whitelists. (Datasources is pending) |
 | `components delete` | 📝 Planned | Will replace delete-component and delete-components |
-| `migrations generate` | ✅ Ready | Replaces previous generate-migrations |
-| `migrations run` | ✅ Ready | Replaces previous run-migrations |
-| `migrations rollback` | ✅ Ready | Replaces previous rollback-migrations |
-| `types generate` | ✅ Ready | Replaces previous generate-typescript-typedefs |
+| [`migrations generate`](./commands/migrations/generate/README.md) | ✅ Ready | Replaces previous generate-migrations |
+| [`migrations run`](./commands/migrations/run/README.md) | ✅ Ready | Replaces previous run-migrations |
+| [`migrations rollback`](./commands/migrations/rollback/README.md) | ✅ Ready | Replaces previous rollback-migrations |
+| [`types generate`](./commands/types/generate/README.md) | ✅ Ready | Replaces previous generate-typescript-typedefs |
 | `sync` | ⚠️ v3 | |
 | `datasources pull` | 📝 Planned | |
 | `datasources push` | 📝 Planned | |
