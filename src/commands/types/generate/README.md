@@ -3,7 +3,7 @@
 The `types generate` command generates TypeScript type definitions (`.d.ts` files) for your Storyblok component schemas. This helps you maintain type safety when working with your Storyblok content.
 
 > [!WARNING]
-> Before generating types, you must first pull your components using the `components pull` command. Make sure to use the same flags (`--separate-files`, `--suffix`) that you used when pulling components to ensure the types are generated correctly.
+> Before generating types, first pull your components using the `components pull` command. Make sure to use the same flags (`--separate-files`, `--suffix`) that you used when pulling components to ensure the types are generated correctly.
 
 ## Basic Usage
 

@@ -1,6 +1,6 @@
 ![Storyblok ImagoType](https://raw.githubusercontent.com/storyblok/.github/refs/heads/main/profile/public/github-banner.png)
 
-# Storyblok CLI Package Reference
+# Storyblok CLI
 
 ## Installation
 
@@ -42,7 +42,7 @@ npm install storyblok@4.0.0-beta.<version>
 
 ## Global Options
 
-These options can be used with any command:
+These options are available for all commands:
 
 | Option | Description | Default |
 |--------|-------------|---------|
@@ -50,4 +50,4 @@ These options can be used with any command:
 | `--ci` | Enable CI mode (coming soon) | `false` |
 
 > [!TIP]
-> When reporting a bug or opening a support ticket, please run the command with the `--verbose` flag to provide detailed information that will help us better understand and resolve the issue.
+> When reporting a bug or opening a support ticket, please run the command with the `--verbose` flag and add the output to it. This will help us better understand and resolve the issue.

@@ -3,10 +3,10 @@
 The `migrations run` command allows you to execute migrations on stories in your Storyblok space.
 
 > [!NOTE]
-> Before running migrations, you need to create them first using the `migrations generate` command. See [migrations generate](./generate/README.md) for more details.
+> Before running migrations, you must create them by running the `migrations generate` command. See [migrations generate](./generate/README.md) for more details.
 
 > [!NOTE]
-> When running a migration, a snapshot of the story's content will be automatically created in the `.storyblok/migrations/{spaceId}/rollbacks` directory with a timestamp. These snapshots can be used to rollback changes if needed.
+> When running a migration, a snapshot of the story's content will be automatically created in the `.storyblok/migrations/{spaceId}/rollbacks` directory with a timestamp. These can be used to rollback changes if needed.
 
 ## Basic Usage
 

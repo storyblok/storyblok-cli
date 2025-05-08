@@ -1,6 +1,6 @@
 # User Command
 
-The `user` command allows you to view information about your currently logged-in Storyblok account.
+This command allows you to view information about your currently logged-in Storyblok account.
 
 ## Basic Usage
 

@@ -3,7 +3,7 @@
 The `components push` command allows you to upload components and their dependencies to your Storyblok space.
 
 > [!WARNING]
-> This command requires that you have previously used the `components pull` command to download the components. If you used any options during the pull (like `--suffix` or `--separate-files`), you must use the same options when pushing to ensure the files are found correctly.
+> This command requires you have previously used the `components pull` command to download those components. If you used any flags during the pull (like `--suffix` or `--separate-files`), you must apply them with the same values when pushing to ensure files are found correctly.
 
 ## Basic Usage
 

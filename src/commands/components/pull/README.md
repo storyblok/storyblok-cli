@@ -81,7 +81,7 @@ Generates:
         └── tags.json           # Component tags
 ```
 
-3. Pull components with custom filename:
+3. Pull components with a custom file name:
 ```bash
 storyblok components pull --space 12345 --filename my-components
 ```
@@ -173,7 +173,7 @@ When using `--separate-files`:
 
 Where:
 - `{path}` is the base path (default: `.storyblok`)
-- `{spaceId}` is your Storyblok space ID
+- `{spaceId}` is your Storyblok Space ID
 - `{filename}` is the name you specified (default: `components`)
 - `{suffix}` is the suffix you specified (default: space ID)
 - `{componentName}` is the name of the component
