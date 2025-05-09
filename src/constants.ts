@@ -9,12 +9,12 @@ export const commands = {
 } as const;
 
 export const colorPalette = {
-  PRIMARY: '#45bfb9',
-  LOGIN: '#8556D3',
-  LOGOUT: '#8556D3',
-  USER: '#8BC34A',
+  PRIMARY: '#8d60ff',
+  LOGIN: '#dad4ff',
+  LOGOUT: '#6d6d6d',
+  USER: '#71d300',
   COMPONENTS: '#a185ff',
-  LANGUAGES: '#FFC107',
+  LANGUAGES: '#f5c003',
   MIGRATIONS: '#8CE2FF',
   TYPES: '#3178C6',
 } as const;

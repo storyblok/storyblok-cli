@@ -13,10 +13,10 @@ export const konsola = {
     console.log(''); // Add a line break
     console.log(''); // Add a line break
     if (subtitle) {
-      console.log(`${formatHeader(chalk.bgHex(color).bold.white(` ${message} `))} ${subtitle}`);
+      console.log(`${formatHeader(chalk.bgHex(color).bold(` ${message} `))} ${subtitle}`);
     }
     else {
-      console.log(formatHeader(chalk.bgHex(color).bold.white(` ${message} `)));
+      console.log(formatHeader(chalk.bgHex(color).bold(` ${message} `)));
     }
     console.log(''); // Add a line break
     console.log(''); // Add a line break
