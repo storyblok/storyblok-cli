@@ -12,14 +12,14 @@ import './commands/languages';
 import './commands/migrations';
 import './commands/types';
 
-import { session } from './session';
+import { colorPalette } from './constants';
 
 export * from './types/storyblok';
 
 dotenv.config(); // This will load variables from .env into process.env
 const program = getProgram();
 console.clear();
-const introText = chalk.bgHex('#45bfb9').bold.black(` Storyblok CLI `);
+const introText = chalk.bgHex(colorPalette.PRIMARY).bold(` Storyblok CLI `);
 const messageText = ` `;
 console.log(formatHeader(`
 ${introText} ${messageText}`));
@@ -32,29 +32,13 @@ program.on('command:*', () => {
   konsola.br(); // Add a line break
 });
 
-program.command('test').action(async () => {
-  konsola.title(`Test`, '#8556D3', 'Attempting a test...');
-  const verbose = program.opts().verbose;
-  try {
-    const { state, initializeSession } = session();
-    await initializeSession();
-
-    if (!state.password) {
-      throw new Error('No password found');
-    }
-  }
-  catch (error) {
-    handleError(error as Error, verbose);
-  }
-});
-
 /* console.log(`
-${chalk.hex('#45bfb9')(' ─────╮')}
-${chalk.hex('#45bfb9')('│     │')}
-${chalk.hex('#45bfb9')('│')} ◠ ◡ ◠
-${chalk.hex('#45bfb9')('|_  __|')}
-${chalk.hex('#45bfb9')('  |/ ')}
-`) */
+${chalk.hex(colorPalette.PRIMARY)(' ──────╮')}
+${chalk.hex(colorPalette.PRIMARY)('│      │')}
+${chalk.hex(colorPalette.PRIMARY)('│')}  ◠ ◡ ◠
+${chalk.hex(colorPalette.PRIMARY)('╰─  ───╯')}
+${chalk.hex(colorPalette.PRIMARY)('  |/ ')}
+`); */
 
 try {
   program.parse(process.argv);
