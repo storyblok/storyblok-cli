@@ -22,7 +22,8 @@ const program = getProgram();
 konsola.title(` Storyblok CLI `, colorPalette.PRIMARY);
 
 program.option('--verbose', 'Enable verbose output');
-program.version(pkg.version, '-v, --vers', 'output the current version');
+program.version(pkg.version, '-v, --vers', 'Output the current version');
+program.helpOption('-h, --help', 'Display help for command');
 
 program.on('command:*', () => {
   console.error(`Invalid command: ${program.args.join(' ')}`);
