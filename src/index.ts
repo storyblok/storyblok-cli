@@ -1,8 +1,7 @@
 #!/usr/bin/env node
-import chalk from 'chalk';
 import dotenv from 'dotenv';
 
-import { formatHeader, handleError, konsola } from './utils';
+import { handleError, konsola } from './utils';
 import { getProgram } from './program';
 import './commands/login';
 import './commands/logout';
@@ -11,6 +10,7 @@ import './commands/components';
 import './commands/languages';
 import './commands/migrations';
 import './commands/types';
+import pkg from '../package.json';
 
 import { colorPalette } from './constants';
 
@@ -18,18 +18,16 @@ export * from './types/storyblok';
 
 dotenv.config(); // This will load variables from .env into process.env
 const program = getProgram();
-console.clear();
-const introText = chalk.bgHex(colorPalette.PRIMARY).bold(` Storyblok CLI `);
-const messageText = ` `;
-console.log(formatHeader(`
-${introText} ${messageText}`));
 
-program.option('-v, --verbose', 'Enable verbose output');
+konsola.title(` Storyblok CLI `, colorPalette.PRIMARY);
+
+program.option('--verbose', 'Enable verbose output');
+program.version(pkg.version, '-v, --vers', 'output the current version');
 
 program.on('command:*', () => {
   console.error(`Invalid command: ${program.args.join(' ')}`);
+  konsola.br();
   program.help();
-  konsola.br(); // Add a line break
 });
 
 /* console.log(`
