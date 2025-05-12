@@ -26,10 +26,12 @@
   "scripts": {
     "build": "unbuild",
     "build:stub": "unbuild --stub",
+    "release": "release-it",
     "dev": "pnpm run build:stub && STUB=true node dist/index.mjs",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "vitest",
+    "test:ci": "vitest run",
     "test:ui": "vitest --ui",
     "coverage": "vitest run --coverage"
   },
@@ -53,6 +55,7 @@
     "eslint": "^9.25.1",
     "memfs": "^4.17.0",
     "msw": "^2.7.5",
+    "release-it": "^19.0.2",
     "typescript": "^5.8.3",
     "unbuild": "^3.5.0",
     "vite": "^6.3.4",
