@@ -1,320 +1,82 @@
-# Type Generation Command
+# Types Generate Command
 
-The Storyblok type generation command allows you to generate TypeScript type definitions for your Storyblok components. This is particularly useful for ensuring type safety when working with Storyblok content in your frontend applications.
+The `types generate` command generates TypeScript type definitions (`.d.ts` files) for your Storyblok component schemas. This helps you maintain type safety when working with your Storyblok content.
 
-## Prerequisites
-
-Before generating types, ensure you have:
-
-- Access to the target Storyblok space
-- Access to the target Storyblok space and proper permissions
-- TypeScript installed in your project (if you plan to use the generated types)
-- Pull components from the target space using the `storyblok components pull` command
+> [!WARNING]
+> Before generating types, first pull your components using the `components pull` command. Make sure to use the same flags (`--separate-files`, `--suffix`) that you used when pulling components to ensure the types are generated correctly.
 
 ## Basic Usage
 
 ```bash
-# Generate types for all components in a space
-storyblok types generate --space 12345
-
-# Generate types with strict mode
-storyblok types generate --space 12345 --strict
-
-# Generate types with a custom prefix for component names
-storyblok types generate --space 12345 --type-prefix "Custom"
-
-# Generate types with a custom suffix for component names (if you used the same flag when pulling components)
-storyblok types generate --space 12345 --suffix "Component"
-
-# Generate types in separate files (if you used the same flag when pulling components)
-storyblok types generate --space 12345 --separate-files
-
-# Generate types with a custom fields parser
-storyblok types generate --space 12345 --custom-fields-parser ./path/to/parser.ts
-
-# Generate types with custom compiler options
-storyblok types generate --space 12345 --compiler-options ./path/to/options.json
+storyblok types generate --space <spaceId>
 ```
 
-## Architecture & Flow
+## Options
 
-The type generation command is organized in three main layers with a specific processing flow to ensure accurate type generation.
+| Option | Description | Default |
+|--------|-------------|---------|
+| `--sf, --separate-files` | Generate separate type definition files for each component | `false` |
+| `--strict` | Enable strict mode with no loose typing | `false` |
+| `--type-prefix <prefix>` | Prefix to be prepended to all generated component type names | - |
+| `--suffix <suffix>` | Suffix for component names | - |
+| `--custom-fields-parser <path>` | Path to the parser file for Custom Field Types | - |
+| `--compiler-options <options>` | Path to the compiler options from json-schema-to-typescript | - |
+| `--space <spaceId>` | (Required) The ID of your Storyblok space | - |
+| `--path <path>` | Path to the directory containing your component files | `.storyblok/components` |
 
-### Command Structure
+## Examples
 
-```typescript
-// 1. Command Layer (index.ts)
-typesCommand
-  .command('generate')
-  .option('--sf, --separate-files', 'Generate types in separate files')
-  .option('--strict', 'Use strict mode for type generation')
-  .option('--type-prefix <prefix>', 'Prefix to be prepended to all generated component type names')
-  .option('--suffix <suffix>', 'Components suffix')
-  .option('--custom-fields-parser <path>', 'Path to the parser file for Custom Field Types')
-  .option('--compiler-options <options>', 'Path to the compiler options from json-schema-to-typescript')
-  .action(async (options) => {
-    // Command implementation
-  });
-
-// 2. Operations Layer (actions.ts)
--generateTypes()
-- generateStoryblokTypes()
-- saveTypesToFile()
-
-// 3. Actions Layer (actions.ts)
-- getComponentType()
-- getComponentPropertiesTypeAnnotations()
-- sanitizeComponentName();
-```
-
-### Processing Flow Examples
-
-#### 1. Basic Type Generation
-
+Generate types for all components:
 ```bash
 storyblok types generate --space 12345
 ```
 
-Flow:
-
-**Read Phase**
-```typescript
-// 1. Read components from space
-const spaceData = await readComponentsFiles({
-  from: '12345',
-  path: undefined
-});
-
-// 2. Generate Storyblok types
-await generateStoryblokTypes({
-  filename: undefined,
-  path: undefined
-});
-```
-
-**Generation Phase**
-```typescript
-// 3. Generate component types
-const typedefString = await generateTypes(spaceData, {
-  // Default options
-});
-```
-
-**Save Phase**
-```typescript
-// 4. Save types to file
-await saveTypesToFile('12345', typedefString, {
-  // Default options
-});
-```
-
-#### 2. Strict Mode Type Generation
-
+Generate types with strict mode:
 ```bash
 storyblok types generate --space 12345 --strict
 ```
 
-Flow:
-
-**Generation Phase**
-```typescript
-// 1. Generate component types with strict mode
-const typedefString = await generateTypes(spaceData, {
-  strict: true
-});
-```
-
-**Type Annotation Example**
-```typescript
-// Without strict mode (loose types)
-export interface Component {
-  text?: string;
-  image?: {
-    filename: string;
-    alt: string;
-  };
-  [k: string]: unknown; // Index signature for additional properties
-}
-
-// With strict mode
-export interface Component {
-  text?: string;
-  image?: {
-    filename: string;
-    alt: string;
-  };
-  // No index signature, only explicitly defined properties are allowed
-}
-```
-
-#### 3. Custom Type Prefix
-
+Generate types with a custom prefix:
 ```bash
-storyblok types generate --space 12345 --type-prefix "Custom"
+storyblok types generate --space 12345 --type-prefix Storyblok
 ```
 
-Flow:
-
-**Component Type Generation**
-```typescript
-// 1. Get component type with prefix
-const componentType = getComponentType(component.name, {
-  typePrefix: 'Custom'
-});
-
-// 2. Result: "CustomComponentName" instead of "ComponentName"
-```
-
-#### 4. Separate Files Generation
-
+Generate separate type files for each component:
 ```bash
 storyblok types generate --space 12345 --separate-files
 ```
 
-Flow:
+## File Structure
 
-**File Generation**
-```typescript
-// 1. Generate types for each component
-for (const component of spaceData.components) {
-  const componentType = getComponentType(component.name, options);
-  const properties = getComponentPropertiesTypeAnnotations(component.schema, options);
+The command will generate two files:
+1. A `storyblok.d.ts` file with base Storyblok types (like `StoryblokAsset`, `StoryblokRichtext`, etc.)
+2. A `storyblok-components.d.ts` file for each space inside the `.storyblok/types/{spaceId}/` directory with your component types
 
-  // 2. Create a separate file for each component
-  const fileContent = `export interface ${componentType} {
-  ${properties}
-}`;
+### Example Structure
 
-  // 3. Save to a separate file
-  await saveToFile(`${component.name}.d.ts`, fileContent);
-}
-```
-
-#### 5. Custom Fields Parser
-
+When running:
 ```bash
-storyblok types generate --space 12345 --custom-fields-parser ./path/to/parser.ts
+storyblok types generate --space 295018
 ```
 
-Flow:
+The following structure will be created:
 
-**Parser Loading**
-```typescript
-// 1. Load custom fields parser
-const customFieldsParser = await import('./path/to/parser.ts');
-
-// 2. Use parser for custom field types
-const propertyType = customFieldsParser(property);
+```
+.storyblok/
+└── types/
+    ├── storyblok.d.ts            # Base Storyblok types
+    └── 295018/
+        └── storyblok.d.ts        # Your component types
 ```
 
-## Key Features
+> **Note:**
+> The `{spaceId}` folder corresponds to the ID of your Storyblok space.
+> The generated files are always placed under `.storyblok/types/` and `.storyblok/types/{spaceId}/`.
 
-### Type Safety
+## Notes
 
-- Generate TypeScript interfaces for all Storyblok components
-- Ensure type safety when working with Storyblok content
-- Reduce runtime errors by catching type issues at compile time
-
-### Customization Options
-
-- Add prefixes to component type names
-- Add suffixes to component type names
-- Generate types in separate files
-- Use strict mode for more precise types
-- Customize compiler options
-
-### Custom Field Support
-
-- Parse custom field types with a custom parser
-- Extend type generation for non-standard field types
-- Support for complex field structures
-
-### Storyblok Type Definitions
-
-- Generate type definitions for Storyblok's built-in field types
-- Include type definitions for Storyblok's API responses
-- Ensure complete type coverage for Storyblok integration
-
-## Type Generation File Structure
-
-Generated type files follow this structure:
-
-```typescript
-// For a component named "hero" with text and image fields
-export interface Hero {
-  text: string;
-  image: {
-    filename: string;
-    alt: string;
-  };
-}
-
-// For a component with nested bloks
-export interface Page {
-  title: string;
-  sections: Array<{
-    component: string;
-    _uid: string;
-    text?: string;
-    image?: {
-      filename: string;
-      alt: string;
-    };
-  }>;
-}
-```
-
-## Testing Strategy
-
-The command includes comprehensive test coverage:
-
-### Unit Tests
-
-- Component type generation
-- Property type annotation generation
-- Custom field parsing
-- File saving functionality
-
-### Testing Checklist
-
-#### Running Type Generation
-
-**General**
-- [ ] It should show the command title
-- [ ] It should throw an error if the user is not logged in: "You are currently not logged in. Please login first to get your user info."
-
-**Required Arguments**
-- `--space=TARGET_SPACE_ID`
-  - [ ] It should read components from the target space
-  - [ ] It should generate types for all components
-  - [ ] It should save the generated types to a file
-
-**Options**
-- `--strict`
-  - [ ] It should generate strict types without the [k: string]: unknown index signature
-  - [ ] It should only allow explicitly defined properties
-
-- `--type-prefix=<prefix>`
-  - [ ] It should prepend the prefix to all component type names
-  - [ ] It should handle special characters in the prefix
-
-- `--suffix=<suffix>`
-  - [ ] It should append the suffix to all component type names
-  - [ ] It should handle special characters in the suffix
-
-- `--separate-files`
-  - [ ] It should generate a separate file for each component
-  - [ ] It should name files according to component names
-
-- `--custom-fields-parser=<path>`
-  - [ ] It should load the custom fields parser from the specified path
-  - [ ] It should use the parser for custom field types
-
-- `--compiler-options=<options>`
-  - [ ] It should load compiler options from the specified path
-  - [ ] It should apply the options to the type generation
-
-**Error Handling**
-- [ ] It should throw an error if the space is not provided: "Please provide the space as argument --space YOUR_SPACE_ID."
-- [ ] It should handle errors during type generation gracefully
-- [ ] It should provide meaningful error messages for common issues
+- The command requires you to be logged in to Storyblok
+- The space ID is required
+- The generated types are based on your component schemas in Storyblok
+- When using `--strict`, the generated types will be more precise but may require more explicit type handling in your code
+- Custom field types can be handled by providing a parser file with `--custom-fields-parser`

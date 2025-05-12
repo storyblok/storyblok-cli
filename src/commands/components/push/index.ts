@@ -23,11 +23,11 @@ componentsCommand
   .option('-f, --from <from>', 'source space id')
   .option('--fi, --filter <filter>', 'glob filter to apply to the components before pushing')
   .option('--sf, --separate-files', 'Read from separate files instead of consolidated files')
-  .option('--suffix <suffix>', 'Suffix to add to the component name')
+  .option('--su, --suffix <suffix>', 'Suffix to add to the component name')
   .action(async (componentName: string | undefined, options: PushComponentsOptions) => {
     konsola.title(` ${commands.COMPONENTS} `, colorPalette.COMPONENTS, componentName ? `Pushing component ${componentName}...` : 'Pushing components...');
     // Global options
-    const { verbose } = program.opts();
+    const verbose = program.opts().verbose;
     const { space, path } = componentsCommand.opts();
 
     const { from, filter } = options;
