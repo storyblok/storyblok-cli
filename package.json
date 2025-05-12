@@ -16,9 +16,9 @@
     "node",
     "javascript"
   ],
-  "main": "./dist/cli.mjs",
+  "main": "./dist/index.mjs",
   "bin": {
-    "storyblok": "./dist/cli.mjs"
+    "storyblok": "./dist/index.mjs"
   },
   "files": [
     "dist/**"
