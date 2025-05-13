@@ -49,8 +49,8 @@ npm install storyblok@4.0.0-beta.<version>
 ## Sync Command
 
 > [!IMPORTANT]
-> The sync command is being reimagined as a new API endpoint that will perform synchronization between spaces. This new implementation will provide:
-> - Faster synchronization compared to the current CLI version
+> The sync command is being reimagined as a new API endpoint that will perform synchronization between spaces. This new implementation, compared to the current version, will provide:
+> - Faster synchronization
 > - Improved reliability by running on our backend servers
 > - Better handling of large-scale synchronization operations
 
