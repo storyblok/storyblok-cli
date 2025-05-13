@@ -56,7 +56,6 @@ npm install storyblok@4.0.0-beta.<version>
 
 If you wish to continue using the `sync` command, please refer to the [v3](https://github.com/storyblok/storyblok-cli/tree/v3?tab=readme-ov-file#sync) documentation and use `storyblok@v3.36.1` or previous.
 
-
 ## Global Options
 
 These options are available for all commands:
