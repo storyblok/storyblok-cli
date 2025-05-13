@@ -31,7 +31,7 @@ npm install storyblok@4.0.0-beta.<version>
 | [`migrations run`](./commands/migrations/run/README.md) | ✅ | Replaces previous run-migrations |
 | [`migrations rollback`](./commands/migrations/rollback/README.md) | ✅ | Replaces previous rollback-migrations |
 | [`types generate`](./commands/types/generate/README.md) | ✅ | Replaces previous generate-typescript-typedefs |
-| `sync` | ⚠️ | |
+| `sync` | ⚠️ | Pending new API endpoint implementation for improved performance and reliability (Check below for more details) |
 | `datasources pull` | 📝 | |
 | `datasources push` | 📝 | |
 | `datasources delete` | 📝 | Will replace delete-datasources |
@@ -43,8 +43,19 @@ npm install storyblok@4.0.0-beta.<version>
 ### Status Legend
 - ✅ Ready: Feature is implemented and ready to use
 - 📝 Planned: Feature is planned for future implementation
-- ⚠️ v3: Feature is available only in v3
+- ⚠️ v3: Feature is available only in [v3](https://github.com/storyblok/storyblok-cli/tree/v3)
 - 💬 TBD: Feature is under discussion
+
+## Sync Command
+
+> [!IMPORTANT]
+> The sync command is being reimagined as a new API endpoint that will perform synchronization between spaces. This new implementation will provide:
+> - Faster synchronization compared to the current CLI version
+> - Improved reliability by running on our backend servers
+> - Better handling of large-scale synchronization operations
+
+If you wish to continue using the `sync` command, please refer to the [v3](https://github.com/storyblok/storyblok-cli/tree/v3?tab=readme-ov-file#sync) documentation and use `storyblok@v3.36.1` or previous.
+
 
 ## Global Options
 
