@@ -89,11 +89,11 @@ pnpm run coverage
 
 To debug the CLI you can use the `launch.json` configuration in the `.vscode` folder. You can run any command with the debugger attached.
 
-![Debugging](/.github/assets/debug-vscode.png)
+![A screenshot of the Visual Studio Code debugger](/.github/assets/debug-vscode.png)
 
 Then you can set breakpoints directly to the typescript files and the debugger will handle the rest with sourcempaps.
 
-![Debugging](/.github/assets/breakpoints.png)
+![A screenshot of a breakpoint set in the Visual Studio Code debugger](/.github/assets/breakpoints.png)
 
 ## Community
 
@@ -107,7 +107,7 @@ For community support, chatting with other users, please visit:
 
 ## Support
 
-For bugs or feature requests, please [submit an issue](https://github.com/storyblok/my-joyful-package/issues/new/choose).
+For bugs or feature requests, please [submit an issue](https://github.com/storyblok/storyblok-cli/issues/new/choose).
 
 > [!IMPORTANT]
 > Please search existing issues before submitting a new one. Issues without a minimal reproducible example will be closed. [Why reproductions are Required](https://antfu.me/posts/why-reproductions-are-required).
@@ -122,7 +122,7 @@ If you have a question, please ask in the [Discuss Storyblok on Discord](https:/
 
 ## Contributing
 
-If you're interested in contributing to my-joyful-package, please read our [contributing docs](https://github.com/storyblok/.github/blob/main/CONTRIBUTING.md) before submitting a pull request.
+If you're interested in contributing to Storyblok CLI, please read our [contributing docs](https://github.com/storyblok/.github/blob/main/contributing.md) before submitting a pull request.
 
 ## License
 
