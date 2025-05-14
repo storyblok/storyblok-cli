@@ -10,8 +10,6 @@ export function formatHeader(title: string) {
 }
 export const konsola = {
   title: (message: string, color: string, subtitle?: string) => {
-    console.log(''); // Add a line break
-    console.log(''); // Add a line break
     if (subtitle) {
       console.log(`${formatHeader(chalk.bgHex(color).bold(` ${message} `))} ${subtitle}`);
     }
