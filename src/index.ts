@@ -19,6 +19,8 @@ export * from './types/storyblok';
 dotenv.config(); // This will load variables from .env into process.env
 const program = getProgram();
 
+konsola.br();
+konsola.br();
 konsola.title(` Storyblok CLI `, colorPalette.PRIMARY);
 
 program.option('--verbose', 'Enable verbose output');
@@ -30,14 +32,6 @@ program.on('command:*', () => {
   konsola.br();
   program.help();
 });
-
-/* console.log(`
-${chalk.hex(colorPalette.PRIMARY)(' ──────╮')}
-${chalk.hex(colorPalette.PRIMARY)('│      │')}
-${chalk.hex(colorPalette.PRIMARY)('│')}  ◠ ◡ ◠
-${chalk.hex(colorPalette.PRIMARY)('╰─  ───╯')}
-${chalk.hex(colorPalette.PRIMARY)('  |/ ')}
-`); */
 
 try {
   program.parse(process.argv);
