@@ -22,10 +22,7 @@
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "sourceMaps": true,
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
-      "env": {
-        "STUB": "true"
-      }
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"]
     },
     {
       "type": "node",
@@ -36,10 +33,7 @@
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "sourceMaps": true,
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
-      "env": {
-        "STUB": "true"
-      }
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"]
     },
     {
       "type": "node",
@@ -50,10 +44,7 @@
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "sourceMaps": true,
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
-      "env": {
-        "STUB": "true"
-      }
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"]
     },
     {
       "type": "node",
@@ -64,10 +55,7 @@
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "sourceMaps": true,
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
-      "env": {
-        "STUB": "true"
-      }
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"]
     },
     {
       "type": "node",
@@ -78,10 +66,7 @@
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "sourceMaps": true,
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
-      "env": {
-        "STUB": "true"
-      }
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"]
     },
     {
       "type": "node",
@@ -92,10 +77,7 @@
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "sourceMaps": true,
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
-      "env": {
-        "STUB": "true"
-      }
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"]
     },
     {
       "type": "node",
@@ -106,10 +88,7 @@
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "sourceMaps": true,
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
-      "env": {
-        "STUB": "true"
-      }
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"]
     },
     {
       "type": "node",
@@ -120,10 +99,7 @@
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "sourceMaps": true,
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
-      "env": {
-        "STUB": "true"
-      }
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"]
     },
     {
       "type": "node",
@@ -134,10 +110,7 @@
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "sourceMaps": true,
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
-      "env": {
-        "STUB": "true"
-      }
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"]
     },
     {
       "type": "node",
@@ -148,10 +121,7 @@
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "sourceMaps": true,
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
-      "env": {
-        "STUB": "true"
-      }
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"]
     },
     {
       "type": "node",
@@ -162,10 +132,7 @@
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "sourceMaps": true,
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
-      "env": {
-        "STUB": "true"
-      }
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"]
     },
     {
       "type": "node",
@@ -176,10 +143,7 @@
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "sourceMaps": true,
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
-      "env": {
-        "STUB": "true"
-      }
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"]
     },
     {
       "type": "node",
@@ -190,10 +154,7 @@
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "sourceMaps": true,
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
-      "env": {
-        "STUB": "true"
-      }
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"]
     },
     {
       "type": "node",
@@ -204,10 +165,7 @@
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "sourceMaps": true,
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
-      "env": {
-        "STUB": "true"
-      }
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"]
     },
     {
       "type": "node",
@@ -218,10 +176,7 @@
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "sourceMaps": true,
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
-      "env": {
-        "STUB": "true"
-      }
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"]
     },
     {
       "type": "node",
@@ -232,10 +187,7 @@
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "sourceMaps": true,
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
-      "env": {
-        "STUB": "true"
-      }
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"]
     },
     {
       "type": "node",
@@ -246,10 +198,7 @@
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "sourceMaps": true,
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
-      "env": {
-        "STUB": "true"
-      }
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"]
     },
     {
       "type": "node",
@@ -260,10 +209,7 @@
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "sourceMaps": true,
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
-      "env": {
-        "STUB": "true"
-      }
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"]
     },
     {
       "type": "node",
@@ -274,10 +220,7 @@
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "sourceMaps": true,
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
-      "env": {
-        "STUB": "true"
-      }
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"]
     },
     {
       "type": "node",
@@ -288,10 +231,7 @@
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "sourceMaps": true,
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
-      "env": {
-        "STUB": "true"
-      }
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"]
     },
     {
       "type": "node",
@@ -302,10 +242,7 @@
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "sourceMaps": true,
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
-      "env": {
-        "STUB": "true"
-      }
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"]
     },
     {
       "type": "node",
@@ -317,10 +254,7 @@
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "sourceMaps": true,
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
-      "env": {
-        "STUB": "true"
-      }
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"]
     },
     {
       "type": "node",
@@ -331,10 +265,7 @@
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "sourceMaps": true,
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
-      "env": {
-        "STUB": "true"
-      }
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"]
     },
     {
       "type": "node",
@@ -345,10 +276,7 @@
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "sourceMaps": true,
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
-      "env": {
-        "STUB": "true"
-      }
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"]
     },
     {
       "type": "node",
@@ -359,10 +287,7 @@
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "sourceMaps": true,
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
-      "env": {
-        "STUB": "true"
-      }
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"]
     },
     {
       "type": "node",
@@ -373,10 +298,7 @@
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "sourceMaps": true,
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
-      "env": {
-        "STUB": "true"
-      }
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"]
     },
     {
       "type": "node",
@@ -387,10 +309,7 @@
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "sourceMaps": true,
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
-      "env": {
-        "STUB": "true"
-      }
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"]
     },
     {
       "type": "node",
@@ -401,10 +320,7 @@
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "sourceMaps": true,
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
-      "env": {
-        "STUB": "true"
-      }
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"]
     }
   ]
 }

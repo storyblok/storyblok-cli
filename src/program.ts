@@ -1,12 +1,26 @@
 // program.ts
 import { Command } from 'commander';
-import * as fs from 'node:fs';
-import { resolve } from 'pathe';
 import { __dirname, handleError } from './utils';
+import type { NormalizedPackageJson } from 'read-package-up';
+import { readPackageUp } from 'read-package-up';
 
+let packageJson: NormalizedPackageJson;
 // Read package.json for metadata
-const packageJsonPath = resolve(__dirname, process.env.VITEST || process.env.STUB ? '../../package.json' : '../package.json');
-const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
+const result = await readPackageUp({
+  cwd: __dirname,
+});
+
+if (!result) {
+  console.debug('Metadata not found');
+  packageJson = {
+    name: 'storyblok',
+    description: 'Storyblok CLI',
+    version: '0.0.0',
+  } as NormalizedPackageJson;
+}
+else {
+  packageJson = result.packageJson;
+}
 
 // Declare a variable to hold the singleton instance
 let programInstance: Command | null = null;
@@ -23,7 +37,7 @@ export function getProgram(): Command {
     programInstance = new Command();
     programInstance
       .name(packageJson.name)
-      .description(packageJson.description)
+      .description(packageJson.description || '')
       .version(packageJson.version);
 
     // Global error handling
