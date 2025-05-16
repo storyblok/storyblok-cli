@@ -13,7 +13,6 @@ import './commands/types';
 import pkg from '../package.json';
 
 import { colorPalette } from './constants';
-import { createManagementClient } from './api';
 
 export * from './types/storyblok';
 
