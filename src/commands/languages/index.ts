@@ -6,6 +6,7 @@ import { fetchLanguages, saveLanguagesToFile } from './actions';
 import chalk from 'chalk';
 import type { PullLanguagesOptions } from './constants';
 import { Spinner } from '@topcli/spinner';
+import { createManagementClient } from '../../api';
 
 const program = getProgram(); // Get the shared singleton instance
 
@@ -43,13 +44,18 @@ languagesCommand
       return;
     }
 
+    createManagementClient({
+      accessToken: state.password,
+      region: state.region,
+    });
+
     const spinner = new Spinner({
       verbose: !isVitest,
     });
     try {
       spinner.start(`Fetching ${chalk.hex(colorPalette.LANGUAGES)('languages')}`);
 
-      const internationalization = await fetchLanguages(space, state.password, state.region);
+      const internationalization = await fetchLanguages(space);
 
       if (!internationalization || internationalization.languages?.length === 0) {
         konsola.warn(`No languages found in the space ${space}`);

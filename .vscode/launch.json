@@ -74,7 +74,7 @@
       "request": "launch",
       "name": "Debug Pull languages",
       "program": "${workspaceFolder}/dist/index.mjs",
-      "args": ["languages", "pull", "--space", "2950182323", "--path", ".storyblok"],
+      "args": ["languages", "pull", "--space", "295018", "--path", ".storyblok"],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "sourceMaps": true,

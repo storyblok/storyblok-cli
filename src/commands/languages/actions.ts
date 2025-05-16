@@ -1,22 +1,16 @@
 import { join } from 'node:path';
 import { handleAPIError, handleFileSystemError } from '../../utils';
-import { customFetch } from '../../utils/fetch';
 import { resolvePath, saveToFile } from '../../utils/filesystem';
 import type { PullLanguagesOptions } from './constants';
-import type { RegionCode } from '../../constants';
 import type { SpaceInternationalization } from '../../types';
-import { getStoryblokUrl } from '../../utils/api-routes';
+import { managementClient } from '../../api';
 
-export const fetchLanguages = async (space: string, token: string, region: RegionCode): Promise<SpaceInternationalization | undefined> => {
+export const fetchLanguages = async (space: string): Promise<SpaceInternationalization | undefined> => {
   try {
-    const url = getStoryblokUrl(region);
-    const response = await customFetch<{
+    const { get } = managementClient();
+    const response = await get<{
       space: SpaceInternationalization;
-    }>(`${url}/spaces/${space}`, {
-      headers: {
-        Authorization: token,
-      },
-    });
+    }>(`/spaces/${space}`);
 
     return {
       default_lang_name: response.space.default_lang_name,

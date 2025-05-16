@@ -5,10 +5,12 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } 
 import { fetchLanguages, saveLanguagesToFile } from './actions';
 import { FetchError } from 'src/utils/fetch';
 import { APIError } from 'src/utils';
+import { createManagementClient } from '../../api';
 
 const handlers = [
   http.get('https://api.storyblok.com/v1/spaces/12345', async ({ request }) => {
     const token = request.headers.get('Authorization');
+    console.log('msw token', token);
     if (token === 'valid-token') {
       return HttpResponse.json({
         space: {
@@ -30,6 +32,12 @@ const handlers = [
   }),
 ];
 
+// Mock the managementClient module
+vi.mock('src/api', () => ({
+  managementClient: vi.fn(),
+  createManagementClient: vi.fn(),
+}));
+
 const server = setupServer(...handlers);
 
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
@@ -40,14 +48,19 @@ afterAll(() => server.close());
 vi.mock('node:fs');
 vi.mock('node:fs/promises');
 
-describe('pull languages actions', () => {
+describe.only('pull languages actions', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vol.reset();
   });
 
   describe('fetchLanguages', () => {
-    it('should pull languages successfully with a valid token', async () => {
+    it('should pull languages successfully', async () => {
+      createManagementClient({
+        accessToken: 'valid-token',
+        region: 'eu',
+      });
+
       const mockResponse = {
         default_lang_name: 'en',
         languages: [
@@ -61,17 +74,26 @@ describe('pull languages actions', () => {
           },
         ],
       };
-      const result = await fetchLanguages('12345', 'valid-token', 'eu');
+      const result = await fetchLanguages('12345');
       expect(result).toEqual(mockResponse);
     });
   });
-  it.skip('should throw an masked error for invalid token', async () => {
-    // TODO: Fix this test, is the only of it's kind that is not working, it's not clear why
-    // Test return "Compared values have no visual difference." but fails anyway
-    const error = new FetchError('Non-JSON response', { status: 401, statusText: 'Unauthorized', data: null });
-    await expect(fetchLanguages('12345', 'invalid-token', 'eu')).rejects.toThrow(
-      new APIError('unauthorized', 'pull_languages', error, `The user is not authorized to access the API`),
-    );
+  it('should throw an masked error for invalid token', async () => {
+    createManagementClient({
+      accessToken: 'invalid-token',
+      region: 'eu',
+    });
+
+    await expect(fetchLanguages('12345')).rejects.toMatchObject({
+      name: 'API Error',
+      errorId: 'unauthorized',
+      cause: 'The user is not authorized to access the API',
+      code: 401,
+      messageStack: [
+        'Failed to pull languages',
+        'The user is not authorized to access the API',
+      ],
+    });
   });
 
   describe('saveLanguagesToFile', () => {

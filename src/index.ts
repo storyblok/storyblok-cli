@@ -13,6 +13,7 @@ import './commands/types';
 import pkg from '../package.json';
 
 import { colorPalette } from './constants';
+import { createManagementClient } from './api';
 
 export * from './types/storyblok';
 
@@ -31,6 +32,10 @@ program.on('command:*', () => {
   console.error(`Invalid command: ${program.args.join(' ')}`);
   konsola.br();
   program.help();
+});
+
+program.command('test').action(() => {
+  const client = createManagementClient();
 });
 
 try {

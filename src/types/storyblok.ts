@@ -1,3 +1,38 @@
+export interface StoryblokBaseResponse<T> {
+  cv: number;
+  rels: string[];
+  links: string[];
+  stories: StoryblokStory<T>[];
+}
+
+export interface StoryblokContentBase {
+  _uid?: string;
+  component: string;
+  _editable?: string;
+}
+
+export interface StoryblokStory<T> {
+  id: number;
+  uuid: string;
+  name: string;
+  slug: string;
+  full_slug: string;
+  path: string;
+  content: StoryblokContentBase & T;
+  position: number;
+  tag_list: string[];
+  is_startpage: boolean;
+  group_id: string;
+  parent_id: number;
+  meta_title: string;
+  meta_description: string;
+  published: boolean;
+  created_at: string;
+  updated_at: string;
+  published_at: string;
+  alternates: string[];
+}
+
 export type StoryblokPropertyType = 'asset' | 'multiasset' | 'multilink' | 'table' | 'richtext';
 
 export interface StoryblokAsset {

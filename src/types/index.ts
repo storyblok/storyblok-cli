@@ -17,7 +17,7 @@ export interface Language {
   name: string;
   code: string;
   fallback_code?: string;
-  ai_translation_code: string | null;
+  ai_translation_code?: string | null;
 }
 
 export interface SpaceInternationalization {
