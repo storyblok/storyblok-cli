@@ -2,14 +2,18 @@ import { getUser } from './actions';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
-import { APIError } from '../../utils';
-import { FetchError } from '../../utils/fetch';
+import { createManagementClient } from '../../api';
 
 const handlers = [
   http.get('https://api.storyblok.com/v1/users/me', async ({ request }) => {
     const token = request.headers.get('Authorization');
     if (token === 'valid-token') {
-      return HttpResponse.json({ data: 'user data' });
+      return HttpResponse.json({
+        user: {
+          friendly_name: 'Test User',
+          email: 'test@example.com',
+        },
+      });
     }
     return new HttpResponse('Unauthorized', { status: 401 });
   }),
@@ -29,32 +33,35 @@ describe('user actions', () => {
 
   describe('getUser', () => {
     it('should get user successfully with a valid token', async () => {
-      const mockResponse = { data: 'user data' };
-      const result = await getUser('valid-token', 'eu');
+      createManagementClient({
+        accessToken: 'valid-token',
+        region: 'eu',
+      });
+
+      const mockResponse = {
+        friendly_name: 'Test User',
+        email: 'test@example.com',
+      };
+      const result = await getUser();
       expect(result).toEqual(mockResponse);
     });
-  });
 
-  it('should throw an masked error for invalid token', async () => {
-    const error = new FetchError('Non-JSON response', {
-      status: 401,
-      statusText: 'Unauthorized',
-      data: null,
+    it('should throw an error for invalid token', async () => {
+      createManagementClient({
+        accessToken: 'invalid-token',
+        region: 'eu',
+      });
+
+      await expect(getUser()).rejects.toMatchObject({
+        name: 'API Error',
+        errorId: 'unauthorized',
+        cause: 'The user is not authorized to access the API',
+        code: 401,
+        messageStack: [
+          'Failed to get user',
+          'The user is not authorized to access the API',
+        ],
+      });
     });
-    await expect(getUser('invalid-token', 'eu')).rejects.toThrow(
-      new APIError('unauthorized', 'get_user', error, `The token provided inva********* is invalid.
-        Please make sure you are using the correct token and try again.`),
-    );
-  });
-
-  it('should throw a network error if response is empty (network)', async () => {
-    server.use(
-      http.get('https://api.storyblok.com/v1/users/me', () => {
-        return new HttpResponse(null, { status: 500 });
-      }),
-    );
-    await expect(getUser('any-token', 'eu')).rejects.toThrow(
-      'No response from server, please check if you are correctly connected to internet',
-    );
   });
 });

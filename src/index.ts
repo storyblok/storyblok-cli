@@ -34,10 +34,6 @@ program.on('command:*', () => {
   program.help();
 });
 
-program.command('test').action(() => {
-  const client = createManagementClient();
-});
-
 try {
   program.parse(process.argv);
 }

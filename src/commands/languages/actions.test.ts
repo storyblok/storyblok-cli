@@ -3,14 +3,13 @@ import { setupServer } from 'msw/node';
 import { vol } from 'memfs';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { fetchLanguages, saveLanguagesToFile } from './actions';
-import { FetchError } from 'src/utils/fetch';
-import { APIError } from 'src/utils';
+
 import { createManagementClient } from '../../api';
 
 const handlers = [
   http.get('https://api.storyblok.com/v1/spaces/12345', async ({ request }) => {
     const token = request.headers.get('Authorization');
-    console.log('msw token', token);
+
     if (token === 'valid-token') {
       return HttpResponse.json({
         space: {
@@ -32,12 +31,6 @@ const handlers = [
   }),
 ];
 
-// Mock the managementClient module
-vi.mock('src/api', () => ({
-  managementClient: vi.fn(),
-  createManagementClient: vi.fn(),
-}));
-
 const server = setupServer(...handlers);
 
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
@@ -48,7 +41,7 @@ afterAll(() => server.close());
 vi.mock('node:fs');
 vi.mock('node:fs/promises');
 
-describe.only('pull languages actions', () => {
+describe('pull languages actions', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vol.reset();
