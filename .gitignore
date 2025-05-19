@@ -115,3 +115,6 @@ storyblok-component-types.d.ts
 
 # storyblok folder
 .storyblok/
+
+# DS_Store
+.DS_Store
