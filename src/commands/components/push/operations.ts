@@ -264,6 +264,7 @@ export async function handleComponentGroups(
     : spaceData;
 
   // First, process groups without parents
+// This conditional handles a strange scenario where group (folders) ids are equal to their parents
   const rootGroups = groupsToProcess.filter(group => (!group.parent_uuid || group.parent_uuid === group.uuid) && !group.parent_id);
   for (const group of rootGroups) {
     const spinner = new Spinner({
