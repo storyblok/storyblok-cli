@@ -124,7 +124,7 @@ function findRelatedResources(
       relatedGroups.add(currentGroup);
 
       // If the group has a parent, get it from the map
-      if (currentGroup.parent_uuid && currentGroup.parent_uuid.length > 0) {
+      if (currentGroup.parent_uuid && currentGroup.parent_uuid.length > 0 && currentGroup.parent_uuid !== currentGroup.uuid) {
         currentGroup = groupsMap.get(currentGroup.parent_uuid);
       }
       else {
@@ -264,7 +264,8 @@ export async function handleComponentGroups(
     : spaceData;
 
   // First, process groups without parents
-  const rootGroups = groupsToProcess.filter(group => !group.parent_uuid && !group.parent_id);
+// This conditional handles a strange scenario where group (folders) ids are equal to their parents
+  const rootGroups = groupsToProcess.filter(group => (!group.parent_uuid || group.parent_uuid === group.uuid) && !group.parent_id);
   for (const group of rootGroups) {
     const spinner = new Spinner({
       verbose: !isVitest,
@@ -453,7 +454,7 @@ function getGroupHierarchy(group: SpaceComponentGroup, allGroups: SpaceComponent
   const hierarchy: SpaceComponentGroup[] = [group];
   let currentGroup = group;
 
-  while (currentGroup.parent_uuid && currentGroup.parent_uuid.length > 0) {
+  while (currentGroup.parent_uuid && currentGroup.parent_uuid.length > 0 && currentGroup.parent_uuid !== currentGroup.uuid) {
     const parentGroup = allGroups.find(g => g.uuid === currentGroup.parent_uuid);
     if (parentGroup) {
       hierarchy.unshift(parentGroup); // Add parent to the start of the array
