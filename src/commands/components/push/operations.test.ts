@@ -451,6 +451,18 @@ describe('operations', () => {
           internal_tags_list: [],
           color: null,
         },
+        {
+          name: 'old-component-inside-old-folder',
+          id: 126,
+          display_name: 'Old Component Inside Old Folder',
+          created_at: '1999-01-01',
+          updated_at: '1999-01-01',
+          schema: {},
+          component_group_uuid: 'group-old-uuid',
+          internal_tag_ids: [],
+          internal_tags_list: [],
+          color: null,
+        },
       ],
       groups: [
         {
@@ -473,6 +485,14 @@ describe('operations', () => {
           uuid: 'group-c-uuid',
           parent_id: 2,
           parent_uuid: 'group-b-uuid',
+        },
+        {
+          name: 'Group Old',
+          id: 99,
+          uuid: 'group-old-uuid',
+          parent_id: null,
+          // old root groups have parent uuid equal to own uuid
+          parent_uuid: 'group-old-uuid',
         },
       ],
       presets: [
@@ -533,6 +553,17 @@ describe('operations', () => {
 
       expect(result.components).toHaveLength(0); // Should not match as it's treated as literal
     });
+
+    it('should handle old root groups', () => {
+      const result = filterSpaceDataByPattern(mockSpaceData, 'old-component-inside-old-folder');
+
+      expect(result.components).toHaveLength(1);
+      expect(result.components[0].name).toBe('old-component-inside-old-folder');
+      expect(result.internalTags).toHaveLength(0);
+      expect(result.presets).toHaveLength(0);
+      expect(result.groups).toHaveLength(1);
+      expect(result.groups[0].uuid).toBe('group-old-uuid');
+    });
   });
 
   describe('filterSpaceDataByComponent', () => {
@@ -562,6 +593,18 @@ describe('operations', () => {
           internal_tags_list: [],
           color: null,
         },
+        {
+          name: 'old-component-inside-old-folder',
+          id: 126,
+          display_name: 'Old Component Inside Old Folder',
+          created_at: '1999-01-01',
+          updated_at: '1999-01-01',
+          schema: {},
+          component_group_uuid: 'group-old-uuid',
+          internal_tag_ids: [],
+          internal_tags_list: [],
+          color: null,
+        },
       ],
       groups: [
         {
@@ -577,6 +620,14 @@ describe('operations', () => {
           uuid: 'group-b-uuid',
           parent_id: 1,
           parent_uuid: 'group-a-uuid',
+        },
+        {
+          name: 'Group Old',
+          id: 99,
+          uuid: 'group-old-uuid',
+          parent_id: null,
+          // old root groups have parent uuid equal to own uuid
+          parent_uuid: 'group-old-uuid',
         },
       ],
       presets: [
@@ -656,6 +707,17 @@ describe('operations', () => {
       expect(result.presets).toHaveLength(0);
       expect(result.groups).toHaveLength(0);
     });
+
+    it('should handle old root groups', () => {
+      const result = filterSpaceDataByComponent(mockSpaceData, 'old-component-inside-old-folder');
+
+      expect(result.components).toHaveLength(1);
+      expect(result.components[0].name).toBe('old-component-inside-old-folder');
+      expect(result.internalTags).toHaveLength(0);
+      expect(result.presets).toHaveLength(0);
+      expect(result.groups).toHaveLength(1);
+      expect(result.groups[0].uuid).toBe('group-old-uuid');
+    });
   });
 
   describe('handleWhitelists', () => {
@@ -704,7 +766,7 @@ describe('operations', () => {
             field2: {
               type: 'bloks',
               restrict_type: 'groups',
-              component_group_whitelist: ['group-a-uuid', 'group-b-uuid'],
+              component_group_whitelist: ['group-a-uuid', 'group-b-uuid', 'group-old-uuid'],
             },
           },
           component_group_uuid: 'group-b-uuid',
@@ -727,6 +789,14 @@ describe('operations', () => {
           uuid: 'group-b-uuid',
           parent_id: 1,
           parent_uuid: 'group-a-uuid',
+        },
+        {
+          name: 'Old Group',
+          id: 99,
+          uuid: 'group-old-uuid',
+          parent_id: null,
+          // old root groups have parent uuid equal to own uuid
+          parent_uuid: 'group-old-uuid',
         },
       ],
       presets: [],
@@ -772,19 +842,23 @@ describe('operations', () => {
 
       // Groups should be processed next
       expect(allCalls[2][1].name).toBe('Group A');
-      expect(allCalls[3][1].name).toBe('Group B');
+      expect(allCalls[3][1].name).toBe('Old Group');
+      expect(allCalls[4][1].name).toBe('Group B');
 
       // Components should be processed last
-      expect(allCalls[4][1].name).toBe('component-tags');
+      expect(allCalls[5][1].name).toBe('component-tags');
 
       // Verify ID/UUID mappings
       expect(results.tagsIdMap.get(1)).toBe(1001);
       expect(results.tagsIdMap.get(2)).toBe(1002);
       expect(results.groupsUuidMap.get('group-a-uuid')).toBe('new-group-a-uuid');
       expect(results.groupsUuidMap.get('group-b-uuid')).toBe('new-group-b-uuid');
+      expect(results.groupsUuidMap.get('group-old-uuid')).toBe('new-group-old-uuid');
     });
 
     it('should update component schema with new tag IDs and group UUIDs', async () => {
+      const updatedComponents: Record<number, any> = {};
+
       // Mock successful responses
       vi.mocked(upsertComponentInternalTag).mockImplementation(async (space, tag) => ({
         ...tag,
@@ -798,26 +872,22 @@ describe('operations', () => {
       }));
 
       vi.mocked(upsertComponent).mockImplementation(async (space, component) => {
-        // Verify that the component's schema has been updated with new IDs/UUIDs
-        if (component.name === 'component-tags') {
-          const schema = component.schema as {
-            tab1: { type: 'tab'; display_name: string; keys: string[] };
-            field1: { type: 'bloks'; restrict_type: string; component_tag_whitelist: number[] };
-          };
-          expect(schema.field1.component_tag_whitelist).toEqual([1001, 1002]);
-          expect(component.component_group_uuid).toBe('new-group-b-uuid');
-          expect(component.internal_tag_ids).toEqual(['1001', '1002']);
-        }
-        return {
+        updatedComponents[component.id] = {
           ...component,
           id: component.id + 1000,
         };
+        return updatedComponents[component.id];
       });
 
       await handleWhitelists(mockSpace, mockPassword, mockRegion, mockSpaceData);
 
       // Verify that upsertComponent was called with updated schemas
       expect(vi.mocked(upsertComponent)).toHaveBeenCalled();
+
+      expect(updatedComponents[124].schema.field1.component_tag_whitelist).toEqual([1001, 1002]);
+      expect(updatedComponents[124].schema.field2.component_group_whitelist).toEqual(['new-group-a-uuid', 'new-group-b-uuid', 'new-group-old-uuid']);
+      expect(updatedComponents[124].component_group_uuid).toBe('new-group-b-uuid');
+      expect(updatedComponents[124].internal_tag_ids).toEqual(['1001', '1002']);
     });
 
     it('should handle circular dependencies between components', async () => {
@@ -945,7 +1015,7 @@ describe('operations', () => {
 
       // Verify that each tag and group was only processed once
       expect(vi.mocked(upsertComponentInternalTag)).toHaveBeenCalledTimes(2); // Only two tags
-      expect(vi.mocked(upsertComponentGroup)).toHaveBeenCalledTimes(2); // Only two groups
+      expect(vi.mocked(upsertComponentGroup)).toHaveBeenCalledTimes(3); // Only three groups
     });
   });
 });
