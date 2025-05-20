@@ -34,7 +34,7 @@ export const fetchComponent = async (space: string, componentName: string, token
         Authorization: token,
       },
     });
-    return response.components?.[0];
+    return response.components?.find(c => c.name === componentName);
   }
   catch (error) {
     handleAPIError('pull_components', error as Error, `Failed to fetch component ${componentName}`);
