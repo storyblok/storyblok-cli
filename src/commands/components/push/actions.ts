@@ -181,7 +181,7 @@ export const upsertComponentPreset = async (space: string, preset: Partial<Space
       if (responseData?.name?.[0] === 'has already been taken') {
         // Find existing preset by name
         const existingPresets = await fetchComponentPresets(space, token, region);
-        const existingPreset = existingPresets?.find(p => p.name === preset.name);
+        const existingPreset = existingPresets?.find(p => p.name === preset.name && p.component_id === preset.component_id);
         if (existingPreset) {
           // Update existing preset
           return await updateComponentPreset(space, existingPreset.id, { preset }, token, region);

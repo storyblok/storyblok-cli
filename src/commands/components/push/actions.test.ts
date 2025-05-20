@@ -73,6 +73,21 @@ const mockComponentPresetExisting: SpaceComponentPreset = {
   description: '',
 };
 
+const mockComponentPresetExistingDifferentComponent: SpaceComponentPreset = {
+  id: 3,
+  // component present names aren't globally unique, they're only unique for each component
+  name: 'preset-name-2',
+  component_id: 2,
+  preset: { field: 'value' },
+  space_id: 12345,
+  created_at: '2021-08-09T12:00:00Z',
+  updated_at: '2021-08-09T12:00:00Z',
+  image: '',
+  color: '',
+  icon: '',
+  description: '',
+};
+
 const mockInternalTag: SpaceComponentInternalTag = {
   id: 1,
   name: 'tag-name',
@@ -91,7 +106,6 @@ const handlers = [
     const token = request.headers.get('Authorization');
     if (token === 'valid-token') {
       const body: any = await request.json();
-      // TODO: verify whether it's correct that component don't have a component body field
       if (body.id === mockComponentExisting.id) {
         return HttpResponse.json({ name: ['has already been taken'] }, { status: 422 });
       }
@@ -128,7 +142,6 @@ const handlers = [
     const token = request.headers.get('Authorization');
     if (token === 'valid-token') {
       const body: any = await request.json();
-      // TODO: verify whether it's correct that component groups don't have a component_group body field
       if (body.id === mockComponentPresetExisting.id) {
         return HttpResponse.json({ name: ['has already been taken'] }, { status: 422 });
       }
@@ -165,7 +178,7 @@ const handlers = [
     const token = request.headers.get('Authorization');
     if (token === 'valid-token') {
       const body: any = await request.json();
-      if (body.preset.id === mockComponentPresetExisting.id) {
+      if (body.preset.id === mockComponentPresetExisting.id || body.preset.id === mockComponentPresetExistingDifferentComponent.id) {
         return HttpResponse.json({ name: ['has already been taken'] }, { status: 422 });
       }
       else {
@@ -184,7 +197,7 @@ const handlers = [
   http.get('https://api.storyblok.com/v1/spaces/12345/presets', async ({ request }) => {
     const token = request.headers.get('Authorization');
     if (token === 'valid-token') {
-      return HttpResponse.json({ presets: [mockComponentPresetExisting] });
+      return HttpResponse.json({ presets: [mockComponentPresetExisting, mockComponentPresetExistingDifferentComponent] });
     }
     return new HttpResponse('Unauthorized', { status: 401 });
   }),
@@ -195,13 +208,19 @@ const handlers = [
     }
     return new HttpResponse('Unauthorized', { status: 401 });
   }),
+  http.put('https://api.storyblok.com/v1/spaces/12345/presets/3', async ({ request }) => {
+    const token = request.headers.get('Authorization');
+    if (token === 'valid-token') {
+      return HttpResponse.json({ preset: mockComponentPresetExistingDifferentComponent });
+    }
+    return new HttpResponse('Unauthorized', { status: 401 });
+  }),
 
   // Internal tag handlers
   http.post('https://api.storyblok.com/v1/spaces/12345/internal_tags', async ({ request }) => {
     const token = request.headers.get('Authorization');
     if (token === 'valid-token') {
       const body: any = await request.json();
-      // TODO: verify whether it's correct that component internal tags don't have a internal_tag body field
       if (body.id === mockInternalTagExisting.id) {
         return HttpResponse.json({ name: ['has already been taken'] }, { status: 422 });
       }
@@ -334,6 +353,11 @@ describe('push components actions', () => {
     it('should upsert existing component preset successfully with a valid token', async () => {
       const result = await upsertComponentPreset('12345', mockComponentPresetExisting, 'valid-token', 'eu');
       expect(result).toEqual(mockComponentPresetExisting);
+    });
+
+    it('should upsert existing component preset with a duplicated name successfully with a valid token', async () => {
+      const result = await upsertComponentPreset('12345', mockComponentPresetExistingDifferentComponent, 'valid-token', 'eu');
+      expect(result).toEqual(mockComponentPresetExistingDifferentComponent);
     });
   });
 
