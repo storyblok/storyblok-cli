@@ -24,6 +24,16 @@ const mockedComponents = [{
   color: null,
   internal_tags_list: ['tag'],
   internal_tag_ids: [1],
+}, {
+  name: 'name-2',
+  display_name: 'Name 2',
+  created_at: '2021-08-09T12:00:00Z',
+  updated_at: '2021-08-09T12:00:00Z',
+  id: 12346,
+  schema: { type: 'object' },
+  color: null,
+  internal_tags_list: [],
+  internal_tag_ids: [],
 }];
 
 const handlers = [
@@ -70,6 +80,16 @@ describe('pull components actions', () => {
       color: null,
       internal_tags_list: ['tag'],
       internal_tag_ids: [1],
+    }, {
+      name: 'name-2',
+      display_name: 'Name 2',
+      created_at: '2021-08-09T12:00:00Z',
+      updated_at: '2021-08-09T12:00:00Z',
+      id: 12346,
+      schema: { type: 'object' },
+      color: null,
+      internal_tags_list: [],
+      internal_tag_ids: [],
     }];
 
     const result = await fetchComponents('12345', 'valid-token', 'eu');
@@ -91,6 +111,25 @@ describe('pull components actions', () => {
       }],
     };
     const result = await fetchComponent('12345', 'component-name', 'valid-token', 'eu');
+    expect(result).toEqual(mockResponse.components[0]);
+  });
+
+  it('should choose the right component when multiple names match', async () => {
+    const mockResponse = {
+      components: [{
+        name: 'name-2',
+        display_name: 'Name 2',
+        created_at: '2021-08-09T12:00:00Z',
+        updated_at: '2021-08-09T12:00:00Z',
+        id: 12346,
+        schema: { type: 'object' },
+        color: null,
+        internal_tags_list: [],
+        internal_tag_ids: [],
+      }],
+    };
+    // searching for 'name-2' would match both 'component-name-2' and 'name-2'
+    const result = await fetchComponent('12345', 'name-2', 'valid-token', 'eu');
     expect(result).toEqual(mockResponse.components[0]);
   });
 

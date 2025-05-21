@@ -17,10 +17,30 @@ const mockComponent: SpaceComponent = {
   internal_tag_ids: ['1'],
 };
 
+const mockComponentExisting: SpaceComponent = {
+  name: 'component-name-2',
+  display_name: 'Component Name @',
+  created_at: '2021-08-09T12:00:00Z',
+  updated_at: '2021-08-09T12:00:00Z',
+  id: 12346,
+  schema: { type: 'object' },
+  color: null,
+  internal_tags_list: [],
+  internal_tag_ids: ['1'],
+};
+
 const mockComponentGroup: SpaceComponentGroup = {
   name: 'group-name',
   uuid: 'group-uuid',
   id: 1,
+  parent_id: 0,
+  parent_uuid: 'parent-uuid',
+};
+
+const mockComponentGroupExisting: SpaceComponentGroup = {
+  name: 'group-name-2',
+  uuid: 'group-uuid-2',
+  id: 2,
   parent_id: 0,
   parent_uuid: 'parent-uuid',
 };
@@ -39,9 +59,45 @@ const mockComponentPreset: SpaceComponentPreset = {
   description: '',
 };
 
+const mockComponentPresetExisting: SpaceComponentPreset = {
+  id: 2,
+  name: 'preset-name-2',
+  component_id: 1,
+  preset: { field: 'value' },
+  space_id: 12345,
+  created_at: '2021-08-09T12:00:00Z',
+  updated_at: '2021-08-09T12:00:00Z',
+  image: '',
+  color: '',
+  icon: '',
+  description: '',
+};
+
+const mockComponentPresetExistingDifferentComponent: SpaceComponentPreset = {
+  id: 3,
+  // component present names aren't globally unique, they're only unique for each component
+  name: 'preset-name-2',
+  component_id: 2,
+  preset: { field: 'value' },
+  space_id: 12345,
+  created_at: '2021-08-09T12:00:00Z',
+  updated_at: '2021-08-09T12:00:00Z',
+  image: '',
+  color: '',
+  icon: '',
+  description: '',
+};
+
 const mockInternalTag: SpaceComponentInternalTag = {
   id: 1,
   name: 'tag-name',
+  object_type: 'component',
+};
+
+const mockInternalTagExisting: SpaceComponentInternalTag = {
+  id: 2,
+  name: 'tag-name-2',
+  object_type: 'component',
 };
 
 const handlers = [
@@ -49,7 +105,13 @@ const handlers = [
   http.post('https://api.storyblok.com/v1/spaces/12345/components', async ({ request }) => {
     const token = request.headers.get('Authorization');
     if (token === 'valid-token') {
-      return HttpResponse.json({ component: mockComponent });
+      const body: any = await request.json();
+      if (body.id === mockComponentExisting.id) {
+        return HttpResponse.json({ name: ['has already been taken'] }, { status: 422 });
+      }
+      else {
+        return HttpResponse.json({ component: mockComponent });
+      }
     }
     return new HttpResponse('Unauthorized', { status: 401 });
   }),
@@ -60,12 +122,32 @@ const handlers = [
     }
     return new HttpResponse('Unauthorized', { status: 401 });
   }),
+  http.get('https://api.storyblok.com/v1/spaces/12345/components', async ({ request }) => {
+    const token = request.headers.get('Authorization');
+    if (token === 'valid-token') {
+      return HttpResponse.json({ components: [mockComponentExisting] });
+    }
+    return new HttpResponse('Unauthorized', { status: 401 });
+  }),
+  http.put('https://api.storyblok.com/v1/spaces/12345/components/12346', async ({ request }) => {
+    const token = request.headers.get('Authorization');
+    if (token === 'valid-token') {
+      return HttpResponse.json({ component: mockComponentExisting });
+    }
+    return new HttpResponse('Unauthorized', { status: 401 });
+  }),
 
   // Component group handlers
   http.post('https://api.storyblok.com/v1/spaces/12345/component_groups', async ({ request }) => {
     const token = request.headers.get('Authorization');
     if (token === 'valid-token') {
-      return HttpResponse.json({ component_group: mockComponentGroup });
+      const body: any = await request.json();
+      if (body.id === mockComponentPresetExisting.id) {
+        return HttpResponse.json({ name: ['has already been taken'] }, { status: 422 });
+      }
+      else {
+        return HttpResponse.json({ component_group: mockComponentGroup });
+      }
     }
     return new HttpResponse('Unauthorized', { status: 401 });
   }),
@@ -76,12 +158,32 @@ const handlers = [
     }
     return new HttpResponse('Unauthorized', { status: 401 });
   }),
+  http.get('https://api.storyblok.com/v1/spaces/12345/component_groups', async ({ request }) => {
+    const token = request.headers.get('Authorization');
+    if (token === 'valid-token') {
+      return HttpResponse.json({ component_groups: [mockComponentGroupExisting] });
+    }
+    return new HttpResponse('Unauthorized', { status: 401 });
+  }),
+  http.put('https://api.storyblok.com/v1/spaces/12345/component_groups/2', async ({ request }) => {
+    const token = request.headers.get('Authorization');
+    if (token === 'valid-token') {
+      return HttpResponse.json({ component_group: mockComponentGroupExisting });
+    }
+    return new HttpResponse('Unauthorized', { status: 401 });
+  }),
 
   // Component preset handlers
   http.post('https://api.storyblok.com/v1/spaces/12345/presets', async ({ request }) => {
     const token = request.headers.get('Authorization');
     if (token === 'valid-token') {
-      return HttpResponse.json({ preset: mockComponentPreset });
+      const body: any = await request.json();
+      if (body.preset.id === mockComponentPresetExisting.id || body.preset.id === mockComponentPresetExistingDifferentComponent.id) {
+        return HttpResponse.json({ name: ['has already been taken'] }, { status: 422 });
+      }
+      else {
+        return HttpResponse.json({ preset: mockComponentPreset });
+      }
     }
     return new HttpResponse('Unauthorized', { status: 401 });
   }),
@@ -92,12 +194,39 @@ const handlers = [
     }
     return new HttpResponse('Unauthorized', { status: 401 });
   }),
+  http.get('https://api.storyblok.com/v1/spaces/12345/presets', async ({ request }) => {
+    const token = request.headers.get('Authorization');
+    if (token === 'valid-token') {
+      return HttpResponse.json({ presets: [mockComponentPresetExisting, mockComponentPresetExistingDifferentComponent] });
+    }
+    return new HttpResponse('Unauthorized', { status: 401 });
+  }),
+  http.put('https://api.storyblok.com/v1/spaces/12345/presets/2', async ({ request }) => {
+    const token = request.headers.get('Authorization');
+    if (token === 'valid-token') {
+      return HttpResponse.json({ preset: mockComponentPresetExisting });
+    }
+    return new HttpResponse('Unauthorized', { status: 401 });
+  }),
+  http.put('https://api.storyblok.com/v1/spaces/12345/presets/3', async ({ request }) => {
+    const token = request.headers.get('Authorization');
+    if (token === 'valid-token') {
+      return HttpResponse.json({ preset: mockComponentPresetExistingDifferentComponent });
+    }
+    return new HttpResponse('Unauthorized', { status: 401 });
+  }),
 
   // Internal tag handlers
   http.post('https://api.storyblok.com/v1/spaces/12345/internal_tags', async ({ request }) => {
     const token = request.headers.get('Authorization');
     if (token === 'valid-token') {
-      return HttpResponse.json({ internal_tag: mockInternalTag });
+      const body: any = await request.json();
+      if (body.id === mockInternalTagExisting.id) {
+        return HttpResponse.json({ name: ['has already been taken'] }, { status: 422 });
+      }
+      else {
+        return HttpResponse.json({ internal_tag: mockInternalTag });
+      }
     }
     return new HttpResponse('Unauthorized', { status: 401 });
   }),
@@ -105,6 +234,20 @@ const handlers = [
     const token = request.headers.get('Authorization');
     if (token === 'valid-token') {
       return HttpResponse.json({ internal_tag: mockInternalTag });
+    }
+    return new HttpResponse('Unauthorized', { status: 401 });
+  }),
+  http.get('https://api.storyblok.com/v1/spaces/12345/internal_tags', async ({ request }) => {
+    const token = request.headers.get('Authorization');
+    if (token === 'valid-token') {
+      return HttpResponse.json({ internal_tags: [mockInternalTagExisting] });
+    }
+    return new HttpResponse('Unauthorized', { status: 401 });
+  }),
+  http.put('https://api.storyblok.com/v1/spaces/12345/internal_tags/2', async ({ request }) => {
+    const token = request.headers.get('Authorization');
+    if (token === 'valid-token') {
+      return HttpResponse.json({ internal_tag: mockInternalTagExisting });
     }
     return new HttpResponse('Unauthorized', { status: 401 });
   }),
@@ -134,6 +277,11 @@ describe('push components actions', () => {
     it('should upsert component successfully with a valid token', async () => {
       const result = await upsertComponent('12345', mockComponent, 'valid-token', 'eu');
       expect(result).toEqual(mockComponent);
+    });
+
+    it('should upsert existing component successfully with a valid token', async () => {
+      const result = await upsertComponent('12345', mockComponentExisting, 'valid-token', 'eu');
+      expect(result).toEqual(mockComponentExisting);
     });
 
     it('should throw an error for invalid token', async () => {
@@ -179,6 +327,11 @@ describe('push components actions', () => {
       const result = await upsertComponentGroup('12345', mockComponentGroup, 'valid-token', 'eu');
       expect(result).toEqual(mockComponentGroup);
     });
+
+    it('should upsert existing component group successfully with a valid token', async () => {
+      const result = await upsertComponentGroup('12345', mockComponentGroupExisting, 'valid-token', 'eu');
+      expect(result).toEqual(mockComponentGroupExisting);
+    });
   });
 
   describe('component preset', () => {
@@ -196,6 +349,16 @@ describe('push components actions', () => {
       const result = await upsertComponentPreset('12345', mockComponentPreset, 'valid-token', 'eu');
       expect(result).toEqual(mockComponentPreset);
     });
+
+    it('should upsert existing component preset successfully with a valid token', async () => {
+      const result = await upsertComponentPreset('12345', mockComponentPresetExisting, 'valid-token', 'eu');
+      expect(result).toEqual(mockComponentPresetExisting);
+    });
+
+    it('should upsert existing component preset with a duplicated name successfully with a valid token', async () => {
+      const result = await upsertComponentPreset('12345', mockComponentPresetExistingDifferentComponent, 'valid-token', 'eu');
+      expect(result).toEqual(mockComponentPresetExistingDifferentComponent);
+    });
   });
 
   describe('component internal tag', () => {
@@ -212,6 +375,11 @@ describe('push components actions', () => {
     it('should upsert component internal tag successfully with a valid token', async () => {
       const result = await upsertComponentInternalTag('12345', mockInternalTag, 'valid-token', 'eu');
       expect(result).toEqual(mockInternalTag);
+    });
+
+    it('should upsert existing component internal tag successfully with a valid token', async () => {
+      const result = await upsertComponentInternalTag('12345', mockInternalTagExisting, 'valid-token', 'eu');
+      expect(result).toEqual(mockInternalTagExisting);
     });
   });
 
