@@ -138,7 +138,7 @@ describe('languagesCommand', () => {
         vi.mocked(fetchLanguages).mockResolvedValue(mockResponse);
 
         await languagesCommand.parseAsync(['node', 'test', 'pull', '--space', '24568']);
-        expect(konsola.warn).toHaveBeenCalledWith(`No languages found in the space 24568`);
+        expect(konsola.warn).toHaveBeenCalledWith(`No languages found in the space 24568`, true);
       });
     });
 
