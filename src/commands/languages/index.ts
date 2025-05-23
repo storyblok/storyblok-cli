@@ -52,7 +52,10 @@ languagesCommand
       const internationalization = await fetchLanguages(space, state.password, state.region);
 
       if (!internationalization || internationalization.languages?.length === 0) {
-        konsola.warn(`No languages found in the space ${space}`);
+        spinner.failed();
+
+        konsola.warn(`No languages found in the space ${space}`, true);
+        konsola.br();
         return;
       }
       await saveLanguagesToFile(space, internationalization, {

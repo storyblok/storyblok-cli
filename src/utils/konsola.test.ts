@@ -16,7 +16,7 @@ describe('konsola', () => {
       const consoleSpy = vi.spyOn(console, 'warn');
       konsola.warn('This is a test warning message');
 
-      expect(consoleSpy).toHaveBeenCalledWith(`${chalk.yellow('⚠️')} This is a test warning message`);
+      expect(consoleSpy).toHaveBeenCalledWith(`${chalk.yellow('⚠️ ')} This is a test warning message`);
     });
 
     it('should prompt a warning message with header', () => {
