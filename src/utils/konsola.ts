@@ -54,7 +54,7 @@ export const konsola = {
       console.warn(formatHeader(warnHeader));
     }
 
-    console.warn(message ? `${chalk.yellow('⚠️')} ${message}` : '');
+    console.warn(message ? `${chalk.yellow('⚠️ ')} ${message}` : '');
   },
   error: (message: string, info?: unknown, options?: KonsolaFormatOptions) => {
     if (options?.header) {
