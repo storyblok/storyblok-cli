@@ -1,5 +1,6 @@
 import { addCredentials, getCredentials, removeCredentials } from './creds';
 import { vol } from 'memfs';
+import type { StoryblokCredentials } from './types';
 // tell vitest to use fs mock from __mocks__ folder
 // this can be done in a setup file if fs should always be mocked
 vi.mock('node:fs');
@@ -23,7 +24,7 @@ describe('creds', async () => {
         }),
       }, '/temp');
 
-      const credentials = await getCredentials('/temp/test/credentials.json');
+      const credentials = await getCredentials('/temp/test/credentials.json') as StoryblokCredentials;
 
       expect(credentials['api.storyblok.com']).toEqual({
         login: 'julio.iglesias@storyblok.com',
@@ -33,7 +34,7 @@ describe('creds', async () => {
     });
     it('should create a credentials.json file if it does not exist', async () => {
       const credentials = await getCredentials('/temp/test/nonexistent.json');
-      expect(credentials).toEqual({});
+      expect(credentials).toEqual(null);
     });
   });
 

@@ -1,3 +1,5 @@
+import type { RegionCode } from '../constants';
+
 /**
  * Interface representing the default options for a CLI command.
  */
@@ -53,4 +55,10 @@ export interface StoryblokLoginWithOtpResponse {
 export interface FileReaderResult<T> {
   data: T[];
   error?: Error;
+}
+
+export interface StoryblokCredentials {
+  login: string;
+  password: string;
+  region: RegionCode;
 }
