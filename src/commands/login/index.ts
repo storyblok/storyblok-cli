@@ -34,7 +34,6 @@ export const loginCommand = program
   .option(
     '-r, --region <region>',
     `The region you would like to work in. Please keep in mind that the region must match the region of your space. This region flag will be used for the other cli's commands. You can use the values: ${allRegionsText}.`,
-    regions.EU,
   )
   .action(async (options: {
     token: string;
@@ -46,10 +45,6 @@ export const loginCommand = program
     // Command options
     const { token, region } = options;
 
-    if (!isRegion(region)) {
-      handleError(new CommandError(`The provided region: ${region} is not valid. Please use one of the following values: ${Object.values(regions).join(' | ')}`));
-    }
-
     const { state, updateSession, persistCredentials, initializeSession } = session();
 
     await initializeSession();
@@ -59,17 +54,34 @@ export const loginCommand = program
       return;
     }
 
+    if (region && !isRegion(region)) {
+      handleError(new CommandError(`The provided region: ${region} is not valid. Please use one of the following values: ${Object.values(regions).join(' | ')}`));
+      return;
+    }
+
     if (token) {
       const spinner = new Spinner({
         verbose: !isVitest,
-      }).start(`Logging in with token`);
+      });
       try {
-        const { user } = await loginWithToken(token, region);
-        updateSession(user.email, token, region);
-        await persistCredentials(region);
+        let userRegion = region;
+        if (!userRegion) {
+          userRegion = await select({
+            message: 'Please select the region you would like to work in:',
+            choices: Object.values(regions).map((region: RegionCode) => ({
+              name: regionNames[region],
+              value: region,
+            })),
+            default: regions.EU,
+          });
+        }
+        spinner.start(`Logging in with token`);
+        const { user } = await loginWithToken(token, userRegion);
+        updateSession(user.email, token, userRegion);
+        await persistCredentials(userRegion);
         spinner.succeed();
 
-        konsola.ok(`Successfully logged in. Welcome ${chalk.hex(colorPalette.PRIMARY)(user.friendly_name)}.`, true);
+        konsola.ok(`Successfully logged in to region ${chalk.hex(colorPalette.PRIMARY)(`${regionNames[userRegion]} (${userRegion})`)}. Welcome ${chalk.hex(colorPalette.PRIMARY)(user.friendly_name)}.`, true);
       }
       catch (error) {
         spinner.failed();
@@ -96,7 +108,7 @@ export const loginCommand = program
           updateSession(user.email, userToken, region);
           await persistCredentials(region);
 
-          konsola.ok(`Successfully logged in. Welcome ${chalk.hex(colorPalette.PRIMARY)(user.friendly_name)}.`, true);
+          konsola.ok(`Successfully logged in to region ${chalk.hex(colorPalette.PRIMARY)(`${regionNames[region]} (${region})`)}. Welcome ${chalk.hex(colorPalette.PRIMARY)(user.friendly_name)}.`, true);
         }
 
         else {
@@ -123,6 +135,7 @@ export const loginCommand = program
               default: regions.EU,
             });
           }
+
           spinner.start(`Logging in with email`);
           spinner.succeed();
           const response = await loginWithEmailAndPassword(userEmail, userPassword, userRegion);
@@ -143,7 +156,7 @@ export const loginCommand = program
           }
           await persistCredentials(region);
 
-          konsola.ok(`Successfully logged in. Welcome ${chalk.hex(colorPalette.PRIMARY)(userEmail)}.`, true);
+          konsola.ok(`Successfully logged in to region ${chalk.hex(colorPalette.PRIMARY)(`${regionNames[userRegion]} (${userRegion})`)}. Welcome ${chalk.hex(colorPalette.PRIMARY)(userEmail)}.`, true);
         }
       }
       catch (error) {

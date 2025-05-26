@@ -163,7 +163,7 @@ describe('loginCommand', () => {
         const mockUser = { email: 'user@example.com' };
         vi.mocked(loginWithToken).mockResolvedValue({ user: mockUser });
 
-        await loginCommand.parseAsync(['node', 'test']);
+        await loginCommand.parseAsync(['node', 'test', '--region', 'eu']);
 
         expect(password).toHaveBeenCalledWith(expect.objectContaining({
           message: 'Please enter your token:',
@@ -183,11 +183,11 @@ describe('loginCommand', () => {
       const mockUser = { email: 'test@example.com', friendly_name: 'Test User' };
       vi.mocked(loginWithToken).mockResolvedValue({ user: mockUser });
 
-      await loginCommand.parseAsync(['node', 'test', '--token', mockToken]);
+      await loginCommand.parseAsync(['node', 'test', '--token', mockToken, '--region', 'eu']);
 
       expect(loginWithToken).toHaveBeenCalledWith(mockToken, 'eu');
 
-      expect(konsola.ok).toHaveBeenCalledWith('Successfully logged in. Welcome Test User.', true);
+      expect(konsola.ok).toHaveBeenCalledWith('Successfully logged in to region Europe (eu). Welcome Test User.', true);
     });
 
     it('should login with a valid token in another region --region', async () => {
@@ -199,7 +199,7 @@ describe('loginCommand', () => {
 
       expect(loginWithToken).toHaveBeenCalledWith(mockToken, 'us');
 
-      expect(konsola.ok).toHaveBeenCalledWith('Successfully logged in. Welcome Test User.', true);
+      expect(konsola.ok).toHaveBeenCalledWith('Successfully logged in to region United States (us). Welcome Test User.', true);
     });
 
     it('should throw an error for an invalid token', async () => {
