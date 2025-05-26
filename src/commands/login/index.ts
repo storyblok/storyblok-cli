@@ -111,14 +111,18 @@ export const loginCommand = program
           const userPassword = await password({
             message: 'Please enter your password:',
           });
-          const userRegion = await select({
-            message: 'Please select the region you would like to work in:',
-            choices: Object.values(regions).map((region: RegionCode) => ({
-              name: regionNames[region],
-              value: region,
-            })),
-            default: regions.EU,
-          });
+
+          let userRegion = region;
+          if (!userRegion) {
+            userRegion = await select({
+              message: 'Please select the region you would like to work in:',
+              choices: Object.values(regions).map((region: RegionCode) => ({
+                name: regionNames[region],
+                value: region,
+              })),
+              default: regions.EU,
+            });
+          }
           spinner.start(`Logging in with email`);
           spinner.succeed();
           const response = await loginWithEmailAndPassword(userEmail, userPassword, userRegion);
