@@ -17,7 +17,7 @@ function createSession() {
     isLoggedIn: false,
   };
 
-  async function initializeSession(region = 'eu' as RegionCode) {
+  async function initializeSession() {
     // First, check for environment variables
     const envCredentials = getEnvCredentials();
     if (envCredentials) {
@@ -30,9 +30,10 @@ function createSession() {
     }
 
     // If no environment variables, fall back to .storyblok/credentials.json
-    const machines = await getCredentials();
-    const creds = machines[regionsDomain[region] || 'api.storyblok.com'];
-    if (creds) {
+    const credentials = await getCredentials();
+    if (credentials) {
+      // Todo: evaluate this in future when we want to support multiple regions
+      const creds = Object.values(credentials)[0];
       state.isLoggedIn = true;
       state.login = creds.login;
       state.password = creds.password;
