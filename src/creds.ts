@@ -7,20 +7,27 @@ import { colorPalette, regionsDomain } from './constants';
 import { getStoryblokGlobalPath, readFile, saveToFile } from './utils/filesystem';
 import type { StoryblokCredentials } from './types';
 
-export const getCredentials = async (filePath = join(getStoryblokGlobalPath(), 'credentials.json')): Promise<StoryblokCredentials | {}> => {
+export const getCredentials = async (filePath = join(getStoryblokGlobalPath(), 'credentials.json')): Promise<StoryblokCredentials | null> => {
   try {
     await access(filePath);
     const content = await readFile(filePath);
-    return JSON.parse(content);
+    const parsedContent = JSON.parse(content);
+
+    // Return null if the parsed content is an empty object
+    if (Object.keys(parsedContent).length === 0) {
+      return null;
+    }
+
+    return parsedContent;
   }
   catch (error) {
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
       // File doesn't exist, create it with empty credentials
       await saveToFile(filePath, JSON.stringify({}, null, 2), { mode: 0o600 });
-      return {};
+      return null;
     }
     handleFileSystemError('read', error as NodeJS.ErrnoException);
-    return {};
+    return null;
   }
 };
 

@@ -34,7 +34,7 @@ describe('creds', async () => {
     });
     it('should create a credentials.json file if it does not exist', async () => {
       const credentials = await getCredentials('/temp/test/nonexistent.json');
-      expect(credentials).toEqual({});
+      expect(credentials).toEqual(null);
     });
   });
 
