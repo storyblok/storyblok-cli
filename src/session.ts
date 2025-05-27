@@ -1,7 +1,6 @@
 // session.ts
 import { type RegionCode, regionsDomain } from './constants';
 import { addCredentials, getCredentials } from './creds';
-import { isEmptyObject } from './utils';
 
 interface SessionState {
   isLoggedIn: boolean;
