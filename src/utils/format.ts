@@ -15,6 +15,10 @@ export const toSnakeCase = (str: string) => {
     .replace(/^_/, '');
 };
 
+export const capitalize = (str: string) => {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+};
+
 export function maskToken(token: string): string {
   // Show only the first 4 characters and replace the rest with asterisks
   if (token.length <= 4) {
