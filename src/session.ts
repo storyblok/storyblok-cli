@@ -1,6 +1,7 @@
 // session.ts
 import { type RegionCode, regionsDomain } from './constants';
 import { addCredentials, getCredentials } from './creds';
+import { isEmptyObject } from './utils';
 
 interface SessionState {
   isLoggedIn: boolean;
@@ -31,7 +32,7 @@ function createSession() {
 
     // If no environment variables, fall back to .storyblok/credentials.json
     const credentials = await getCredentials();
-    if (credentials) {
+    if (!isEmptyObject(credentials)) {
       // Todo: evaluate this in future when we want to support multiple regions
       const creds = Object.values(credentials)[0];
       state.isLoggedIn = true;
