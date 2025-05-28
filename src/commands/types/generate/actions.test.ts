@@ -1,4 +1,4 @@
-import { generateStoryblokTypes, generateTypes, getComponentType } from './actions';
+import { generateStoryblokTypes, generateTypes, getComponentType, getStoryType } from './actions';
 import type { SpaceComponent, SpaceData } from '../../../commands/components/constants';
 import type { GenerateTypesOptions } from './constants';
 import { join, resolve } from 'node:path';
@@ -295,6 +295,33 @@ describe('getComponentType', () => {
   it('should handle component names with spaces', () => {
     const options: GenerateTypesOptions = {};
     expect(getComponentType('test component', options)).toBe('TestComponent');
+  });
+});
+
+describe('getStoryType', () => {
+  it('should convert property names to the correct format', () => {
+    // Test cases for different property name formats
+    expect(getStoryType('my_property')).toBe('ISbStoryData<MyProperty>');
+    expect(getStoryType('my-property')).toBe('ISbStoryData<MyProperty>');
+    expect(getStoryType('myProperty')).toBe('ISbStoryData<MyProperty>');
+    expect(getStoryType('MyProperty')).toBe('ISbStoryData<MyProperty>');
+    expect(getStoryType('my property')).toBe('ISbStoryData<MyProperty>');
+    expect(getStoryType('my_property_name')).toBe('ISbStoryData<MyPropertyName>');
+  });
+
+  it('should handle special characters and numbers', () => {
+    expect(getStoryType('my_property_123')).toBe('ISbStoryData<MyProperty123>');
+    expect(getStoryType('my-property!')).toBe('ISbStoryData<MyProperty>');
+    expect(getStoryType('my_property@name')).toBe('ISbStoryData<MyPropertyName>');
+  });
+
+  it('should handle empty or single character properties', () => {
+    expect(getStoryType('')).toBe('ISbStoryData<>');
+    expect(getStoryType('a')).toBe('ISbStoryData<A>');
+  });
+
+  it('should handle prefix', () => {
+    expect(getStoryType('my_property', 'Custom')).toBe('ISbStoryData<CustomMyProperty>');
   });
 });
 

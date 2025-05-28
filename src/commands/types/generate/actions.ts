@@ -21,7 +21,7 @@ const DEFAULT_TYPEDEFS_HEADER = [
   '// DO NOT MODIFY THIS FILE BY HAND.',
 ];
 
-const getPropertyTypeAnnotation = (property: ComponentPropertySchema) => {
+const getPropertyTypeAnnotation = (property: ComponentPropertySchema, prefix?: string) => {
   // If a property type is one of the ones provided by Storyblok, return that type
   // Casting as string[] to avoid TS error on using Array.includes on different narrowed types
   if (Array.from(storyblokSchemas.keys()).includes(property.type as StoryblokPropertyType)) {
@@ -42,13 +42,13 @@ const getPropertyTypeAnnotation = (property: ComponentPropertySchema) => {
     if (property.filter_content_type) {
       if (typeof property.filter_content_type === 'string') {
         return {
-          tsType: `(${getStoryType(property.filter_content_type)} | string )${property.type === 'options' ? '[]' : ''}`,
+          tsType: `(${getStoryType(property.filter_content_type, prefix)} | string )${property.type === 'options' ? '[]' : ''}`,
         };
       }
 
       return {
         tsType: `(${property.filter_content_type
-          .map(type2 => getStoryType(type2))
+          .map(type2 => getStoryType(type2, prefix))
           // In this case property.type can be `option` or `options`. In case of `options` the type should be an array
           .join(' | ')} | string )${property.type === 'options' ? '[]' : ''}`,
       };
@@ -115,8 +115,8 @@ const getPropertyTypeAnnotation = (property: ComponentPropertySchema) => {
   }
 };
 
-export function getStoryType(property: string) {
-  return `${STORY_TYPE}<${capitalize(property)}>`;
+export function getStoryType(property: string, prefix?: string) {
+  return `${STORY_TYPE}<${prefix ?? ''}${capitalize(toCamelCase(property))}>`;
 }
 
 /**
@@ -167,7 +167,7 @@ const getComponentPropertiesTypeAnnotations = async (
 
     const propertyType = value.type;
     const propertyTypeAnnotation: JSONSchema = {
-      [key]: getPropertyTypeAnnotation(value as ComponentPropertySchema),
+      [key]: getPropertyTypeAnnotation(value as ComponentPropertySchema, options.typePrefix),
     };
 
     if (propertyType === 'custom' && customFieldsParser) {
