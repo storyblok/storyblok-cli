@@ -4,15 +4,25 @@ export const toPascalCase = (str: string) => {
 
 export const toCamelCase = (str: string) => {
   return str
-    .replace(/(?:^|_)(\w)/g, (_, char) => char.toUpperCase())
+    // First replace snake_case
+    .replace(/_([a-z])/g, (_, letter) => letter.toUpperCase())
     .replace(/_/g, '')
-    .replace(/^[A-Z]/, char => char.toLowerCase());
+    // Then replace kebab-case
+    .replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())
+  // Capitalize letters after special characters
+    .replace(/[^a-z0-9]([a-z])/gi, (_, letter) => letter.toUpperCase())
+    // Remove special characters
+    .replace(/[^a-z0-9]/gi, '');
 };
 
 export const toSnakeCase = (str: string) => {
   return str
     .replace(/([A-Z])/g, (_, char) => `_${char.toLowerCase()}`)
     .replace(/^_/, '');
+};
+
+export const capitalize = (str: string) => {
+  return str.charAt(0).toUpperCase() + str.slice(1);
 };
 
 export function maskToken(token: string): string {
