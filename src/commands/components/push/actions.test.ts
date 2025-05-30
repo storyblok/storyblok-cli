@@ -4,6 +4,7 @@ import { vol } from 'memfs';
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { pushComponent, pushComponentGroup, pushComponentInternalTag, pushComponentPreset, readComponentsFiles, updateComponent, updateComponentGroup, updateComponentInternalTag, updateComponentPreset, upsertComponent, upsertComponentGroup, upsertComponentInternalTag, upsertComponentPreset } from './actions';
 import type { SpaceComponent, SpaceComponentGroup, SpaceComponentInternalTag, SpaceComponentPreset } from '../constants';
+import chalk from 'chalk';
 
 const mockComponent: SpaceComponent = {
   name: 'component-name',
@@ -506,6 +507,7 @@ describe('push components actions', () => {
       await expect(readComponentsFiles({
         path: '/temp/path/to/components',
         from: 'non-existent',
+        space: 'existing-space',
         separateFiles: false,
         verbose: false,
       })).rejects.toThrow(
@@ -518,7 +520,15 @@ describe('push components actions', () => {
             code: 'ENOENT',
             message: expect.stringContaining('ENOENT: no such file or directory'),
           }),
-          message: 'No directory found for space "non-existent". Please make sure you have pulled the components first by running:\n\n  storyblok components pull --space non-existent \n\n',
+          message: expect.stringContaining(
+            `No local components found for space ${chalk.bold('non-existent')}. To push components, you need to pull them first:
+
+1. Pull the components from your source space:
+   ${chalk.cyan('storyblok components pull --space non-existent')}
+
+2. Then try pushing again:
+   ${chalk.cyan('storyblok components push --space existing-space --from non-existent')}`,
+          ),
         }),
       );
     });

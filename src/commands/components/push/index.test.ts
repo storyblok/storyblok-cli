@@ -50,6 +50,7 @@ vi.mock('../../../utils', async () => {
     konsola: {
       ok: vi.fn(),
       title: vi.fn(),
+      info: vi.fn(),
       warn: vi.fn(),
       error: vi.fn(),
       br: vi.fn(),
@@ -135,6 +136,7 @@ describe('push', () => {
       expect(readComponentsFiles).toHaveBeenCalledWith({
         from: '12345',
         path: undefined,
+        space: '12345',
       });
 
       // Whitelist phase.
