@@ -29,4 +29,8 @@ export interface ReadComponentsOptions extends PushComponentsOptions {
    * @default `.storyblok/components`
    */
   path?: string;
+  /**
+   * Target space
+   */
+  space?: string;
 }

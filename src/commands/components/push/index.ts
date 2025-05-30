@@ -14,6 +14,7 @@ import {
   handleTags,
   handleWhitelists,
 } from './operations';
+import chalk from 'chalk';
 
 const program = getProgram(); // Get the shared singleton instance
 
@@ -52,12 +53,16 @@ componentsCommand
       options.from = space;
     }
 
+    konsola.info(`Attempting to push components ${chalk.bold('from')} space ${chalk.hex(colorPalette.COMPONENTS)(options.from)} ${chalk.bold('to')} ${chalk.hex(colorPalette.COMPONENTS)(space)}`);
+    konsola.br();
+
     const { password, region } = state;
 
     try {
       let spaceData = await readComponentsFiles({
         ...options,
         path,
+        space,
       });
 
       // If componentName is provided, filter space data to only include related resources

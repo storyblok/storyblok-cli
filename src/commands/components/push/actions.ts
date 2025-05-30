@@ -9,6 +9,7 @@ import { readdir, readFile } from 'node:fs/promises';
 import { resolvePath } from '../../../utils/filesystem';
 import { fetchComponent, fetchComponentGroups, fetchComponentInternalTags, fetchComponentPresets } from '../actions';
 import type { FileReaderResult } from '../../../types';
+import chalk from 'chalk';
 
 // Component actions
 export const pushComponent = async (space: string, component: SpaceComponent, token: string, region: RegionCode): Promise<SpaceComponent | undefined> => {
@@ -269,7 +270,7 @@ async function readJsonFile<T>(filePath: string): Promise<FileReaderResult<T>> {
 
 export const readComponentsFiles = async (
   options: ReadComponentsOptions): Promise<SpaceData> => {
-  const { from, path, separateFiles = false, suffix } = options;
+  const { from, path, separateFiles = false, suffix, space } = options;
   const resolvedPath = resolvePath(path, `components/${from}`);
 
   // Check if directory exists first
@@ -277,7 +278,14 @@ export const readComponentsFiles = async (
     await readdir(resolvedPath);
   }
   catch (error) {
-    const message = `No directory found for space "${from}". Please make sure you have pulled the components first by running:\n\n  storyblok components pull --space ${from} \n\n`;
+    const message = `No local components found for space ${chalk.bold(from)}. To push components, you need to pull them first:
+
+1. Pull the components from your source space:
+   ${chalk.cyan(`storyblok components pull --space ${from}`)}
+
+2. Then try pushing again:
+   ${chalk.cyan(`storyblok components push --space ${space} --from ${from}`)}`;
+
     throw new FileSystemError(
       'file_not_found',
       'read',
