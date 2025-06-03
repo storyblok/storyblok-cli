@@ -113,7 +113,7 @@ componentsCommand
       }
       else {
         const fileName = suffix ? `${filename}.${suffix}.json` : `${filename}.json`;
-        const filePath = path ? `${path}/components/${space}/${fileName}` : `.storyblok/components/${space}/${fileName}`;
+        const filePath = path ? `${path}/components/${space}/consolidated/${fileName}` : `.storyblok/components/${space}/consolidated/${fileName}`;
 
         konsola.ok(`Components downloaded successfully to ${chalk.hex(colorPalette.PRIMARY)(filePath)}`);
       }

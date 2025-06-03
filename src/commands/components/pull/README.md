@@ -13,10 +13,11 @@ This will download all components and their dependencies to consolidated files:
 .storyblok/
 └── components/
     └── YOUR_SPACE_ID/
-        ├── components.json      # All components
-        ├── groups.json         # Component groups
-        ├── presets.json        # Component presets
-        └── tags.json           # Component tags
+        ├── consolidated/
+        │   ├── components.json      # All components
+        │   ├── groups.json         # Component groups
+        │   ├── presets.json        # Component presets
+        │   └── tags.json           # Component tags
 ```
 
 > [!WARNING]
@@ -34,9 +35,10 @@ This will download a single component and its dependencies to:
 └── components/
     └── YOUR_SPACE_ID/
         ├── COMPONENT_NAME.json  # Single component
-        ├── groups.json         # Component groups
-        ├── COMPONENT_NAME.presets.json        # Component presets
-        └── tags.json           # Component tags
+        ├── COMPONENT_NAME.presets.json  # Component presets
+        └── consolidated/
+            ├── groups.json         # Component groups
+            └── tags.json           # Component tags
 ```
 
 ## Options
@@ -60,10 +62,11 @@ Generates:
 .storyblok/
 └── components/
     └── 12345/
-        ├── components.json      # All components
-        ├── groups.json         # Component groups
-        ├── presets.json        # Component presets
-        └── tags.json           # Component tags
+        └── consolidated/
+            ├── components.json      # All components
+            ├── groups.json         # Component groups
+            ├── presets.json        # Component presets
+            └── tags.json           # Component tags
 ```
 
 2. Pull a single component:
@@ -76,9 +79,10 @@ Generates:
 └── components/
     └── 12345/
         ├── hero.json           # Single component
-        ├── groups.json         # Component groups
         ├── hero.presets.json   # Component presets
-        └── tags.json           # Component tags
+        └── consolidated/
+            ├── groups.json         # Component groups
+            └── tags.json           # Component tags
 ```
 
 3. Pull components with a custom file name:
@@ -91,9 +95,10 @@ Generates:
 └── components/
     └── 12345/
         ├── my-components.json  # All components
-        ├── groups.json         # Component groups
-        ├── presets.json        # Component presets
-        └── tags.json           # Component tags
+        └── consolidated/
+            ├── groups.json         # Component groups
+            ├── presets.json        # Component presets
+            └── tags.json           # Component tags
 ```
 
 4. Pull components with custom suffix:
@@ -105,10 +110,11 @@ Generates:
 .storyblok/
 └── components/
     └── 12345/
-        ├── components.dev.json  # All components
-        ├── groups.json         # Component groups
-        ├── presets.json        # Component presets
-        └── tags.json           # Component tags
+        └── consolidated/
+            ├── components.dev.json  # All components
+            ├── groups.json         # Component groups
+            ├── presets.json        # Component presets
+            └── tags.json           # Component tags
 ```
 
 5. Pull components to separate files:
@@ -125,8 +131,9 @@ Generates:
         ├── feature.json
         ├── feature.presets.json
         ├── ...
-        ├── groups.json         # Component groups
-        └── tags.json           # Component tags
+        └── consolidated/
+            ├── groups.json         # Component groups
+            └── tags.json           # Component tags
 ```
 
 6. Pull components to a custom path:
@@ -138,10 +145,11 @@ Generates:
 backup/
 └── components/
     └── 12345/
-        ├── components.json      # All components
-        ├── groups.json         # Component groups
-        ├── presets.json        # Component presets
-        └── tags.json           # Component tags
+        └── consolidated/
+            ├── components.json      # All components
+            ├── groups.json         # Component groups
+            ├── presets.json        # Component presets
+            └── tags.json           # Component tags
 ```
 
 ## File Structure
@@ -151,10 +159,12 @@ The command follows this pattern for file generation:
 {path}/
 └── components/
     └── {spaceId}/
-        ├── {filename}.{suffix}.json  # Components file
-        ├── groups.json              # Component groups
-        ├── presets.json             # Component presets
-        └── tags.json                # Component tags
+        ├── consolidated/
+        │   ├── {filename}.{suffix}.json  # Components file
+        │   ├── groups.json              # Component groups
+        │   ├── presets.json             # Component presets
+        │   └── tags.json                # Component tags
+        └── {componentName}.json         # Individual components (when using --separate-files)
 ```
 
 When using `--separate-files`:
@@ -167,8 +177,9 @@ When using `--separate-files`:
         ├── {componentName2}.json
         ├── {componentName2}.presets.json
         ├── ...
-        ├── groups.json                  # Component groups
-        └── tags.json                    # Component tags
+        └── consolidated/
+            ├── groups.json              # Component groups
+            └── tags.json                # Component tags
 ```
 
 Where:
