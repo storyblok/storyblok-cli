@@ -36,6 +36,7 @@
   },
   "dependencies": {
     "@inquirer/prompts": "^7.5.1",
+    "@storyblok/js": "^4.0.0",
     "@topcli/spinner": "^2.1.2",
     "chalk": "^5.4.1",
     "commander": "^13.1.0",
