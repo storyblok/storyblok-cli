@@ -137,6 +137,17 @@
     {
       "type": "node",
       "request": "launch",
+      "name": "Debug circular dependencies",
+      "program": "${workspaceFolder}/dist/index.mjs",
+      "args": ["components", "push", "component-component-whitelist", "--space", "295018", "--from", "295017", "--verbose"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "sourceMaps": true,
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"]
+    },
+    {
+      "type": "node",
+      "request": "launch",
       "name": "Debug Push component non-existing",
       "program": "${workspaceFolder}/dist/index.mjs",
       "args": ["components", "push", "non-existing", "--space", "295018", "--from", "295017"],
