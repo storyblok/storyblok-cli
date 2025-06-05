@@ -16,6 +16,7 @@ import { delay } from '../../../utils/fetch';
 function findRelatedResources(
   components: SpaceComponent[],
   spaceData: SpaceData,
+  visitedComponents = new Set<string>(), // Track visited components to detect cycles
 ): {
     groups: SpaceComponentGroup[];
     presets: SpaceComponentPreset[];
@@ -147,7 +148,16 @@ function findRelatedResources(
   };
 
   if (whitelistedComponents.length > 0) {
-    additionalResources = findRelatedResources(whitelistedComponents, spaceData);
+    // Filter out components that would create circular dependencies
+    const newComponents = whitelistedComponents.filter(component => !visitedComponents.has(component.name));
+
+    if (newComponents.length > 0) {
+      // Add current components to visited set
+      components.forEach(component => visitedComponents.add(component.name));
+
+      // Only process components we haven't seen before
+      additionalResources = findRelatedResources(newComponents, spaceData, visitedComponents);
+    }
   }
 
   const result = {
@@ -574,13 +584,8 @@ export async function handleWhitelists(
         return;
       }
 
-      // Check for circular dependencies
+      // Skip if we detect a circular dependency
       if (visited.has(componentName)) {
-        failedComponents.add(componentName);
-        results.failed.push({
-          name: componentName,
-          error: new Error(`Circular dependency detected for component ${componentName}`),
-        });
         return;
       }
 

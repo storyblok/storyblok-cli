@@ -931,13 +931,17 @@ describe('operations', () => {
         ],
       };
 
+      // Mock successful responses
+      vi.mocked(upsertComponent).mockImplementation(async (_space, component) => ({
+        ...component,
+        id: component.id + 1000,
+      }));
+
       const results = await handleWhitelists(mockSpace, mockPassword, mockRegion, circularData);
 
-      // Verify that circular dependency was detected and handled
-      expect(results.failed).toHaveLength(1);
-      expect(results.failed[0].error).toMatchObject({
-        message: expect.stringContaining('Circular dependency detected'),
-      });
+      // Verify that circular dependency was handled by skipping
+      expect(results.failed).toHaveLength(0); // No failures
+      expect(results.successful).toHaveLength(2); // Only two components were processed
     });
 
     it('should handle missing dependencies gracefully', async () => {
