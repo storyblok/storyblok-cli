@@ -13,6 +13,10 @@ import './commands/types';
 import pkg from '../package.json';
 
 import { colorPalette } from './constants';
+import { customFetch } from './utils/fetch';
+import { createMapiClient } from './api';
+import { session } from './session';
+import { Spinner } from '@topcli/spinner';
 
 export * from './types/storyblok';
 
@@ -32,6 +36,55 @@ program.on('command:*', () => {
   konsola.br();
   program.help();
 });
+
+program
+  .command('test')
+  .description('Test the CLI')
+  .action(async () => {
+    console.log('Testing the CLI...');
+
+    // Check if the user is logged in
+    const { state, initializeSession } = session();
+    await initializeSession();
+
+    const { password, region } = state;
+
+    const client = createMapiClient({
+      token: password,
+      url: 'http://localhost:2599/api',
+      verbose: false,
+    });
+
+    const results = {
+      success: [],
+      failed: [],
+    };
+
+    try {
+      const promises = Array.from({ length: 10 }).map(async (_value, index) => {
+        const spinner = new Spinner({
+          verbose: true,
+        });
+
+        try {
+          spinner.start(`Fetching user ${index}...`);
+          const { data, attempt } = await client.get(`users/${index}`);
+          spinner.succeed(`${data.name} - Attempt ${attempt}`);
+          results.success.push({ data, attempt });
+        }
+        catch (error) {
+          spinner.failed();
+          results.failed.push(`users/${index} - ${error.response.status}`);
+        }
+      });
+      await Promise.all(promises);
+    }
+    catch (error) {
+      console.log(error);
+    }
+
+    console.log(results);
+  });
 
 try {
   program.parse(process.argv);
