@@ -33,7 +33,35 @@ export const mapiClient = (options: ManagementApiClientOptions) => {
     freeze: false,
   };
 
-  const get = async (path: string, options?: FetchOptions, attempt: number = 0) => {
+  interface GetResponse {
+    data: any;
+    attempt: number;
+  }
+
+  // Internal: isRateLimitOwner is true for the request that first hits 429 and is responsible for lifting the freeze
+  const get = async (
+    path: string,
+    fetchOptions?: FetchOptions,
+    attempt: number = 0,
+    isRateLimitOwner: boolean = false,
+  ): Promise<GetResponse> => {
+    // Only non-owner calls should wait for freeze
+    if (state.freeze && !isRateLimitOwner) {
+      if (options?.verbose) {
+        console.log(`⏳ ${path} - Waiting for rate limit to be resolved`);
+      }
+      await new Promise<void>((resolve) => {
+        const checkFreeze = setInterval(() => {
+          if (!state.freeze) {
+            clearInterval(checkFreeze);
+            resolve();
+          }
+        }, 50);
+      });
+      // Add a random delay (e.g., 100-500ms) to spread out retries
+      await delay(100 + Math.random() * 400);
+      return get(path, fetchOptions, attempt);
+    }
     try {
       if (options?.verbose) {
         console.log(`${state.url}/${path} - Attempt ${attempt}`);
@@ -66,10 +94,30 @@ export const mapiClient = (options: ManagementApiClientOptions) => {
           if (options?.verbose) {
             console.log(`❌ ${path} - Rate limit exceeded`);
           }
-          const waitTime = state.baseDelay * 2 ** attempt;
+          let isOwner = isRateLimitOwner;
+          // Set freeze to true if this is the first 429
+          if (!state.freeze) {
+            state.freeze = true;
+            isOwner = true;
+          }
+          const waitTime = state.baseDelay * 2 ** attempt + Math.random() * 100;
           await delay(waitTime);
-          return get(path, options, attempt + 1);
+          try {
+            // Pass isOwner down the retry chain
+            const result = await get(path, options, attempt + 1, isOwner);
+            return result;
+          }
+          finally {
+            // Only the owner can lift the freeze
+            if (isOwner && state.freeze) {
+              state.freeze = false;
+            }
+          }
         }
+      }
+      // Always lift freeze if all retries are exhausted
+      if (state.freeze && isRateLimitOwner) {
+        state.freeze = false;
       }
       throw error;
     }

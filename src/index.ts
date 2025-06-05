@@ -52,7 +52,7 @@ program
     const client = createMapiClient({
       token: password,
       url: 'http://localhost:2599/api',
-      verbose: false,
+      verbose: true,
     });
 
     const results = {
@@ -62,18 +62,25 @@ program
 
     try {
       const promises = Array.from({ length: 10 }).map(async (_value, index) => {
-        const spinner = new Spinner({
+        /* const spinner = new Spinner({
           verbose: true,
-        });
+        }); */
 
         try {
-          spinner.start(`Fetching user ${index}...`);
+          /* spinner.start(`Fetching user ${index}...`); */
           const { data, attempt } = await client.get(`users/${index}`);
-          spinner.succeed(`${data.name} - Attempt ${attempt}`);
+          /*  spinner.succeed(`${data.name} - Attempt ${attempt}`); */
           results.success.push({ data, attempt });
+
+          const tags = Array.from({ length: 6 }).map(async (_value, internalIndex) => {
+            const { data, attempt } = await client.get(`tags/${index}${internalIndex}`);
+            results.success.push({ data, attempt });
+          });
+
+          await Promise.all(tags);
         }
         catch (error) {
-          spinner.failed();
+          /*  spinner.failed(); */
           results.failed.push(`users/${index} - ${error.response.status}`);
         }
       });
