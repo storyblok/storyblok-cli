@@ -31,7 +31,7 @@ export const fetchStories = async (
 
       // Handle regular params with URLSearchParams
       const regularParams = new URLSearchParams({
-        ...objectToStringParams(restParams),
+        ...objectToStringParams({ ...restParams, per_page: 100 }),
         ...(currentPage > 1 && { page: currentPage.toString() }),
       }).toString();
 
