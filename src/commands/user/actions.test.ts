@@ -29,7 +29,7 @@ describe('user actions', () => {
 
   describe('getUser', () => {
     it('should get user successfully with a valid token', async () => {
-      const mockResponse = { data: 'user data' };
+      const mockResponse = { data: 'user data', perPage: 0, total: 0 };
       const result = await getUser('valid-token', 'eu');
       expect(result).toEqual(mockResponse);
     });

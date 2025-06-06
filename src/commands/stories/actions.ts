@@ -21,28 +21,46 @@ export const fetchStories = async (
 ) => {
   try {
     const url = getStoryblokUrl(region);
+    const allStories: Story[] = [];
+    let currentPage = 1;
+    let hasMorePages = true;
 
-    // Extract filter_query params to handle them separately
-    const { filter_query, ...restParams } = params || {};
+    while (hasMorePages) {
+      // Extract filter_query params to handle them separately
+      const { filter_query, ...restParams } = params || {};
 
-    // Handle regular params with URLSearchParams
-    const regularParams = new URLSearchParams(objectToStringParams(restParams)).toString();
+      // Handle regular params with URLSearchParams
+      const regularParams = new URLSearchParams({
+        ...objectToStringParams(restParams),
+        ...(currentPage > 1 && { page: currentPage.toString() }),
+      }).toString();
 
-    // Combine regular params with filter_query params (if any)
-    const queryString = filter_query
-      ? `${regularParams ? `${regularParams}&` : ''}${filter_query}`
-      : regularParams;
+      // Combine regular params with filter_query params (if any)
+      const queryString = filter_query
+        ? `${regularParams ? `${regularParams}&` : ''}${filter_query}`
+        : regularParams;
 
-    const endpoint = `${url}/spaces/${space}/stories${queryString ? `?${queryString}` : ''}`;
+      const endpoint = `${url}/spaces/${space}/stories${queryString ? `?${queryString}` : ''}`;
 
-    const response = await customFetch<{
-      stories: Story[];
-    }>(endpoint, {
-      headers: {
-        Authorization: token,
-      },
-    });
-    return response.stories;
+      const response = await customFetch<{
+        stories: Story[];
+        per_page: number;
+        total: number;
+      }>(endpoint, {
+        headers: {
+          Authorization: token,
+        },
+      });
+
+      allStories.push(...response.stories);
+
+      // Check if we have more pages to fetch
+      const totalPages = Math.ceil(response.total / response.perPage);
+      hasMorePages = currentPage < totalPages;
+      currentPage++;
+    }
+
+    return allStories;
   }
   catch (error) {
     handleAPIError('pull_stories', error as Error);

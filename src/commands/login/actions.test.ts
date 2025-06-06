@@ -43,7 +43,7 @@ afterAll(() => server.close());
 describe('login actions', () => {
   describe('loginWithToken', () => {
     it('should login successfully with a valid token', async () => {
-      const mockResponse = { data: 'user data' };
+      const mockResponse = { data: 'user data', perPage: 0, total: 0 };
       const result = await loginWithToken('valid-token', 'eu');
       expect(result).toEqual(mockResponse);
     });
@@ -70,7 +70,7 @@ describe('login actions', () => {
 
   describe('loginWithEmailAndPassword', () => {
     it('should get if the user requires otp', async () => {
-      const expected = { otp_required: true };
+      const expected = { otp_required: true, perPage: 0, total: 0 };
       const result = await loginWithEmailAndPassword('julio.iglesias@storyblok.com', 'password', 'eu');
       expect(result).toEqual(expected);
     });
@@ -96,7 +96,7 @@ describe('login actions', () => {
           }
         }),
       );
-      const expected = { access_token: 'Awiwi' };
+      const expected = { access_token: 'Awiwi', perPage: 0, total: 0 };
 
       const result = await loginWithOtp('julio.iglesias@storyblok.com', 'password', '123456', 'eu');
 
