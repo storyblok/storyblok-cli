@@ -13,10 +13,11 @@ import './commands/types';
 import pkg from '../package.json';
 
 import { colorPalette } from './constants';
-import { customFetch } from './utils/fetch';
+
 import { createMapiClient } from './api';
 import { session } from './session';
-import { Spinner } from '@topcli/spinner';
+// import { Spinner } from '@topcli/spinner';
+import pLimit from 'p-limit';
 
 export * from './types/storyblok';
 
@@ -39,15 +40,18 @@ program.on('command:*', () => {
 
 program
   .command('test')
+  .option('--limit <number>', 'Limit the number of concurrent requests', '10')
   .description('Test the CLI')
-  .action(async () => {
+  .action(async (options) => {
     console.log('Testing the CLI...');
-
+    console.time('Test');
     // Check if the user is logged in
     const { state, initializeSession } = session();
     await initializeSession();
 
     const { password, region } = state;
+
+    const limit = pLimit(Number(options.limit));
 
     const client = createMapiClient({
       token: password,
@@ -68,12 +72,12 @@ program
 
         try {
           /* spinner.start(`Fetching user ${index}...`); */
-          const { data, attempt } = await client.get(`users/${index}`);
+          const { data, attempt } = await limit(() => client.get(`users/${index}`));
           /*  spinner.succeed(`${data.name} - Attempt ${attempt}`); */
           results.success.push({ data, attempt });
 
           const tags = Array.from({ length: 6 }).map(async (_value, internalIndex) => {
-            const { data, attempt } = await client.get(`tags/${index}${internalIndex}`);
+            const { data, attempt } = await limit(() => client.get(`tags/${index}${internalIndex}`));
             results.success.push({ data, attempt });
           });
 
@@ -91,6 +95,7 @@ program
     }
 
     console.log(results);
+    console.timeEnd('Test');
   });
 
 try {
