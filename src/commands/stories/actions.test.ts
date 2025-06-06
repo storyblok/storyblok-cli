@@ -272,35 +272,35 @@ describe('stories/actions', () => {
 
     it('should fetch stories without filters', async () => {
       await fetchStoriesByComponent(mockSpaceOptions);
-      expect(requestUrl).toBe('');
+      expect(requestUrl).toBe('?per_page=100');
     });
 
     it('should fetch stories with component filter', async () => {
       await fetchStoriesByComponent(mockSpaceOptions, {
         componentName: 'test-component',
       });
-      expect(requestUrl).toBe('?contain_component=test-component');
+      expect(requestUrl).toBe('?contain_component=test-component&per_page=100');
     });
 
     it('should fetch stories with starts_with filter', async () => {
       await fetchStoriesByComponent(mockSpaceOptions, {
         starts_with: '/en/blog/',
       });
-      expect(requestUrl).toBe('?starts_with=%2Fen%2Fblog%2F');
+      expect(requestUrl).toBe('?starts_with=%2Fen%2Fblog%2F&per_page=100');
     });
 
     it('should fetch stories with filter_query parameter', async () => {
       await fetchStoriesByComponent(mockSpaceOptions, {
         query: '[highlighted][is]=true',
       });
-      expect(requestUrl).toBe('?filter_query[highlighted][is]=true');
+      expect(requestUrl).toBe('?per_page=100&filter_query[highlighted][is]=true');
     });
 
     it('should handle already prefixed filter_query parameter', async () => {
       await fetchStoriesByComponent(mockSpaceOptions, {
         query: 'filter_query[highlighted][is]=true',
       });
-      expect(requestUrl).toBe('?filter_query[highlighted][is]=true');
+      expect(requestUrl).toBe('?per_page=100&filter_query[highlighted][is]=true');
     });
 
     it('should handle multiple filters together', async () => {
@@ -309,7 +309,7 @@ describe('stories/actions', () => {
         starts_with: '/en/blog/',
         query: '[highlighted][is]=true',
       });
-      expect(requestUrl).toBe('?starts_with=%2Fen%2Fblog%2F&contain_component=test-component&filter_query[highlighted][is]=true');
+      expect(requestUrl).toBe('?starts_with=%2Fen%2Fblog%2F&contain_component=test-component&per_page=100&filter_query[highlighted][is]=true');
     });
 
     it('should handle error responses', async () => {

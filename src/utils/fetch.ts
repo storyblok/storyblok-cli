@@ -22,7 +22,7 @@ export interface FetchOptions {
   baseDelay?: number;
 }
 
-export async function customFetch<T>(url: string, options: FetchOptions = {}): Promise<T> {
+export async function customFetch<T>(url: string, options: FetchOptions = {}): Promise<T & { perPage: number; total: number }> {
   const maxRetries = options.maxRetries ?? 3;
   const baseDelay = options.baseDelay ?? 500; // 500ms base delay
   let attempt = 0;
@@ -77,7 +77,11 @@ export async function customFetch<T>(url: string, options: FetchOptions = {}): P
         });
       }
 
-      return data;
+      return {
+        ...data,
+        perPage: Number(response.headers.get('Per-Page')),
+        total: Number(response.headers.get('Total')),
+      };
     }
     catch (error) {
       if (error instanceof FetchError) {

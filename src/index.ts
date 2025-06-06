@@ -13,6 +13,8 @@ import './commands/types';
 import pkg from '../package.json';
 
 import { colorPalette } from './constants';
+import { session } from './session';
+import { fetchStories } from './commands/stories';
 
 export * from './types/storyblok';
 
@@ -32,6 +34,25 @@ program.on('command:*', () => {
   konsola.br();
   program.help();
 });
+
+program.command('test')
+  .description('Test the CLI')
+  .action(async () => {
+    const { state, initializeSession } = session();
+    await initializeSession();
+
+    const { password, region } = state;
+
+    try {
+      const result = await fetchStories('85047', password, region, {
+        per_page: 100,
+      });
+      console.log(result?.length);
+    }
+    catch (error) {
+      console.error(error);
+    }
+  });
 
 try {
   program.parse(process.argv);
