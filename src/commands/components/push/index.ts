@@ -2,7 +2,7 @@ import type { PushComponentsOptions } from './constants';
 
 import { colorPalette, commands } from '../../../constants';
 import { getProgram } from '../../../program';
-import { CommandError, handleError, konsola } from '../../../utils';
+import { CommandError, handleError, konsola, requireAuthentication } from '../../../utils';
 import { session } from '../../../session';
 import { readComponentsFiles } from './actions';
 import { componentsCommand } from '../command';
@@ -37,8 +37,7 @@ componentsCommand
     const { state, initializeSession } = session();
     await initializeSession();
 
-    if (!state.isLoggedIn || !state.password || !state.region) {
-      handleError(new CommandError(`You are currently not logged in. Please login first to get your user info.`), verbose);
+    if (!requireAuthentication(state, verbose)) {
       return;
     }
 

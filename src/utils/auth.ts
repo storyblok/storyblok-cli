@@ -1,0 +1,25 @@
+import type { SessionState } from '../session';
+import { CommandError, handleError } from './error';
+
+type AuthenticatedSessionState = SessionState & {
+  isLoggedIn: true;
+  password: NonNullable<SessionState['password']>;
+  region: NonNullable<SessionState['region']>;
+};
+
+/**
+ * Check if user is authenticated and handle error if not
+ * @param state - Session state object
+ * @param verbose - Whether to show verbose error output
+ * @returns true if authenticated, false if not (and error is handled)
+ */
+export function requireAuthentication(state: SessionState, verbose = false): state is AuthenticatedSessionState {
+  if (!state.isLoggedIn || !state.password || !state.region) {
+    handleError(
+      new CommandError('You are currently not logged in. Please run "storyblok login" to authenticate.'),
+      verbose,
+    );
+    return false;
+  }
+  return true;
+}

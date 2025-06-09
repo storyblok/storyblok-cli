@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import { colorPalette, commands } from '../../constants';
 import { getProgram } from '../../program';
-import { CommandError, handleError, isVitest, konsola } from '../../utils';
+import { handleError, isVitest, konsola, requireAuthentication } from '../../utils';
 import { getUser } from './actions';
 import { session } from '../../session';
 import { Spinner } from '@topcli/spinner';
@@ -16,8 +16,7 @@ export const userCommand = program
     const { state, initializeSession } = session();
     await initializeSession();
 
-    if (!state.isLoggedIn) {
-      handleError(new CommandError(`You are currently not logged in. Please login first to get your user info.`));
+    if (!requireAuthentication(state)) {
       return;
     }
     const spinner = new Spinner({
