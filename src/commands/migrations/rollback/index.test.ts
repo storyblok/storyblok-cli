@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { session } from '../../../session';
-import { CommandError, konsola } from '../../../utils';
+import { konsola } from '../../../utils';
 import '../index';
 import { migrationsCommand } from '../command';
 import { readRollbackFile } from './actions';

@@ -1,6 +1,6 @@
 import { userCommand } from './';
 import { getUser } from './actions';
-import { CommandError, konsola } from '../../utils';
+import { konsola } from '../../utils';
 import { session } from '../../session';
 import chalk from 'chalk';
 
