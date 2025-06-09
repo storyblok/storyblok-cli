@@ -39,23 +39,7 @@ vi.mock('../../session', () => {
   };
 });
 
-vi.mock('../../utils', async () => {
-  const actualUtils = await vi.importActual('../../utils');
-  return {
-    ...actualUtils,
-    konsola: {
-      ok: vi.fn(),
-      title: vi.fn(),
-      warn: vi.fn(),
-      error: vi.fn(),
-      br: vi.fn(),
-    },
-    handleError: (error: Error, header = false) => {
-      konsola.error(error, header);
-      // Optionally, prevent process.exit during tests
-    },
-  };
-});
+vi.mock('../../utils/konsola');
 
 describe('languagesCommand', () => {
   describe('pull', () => {
@@ -102,9 +86,11 @@ describe('languagesCommand', () => {
         session().state = {
           isLoggedIn: false,
         };
-        const mockError = new CommandError(`You are currently not logged in. Please login first to get your user info.`);
+        const mockError = new CommandError(`You are currently not logged in. Please run storyblok login to authenticate, or storyblok signup to signup.`);
         await languagesCommand.parseAsync(['node', 'test', 'pull', '--space', '12345']);
-        expect(konsola.error).toHaveBeenCalledWith(mockError, false);
+        expect(konsola.error).toHaveBeenCalledWith(mockError.message, null, {
+          header: true,
+        });
       });
 
       it('should throw an error if the space is not provided', async () => {
@@ -121,7 +107,9 @@ describe('languagesCommand', () => {
         catch (error) {
           console.log('TEST languages', error);
         }
-        expect(konsola.error).toHaveBeenCalledWith(mockError, false);
+        expect(konsola.error).toHaveBeenCalledWith(mockError.message, null, {
+          header: true,
+        });
       });
 
       it('should prompt a warning the user if no languages are found', async () => {

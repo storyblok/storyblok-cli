@@ -34,22 +34,7 @@ vi.mock('../../session', () => {
   };
 });
 
-vi.mock('../../utils', async () => {
-  const actualUtils = await vi.importActual('../../utils');
-  return {
-    ...actualUtils,
-    konsola: {
-      ok: vi.fn(),
-      title: vi.fn(),
-      error: vi.fn(),
-      br: vi.fn(),
-    },
-    handleError: (error: Error, header = false) => {
-      konsola.error(error, header);
-      // Optionally, prevent process.exit during tests
-    },
-  };
-});
+vi.mock('../../utils/konsola');
 
 describe('userCommand', () => {
   beforeEach(() => {
@@ -85,7 +70,9 @@ describe('userCommand', () => {
     };
     await userCommand.parseAsync(['node', 'test']);
 
-    expect(konsola.error).toHaveBeenCalledWith(new CommandError(`You are currently not logged in. Please login first to get your user info.`), false);
+    expect(konsola.error).toHaveBeenCalledWith('You are currently not logged in. Please run storyblok login to authenticate, or storyblok signup to signup.', null, {
+      header: true,
+    });
   });
 
   it('should show an error if the user information cannot be fetched', async () => {
@@ -101,6 +88,8 @@ describe('userCommand', () => {
 
     await userCommand.parseAsync(['node', 'test']);
 
-    expect(konsola.error).toHaveBeenCalledWith(mockError, true);
+    expect(konsola.error).toHaveBeenCalledWith(mockError.message, null, {
+      header: true,
+    });
   });
 });
