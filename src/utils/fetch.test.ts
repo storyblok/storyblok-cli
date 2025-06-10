@@ -10,19 +10,31 @@ describe('customFetch', () => {
     const mockResponse = { data: 'test' };
     mockFetch.mockResolvedValueOnce({
       ok: true,
-      headers: { get: () => 'application/json' },
+      headers: new Headers({
+        'content-type': 'application/json',
+        'per-page': '10',
+        'total': '100',
+      }),
       json: () => Promise.resolve(mockResponse),
     });
 
     const result = await customFetch('https://api.test.com');
-    expect(result).toEqual(mockResponse);
+    expect(result).toEqual({
+      ...mockResponse,
+      perPage: 10,
+      total: 100,
+    });
   });
 
   it('should handle object body by stringifying it', async () => {
     const body = { test: 'data' };
     mockFetch.mockResolvedValueOnce({
       ok: true,
-      headers: { get: () => 'application/json' },
+      headers: new Headers({
+        'content-type': 'application/json',
+        'per-page': '10',
+        'total': '100',
+      }),
       json: () => Promise.resolve({}),
     });
 
@@ -37,7 +49,11 @@ describe('customFetch', () => {
     const body = '{"test":"data"}';
     mockFetch.mockResolvedValueOnce({
       ok: true,
-      headers: { get: () => 'application/json' },
+      headers: new Headers({
+        'content-type': 'application/json',
+        'per-page': '10',
+        'total': '100',
+      }),
       json: () => Promise.resolve({}),
     });
 
@@ -52,7 +68,11 @@ describe('customFetch', () => {
     const body = ['test', 'data'];
     mockFetch.mockResolvedValueOnce({
       ok: true,
-      headers: { get: () => 'application/json' },
+      headers: new Headers({
+        'content-type': 'application/json',
+        'per-page': '10',
+        'total': '100',
+      }),
       json: () => Promise.resolve({}),
     });
 
@@ -67,7 +87,11 @@ describe('customFetch', () => {
     const textResponse = 'Hello World';
     mockFetch.mockResolvedValueOnce({
       ok: true,
-      headers: { get: () => 'text/plain' },
+      headers: new Headers({
+        'content-type': 'text/plain',
+        'per-page': '10',
+        'total': '100',
+      }),
       text: () => Promise.resolve(textResponse),
     });
 
@@ -80,6 +104,11 @@ describe('customFetch', () => {
       ok: false,
       status: 404,
       statusText: 'Not Found',
+      headers: new Headers({
+        'content-type': 'application/json',
+        'per-page': '10',
+        'total': '100',
+      }),
       json: () => Promise.resolve(errorResponse),
     });
 
@@ -109,7 +138,11 @@ describe('customFetch', () => {
   it('should set correct headers', async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
-      headers: { get: () => 'application/json' },
+      headers: new Headers({
+        'content-type': 'application/json',
+        'per-page': '10',
+        'total': '100',
+      }),
       json: () => Promise.resolve({}),
     });
 
