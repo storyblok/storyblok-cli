@@ -15,6 +15,7 @@ import {
   handleWhitelists,
 } from './operations';
 import chalk from 'chalk';
+import { mapiClient } from '../../../api';
 
 const program = getProgram(); // Get the shared singleton instance
 
@@ -87,6 +88,11 @@ componentsCommand
         konsola.warn('No components found. Please make sure you have pulled the components first.');
         return;
       }
+
+      mapiClient({
+        token: password,
+        region,
+      });
 
       const results = {
         successful: [] as string[],

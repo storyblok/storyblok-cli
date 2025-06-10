@@ -6,6 +6,7 @@ import type { SpaceComponent, SpaceComponentGroup, SpaceComponentInternalTag, Sp
 import { join, resolve } from 'node:path';
 import { resolvePath, saveToFile } from '../../../utils/filesystem';
 import type { SaveComponentsOptions } from './constants';
+import { mapiClient } from '../../../api';
 // Components
 export const fetchComponents = async (space: string, token: string, region: RegionCode): Promise<SpaceComponent[] | undefined> => {
   try {
@@ -78,17 +79,15 @@ export const fetchComponentPresets = async (space: string, token: string, region
 };
 
 // Component internal tags
-export const fetchComponentInternalTags = async (space: string, token: string, region: RegionCode): Promise<SpaceComponentInternalTag[] | undefined> => {
+export const fetchComponentInternalTags = async (space: string): Promise<SpaceComponentInternalTag[] | undefined> => {
   try {
-    const url = getStoryblokUrl(region);
-    const response = await customFetch<{
+    const client = mapiClient();
+
+    const { data } = await client.get<{
       internal_tags: SpaceComponentInternalTag[];
-    }>(`${url}/spaces/${space}/internal_tags`, {
-      headers: {
-        Authorization: token,
-      },
+    }>(`spaces/${space}/internal_tags`, {
     });
-    return response.internal_tags.filter(tag => tag.object_type === 'component');
+    return data.internal_tags.filter(tag => tag.object_type === 'component');
   }
   catch (error) {
     handleAPIError('pull_component_internal_tags', error as Error);

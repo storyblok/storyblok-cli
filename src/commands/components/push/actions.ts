@@ -10,6 +10,7 @@ import { resolvePath } from '../../../utils/filesystem';
 import { fetchComponent, fetchComponentGroups, fetchComponentInternalTags, fetchComponentPresets } from '../actions';
 import type { FileReaderResult } from '../../../types';
 import chalk from 'chalk';
+import { mapiClient } from '../../../api';
 
 // Component actions
 export const pushComponent = async (space: string, component: SpaceComponent, token: string, region: RegionCode): Promise<SpaceComponent | undefined> => {
@@ -195,58 +196,56 @@ export const upsertComponentPreset = async (space: string, preset: Partial<Space
 
 // Component internal tag actions
 
-export const pushComponentInternalTag = async (space: string, componentInternalTag: SpaceComponentInternalTag, token: string, region: RegionCode): Promise<SpaceComponentInternalTag | undefined> => {
+export const pushComponentInternalTag = async (space: string, componentInternalTag: SpaceComponentInternalTag): Promise<SpaceComponentInternalTag | undefined> => {
   try {
-    const url = getStoryblokUrl(region);
-    const response = await customFetch<{
+    const client = mapiClient();
+
+    const { data } = await client.post<{
       internal_tag: SpaceComponentInternalTag;
-    }>(`${url}/spaces/${space}/internal_tags`, {
+    }>(`spaces/${space}/internal_tags`, {
       method: 'POST',
-      headers: {
-        Authorization: token,
-      },
       body: JSON.stringify(componentInternalTag),
     });
-    return response.internal_tag;
+
+    return data.internal_tag;
   }
   catch (error) {
     handleAPIError('push_component_internal_tag', error as Error, `Failed to push component internal tag ${componentInternalTag.name}`);
   }
 };
 
-export const updateComponentInternalTag = async (space: string, tagId: number, componentInternalTag: SpaceComponentInternalTag, token: string, region: RegionCode): Promise<SpaceComponentInternalTag | undefined> => {
+export const updateComponentInternalTag = async (space: string, tagId: number, componentInternalTag: SpaceComponentInternalTag): Promise<SpaceComponentInternalTag | undefined> => {
   try {
-    const url = getStoryblokUrl(region);
-    const response = await customFetch<{
+    const client = mapiClient();
+
+    const { data } = await client.put<{
       internal_tag: SpaceComponentInternalTag;
-    }>(`${url}/spaces/${space}/internal_tags/${tagId}`, {
+    }>(`spaces/${space}/internal_tags/${tagId}`, {
       method: 'PUT',
-      headers: {
-        Authorization: token,
-      },
       body: JSON.stringify(componentInternalTag),
     });
-    return response.internal_tag;
+
+    return data.internal_tag;
   }
   catch (error) {
     handleAPIError('update_component_internal_tag', error as Error, `Failed to update component internal tag ${componentInternalTag.name}`);
   }
 };
 
-export const upsertComponentInternalTag = async (space: string, tag: SpaceComponentInternalTag, token: string, region: RegionCode): Promise<SpaceComponentInternalTag | undefined> => {
+export const upsertComponentInternalTag = async (space: string, tag: SpaceComponentInternalTag): Promise<SpaceComponentInternalTag | undefined> => {
   try {
-    return await pushComponentInternalTag(space, tag, token, region);
+    return await pushComponentInternalTag(space, tag);
   }
   catch (error) {
     if (error instanceof APIError && error.code === 422) {
       const responseData = error.response?.data as { [key: string]: string[] } | undefined;
       if (responseData?.name?.[0] === 'has already been taken') {
         // Find existing tag by name
-        const existingTags = await fetchComponentInternalTags(space, token, region);
+        const existingTags = await fetchComponentInternalTags(space);
         const existingTag = existingTags?.find(t => t.name === tag.name);
         if (existingTag) {
           // Update existing tag
-          return await updateComponentInternalTag(space, existingTag.id, tag, token, region);
+          return await updateComponentInternalTag(space, existingTag.id, tag);
         }
       }
     }

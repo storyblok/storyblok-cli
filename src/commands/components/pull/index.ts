@@ -69,7 +69,7 @@ componentsCommand
       // Fetch components internal tags
       spinnerInternalTags.start(`Fetching ${chalk.hex(colorPalette.COMPONENTS)('components internal tags')}`);
 
-      const internalTags = await fetchComponentInternalTags(space, password, region);
+      const internalTags = await fetchComponentInternalTags(space);
       spinnerInternalTags.succeed(`${chalk.hex(colorPalette.COMPONENTS)('Tags')} - Completed in ${spinnerInternalTags.elapsedTime.toFixed(2)}ms`);
 
       // Save everything using the new structure

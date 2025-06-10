@@ -5,6 +5,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest
 import { pushComponent, pushComponentGroup, pushComponentInternalTag, pushComponentPreset, readComponentsFiles, updateComponent, updateComponentGroup, updateComponentInternalTag, updateComponentPreset, upsertComponent, upsertComponentGroup, upsertComponentInternalTag, upsertComponentPreset } from './actions';
 import type { SpaceComponent, SpaceComponentGroup, SpaceComponentInternalTag, SpaceComponentPreset } from '../constants';
 import chalk from 'chalk';
+import { mapiClient } from '../../../api';
 
 const mockComponent: SpaceComponent = {
   name: 'component-name',
@@ -363,23 +364,31 @@ describe('push components actions', () => {
   });
 
   describe('component internal tag', () => {
+    beforeEach(() => {
+      mapiClient().dispose();
+      mapiClient({
+        token: 'valid-token',
+        region: 'eu',
+      });
+    });
+
     it('should push component internal tag successfully with a valid token', async () => {
-      const result = await pushComponentInternalTag('12345', mockInternalTag, 'valid-token', 'eu');
+      const result = await pushComponentInternalTag('12345', mockInternalTag);
       expect(result).toEqual(mockInternalTag);
     });
 
     it('should update component internal tag successfully with a valid token', async () => {
-      const result = await updateComponentInternalTag('12345', 1, mockInternalTag, 'valid-token', 'eu');
+      const result = await updateComponentInternalTag('12345', 1, mockInternalTag);
       expect(result).toEqual(mockInternalTag);
     });
 
     it('should upsert component internal tag successfully with a valid token', async () => {
-      const result = await upsertComponentInternalTag('12345', mockInternalTag, 'valid-token', 'eu');
+      const result = await upsertComponentInternalTag('12345', mockInternalTag);
       expect(result).toEqual(mockInternalTag);
     });
 
     it('should upsert existing component internal tag successfully with a valid token', async () => {
-      const result = await upsertComponentInternalTag('12345', mockInternalTagExisting, 'valid-token', 'eu');
+      const result = await upsertComponentInternalTag('12345', mockInternalTagExisting);
       expect(result).toEqual(mockInternalTagExisting);
     });
   });

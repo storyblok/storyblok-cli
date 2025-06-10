@@ -3,7 +3,7 @@ import { getStoryblokUrl } from './utils/api-routes';
 import { delay, FetchError } from './utils/fetch';
 
 export interface ManagementApiClientOptions {
-  token: string;
+  token?: string;
   url?: string;
   region?: RegionCode;
   maxRetries?: number;
@@ -19,13 +19,29 @@ export interface FetchOptions {
   baseDelay?: number;
 }
 
-export const mapiClient = (options: ManagementApiClientOptions) => {
+export interface GetResponse<T> {
+  data: T;
+  attempt: number;
+}
+
+export interface MapiClient {
+  uuid: string;
+  get: <T>(path: string, fetchOptions?: FetchOptions) => Promise<GetResponse<T>>;
+  post: <T>(path: string, fetchOptions?: FetchOptions) => Promise<GetResponse<T>>;
+  put: <T>(path: string, fetchOptions?: FetchOptions) => Promise<GetResponse<T>>;
+  dispose: () => void;
+}
+
+let instance: MapiClient | null = null;
+
+const createMapiClient = (options: ManagementApiClientOptions): MapiClient => {
   const baseHeaders = {
     'Content-Type': 'application/json',
     'Authorization': options.token,
   };
 
   const state = {
+    uuid: `mapi-client-${Math.random().toString(36).substring(2, 15)}`,
     baseHeaders,
     url: options.url || getStoryblokUrl(options.region),
     maxRetries: options.maxRetries ?? 6,
@@ -33,18 +49,13 @@ export const mapiClient = (options: ManagementApiClientOptions) => {
     freeze: false,
   };
 
-  interface GetResponse {
-    data: any;
-    attempt: number;
-  }
-
   // Internal: isRateLimitOwner is true for the request that first hits 429 and is responsible for lifting the freeze
-  const get = async (
+  const request = async <T>(
     path: string,
     fetchOptions?: FetchOptions,
     attempt: number = 0,
     isRateLimitOwner: boolean = false,
-  ): Promise<GetResponse> => {
+  ): Promise<GetResponse<T>> => {
     // Only non-owner calls should wait for freeze
     if (state.freeze && !isRateLimitOwner) {
       if (options?.verbose) {
@@ -60,15 +71,18 @@ export const mapiClient = (options: ManagementApiClientOptions) => {
       });
       // Add a random delay (e.g., 100-500ms) to spread out retries
       await delay(100 + Math.random() * 400);
-      return get(path, fetchOptions, attempt);
+      return request<T>(path, fetchOptions, attempt);
     }
     try {
       if (options?.verbose) {
         console.log(`${state.url}/${path} - Attempt ${attempt}`);
       }
       const res = await fetch(`${state.url}/${path}`, {
-        method: 'GET',
-        headers: state.baseHeaders,
+        headers: {
+          ...state.baseHeaders,
+          ...fetchOptions?.headers,
+        } as HeadersInit,
+        ...fetchOptions,
       });
 
       if (res.ok) {
@@ -84,7 +98,7 @@ export const mapiClient = (options: ManagementApiClientOptions) => {
         throw new FetchError('Request failed', {
           status: res.status,
           statusText: res.statusText,
-          data: null,
+          data: await res.json(),
         });
       }
     }
@@ -104,7 +118,7 @@ export const mapiClient = (options: ManagementApiClientOptions) => {
           await delay(waitTime);
           try {
             // Pass isOwner down the retry chain
-            const result = await get(path, options, attempt + 1, isOwner);
+            const result = await request<T>(path, fetchOptions, attempt + 1, isOwner);
             return result;
           }
           finally {
@@ -123,9 +137,34 @@ export const mapiClient = (options: ManagementApiClientOptions) => {
     }
   };
 
-  return {
-    get,
+  const get = async (path: string, fetchOptions?: FetchOptions) => {
+    return request(path, fetchOptions);
   };
+
+  const post = async (path: string, fetchOptions?: FetchOptions) => {
+    return request(path, { ...fetchOptions, method: 'POST' });
+  };
+
+  const put = async (path: string, fetchOptions?: FetchOptions) => {
+    return request(path, { ...fetchOptions, method: 'PUT' });
+  };
+
+  instance = {
+    uuid: state.uuid,
+    get,
+    post,
+    put,
+    dispose: () => {
+      instance = null;
+    },
+  } as MapiClient;
+
+  return instance;
 };
 
-export const createMapiClient = (options: ManagementApiClientOptions) => mapiClient(options);
+export function mapiClient(options?: ManagementApiClientOptions) {
+  if (!instance) {
+    instance = createMapiClient(options ?? {});
+  }
+  return instance;
+};
