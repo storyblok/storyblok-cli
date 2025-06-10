@@ -54,3 +54,13 @@ export interface SpaceData {
   presets: SpaceComponentPreset[];
   internalTags: SpaceComponentInternalTag[];
 }
+
+export interface SpaceDataState {
+  local: SpaceData;
+  target: {
+    components: Map<string, SpaceComponent>;
+    tags: Map<string, SpaceComponentInternalTag>;
+    groups: Map<string, SpaceComponentGroup>;
+    presets: Map<string, SpaceComponentPreset>;
+  };
+}

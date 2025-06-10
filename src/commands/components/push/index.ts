@@ -16,6 +16,8 @@ import {
 } from './operations';
 import chalk from 'chalk';
 import { mapiClient } from '../../../api';
+import { fetchComponentGroups, fetchComponentInternalTags, fetchComponentPresets, fetchComponents } from '../actions';
+import type { SpaceDataState } from '../constants';
 
 const program = getProgram(); // Get the shared singleton instance
 
@@ -28,6 +30,7 @@ componentsCommand
   .option('--su, --suffix <suffix>', 'Suffix to add to the component name')
   .action(async (componentName: string | undefined, options: PushComponentsOptions) => {
     konsola.title(` ${commands.COMPONENTS} `, colorPalette.COMPONENTS, componentName ? `Pushing component ${componentName}...` : 'Pushing components...');
+    console.time('perf: push components separate files');
     // Global options
     const verbose = program.opts().verbose;
     const { space, path } = componentsCommand.opts();
@@ -59,37 +62,73 @@ componentsCommand
 
     const { password, region } = state;
 
+    let requestCount = 0;
+
     mapiClient({
       token: password,
       region,
+      onRequest: (request) => {
+        requestCount++;
+      },
     });
 
     try {
-      let spaceData = await readComponentsFiles({
-        ...options,
-        path,
-        space,
+      const spaceState: SpaceDataState = {
+        local: await readComponentsFiles({
+          ...options,
+          path,
+          space,
+        }),
+        target: {
+          components: new Map(),
+          groups: new Map(),
+          tags: new Map(),
+          presets: new Map(),
+        },
+      };
+
+      // Target space data
+      const promises = [
+        fetchComponents(space),
+        fetchComponentGroups(space),
+        fetchComponentPresets(space),
+        fetchComponentInternalTags(space),
+      ];
+      const [components, groups, presets, internalTags] = await Promise.all(promises);
+
+      components?.forEach((component) => {
+        spaceState.target.components.set(component.name, component);
+      });
+
+      groups?.forEach((group) => {
+        spaceState.target.groups.set(group.name, group);
+      });
+      presets?.forEach((preset) => {
+        spaceState.target.presets.set(preset.name, preset);
+      });
+      internalTags?.forEach((tag) => {
+        spaceState.target.tags.set(tag.name, tag);
       });
 
       // If componentName is provided, filter space data to only include related resources
       if (componentName) {
-        spaceData = filterSpaceDataByComponent(spaceData, componentName);
-        if (!spaceData.components.length) {
+        spaceState.local = filterSpaceDataByComponent(spaceState.local, componentName);
+        if (!spaceState.local.components.length) {
           handleError(new CommandError(`Component "${componentName}" not found.`), verbose);
           return;
         }
       }
       // If filter pattern is provided, filter space data to match the pattern
       else if (filter) {
-        spaceData = filterSpaceDataByPattern(spaceData, filter);
-        if (!spaceData.components.length) {
+        spaceState.local = filterSpaceDataByPattern(spaceState.local, filter);
+        if (!spaceState.local.components.length) {
           handleError(new CommandError(`No components found matching pattern "${filter}".`), verbose);
           return;
         }
         konsola.info(`Filter applied: ${filter}`);
       }
 
-      if (!spaceData.components.length) {
+      if (!spaceState.local.components.length) {
         konsola.warn('No components found. Please make sure you have pulled the components first.');
         return;
       }
@@ -100,22 +139,22 @@ componentsCommand
       };
 
       // First, process whitelist dependencies
-      const whitelistResults = await handleWhitelists(space, password, region, spaceData);
+      const whitelistResults = await handleWhitelists(space, spaceState);
       results.successful.push(...whitelistResults.successful);
       results.failed.push(...whitelistResults.failed);
 
       // Then process remaining tags (skip those already processed in whitelists)
-      const tagsResults = await handleTags(space, password, region, spaceData.internalTags, whitelistResults.processedTagIds);
+      const tagsResults = await handleTags(space, spaceState, whitelistResults.processedTagIds);
       results.successful.push(...tagsResults.successful);
       results.failed.push(...tagsResults.failed);
 
       // Then process remaining groups (skip those already processed in whitelists)
-      const groupsResults = await handleComponentGroups(space, password, region, spaceData.groups, whitelistResults.processedGroupUuids);
+      const groupsResults = await handleComponentGroups(space, spaceState, whitelistResults.processedGroupUuids);
       results.successful.push(...groupsResults.successful);
       results.failed.push(...groupsResults.failed);
 
       // Finally process remaining components (skip those already processed in whitelists)
-      const remainingComponents = spaceData.components.filter(
+      const remainingComponents = spaceState.local.components.filter(
         component => !whitelistResults.processedComponentNames.has(component.name),
       );
 
@@ -123,10 +162,17 @@ componentsCommand
         space,
         password,
         region,
-        spaceData: {
-          ...spaceData,
-          components: remainingComponents,
+        state: {
+          ...spaceState,
+          local: {
+            ...spaceState.local,
+            components: remainingComponents,
+          },
         },
+        /* spaceData: {
+          ...spaceState.local,
+          components: remainingComponents,
+        }, */
         groupsUuidMap: new Map([...whitelistResults.groupsUuidMap, ...groupsResults.uuidMap]), // Merge both group maps
         tagsIdMaps: new Map([...whitelistResults.tagsIdMap, ...tagsResults.idMap]), // Merge both tag maps
         componentNameMap: whitelistResults.componentNameMap,
@@ -145,6 +191,9 @@ componentsCommand
           });
         }
       }
+      console.log(`${results.successful.length} processed components`);
+      console.log(`${requestCount} requests made`);
+      console.timeEnd(`perf: push components separate files`);
     }
     catch (error) {
       handleError(error as Error, verbose);

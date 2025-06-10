@@ -9,8 +9,9 @@ import type {
   SpaceComponentInternalTag,
   SpaceComponentPreset,
   SpaceData,
+  SpaceDataState,
 } from '../constants';
-import { upsertComponent, upsertComponentGroup, upsertComponentInternalTag, upsertComponentPreset } from './actions';
+import { pushComponent, pushComponentGroup, pushComponentInternalTag, upsertComponent, upsertComponentGroup, upsertComponentPreset } from './actions';
 import { delay } from '../../../utils/fetch';
 
 function findRelatedResources(
@@ -217,9 +218,7 @@ export function filterSpaceDataByComponent(spaceData: SpaceData, componentName: 
 
 export async function handleTags(
   space: string,
-  password: string,
-  region: RegionCode,
-  spaceData: SpaceComponentInternalTag[],
+  state: SpaceDataState,
   skipIds?: Set<number>,
 ) {
   const results = {
@@ -230,8 +229,8 @@ export async function handleTags(
 
   // Filter out tags that should be skipped
   const tagsToProcess = skipIds
-    ? spaceData.filter(tag => !skipIds.has(tag.id))
-    : spaceData;
+    ? state.local.internalTags.filter(tag => !skipIds.has(tag.id))
+    : state.local.internalTags;
 
   await Promise.all(tagsToProcess.map(async (tag) => {
     const consolidatedSpinner = new Spinner({
@@ -239,7 +238,11 @@ export async function handleTags(
     });
     consolidatedSpinner.start('Upserting tags...');
     try {
-      const updatedTag = await upsertComponentInternalTag(space, tag, password, region);
+      let updatedTag = state.target.tags.get(tag.name);
+      if (!updatedTag) {
+        updatedTag = await pushComponentInternalTag(space, tag);
+      }
+
       if (updatedTag) {
         results.idMap.set(tag.id, updatedTag.id);
         results.successful.push(tag.name);
@@ -256,9 +259,7 @@ export async function handleTags(
 
 export async function handleComponentGroups(
   space: string,
-  password: string,
-  region: RegionCode,
-  spaceData: SpaceComponentGroup[],
+  state: SpaceDataState,
   skipUuids?: Set<string>,
 ) {
   const results = {
@@ -270,8 +271,8 @@ export async function handleComponentGroups(
 
   // Filter out groups that should be skipped
   const groupsToProcess = skipUuids
-    ? spaceData.filter(group => !skipUuids.has(group.uuid))
-    : spaceData;
+    ? state.local.groups.filter(group => !skipUuids.has(group.uuid))
+    : state.local.groups;
 
   // First, process groups without parents
   // This conditional handles a strange scenario where group (folders) ids are equal to their parents
@@ -282,13 +283,16 @@ export async function handleComponentGroups(
     });
     spinner.start(`Upserting root group ${group.name}...`);
     try {
-      const updatedGroup = await upsertComponentGroup(space, group, password, region);
+      let updatedGroup = state.target.groups.get(group.name);
+      if (!updatedGroup) {
+        updatedGroup = await pushComponentGroup(space, group);
+      }
       if (updatedGroup) {
         results.uuidMap.set(group.uuid, updatedGroup.uuid);
         results.idMap.set(group.id, updatedGroup.id);
         results.successful.push(group.name);
-        spinner.succeed(`Group-> ${chalk.hex(colorPalette.COMPONENTS)(group.name)} - Completed in ${spinner.elapsedTime.toFixed(2)}ms`);
       }
+      spinner.succeed(`Group-> ${chalk.hex(colorPalette.COMPONENTS)(group.name)} - Completed in ${spinner.elapsedTime.toFixed(2)}ms`);
     }
     catch (error) {
       spinner.failed(`Group-> ${chalk.hex(colorPalette.COMPONENTS)(group.name)} - Failed`);
@@ -302,7 +306,7 @@ export async function handleComponentGroups(
 
   async function processChildGroups() {
     let processedAny = false;
-    const remainingGroups = spaceData.filter(group => !processedGroups.has(group.uuid));
+    const remainingGroups = state.local.groups.filter(group => !processedGroups.has(group.uuid));
 
     for (const group of remainingGroups) {
       if (!group.parent_uuid || !group.parent_id) {
@@ -329,7 +333,7 @@ export async function handleComponentGroups(
           parent_id: newParentId,
         };
 
-        const updatedGroup = await upsertComponentGroup(space, groupToUpdate, password, region);
+        const updatedGroup = await upsertComponentGroup(space, groupToUpdate);
         if (updatedGroup) {
           results.uuidMap.set(group.uuid, updatedGroup.uuid);
           results.idMap.set(group.id, updatedGroup.id);
@@ -347,7 +351,7 @@ export async function handleComponentGroups(
     }
 
     // If we processed any groups and there are still unprocessed groups, continue recursively
-    if (processedAny && processedGroups.size < spaceData.length) {
+    if (processedAny && processedGroups.size < state.local.groups.length) {
       await processChildGroups();
     }
   }
@@ -480,9 +484,7 @@ function getGroupHierarchy(group: SpaceComponentGroup, allGroups: SpaceComponent
 
 export async function handleWhitelists(
   space: string,
-  password: string,
-  region: RegionCode,
-  spaceData: SpaceData,
+  state: SpaceDataState,
 ): Promise<{
     successful: string[];
     failed: Array<{ name: string; error: unknown }>;
@@ -512,7 +514,7 @@ export async function handleWhitelists(
   };
 
   // First, collect all direct dependencies
-  spaceData.components.forEach((component) => {
+  state.local.components.forEach((component) => {
     if (component.schema) {
       const deps = collectWhitelistDependencies(component.schema);
       deps.groupUuids.forEach(uuid => allDependencies.groupUuids.add(uuid));
@@ -522,13 +524,13 @@ export async function handleWhitelists(
   });
 
   // Process tags first
-  const whitelistTags = spaceData.internalTags.filter(tag => allDependencies.tagIds.has(tag.id));
+  const whitelistTags = state.local.internalTags.filter(tag => allDependencies.tagIds.has(tag.id));
   if (whitelistTags.length > 0) {
     const spinner = new Spinner({
       verbose: !isVitest,
     });
     spinner.start('Processing whitelist tags...');
-    const tagResults = await handleTags(space, password, region, whitelistTags);
+    const tagResults = await handleTags(space, state, new Set(whitelistTags.map(tag => tag.id)));
     results.successful.push(...tagResults.successful);
     results.failed.push(...tagResults.failed);
     tagResults.idMap.forEach((newId, oldId) => {
@@ -542,11 +544,11 @@ export async function handleWhitelists(
   const whitelistGroupsSet = new Set<SpaceComponentGroup>();
 
   // First, collect directly whitelisted groups
-  const directWhitelistGroups = spaceData.groups.filter(group => allDependencies.groupUuids.has(group.uuid));
+  const directWhitelistGroups = state.local.groups.filter(group => allDependencies.groupUuids.has(group.uuid));
 
   // Then, for each whitelisted group, get its full hierarchy
   directWhitelistGroups.forEach((group) => {
-    const hierarchy = getGroupHierarchy(group, spaceData.groups);
+    const hierarchy = getGroupHierarchy(group, state.local.groups);
     hierarchy.forEach(g => whitelistGroupsSet.add(g));
   });
 
@@ -556,7 +558,8 @@ export async function handleWhitelists(
       verbose: !isVitest,
     });
     spinner.start('Processing whitelist groups...');
-    const groupResults = await handleComponentGroups(space, password, region, whitelistGroups);
+
+    const groupResults = await handleComponentGroups(space, state, new Set(whitelistGroups.map(group => group.uuid)));
     results.successful.push(...groupResults.successful);
     results.failed.push(...groupResults.failed);
     groupResults.uuidMap.forEach((newUuid, oldUuid) => {
@@ -567,7 +570,7 @@ export async function handleWhitelists(
   }
 
   // Process whitelisted components last (after tags and groups are processed)
-  const whitelistComponents = spaceData.components.filter(component => allDependencies.componentNames.has(component.name));
+  const whitelistComponents = state.local.components.filter(component => allDependencies.componentNames.has(component.name));
   if (whitelistComponents.length > 0) {
     const spinner = new Spinner({
       verbose: !isVitest,
@@ -592,7 +595,7 @@ export async function handleWhitelists(
       visited.add(componentName);
 
       // Find the component
-      const component = spaceData.components.find(c => c.name === componentName);
+      const component = state.local.components.find(c => c.name === componentName);
       if (!component) {
         failedComponents.add(componentName);
         results.failed.push({
@@ -641,7 +644,7 @@ export async function handleWhitelists(
 
           // Map existing tag IDs to new ones
           for (const tagId of component.internal_tag_ids) {
-            const tag = spaceData.internalTags.find(t => t.id === Number(tagId));
+            const tag = state.local.internalTags.find(t => t.id === Number(tagId));
             if (tag) {
               const newTagId = results.tagsIdMap.get(tag.id);
               if (newTagId) {
@@ -670,7 +673,7 @@ export async function handleWhitelists(
           );
         }
 
-        const updatedComponent = await upsertComponent(space, componentToUpdate, password, region);
+        const updatedComponent = await upsertComponent(space, componentToUpdate);
         if (updatedComponent) {
           results.successful.push(component.name);
           results.componentNameMap.set(component.name, updatedComponent.name);
@@ -702,7 +705,7 @@ interface HandleComponentsOptions {
   space: string;
   password: string;
   region: RegionCode;
-  spaceData: SpaceData;
+  state: SpaceDataState;
   groupsUuidMap: Map<string, string>;
   tagsIdMaps: Map<number, number>;
   componentNameMap: Map<string, string>;
@@ -713,7 +716,7 @@ export async function handleComponents(options: HandleComponentsOptions) {
     space,
     password,
     region,
-    spaceData: { components, internalTags, presets },
+    state,
     groupsUuidMap,
     tagsIdMaps,
     componentNameMap,
@@ -750,7 +753,7 @@ export async function handleComponents(options: HandleComponentsOptions) {
   };
 
   // First pass: Create/update all components
-  for (const component of components) {
+  for (const component of state.local.components) {
     const spinner = new Spinner({
       verbose: !isVitest,
     });
@@ -784,7 +787,7 @@ export async function handleComponents(options: HandleComponentsOptions) {
 
         // Map existing tag IDs to new ones
         for (const tagId of component.internal_tag_ids) {
-          const tag = internalTags.find(t => t.id === Number(tagId));
+          const tag = state.local.internalTags.find(t => t.id === Number(tagId));
           if (tag) {
             const newTagId = tagsIdMaps.get(tag.id);
             if (newTagId) {
@@ -813,8 +816,11 @@ export async function handleComponents(options: HandleComponentsOptions) {
         );
       }
 
-      // Upsert the component
-      const updatedComponent = await upsertComponent(space, componentToUpdate, password, region);
+      let updatedComponent = state.target.components.get(component.name);
+      if (!updatedComponent) {
+        updatedComponent = await pushComponent(space, componentToUpdate);
+      }
+
       if (updatedComponent) {
         results.successful.push(component.name);
         results.componentIdMap.set(component.id, updatedComponent.id);
@@ -828,7 +834,7 @@ export async function handleComponents(options: HandleComponentsOptions) {
   }
 
   // Second pass: Only update components that have component_whitelist dependencies and weren't properly mapped in first pass
-  const componentsWithUnmappedWhitelists = components.filter(component =>
+  const componentsWithUnmappedWhitelists = state.local.components.filter(component =>
     component.schema
     && hasWhitelists(component.schema)
     && componentNameMap
@@ -861,7 +867,7 @@ export async function handleComponents(options: HandleComponentsOptions) {
         );
 
         // Upsert the component again with updated component whitelists
-        await upsertComponent(space, componentToUpdate, password, region);
+        await upsertComponent(space, componentToUpdate);
         spinner.succeed(`Component whitelists-> ${chalk.hex(colorPalette.COMPONENTS)(component.name)} - Completed in ${spinner.elapsedTime.toFixed(2)}ms`);
       }
       catch (error) {
@@ -872,8 +878,8 @@ export async function handleComponents(options: HandleComponentsOptions) {
   }
 
   // Finally, process presets
-  for (const component of components) {
-    const relatedPresets = presets.filter(preset => preset.component_id === component.id);
+  for (const component of state.local.components) {
+    const relatedPresets = state.local.presets.filter(preset => preset.component_id === component.id);
     if (relatedPresets.length > 0) {
       for (const preset of relatedPresets) {
         const presetSpinner = new Spinner({
