@@ -217,8 +217,6 @@ export function filterSpaceDataByComponent(spaceData: SpaceData, componentName: 
 
 export async function handleTags(
   space: string,
-  password: string,
-  region: RegionCode,
   spaceData: SpaceComponentInternalTag[],
   skipIds?: Set<number>,
 ) {
@@ -239,7 +237,7 @@ export async function handleTags(
     });
     consolidatedSpinner.start('Upserting tags...');
     try {
-      const updatedTag = await upsertComponentInternalTag(space, tag, password, region);
+      const updatedTag = await upsertComponentInternalTag(space, tag);
       if (updatedTag) {
         results.idMap.set(tag.id, updatedTag.id);
         results.successful.push(tag.name);
@@ -256,8 +254,6 @@ export async function handleTags(
 
 export async function handleComponentGroups(
   space: string,
-  password: string,
-  region: RegionCode,
   spaceData: SpaceComponentGroup[],
   skipUuids?: Set<string>,
 ) {
@@ -282,7 +278,7 @@ export async function handleComponentGroups(
     });
     spinner.start(`Upserting root group ${group.name}...`);
     try {
-      const updatedGroup = await upsertComponentGroup(space, group, password, region);
+      const updatedGroup = await upsertComponentGroup(space, group);
       if (updatedGroup) {
         results.uuidMap.set(group.uuid, updatedGroup.uuid);
         results.idMap.set(group.id, updatedGroup.id);
@@ -329,7 +325,7 @@ export async function handleComponentGroups(
           parent_id: newParentId,
         };
 
-        const updatedGroup = await upsertComponentGroup(space, groupToUpdate, password, region);
+        const updatedGroup = await upsertComponentGroup(space, groupToUpdate);
         if (updatedGroup) {
           results.uuidMap.set(group.uuid, updatedGroup.uuid);
           results.idMap.set(group.id, updatedGroup.id);
@@ -480,8 +476,6 @@ function getGroupHierarchy(group: SpaceComponentGroup, allGroups: SpaceComponent
 
 export async function handleWhitelists(
   space: string,
-  password: string,
-  region: RegionCode,
   spaceData: SpaceData,
 ): Promise<{
     successful: string[];
@@ -528,7 +522,7 @@ export async function handleWhitelists(
       verbose: !isVitest,
     });
     spinner.start('Processing whitelist tags...');
-    const tagResults = await handleTags(space, password, region, whitelistTags);
+    const tagResults = await handleTags(space, whitelistTags);
     results.successful.push(...tagResults.successful);
     results.failed.push(...tagResults.failed);
     tagResults.idMap.forEach((newId, oldId) => {
@@ -556,7 +550,7 @@ export async function handleWhitelists(
       verbose: !isVitest,
     });
     spinner.start('Processing whitelist groups...');
-    const groupResults = await handleComponentGroups(space, password, region, whitelistGroups);
+    const groupResults = await handleComponentGroups(space, whitelistGroups);
     results.successful.push(...groupResults.successful);
     results.failed.push(...groupResults.failed);
     groupResults.uuidMap.forEach((newUuid, oldUuid) => {
@@ -670,7 +664,7 @@ export async function handleWhitelists(
           );
         }
 
-        const updatedComponent = await upsertComponent(space, componentToUpdate, password, region);
+        const updatedComponent = await upsertComponent(space, componentToUpdate);
         if (updatedComponent) {
           results.successful.push(component.name);
           results.componentNameMap.set(component.name, updatedComponent.name);
@@ -700,8 +694,6 @@ export async function handleWhitelists(
 // Update HandleComponentsOptions to include whitelist maps
 interface HandleComponentsOptions {
   space: string;
-  password: string;
-  region: RegionCode;
   spaceData: SpaceData;
   groupsUuidMap: Map<string, string>;
   tagsIdMaps: Map<number, number>;
@@ -711,8 +703,6 @@ interface HandleComponentsOptions {
 export async function handleComponents(options: HandleComponentsOptions) {
   const {
     space,
-    password,
-    region,
     spaceData: { components, internalTags, presets },
     groupsUuidMap,
     tagsIdMaps,
@@ -814,7 +804,7 @@ export async function handleComponents(options: HandleComponentsOptions) {
       }
 
       // Upsert the component
-      const updatedComponent = await upsertComponent(space, componentToUpdate, password, region);
+      const updatedComponent = await upsertComponent(space, componentToUpdate);
       if (updatedComponent) {
         results.successful.push(component.name);
         results.componentIdMap.set(component.id, updatedComponent.id);
@@ -861,7 +851,7 @@ export async function handleComponents(options: HandleComponentsOptions) {
         );
 
         // Upsert the component again with updated component whitelists
-        await upsertComponent(space, componentToUpdate, password, region);
+        await upsertComponent(space, componentToUpdate);
         spinner.succeed(`Component whitelists-> ${chalk.hex(colorPalette.COMPONENTS)(component.name)} - Completed in ${spinner.elapsedTime.toFixed(2)}ms`);
       }
       catch (error) {
@@ -893,7 +883,7 @@ export async function handleComponents(options: HandleComponentsOptions) {
             component_id: newComponentId,
           };
 
-          await upsertComponentPreset(space, presetToUpdate, password, region);
+          await upsertComponentPreset(space, presetToUpdate);
           presetSpinner.succeed(`Preset-> ${chalk.hex(colorPalette.COMPONENTS)(preset.name)} - Completed in ${presetSpinner.elapsedTime.toFixed(2)}ms`);
         }
         catch (error) {

@@ -1,5 +1,4 @@
 import { APIError, FileSystemError, handleAPIError, handleFileSystemError } from '../../../utils';
-import type { RegionCode } from '../../../constants';
 import type { SpaceComponent, SpaceComponentGroup, SpaceComponentInternalTag, SpaceComponentPreset, SpaceData } from '../constants';
 import type { ReadComponentsOptions } from './constants';
 import { join } from 'node:path';
@@ -152,20 +151,20 @@ export const updateComponentPreset = async (space: string, presetId: number, com
   }
 };
 
-export const upsertComponentPreset = async (space: string, preset: Partial<SpaceComponentPreset>, token: string, region: RegionCode): Promise<SpaceComponentPreset | undefined> => {
+export const upsertComponentPreset = async (space: string, preset: Partial<SpaceComponentPreset>): Promise<SpaceComponentPreset | undefined> => {
   try {
-    return await pushComponentPreset(space, { preset }, token, region);
+    return await pushComponentPreset(space, { preset });
   }
   catch (error) {
     if (error instanceof APIError && error.code === 422) {
       const responseData = error.response?.data as { [key: string]: string[] } | undefined;
       if (responseData?.name?.[0] === 'has already been taken') {
         // Find existing preset by name
-        const existingPresets = await fetchComponentPresets(space, token, region);
+        const existingPresets = await fetchComponentPresets(space);
         const existingPreset = existingPresets?.find(p => p.name === preset.name && p.component_id === preset.component_id);
         if (existingPreset) {
           // Update existing preset
-          return await updateComponentPreset(space, existingPreset.id, { preset }, token, region);
+          return await updateComponentPreset(space, existingPreset.id, { preset });
         }
       }
     }

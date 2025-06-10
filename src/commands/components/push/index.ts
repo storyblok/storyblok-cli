@@ -100,17 +100,17 @@ componentsCommand
       };
 
       // First, process whitelist dependencies
-      const whitelistResults = await handleWhitelists(space, password, region, spaceData);
+      const whitelistResults = await handleWhitelists(space, spaceData);
       results.successful.push(...whitelistResults.successful);
       results.failed.push(...whitelistResults.failed);
 
       // Then process remaining tags (skip those already processed in whitelists)
-      const tagsResults = await handleTags(space, password, region, spaceData.internalTags, whitelistResults.processedTagIds);
+      const tagsResults = await handleTags(space, spaceData.internalTags, whitelistResults.processedTagIds);
       results.successful.push(...tagsResults.successful);
       results.failed.push(...tagsResults.failed);
 
       // Then process remaining groups (skip those already processed in whitelists)
-      const groupsResults = await handleComponentGroups(space, password, region, spaceData.groups, whitelistResults.processedGroupUuids);
+      const groupsResults = await handleComponentGroups(space, spaceData.groups, whitelistResults.processedGroupUuids);
       results.successful.push(...groupsResults.successful);
       results.failed.push(...groupsResults.failed);
 
@@ -121,8 +121,6 @@ componentsCommand
 
       const componentsResults = await handleComponents({
         space,
-        password,
-        region,
         spaceData: {
           ...spaceData,
           components: remainingComponents,

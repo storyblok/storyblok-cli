@@ -140,19 +140,17 @@ describe('push', () => {
       });
 
       // Whitelist phase.
-      expect(handleWhitelists).toHaveBeenCalledWith('12345', 'valid-token', 'eu', mockedSpaceData);
+      expect(handleWhitelists).toHaveBeenCalledWith('12345', mockedSpaceData);
 
       // Tags phase.
-      expect(handleTags).toHaveBeenCalledWith('12345', 'valid-token', 'eu', mockedSpaceData.internalTags, mockedWhitelistResults.processedTagIds);
+      expect(handleTags).toHaveBeenCalledWith('12345', mockedSpaceData.internalTags, mockedWhitelistResults.processedTagIds);
 
       // Groups phase.
-      expect(handleComponentGroups).toHaveBeenCalledWith('12345', 'valid-token', 'eu', mockedSpaceData.groups, mockedWhitelistResults.processedGroupUuids);
+      expect(handleComponentGroups).toHaveBeenCalledWith('12345', mockedSpaceData.groups, mockedWhitelistResults.processedGroupUuids);
 
       // Components phase.
       expect(handleComponents).toHaveBeenCalledWith({
         space: '12345',
-        password: 'valid-token',
-        region: 'eu',
         spaceData: {
           components: mockedSpaceData.components,
           groups: [],
@@ -231,13 +229,11 @@ describe('push', () => {
       await componentsCommand.parseAsync(['node', 'test', 'push', '--space', '12345']);
 
       // Tags phase.
-      expect(handleTags).toHaveBeenCalledWith('12345', 'valid-token', 'eu', mockedSpaceData.internalTags, mockedWhitelistResults.processedTagIds);
+      expect(handleTags).toHaveBeenCalledWith('12345', mockedSpaceData.internalTags, mockedWhitelistResults.processedTagIds);
 
       // Components phase.
       expect(handleComponents).toHaveBeenCalledWith({
         space: '12345',
-        password: 'valid-token',
-        region: 'eu',
         spaceData: {
           components: mockedSpaceData.components,
           groups: [],
@@ -332,13 +328,11 @@ describe('push', () => {
       await componentsCommand.parseAsync(['node', 'test', 'push', '--space', '12345']);
 
       // Groups phase.
-      expect(handleComponentGroups).toHaveBeenCalledWith('12345', 'valid-token', 'eu', mockedSpaceData.groups, mockedWhitelistResults.processedGroupUuids);
+      expect(handleComponentGroups).toHaveBeenCalledWith('12345', mockedSpaceData.groups, mockedWhitelistResults.processedGroupUuids);
 
       // Components phase.
       expect(handleComponents).toHaveBeenCalledWith({
         space: '12345',
-        password: 'valid-token',
-        region: 'eu',
         spaceData: {
           components: mockedSpaceData.components,
           groups: [
@@ -431,16 +425,14 @@ describe('push', () => {
 
       await componentsCommand.parseAsync(['node', 'test', 'push', '--space', '12345']);
 
-      expect(handleWhitelists).toHaveBeenCalledWith('12345', 'valid-token', 'eu', mockedSpaceData);
+      expect(handleWhitelists).toHaveBeenCalledWith('12345', mockedSpaceData);
 
       // Tags phase.
-      expect(handleTags).toHaveBeenCalledWith('12345', 'valid-token', 'eu', mockedSpaceData.internalTags, mockedWhitelistResults.processedTagIds);
+      expect(handleTags).toHaveBeenCalledWith('12345', mockedSpaceData.internalTags, mockedWhitelistResults.processedTagIds);
 
       // Components phase.
       expect(handleComponents).toHaveBeenCalledWith({
         space: '12345',
-        password: 'valid-token',
-        region: 'eu',
         spaceData: {
           components: mockedSpaceData.components,
           groups: [],
@@ -521,13 +513,11 @@ describe('push', () => {
       await componentsCommand.parseAsync(['node', 'test', 'push', '--space', '12345']);
 
       // Groups phase.
-      expect(handleComponentGroups).toHaveBeenCalledWith('12345', 'valid-token', 'eu', mockedSpaceData.groups, mockedWhitelistResults.processedGroupUuids);
+      expect(handleComponentGroups).toHaveBeenCalledWith('12345', mockedSpaceData.groups, mockedWhitelistResults.processedGroupUuids);
 
       // Components phase.
       expect(handleComponents).toHaveBeenCalledWith({
         space: '12345',
-        password: 'valid-token',
-        region: 'eu',
         spaceData: {
           components: mockedSpaceData.components,
           groups: [
@@ -625,13 +615,11 @@ describe('push', () => {
       await componentsCommand.parseAsync(['node', 'test', 'push', '--space', '12345']);
 
       // Groups phase.
-      expect(handleComponentGroups).toHaveBeenCalledWith('12345', 'valid-token', 'eu', mockedSpaceData.groups, mockedWhitelistResults.processedGroupUuids);
+      expect(handleComponentGroups).toHaveBeenCalledWith('12345', mockedSpaceData.groups, mockedWhitelistResults.processedGroupUuids);
 
       // Components phase.
       expect(handleComponents).toHaveBeenCalledWith({
         space: '12345',
-        password: 'valid-token',
-        region: 'eu',
         spaceData: {
           components: [mockedSpaceData.components[1]], // Only the component with the whitelist
           groups: [],

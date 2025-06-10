@@ -47,11 +47,11 @@ describe('operations', () => {
       // Mock successful upsert
       vi.mocked(upsertComponentInternalTag).mockResolvedValue(undefined);
 
-      const result = await handleTags(mockSpace, mockPassword, mockRegion, mockTags);
+      const result = await handleTags(mockSpace, mockTags);
 
       expect(upsertComponentInternalTag).toHaveBeenCalledTimes(2);
-      expect(upsertComponentInternalTag).toHaveBeenCalledWith(mockSpace, mockTags[0], mockPassword, mockRegion);
-      expect(upsertComponentInternalTag).toHaveBeenCalledWith(mockSpace, mockTags[1], mockPassword, mockRegion);
+      expect(upsertComponentInternalTag).toHaveBeenCalledWith(mockSpace, mockTags[0]);
+      expect(upsertComponentInternalTag).toHaveBeenCalledWith(mockSpace, mockTags[1]);
       expect(result.failed).toHaveLength(0);
     });
 
@@ -66,7 +66,7 @@ describe('operations', () => {
         .mockResolvedValueOnce(undefined)
         .mockRejectedValueOnce(new Error('API Error'));
 
-      const result = await handleTags(mockSpace, mockPassword, mockRegion, mockTags);
+      const result = await handleTags(mockSpace, mockTags);
 
       expect(upsertComponentInternalTag).toHaveBeenCalledTimes(2);
       expect(result.failed).toHaveLength(1);
@@ -147,7 +147,7 @@ describe('operations', () => {
         return mockResponses[group.name];
       });
 
-      const result = await handleComponentGroups(mockSpace, mockPassword, mockRegion, mockGroups);
+      const result = await handleComponentGroups(mockSpace, mockGroups);
 
       // Verify successful processing
       expect(result.successful).toEqual(['Folder A', 'Folder B', 'Folder C', 'Folder D']);
@@ -200,7 +200,7 @@ describe('operations', () => {
         };
       });
 
-      const result = await handleComponentGroups(mockSpace, mockPassword, mockRegion, mockGroups);
+      const result = await handleComponentGroups(mockSpace, mockGroups);
 
       // Verify Folder B failed but others processed
       expect(result.failed).toHaveLength(1);
@@ -214,7 +214,7 @@ describe('operations', () => {
     });
 
     it('should handle empty groups array', async () => {
-      const result = await handleComponentGroups(mockSpace, mockPassword, mockRegion, []);
+      const result = await handleComponentGroups(mockSpace, []);
 
       expect(result.successful).toHaveLength(0);
       expect(result.failed).toHaveLength(0);
@@ -313,8 +313,6 @@ describe('operations', () => {
 
       const result = await handleComponents({
         space: mockSpace,
-        password: mockPassword,
-        region: mockRegion,
         spaceData: mockSpaceData,
         groupsUuidMap: mockGroupsUuidMap,
         tagsIdMaps: mockTagsIdMap,
@@ -367,8 +365,6 @@ describe('operations', () => {
 
       const result = await handleComponents({
         space: mockSpace,
-        password: mockPassword,
-        region: mockRegion,
         spaceData: mockSpaceData,
         groupsUuidMap: mockGroupsUuidMap,
         tagsIdMaps: mockTagsIdMap,
@@ -395,8 +391,6 @@ describe('operations', () => {
 
       const result = await handleComponents({
         space: mockSpace,
-        password: mockPassword,
-        region: mockRegion,
         spaceData: mockSpaceData,
         groupsUuidMap: mockGroupsUuidMap,
         tagsIdMaps: mockTagsIdMap,
@@ -828,7 +822,7 @@ describe('operations', () => {
         id: component.id + 1000, // New ID = old ID + 1000
       }));
 
-      const results = await handleWhitelists(mockSpace, mockPassword, mockRegion, mockSpaceData);
+      const results = await handleWhitelists(mockSpace, mockSpaceData);
 
       // Verify order of operations through mock calls
       const allCalls = vi.mocked(upsertComponentInternalTag).mock.calls.concat(
@@ -879,7 +873,7 @@ describe('operations', () => {
         return updatedComponents[component.id];
       });
 
-      await handleWhitelists(mockSpace, mockPassword, mockRegion, mockSpaceData);
+      await handleWhitelists(mockSpace, mockSpaceData);
 
       // Verify that upsertComponent was called with updated schemas
       expect(vi.mocked(upsertComponent)).toHaveBeenCalled();
@@ -937,7 +931,7 @@ describe('operations', () => {
         id: component.id + 1000,
       }));
 
-      const results = await handleWhitelists(mockSpace, mockPassword, mockRegion, circularData);
+      const results = await handleWhitelists(mockSpace, circularData);
 
       // Verify that circular dependency was handled by skipping
       expect(results.failed).toHaveLength(0); // No failures
@@ -970,7 +964,7 @@ describe('operations', () => {
         ],
       };
 
-      const results = await handleWhitelists(mockSpace, mockPassword, mockRegion, dataWithMissingDeps);
+      const results = await handleWhitelists(mockSpace, dataWithMissingDeps);
 
       // Verify that missing dependencies were handled gracefully with no failures, just no updates
       expect(results.failed).toHaveLength(0);
@@ -1015,7 +1009,7 @@ describe('operations', () => {
         ],
       };
 
-      await handleWhitelists(mockSpace, mockPassword, mockRegion, dataWithDuplicates);
+      await handleWhitelists(mockSpace, dataWithDuplicates);
 
       // Verify that each tag and group was only processed once
       expect(vi.mocked(upsertComponentInternalTag)).toHaveBeenCalledTimes(2); // Only two tags
