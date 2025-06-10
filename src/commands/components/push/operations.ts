@@ -2,7 +2,6 @@ import { Spinner } from '@topcli/spinner';
 import chalk from 'chalk';
 import { colorPalette } from '../../../constants';
 import { createRegexFromGlob, isVitest } from '../../../utils';
-import type { RegionCode } from '../../../constants';
 import type {
   SpaceComponent,
   SpaceComponentGroup,

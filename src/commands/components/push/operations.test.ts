@@ -30,8 +30,6 @@ vi.mock('@topcli/spinner', () => ({
 
 describe('operations', () => {
   const mockSpace = 'test-space';
-  const mockPassword = 'test-password';
-  const mockRegion = 'eu' as const;
 
   beforeEach(() => {
     vi.clearAllMocks();
