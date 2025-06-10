@@ -8,6 +8,7 @@ import { fetchComponent, fetchComponentGroups, fetchComponentInternalTags, fetch
 import { componentsCommand } from '../command';
 import chalk from 'chalk';
 import { getProgram } from '../../../program';
+import { mapiClient } from '../../../api';
 
 const program = getProgram();
 
@@ -40,6 +41,11 @@ componentsCommand
 
     const { password, region } = state;
 
+    mapiClient({
+      token: password,
+      region,
+    });
+
     const spinnerGroups = new Spinner({
       verbose: !isVitest,
     });
@@ -57,13 +63,13 @@ componentsCommand
       // Fetch components groups
       spinnerGroups.start(`Fetching ${chalk.hex(colorPalette.COMPONENTS)('components groups')}`);
 
-      const groups = await fetchComponentGroups(space, password, region);
+      const groups = await fetchComponentGroups(space);
       spinnerGroups.succeed(`${chalk.hex(colorPalette.COMPONENTS)('Groups')} - Completed in ${spinnerGroups.elapsedTime.toFixed(2)}ms`);
 
       // Fetch components presets
       spinnerPresets.start(`Fetching ${chalk.hex(colorPalette.COMPONENTS)('components presets')}`);
 
-      const presets = await fetchComponentPresets(space, password, region);
+      const presets = await fetchComponentPresets(space);
       spinnerPresets.succeed(`${chalk.hex(colorPalette.COMPONENTS)('Presets')} - Completed in ${spinnerPresets.elapsedTime.toFixed(2)}ms`);
 
       // Fetch components internal tags
@@ -77,7 +83,7 @@ componentsCommand
       spinnerComponents.start(`Fetching ${chalk.hex(colorPalette.COMPONENTS)('components')}`);
 
       if (componentName) {
-        const component = await fetchComponent(space, componentName, password, region);
+        const component = await fetchComponent(space, componentName);
         if (!component) {
           konsola.warn(`No component found with name "${componentName}"`);
           return;
@@ -85,7 +91,7 @@ componentsCommand
         components = [component];
       }
       else {
-        components = await fetchComponents(space, password, region);
+        components = await fetchComponents(space);
         if (!components || components.length === 0) {
           konsola.warn(`No components found in the space ${space}`);
           return;

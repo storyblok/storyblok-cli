@@ -59,6 +59,11 @@ componentsCommand
 
     const { password, region } = state;
 
+    mapiClient({
+      token: password,
+      region,
+    });
+
     try {
       let spaceData = await readComponentsFiles({
         ...options,
@@ -88,11 +93,6 @@ componentsCommand
         konsola.warn('No components found. Please make sure you have pulled the components first.');
         return;
       }
-
-      mapiClient({
-        token: password,
-        region,
-      });
 
       const results = {
         successful: [] as string[],

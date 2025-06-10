@@ -73,10 +73,12 @@ const createMapiClient = (options: ManagementApiClientOptions): MapiClient => {
       await delay(100 + Math.random() * 400);
       return request<T>(path, fetchOptions, attempt);
     }
+
     try {
       if (options?.verbose) {
         console.log(`${state.url}/${path} - Attempt ${attempt}`);
       }
+
       const res = await fetch(`${state.url}/${path}`, {
         headers: {
           ...state.baseHeaders,
@@ -85,12 +87,23 @@ const createMapiClient = (options: ManagementApiClientOptions): MapiClient => {
         ...fetchOptions,
       });
 
+      let data;
+      try {
+        data = await res.json();
+      }
+      catch {
+        throw new FetchError('Non-JSON response', {
+          status: res.status,
+          statusText: res.statusText,
+          data: null,
+        });
+      }
       if (res.ok) {
         if (options?.verbose) {
           console.log(`✅ ${path}`);
         }
         return {
-          data: await res.json(),
+          data,
           attempt,
         };
       }
@@ -98,7 +111,7 @@ const createMapiClient = (options: ManagementApiClientOptions): MapiClient => {
         throw new FetchError('Request failed', {
           status: res.status,
           statusText: res.statusText,
-          data: await res.json(),
+          data,
         });
       }
     }
@@ -128,12 +141,18 @@ const createMapiClient = (options: ManagementApiClientOptions): MapiClient => {
             }
           }
         }
+        throw error;
       }
       // Always lift freeze if all retries are exhausted
       if (state.freeze && isRateLimitOwner) {
         state.freeze = false;
       }
-      throw error;
+      // For network errors or other non-HTTP errors, create a FetchError
+      throw new FetchError(error instanceof Error ? error.message : String(error), {
+        status: 0,
+        statusText: 'Network Error',
+        data: null,
+      });
     }
   };
 

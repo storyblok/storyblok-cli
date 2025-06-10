@@ -266,28 +266,41 @@ vi.mock('node:fs/promises');
 
 describe('push components actions', () => {
   describe('component', () => {
+    beforeEach(() => {
+      mapiClient().dispose();
+      mapiClient({
+        token: 'valid-token',
+        region: 'eu',
+      });
+    });
     it('should push component successfully with a valid token', async () => {
-      const result = await pushComponent('12345', mockComponent, 'valid-token', 'eu');
+      const result = await pushComponent('12345', mockComponent);
       expect(result).toEqual(mockComponent);
     });
 
     it('should update component successfully with a valid token', async () => {
-      const result = await updateComponent('12345', 12345, mockComponent, 'valid-token', 'eu');
+      const result = await updateComponent('12345', 12345, mockComponent);
       expect(result).toEqual(mockComponent);
     });
 
     it('should upsert component successfully with a valid token', async () => {
-      const result = await upsertComponent('12345', mockComponent, 'valid-token', 'eu');
+      const result = await upsertComponent('12345', mockComponent);
       expect(result).toEqual(mockComponent);
     });
 
     it('should upsert existing component successfully with a valid token', async () => {
-      const result = await upsertComponent('12345', mockComponentExisting, 'valid-token', 'eu');
+      const result = await upsertComponent('12345', mockComponentExisting);
       expect(result).toEqual(mockComponentExisting);
     });
 
     it('should throw an error for invalid token', async () => {
-      await expect(pushComponent('12345', mockComponent, 'invalid-token', 'eu')).rejects.toThrow(
+      mapiClient().dispose();
+      mapiClient({
+        token: 'invalid-token',
+        region: 'eu',
+      });
+
+      await expect(pushComponent('12345', mockComponent)).rejects.toThrow(
         expect.objectContaining({
           name: 'API Error',
           message: 'Failed to push component component-name',
@@ -315,8 +328,15 @@ describe('push components actions', () => {
   });
 
   describe('component group', () => {
+    beforeEach(() => {
+      mapiClient().dispose();
+      mapiClient({
+        token: 'valid-token',
+        region: 'eu',
+      });
+    });
     it('should push component group successfully with a valid token', async () => {
-      const result = await pushComponentGroup('12345', mockComponentGroup, 'valid-token', 'eu');
+      const result = await pushComponentGroup('12345', mockComponentGroup);
       expect(result).toEqual(mockComponentGroup);
     });
 

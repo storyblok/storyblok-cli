@@ -1,5 +1,3 @@
-import { getStoryblokUrl } from '../../../utils/api-routes';
-import { customFetch } from '../../../utils/fetch';
 import { APIError, FileSystemError, handleAPIError, handleFileSystemError } from '../../../utils';
 import type { RegionCode } from '../../../constants';
 import type { SpaceComponent, SpaceComponentGroup, SpaceComponentInternalTag, SpaceComponentPreset, SpaceData } from '../constants';
@@ -13,59 +11,52 @@ import chalk from 'chalk';
 import { mapiClient } from '../../../api';
 
 // Component actions
-export const pushComponent = async (space: string, component: SpaceComponent, token: string, region: RegionCode): Promise<SpaceComponent | undefined> => {
+export const pushComponent = async (space: string, component: SpaceComponent): Promise<SpaceComponent | undefined> => {
   try {
-    const url = getStoryblokUrl(region);
+    const client = mapiClient();
 
-    const response = await customFetch<{
+    const { data } = await client.post<{
       component: SpaceComponent;
-    }>(`${url}/spaces/${space}/components`, {
-      method: 'POST',
-      headers: {
-        Authorization: token,
-      },
+    }>(`spaces/${space}/components`, {
       body: JSON.stringify(component),
     });
 
-    return response.component;
+    return data.component;
   }
   catch (error) {
     handleAPIError('push_component', error as Error, `Failed to push component ${component.name}`);
   }
 };
 
-export const updateComponent = async (space: string, componentId: number, component: SpaceComponent, token: string, region: RegionCode): Promise<SpaceComponent | undefined> => {
+export const updateComponent = async (space: string, componentId: number, component: SpaceComponent): Promise<SpaceComponent | undefined> => {
   try {
-    const url = getStoryblokUrl(region);
-    const response = await customFetch<{
+    const client = mapiClient();
+
+    const { data } = await client.put<{
       component: SpaceComponent;
-    }>(`${url}/spaces/${space}/components/${componentId}`, {
-      method: 'PUT',
-      headers: {
-        Authorization: token,
-      },
+    }>(`spaces/${space}/components/${componentId}`, {
       body: JSON.stringify(component),
     });
-    return response.component;
+    return data.component;
   }
   catch (error) {
     handleAPIError('update_component', error as Error, `Failed to update component ${component.name}`);
   }
 };
 
-export const upsertComponent = async (space: string, component: SpaceComponent, token: string, region: RegionCode): Promise<SpaceComponent | undefined> => {
+export const upsertComponent = async (space: string, component: SpaceComponent): Promise<SpaceComponent | undefined> => {
   try {
-    return await pushComponent(space, component, token, region);
+    return await pushComponent(space, component);
   }
   catch (error) {
     if (error instanceof APIError && error.code === 422) {
       const responseData = error.response?.data as { [key: string]: string[] } | undefined;
       if (responseData?.name?.[0] === 'has already been taken') {
         // Find existing component by name
-        const existingComponent = await fetchComponent(space, component.name, token, region);
+        const existingComponent = await fetchComponent(space, component.name);
         if (existingComponent) {
           // Update existing component
-          return await updateComponent(space, existingComponent.id, component, token, region);
+          return await updateComponent(space, existingComponent.id, component);
         }
       }
     }
@@ -75,58 +66,52 @@ export const upsertComponent = async (space: string, component: SpaceComponent, 
 
 // Component group actions
 
-export const pushComponentGroup = async (space: string, componentGroup: SpaceComponentGroup, token: string, region: RegionCode): Promise<SpaceComponentGroup | undefined> => {
+export const pushComponentGroup = async (space: string, componentGroup: SpaceComponentGroup): Promise<SpaceComponentGroup | undefined> => {
   try {
-    const url = getStoryblokUrl(region);
-    const response = await customFetch<{
+    const client = mapiClient();
+
+    const { data } = await client.post<{
       component_group: SpaceComponentGroup;
-    }>(`${url}/spaces/${space}/component_groups`, {
-      method: 'POST',
-      headers: {
-        Authorization: token,
-      },
+    }>(`spaces/${space}/component_groups`, {
       body: JSON.stringify(componentGroup),
     });
-    return response.component_group;
+    return data.component_group;
   }
   catch (error) {
     handleAPIError('push_component_group', error as Error, `Failed to push component group ${componentGroup.name}`);
   }
 };
 
-export const updateComponentGroup = async (space: string, groupId: number, componentGroup: SpaceComponentGroup, token: string, region: RegionCode): Promise<SpaceComponentGroup | undefined> => {
+export const updateComponentGroup = async (space: string, groupId: number, componentGroup: SpaceComponentGroup): Promise<SpaceComponentGroup | undefined> => {
   try {
-    const url = getStoryblokUrl(region);
-    const response = await customFetch<{
+    const client = mapiClient();
+
+    const { data } = await client.put<{
       component_group: SpaceComponentGroup;
-    }>(`${url}/spaces/${space}/component_groups/${groupId}`, {
-      method: 'PUT',
-      headers: {
-        Authorization: token,
-      },
+    }>(`spaces/${space}/component_groups/${groupId}`, {
       body: JSON.stringify(componentGroup),
     });
-    return response.component_group;
+    return data.component_group;
   }
   catch (error) {
     handleAPIError('update_component_group', error as Error, `Failed to update component group ${componentGroup.name}`);
   }
 };
 
-export const upsertComponentGroup = async (space: string, group: SpaceComponentGroup, token: string, region: RegionCode): Promise<SpaceComponentGroup | undefined> => {
+export const upsertComponentGroup = async (space: string, group: SpaceComponentGroup): Promise<SpaceComponentGroup | undefined> => {
   try {
-    return await pushComponentGroup(space, group, token, region);
+    return await pushComponentGroup(space, group);
   }
   catch (error) {
     if (error instanceof APIError && error.code === 422) {
       const responseData = error.response?.data as { [key: string]: string[] } | undefined;
       if (responseData?.name?.[0] === 'has already been taken') {
         // Find existing group by name
-        const existingGroups = await fetchComponentGroups(space, token, region);
+        const existingGroups = await fetchComponentGroups(space);
         const existingGroup = existingGroups?.find(g => g.name === group.name);
         if (existingGroup) {
           // Update existing group
-          return await updateComponentGroup(space, existingGroup.id, group, token, region);
+          return await updateComponentGroup(space, existingGroup.id, group);
         }
       }
     }
@@ -135,38 +120,32 @@ export const upsertComponentGroup = async (space: string, group: SpaceComponentG
 };
 
 // Component preset actions
-export const pushComponentPreset = async (space: string, componentPreset: { preset: Partial<SpaceComponentPreset> }, token: string, region: RegionCode): Promise<SpaceComponentPreset | undefined> => {
+export const pushComponentPreset = async (space: string, componentPreset: { preset: Partial<SpaceComponentPreset> }): Promise<SpaceComponentPreset | undefined> => {
   try {
-    const url = getStoryblokUrl(region);
-    const response = await customFetch<{
+    const client = mapiClient();
+
+    const { data } = await client.post<{
       preset: SpaceComponentPreset;
-    }>(`${url}/spaces/${space}/presets`, {
-      method: 'POST',
-      headers: {
-        Authorization: token,
-      },
+    }>(`spaces/${space}/presets`, {
       body: JSON.stringify(componentPreset),
     });
-    return response.preset;
+    return data.preset;
   }
   catch (error) {
     handleAPIError('push_component_preset', error as Error, `Failed to push component preset ${componentPreset.preset.name}`);
   }
 };
 
-export const updateComponentPreset = async (space: string, presetId: number, componentPreset: { preset: Partial<SpaceComponentPreset> }, token: string, region: RegionCode): Promise<SpaceComponentPreset | undefined> => {
+export const updateComponentPreset = async (space: string, presetId: number, componentPreset: { preset: Partial<SpaceComponentPreset> }): Promise<SpaceComponentPreset | undefined> => {
   try {
-    const url = getStoryblokUrl(region);
-    const response = await customFetch<{
+    const client = mapiClient();
+
+    const { data } = await client.put<{
       preset: SpaceComponentPreset;
-    }>(`${url}/spaces/${space}/presets/${presetId}`, {
-      method: 'PUT',
-      headers: {
-        Authorization: token,
-      },
+    }>(`spaces/${space}/presets/${presetId}`, {
       body: JSON.stringify(componentPreset),
     });
-    return response.preset;
+    return data.preset;
   }
   catch (error) {
     handleAPIError('update_component_preset', error as Error, `Failed to update component preset ${componentPreset.preset.name}`);
