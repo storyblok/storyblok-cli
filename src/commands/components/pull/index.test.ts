@@ -104,7 +104,7 @@ describe('pull', () => {
 
       await componentsCommand.parseAsync(['node', 'test', 'pull', '--space', '12345']);
 
-      expect(fetchComponents).toHaveBeenCalledWith('12345', 'valid-token', 'eu');
+      expect(fetchComponents).toHaveBeenCalledWith('12345');
       expect(saveComponentsToFiles).toHaveBeenCalledWith('12345', {
         components: mockResponse,
         groups: [],
@@ -137,7 +137,7 @@ describe('pull', () => {
       };
       vi.mocked(fetchComponent).mockResolvedValue(mockResponse);
       await componentsCommand.parseAsync(['node', 'test', 'pull', 'component-name', '--space', '12345']);
-      expect(fetchComponent).toHaveBeenCalledWith('12345', 'component-name', 'valid-token', 'eu');
+      expect(fetchComponent).toHaveBeenCalledWith('12345', 'component-name');
       expect(saveComponentsToFiles).toHaveBeenCalledWith('12345', {
         components: [mockResponse],
         groups: [],
@@ -199,7 +199,7 @@ describe('pull', () => {
       vi.mocked(fetchComponents).mockResolvedValue(mockResponse);
 
       await componentsCommand.parseAsync(['node', 'test', 'pull', '--space', '12345', '--path', '/path/to/components']);
-      expect(fetchComponents).toHaveBeenCalledWith('12345', 'valid-token', 'eu');
+      expect(fetchComponents).toHaveBeenCalledWith('12345');
       expect(saveComponentsToFiles).toHaveBeenCalledWith('12345', {
         components: mockResponse,
         groups: [],
@@ -233,7 +233,7 @@ describe('pull', () => {
       vi.mocked(fetchComponents).mockResolvedValue(mockResponse);
 
       await componentsCommand.parseAsync(['node', 'test', 'pull', '--space', '12345', '--filename', 'custom']);
-      expect(fetchComponents).toHaveBeenCalledWith('12345', 'valid-token', 'eu');
+      expect(fetchComponents).toHaveBeenCalledWith('12345');
       expect(saveComponentsToFiles).toHaveBeenCalledWith('12345', {
         components: mockResponse,
         groups: [],
@@ -277,7 +277,7 @@ describe('pull', () => {
       vi.mocked(fetchComponents).mockResolvedValue(mockResponse);
 
       await componentsCommand.parseAsync(['node', 'test', 'pull', '--space', '12345', '--separate-files']);
-      expect(fetchComponents).toHaveBeenCalledWith('12345', 'valid-token', 'eu');
+      expect(fetchComponents).toHaveBeenCalledWith('12345');
       expect(saveComponentsToFiles).toHaveBeenCalledWith('12345', {
         components: mockResponse,
         groups: [],
@@ -309,7 +309,7 @@ describe('pull', () => {
       vi.mocked(fetchComponents).mockResolvedValue(mockResponse);
 
       await componentsCommand.parseAsync(['node', 'test', 'pull', '--space', '12345', '--separate-files', '--filename', 'custom']);
-      expect(fetchComponents).toHaveBeenCalledWith('12345', 'valid-token', 'eu');
+      expect(fetchComponents).toHaveBeenCalledWith('12345');
       expect(saveComponentsToFiles).toHaveBeenCalledWith('12345', {
         components: mockResponse,
         groups: [],

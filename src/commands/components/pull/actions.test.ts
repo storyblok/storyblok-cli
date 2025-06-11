@@ -3,6 +3,7 @@ import { setupServer } from 'msw/node';
 import { vol } from 'memfs';
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { fetchComponent, fetchComponents, saveComponentsToFiles } from './actions';
+import { mapiClient } from '../../../api';
 
 const mockedComponents = [{
   name: 'component-name',
@@ -59,6 +60,14 @@ vi.mock('node:fs');
 vi.mock('node:fs/promises');
 
 describe('pull components actions', () => {
+  beforeEach(() => {
+    mapiClient().dispose();
+    mapiClient({
+      token: 'valid-token',
+      region: 'eu',
+    });
+  });
+
   it('should pull components successfully with a valid token', async () => {
     const mockResponse = [{
       name: 'component-name',
@@ -92,7 +101,7 @@ describe('pull components actions', () => {
       internal_tag_ids: [],
     }];
 
-    const result = await fetchComponents('12345', 'valid-token', 'eu');
+    const result = await fetchComponents('12345');
     expect(result).toEqual(mockResponse);
   });
 
@@ -110,7 +119,7 @@ describe('pull components actions', () => {
         internal_tag_ids: [1],
       }],
     };
-    const result = await fetchComponent('12345', 'component-name', 'valid-token', 'eu');
+    const result = await fetchComponent('12345', 'component-name');
     expect(result).toEqual(mockResponse.components[0]);
   });
 
@@ -129,12 +138,18 @@ describe('pull components actions', () => {
       }],
     };
     // searching for 'name-2' would match both 'component-name-2' and 'name-2'
-    const result = await fetchComponent('12345', 'name-2', 'valid-token', 'eu');
+    const result = await fetchComponent('12345', 'name-2');
     expect(result).toEqual(mockResponse.components[0]);
   });
 
   it('should throw an masked error for invalid token', async () => {
-    await expect(fetchComponents('12345', 'invalid-token', 'eu')).rejects.toThrow(
+    mapiClient().dispose();
+    mapiClient({
+      token: 'invalid-token',
+      region: 'eu',
+    });
+
+    await expect(fetchComponents('12345')).rejects.toThrow(
       expect.objectContaining({
         name: 'API Error',
         message: 'The user is not authorized to access the API',

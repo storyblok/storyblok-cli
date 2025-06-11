@@ -1,40 +1,34 @@
 import { handleAPIError, handleFileSystemError } from '../../../utils';
-import type { RegionCode } from '../../../constants';
-import { customFetch } from '../../../utils/fetch';
-import { getStoryblokUrl } from '../../../utils/api-routes';
 import type { SpaceComponent, SpaceComponentGroup, SpaceComponentInternalTag, SpaceComponentPreset, SpaceData } from '../constants';
 import { join, resolve } from 'node:path';
 import { resolvePath, saveToFile } from '../../../utils/filesystem';
 import type { SaveComponentsOptions } from './constants';
+import { mapiClient } from '../../../api';
 // Components
-export const fetchComponents = async (space: string, token: string, region: RegionCode): Promise<SpaceComponent[] | undefined> => {
+export const fetchComponents = async (space: string): Promise<SpaceComponent[] | undefined> => {
   try {
-    const url = getStoryblokUrl(region);
-    const response = await customFetch<{
+    const client = mapiClient();
+
+    const { data } = await client.get<{
       components: SpaceComponent[];
-    }>(`${url}/spaces/${space}/components`, {
-      headers: {
-        Authorization: token,
-      },
+    }>(`spaces/${space}/components`, {
     });
-    return response.components;
+    return data.components;
   }
   catch (error) {
     handleAPIError('pull_components', error as Error);
   }
 };
 
-export const fetchComponent = async (space: string, componentName: string, token: string, region: RegionCode): Promise<SpaceComponent | undefined> => {
+export const fetchComponent = async (space: string, componentName: string): Promise<SpaceComponent | undefined> => {
   try {
-    const url = getStoryblokUrl(region);
-    const response = await customFetch<{
+    const client = mapiClient();
+
+    const { data } = await client.get<{
       components: SpaceComponent[];
-    }>(`${url}/spaces/${space}/components?search=${encodeURIComponent(componentName)}`, {
-      headers: {
-        Authorization: token,
-      },
+    }>(`spaces/${space}/components?search=${encodeURIComponent(componentName)}`, {
     });
-    return response.components?.find(c => c.name === componentName);
+    return data.components?.find(c => c.name === componentName);
   }
   catch (error) {
     handleAPIError('pull_components', error as Error, `Failed to fetch component ${componentName}`);
@@ -42,17 +36,14 @@ export const fetchComponent = async (space: string, componentName: string, token
 };
 
 // Component group actions
-export const fetchComponentGroups = async (space: string, token: string, region: RegionCode): Promise<SpaceComponentGroup[] | undefined> => {
+export const fetchComponentGroups = async (space: string): Promise<SpaceComponentGroup[] | undefined> => {
   try {
-    const url = getStoryblokUrl(region);
-    const response = await customFetch<{
+    const client = mapiClient();
+
+    const { data } = await client.get<{
       component_groups: SpaceComponentGroup[];
-    }>(`${url}/spaces/${space}/component_groups`, {
-      headers: {
-        Authorization: token,
-      },
-    });
-    return response.component_groups;
+    }>(`spaces/${space}/component_groups`);
+    return data.component_groups;
   }
   catch (error) {
     handleAPIError('pull_component_groups', error as Error);
@@ -60,17 +51,14 @@ export const fetchComponentGroups = async (space: string, token: string, region:
 };
 
 // Component preset actions
-export const fetchComponentPresets = async (space: string, token: string, region: RegionCode): Promise<SpaceComponentPreset[] | undefined> => {
+export const fetchComponentPresets = async (space: string): Promise<SpaceComponentPreset[] | undefined> => {
   try {
-    const url = getStoryblokUrl(region);
-    const response = await customFetch<{
+    const client = mapiClient();
+
+    const { data } = await client.get<{
       presets: SpaceComponentPreset[];
-    }>(`${url}/spaces/${space}/presets`, {
-      headers: {
-        Authorization: token,
-      },
-    });
-    return response.presets;
+    }>(`spaces/${space}/presets`);
+    return data.presets;
   }
   catch (error) {
     handleAPIError('pull_component_presets', error as Error);
@@ -78,17 +66,15 @@ export const fetchComponentPresets = async (space: string, token: string, region
 };
 
 // Component internal tags
-export const fetchComponentInternalTags = async (space: string, token: string, region: RegionCode): Promise<SpaceComponentInternalTag[] | undefined> => {
+export const fetchComponentInternalTags = async (space: string): Promise<SpaceComponentInternalTag[] | undefined> => {
   try {
-    const url = getStoryblokUrl(region);
-    const response = await customFetch<{
+    const client = mapiClient();
+
+    const { data } = await client.get<{
       internal_tags: SpaceComponentInternalTag[];
-    }>(`${url}/spaces/${space}/internal_tags`, {
-      headers: {
-        Authorization: token,
-      },
+    }>(`spaces/${space}/internal_tags`, {
     });
-    return response.internal_tags.filter(tag => tag.object_type === 'component');
+    return data.internal_tags.filter(tag => tag.object_type === 'component');
   }
   catch (error) {
     handleAPIError('pull_component_internal_tags', error as Error);

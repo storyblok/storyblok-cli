@@ -128,7 +128,7 @@
       "request": "launch",
       "name": "Debug Push component component-tags",
       "program": "${workspaceFolder}/dist/index.mjs",
-      "args": ["components", "push", "component-tags", "--space", "295018", "--from", "295017"],
+      "args": ["components", "push", "component-tags", "--space", "295018", "--from", "295017", "--sf", "--verbose"],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "sourceMaps": true,
