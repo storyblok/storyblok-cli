@@ -161,10 +161,6 @@ componentsCommand
           });
         }
       }
-      console.log(`${results.successful.length} processed components`);
-      if (results.skipped.length > 0) {
-        console.log(`${results.skipped.length} resources skipped (already exist)`);
-      }
       console.log(`${requestCount} requests made`);
       console.timeEnd(`perf: push components separate files`);
     }

@@ -14,6 +14,7 @@ import type {
 import { upsertComponent, upsertComponentGroup, upsertComponentInternalTag, upsertComponentPreset } from './actions';
 import { fetchComponentGroups, fetchComponentInternalTags, fetchComponentPresets, fetchComponents } from '../actions';
 import { createHash } from 'node:crypto';
+import { type ProcessingEvent, progressDisplay } from './progress-display';
 
 // =============================================================================
 // TYPE DEFINITIONS
@@ -754,30 +755,37 @@ async function processLevel(
 
   // Process in batches to control concurrent API calls
   for (let i = 0; i < level.length; i += maxConcurrency) {
+    // await new Promise(resolve => setTimeout(resolve, 1000));
+
     const batch = level.slice(i, i + maxConcurrency);
 
     const batchPromises = batch.map(async (nodeId) => {
       const node = graph.nodes.get(nodeId)!;
-      const spinner = new Spinner({ verbose: !isVitest });
+      const displayName = getNodeDisplayName(node);
 
       try {
-        const displayName = getNodeDisplayName(node);
-        spinner.start(`Processing ${node.type} ${displayName}...`);
-
         const { result, skipped: wasSkipped } = await processNode(nodeId, graph, space, idMappings, targetData);
 
         if (result) {
           node.processed = true;
-          const color = getNodeColor(node.type);
-          const label = capitalize(node.type);
 
           if (wasSkipped) {
             skipped.push(nodeId);
-            spinner.succeed(`${label}→ ${chalk.hex(color)(displayName)} - Skipped (identical) in ${spinner.elapsedTime.toFixed(2)}ms`);
+            progressDisplay.handleEvent({
+              type: 'skip',
+              name: displayName,
+              resourceType: node.type,
+            });
           }
           else {
             successful.push(nodeId);
-            spinner.succeed(`${label}→ ${chalk.hex(color)(displayName)} - Completed in ${spinner.elapsedTime.toFixed(2)}ms`);
+            const color = getNodeColor(node.type);
+            progressDisplay.handleEvent({
+              type: 'success',
+              name: displayName,
+              resourceType: node.type,
+              color,
+            });
           }
         }
         else {
@@ -786,10 +794,11 @@ async function processLevel(
       }
       catch (error) {
         failed.push({ name: nodeId, error });
-        const displayName = getNodeDisplayName(node);
         const color = getNodeColor(node.type);
         const label = capitalize(node.type);
-        spinner.failed(`${label}→ ${chalk.hex(color)(displayName)} - Failed`);
+        // Clear the progress line, show the result, then we'll redraw the progress line
+        process.stdout.write(`\r${' '.repeat(80)}\r`);
+        console.log(`✗ ${label}→ ${chalk.hex(color)(displayName)} - Failed`);
       }
     });
 
@@ -808,7 +817,7 @@ async function processLevel(
  * Processes component presets after all components have been created.
  * Updates preset component_id references to use new component IDs.
  */
-async function processPresets(
+async function processPresetsWithProgress(
   spaceData: SpaceData,
   space: string,
   password: string,
@@ -821,9 +830,6 @@ async function processPresets(
   const skipped: string[] = [];
 
   for (const preset of spaceData.presets) {
-    const spinner = new Spinner({ verbose: !isVitest });
-    spinner.start(`Processing preset ${preset.name}...`);
-
     try {
       // Check if preset exists and compare content hash
       if (targetData) {
@@ -840,9 +846,13 @@ async function processPresets(
           const localHash = generateContentHash(normalized);
 
           if (localHash === existingEntry.hash) {
-            // Content is identical, skip
+          // Content is identical, skip
             skipped.push(preset.name);
-            spinner.succeed(`Preset→ ${chalk.hex(colorPalette.COMPONENTS)(preset.name)} - Skipped (identical) in ${spinner.elapsedTime.toFixed(2)}ms`);
+            progressDisplay.handleEvent({
+              type: 'skip',
+              name: preset.name,
+              resourceType: 'preset',
+            });
             continue;
           }
         }
@@ -861,7 +871,12 @@ async function processPresets(
 
       const result = await upsertComponentPreset(space, presetToUpdate, password, region);
       successful.push(preset.name);
-      spinner.succeed(`Preset→ ${chalk.hex(colorPalette.COMPONENTS)(preset.name)} - Completed in ${spinner.elapsedTime.toFixed(2)}ms`);
+      progressDisplay.handleEvent({
+        type: 'success',
+        name: preset.name,
+        resourceType: 'preset',
+        color: colorPalette.COMPONENTS,
+      });
 
       // Update target data with new hash for future comparisons
       if (targetData && result) {
@@ -872,7 +887,12 @@ async function processPresets(
     }
     catch (error) {
       failed.push({ name: preset.name, error });
-      spinner.failed(`Preset→ ${chalk.hex(colorPalette.COMPONENTS)(preset.name)} - Failed`);
+      progressDisplay.handleEvent({
+        type: 'error',
+        name: preset.name,
+        resourceType: 'preset',
+        error,
+      });
     }
   }
 
@@ -951,9 +971,8 @@ export async function pushWithDependencyGraph(
 
   // Determine processing order
   const levels = determineProcessingOrder(graph);
-  console.log(`🚀 Processing ${levels.length} dependency levels with intelligent optimization`);
 
-  // Process each level
+  // Process each level with unified progress tracking
   const results: PushResults = {
     successful: [],
     failed: [],
@@ -968,11 +987,14 @@ export async function pushWithDependencyGraph(
   // Track component ID mappings for presets
   const componentIdMappings = new Map<number, number>();
 
+  // Calculate total resources for progress tracking
+  const totalResources = levels.reduce((sum, level) => sum + level.length, 0) + spaceData.presets.length;
+
+  // Initialize progress display
+  progressDisplay.start(totalResources);
+
   for (let i = 0; i < levels.length; i++) {
     const level = levels[i];
-    const levelSpinner = new Spinner({ verbose: !isVitest });
-
-    levelSpinner.start(`Processing level ${i + 1}/${levels.length} (${level.length} resources)...`);
 
     const levelResults = await processLevel(level, graph, space, results.idMappings, maxConcurrency, targetData);
 
@@ -993,14 +1015,21 @@ export async function pushWithDependencyGraph(
         }
       }
     });
-
-    const summary = `${levelResults.successful.length} successful, ${levelResults.skipped.length} skipped, ${levelResults.failed.length} failed`;
-    levelSpinner.succeed(`Level ${i + 1}/${levels.length} completed: ${summary}`);
   }
+
+  // Show completion summary using progress display
+  progressDisplay.handleEvent({
+    type: 'complete',
+    summary: {
+      updated: results.successful.length,
+      unchanged: results.skipped.length,
+      failed: results.failed.length,
+    },
+  });
 
   // Process presets (they depend on components being created first)
   if (spaceData.presets.length > 0) {
-    const presetResults = await processPresets(spaceData, space, password, region, componentIdMappings, targetData);
+    const presetResults = await processPresetsWithProgress(spaceData, space, password, region, componentIdMappings, targetData);
     results.successful.push(...presetResults.successful);
     results.failed.push(...presetResults.failed);
     results.skipped.push(...presetResults.skipped);
