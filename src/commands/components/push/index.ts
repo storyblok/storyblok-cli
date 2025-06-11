@@ -6,18 +6,12 @@ import { CommandError, handleError, konsola } from '../../../utils';
 import { session } from '../../../session';
 import { readComponentsFiles } from './actions';
 import { componentsCommand } from '../command';
-import {
-  filterSpaceDataByComponent,
-  filterSpaceDataByPattern,
-  handleComponentGroups,
-  handleComponents,
-  handleTags,
-  handleWhitelists,
-} from './operations';
+import { filterSpaceDataByComponent, filterSpaceDataByPattern } from './utils';
+import { pushWithDependencyGraph } from './graph-operations';
 import chalk from 'chalk';
 import { mapiClient } from '../../../api';
 import { fetchComponentGroups, fetchComponentInternalTags, fetchComponentPresets, fetchComponents } from '../actions';
-import type { SpaceDataState } from '../constants';
+import type { SpaceComponent, SpaceComponentGroup, SpaceComponentInternalTag, SpaceComponentPreset, SpaceDataState } from '../constants';
 
 const program = getProgram(); // Get the shared singleton instance
 
@@ -67,7 +61,7 @@ componentsCommand
     mapiClient({
       token: password,
       region,
-      onRequest: (request) => {
+      onRequest: (_request) => {
         requestCount++;
       },
     });
@@ -96,19 +90,29 @@ componentsCommand
       ];
       const [components, groups, presets, internalTags] = await Promise.all(promises);
 
-      components?.forEach((component) => {
-        spaceState.target.components.set(component.name, component);
-      });
+      if (components) {
+        (components as SpaceComponent[]).forEach((component) => {
+          spaceState.target.components.set(component.name, component);
+        });
+      }
 
-      groups?.forEach((group) => {
-        spaceState.target.groups.set(group.name, group);
-      });
-      presets?.forEach((preset) => {
-        spaceState.target.presets.set(preset.name, preset);
-      });
-      internalTags?.forEach((tag) => {
-        spaceState.target.tags.set(tag.name, tag);
-      });
+      if (groups) {
+        (groups as SpaceComponentGroup[]).forEach((group) => {
+          spaceState.target.groups.set(group.name, group);
+        });
+      }
+
+      if (presets) {
+        (presets as SpaceComponentPreset[]).forEach((preset) => {
+          spaceState.target.presets.set(preset.name, preset);
+        });
+      }
+
+      if (internalTags) {
+        (internalTags as SpaceComponentInternalTag[]).forEach((tag) => {
+          spaceState.target.tags.set(tag.name, tag);
+        });
+      }
 
       // If componentName is provided, filter space data to only include related resources
       if (componentName) {
@@ -136,49 +140,15 @@ componentsCommand
       const results = {
         successful: [] as string[],
         failed: [] as Array<{ name: string; error: unknown }>,
+        skipped: [] as string[],
       };
 
-      // First, process whitelist dependencies
-      const whitelistResults = await handleWhitelists(space, spaceState);
-      results.successful.push(...whitelistResults.successful);
-      results.failed.push(...whitelistResults.failed);
-
-      // Then process remaining tags (skip those already processed in whitelists)
-      const tagsResults = await handleTags(space, spaceState, whitelistResults.processedTagIds);
-      results.successful.push(...tagsResults.successful);
-      results.failed.push(...tagsResults.failed);
-
-      // Then process remaining groups (skip those already processed in whitelists)
-      const groupsResults = await handleComponentGroups(space, spaceState, whitelistResults.processedGroupUuids);
-      results.successful.push(...groupsResults.successful);
-      results.failed.push(...groupsResults.failed);
-
-      // Finally process remaining components (skip those already processed in whitelists)
-      const remainingComponents = spaceState.local.components.filter(
-        component => !whitelistResults.processedComponentNames.has(component.name),
-      );
-
-      const componentsResults = await handleComponents({
-        space,
-        password,
-        region,
-        state: {
-          ...spaceState,
-          local: {
-            ...spaceState.local,
-            components: remainingComponents,
-          },
-        },
-        /* spaceData: {
-          ...spaceState.local,
-          components: remainingComponents,
-        }, */
-        groupsUuidMap: new Map([...whitelistResults.groupsUuidMap, ...groupsResults.uuidMap]), // Merge both group maps
-        tagsIdMaps: new Map([...whitelistResults.tagsIdMap, ...tagsResults.idMap]), // Merge both tag maps
-        componentNameMap: whitelistResults.componentNameMap,
-      });
-      results.successful.push(...componentsResults.successful);
-      results.failed.push(...componentsResults.failed);
+      // Use optimized graph-based dependency resolution
+      konsola.info('Using graph-based dependency resolution');
+      const graphResults = await pushWithDependencyGraph(space, password, region, spaceState.local, 5);
+      results.successful.push(...graphResults.successful);
+      results.failed.push(...graphResults.failed);
+      results.skipped.push(...graphResults.skipped);
 
       if (results.failed.length > 0) {
         if (!verbose) {
@@ -192,6 +162,9 @@ componentsCommand
         }
       }
       console.log(`${results.successful.length} processed components`);
+      if (results.skipped.length > 0) {
+        console.log(`${results.skipped.length} resources skipped (already exist)`);
+      }
       console.log(`${requestCount} requests made`);
       console.timeEnd(`perf: push components separate files`);
     }
