@@ -312,6 +312,10 @@ export const generateTypes = async (
           if (property.type && Array.from(storyblokSchemas.keys()).includes(property.type as StoryblokPropertyType)) {
             storyblokPropertyTypes.add(property.type as StoryblokPropertyType);
           }
+          // Check if the property uses ISbStoryData
+          if (property.tsType && property.tsType.includes(STORY_TYPE)) {
+            storyblokPropertyTypes.add(STORY_TYPE);
+          }
         });
       }
 
@@ -346,6 +350,14 @@ export const generateTypes = async (
 
     // Add imports for Storyblok types if needed
     const imports: string[] = [];
+
+    // Check if ISbStoryData is needed
+    const needsISbStoryData = storyblokPropertyTypes.has(STORY_TYPE);
+    if (needsISbStoryData) {
+      imports.push(`import type { ${STORY_TYPE} } from '@storyblok/js';`);
+      storyblokPropertyTypes.delete(STORY_TYPE); // Remove it so it's not included in the next import
+    }
+
     if (storyblokPropertyTypes.size > 0) {
       const typeImports = Array.from(storyblokPropertyTypes).map((type) => {
         const pascalType = toPascalCase(type);
