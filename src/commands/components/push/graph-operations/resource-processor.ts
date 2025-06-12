@@ -1,0 +1,193 @@
+import { colorPalette } from '../../../../constants';
+import type { RegionCode } from '../../../../constants';
+import type { DependencyGraph, NodeProcessingResult, PushResults, TargetData } from './types';
+import { determineProcessingOrder } from './dependency-graph';
+import { progressDisplay } from '../progress-display';
+
+// =============================================================================
+// RESOURCE PROCESSING
+// =============================================================================
+
+/**
+ * Processes all resources with 2-pass per level approach.
+ */
+export async function processAllResources(
+  graph: DependencyGraph,
+  space: string,
+  password: string,
+  region: RegionCode,
+  targetData: TargetData,
+  maxConcurrency: number = 5,
+): Promise<PushResults> {
+  const levels = determineProcessingOrder(graph);
+  const results: PushResults = { successful: [], failed: [], skipped: [] };
+
+  // Calculate total resources for progress tracking
+  const totalResources = levels.reduce((sum, level) => sum + level.length, 0);
+
+  // Initialize progress display
+  progressDisplay.start(totalResources);
+
+  for (const level of levels) {
+    const levelResults = await processLevel(level, graph, space, password, region, targetData, maxConcurrency);
+    mergeResults(results, levelResults);
+  }
+
+  // Show completion summary using progress display
+  progressDisplay.handleEvent({
+    type: 'complete',
+    summary: {
+      updated: results.successful.length,
+      unchanged: results.skipped.length,
+      failed: results.failed.length,
+    },
+  });
+
+  return results;
+}
+
+/**
+ * Processes a single level of nodes using 2-pass approach:
+ * Pass 1: Resolve references (dependencies from previous levels exist)
+ * Pass 2: Process all resources with resolved references
+ */
+async function processLevel(
+  level: string[],
+  graph: DependencyGraph,
+  space: string,
+  password: string,
+  region: RegionCode,
+  targetData: TargetData,
+  maxConcurrency: number,
+): Promise<PushResults> {
+  // PASS 1: Resolve references for this level (now that dependencies from previous levels exist)
+  for (const nodeId of level) {
+    const node = graph.nodes.get(nodeId)!;
+    node.resolveReferences(targetData, graph);
+  }
+
+  // PASS 2: Process all nodes in this level with resolved references
+  const semaphore: Array<Promise<NodeProcessingResult> | null> = Array.from({ length: maxConcurrency }, () => null);
+  const promises: Promise<NodeProcessingResult>[] = [];
+
+  for (let i = 0; i < level.length; i++) {
+    const nodeId = level[i];
+
+    // Wait for an available slot
+    const slotIndex = i % maxConcurrency;
+    if (i >= maxConcurrency && semaphore[slotIndex]) {
+      await semaphore[slotIndex];
+    }
+
+    // Start processing the node
+    const promise = processNode(nodeId, graph, space, password, region, targetData);
+    promises.push(promise);
+    semaphore[slotIndex] = promise;
+  }
+
+  const results = await Promise.all(promises);
+  return aggregateResults(results);
+}
+
+/**
+ * Process node with resolved references
+ */
+async function processNode(
+  nodeId: string,
+  graph: DependencyGraph,
+  space: string,
+  password: string,
+  region: RegionCode,
+  targetData: TargetData,
+): Promise<NodeProcessingResult> {
+  const node = graph.nodes.get(nodeId)!;
+
+  try {
+    // Skip if resource is already up-to-date
+    if (node.shouldSkip(targetData)) {
+      progressDisplay.handleEvent({
+        type: 'skip',
+        name: node.getName(),
+        resourceType: getResourceTypeName(node.type),
+      });
+      return { name: node.getName(), skipped: true };
+    }
+
+    // Create/update the resource with resolved references
+    const result = await node.upsert(space, password, region, targetData);
+    node.updateTargetData(result, targetData);
+    node.processed = true;
+
+    progressDisplay.handleEvent({
+      type: 'success',
+      name: node.getName(),
+      resourceType: getResourceTypeName(node.type),
+      color: getResourceTypeColor(node.type),
+    });
+
+    return { name: node.getName(), skipped: false };
+  }
+  catch (error) {
+    progressDisplay.handleEvent({
+      type: 'error',
+      name: node.getName(),
+      resourceType: getResourceTypeName(node.type),
+      error,
+    });
+    return { name: node.getName(), skipped: false, error };
+  }
+}
+
+/**
+ * Aggregates results from multiple node processing operations
+ */
+function aggregateResults(results: NodeProcessingResult[]): PushResults {
+  const aggregated: PushResults = { successful: [], failed: [], skipped: [] };
+
+  for (const result of results) {
+    if (result.error) {
+      aggregated.failed.push({ name: result.name, error: result.error });
+    }
+    else if (result.skipped) {
+      aggregated.skipped.push(result.name);
+    }
+    else {
+      aggregated.successful.push(result.name);
+    }
+  }
+
+  return aggregated;
+}
+
+/**
+ * Merges results from multiple operations
+ */
+function mergeResults(target: PushResults, source: PushResults): void {
+  target.successful.push(...source.successful);
+  target.failed.push(...source.failed);
+  target.skipped.push(...source.skipped);
+}
+
+/**
+ * Gets display name for a resource type
+ */
+function getResourceTypeName(type: string): string {
+  switch (type) {
+    case 'component': return 'component';
+    case 'group': return 'group';
+    case 'tag': return 'tag';
+    default: return type;
+  }
+}
+
+/**
+ * Gets color for a resource type
+ */
+function getResourceTypeColor(type: string): string {
+  switch (type) {
+    case 'component': return colorPalette.COMPONENTS;
+    case 'group': return '#4ade80'; // green
+    case 'tag': return '#fbbf24'; // yellow
+    default: return colorPalette.COMPONENTS;
+  }
+}
