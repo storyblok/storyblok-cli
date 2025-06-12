@@ -28,7 +28,7 @@ export const loginWithToken = async (token: string, region: RegionCode) => {
           throw new APIError('network_error', 'login_with_token', error);
       }
     }
-    throw new APIError('generic', 'login_with_token', error, 'The provided credentials are invalid');
+    throw new APIError('generic', 'login_with_token', error as FetchError, 'The provided credentials are invalid');
   }
 };
 

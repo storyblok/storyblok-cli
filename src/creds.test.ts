@@ -1,4 +1,4 @@
-import { addCredentials, getCredentials, removeCredentials } from './creds';
+import { addCredentials, getCredentials, removeAllCredentials } from './creds';
 import { vol } from 'memfs';
 import type { StoryblokCredentials } from './types';
 // tell vitest to use fs mock from __mocks__ folder
@@ -57,7 +57,7 @@ describe('creds', async () => {
     });
   });
 
-  describe('removeCredentials', () => {
+  describe('removeAllCredentials', () => {
     it('should remove an entry from credentials file', async () => {
       vol.fromJSON({
         'test/credentials.json': JSON.stringify({
@@ -69,7 +69,7 @@ describe('creds', async () => {
         }),
       }, '/temp');
 
-      await removeCredentials('eu', '/temp/test');
+      await removeAllCredentials('/temp/test');
 
       const content = vol.readFileSync('/temp/test/credentials.json', 'utf8');
       expect(content).toBe('{}');

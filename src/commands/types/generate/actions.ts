@@ -252,14 +252,14 @@ const getComponentPropertiesTypeAnnotations = async (
   }, Promise.resolve({} as JSONSchema));
 };
 
-const loadCustomFieldsParser = async (path: string) => {
+const loadCustomFieldsParser = async (path: string): Promise<((key: string, value: Record<string, unknown>) => Record<string, unknown>) | undefined> => {
   try {
     const customFieldsParser = await import(resolve(path));
     return customFieldsParser.default;
   }
   catch (error) {
     handleError(error as Error);
-    return null;
+    return undefined;
   }
 };
 
@@ -280,7 +280,7 @@ export const generateTypes = async (
   try {
     const typeDefs = [...DEFAULT_TYPEDEFS_HEADER];
     const storyblokPropertyTypes = new Set<string>();
-    let customFieldsParser: Record<string, unknown> | undefined;
+    let customFieldsParser: ((key: string, value: Record<string, unknown>) => Record<string, unknown>) | undefined;
     let compilerOptions: Record<string, unknown> | undefined;
     // Custom fields parser
     if (options.customFieldsParser) {
