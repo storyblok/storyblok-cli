@@ -44,8 +44,6 @@ export interface SchemaDependencies {
 
 /** Abstract base class for all graph nodes */
 export abstract class GraphNode {
-  public processed: boolean = false;
-
   constructor(
     public readonly id: string,
     public readonly type: NodeType,

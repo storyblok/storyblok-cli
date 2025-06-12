@@ -116,7 +116,6 @@ async function processNode(
     // Create/update the resource with resolved references
     const result = await node.upsert(space, password, region, targetData);
     node.updateTargetData(result, targetData);
-    node.processed = true;
 
     progressDisplay.handleEvent({
       type: 'success',

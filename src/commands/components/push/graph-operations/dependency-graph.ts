@@ -155,16 +155,10 @@ class GroupNode extends GraphNode {
         const parentGroupName = parentGroupNode.getName();
         const targetParentGroup = targetData.groups.get(parentGroupName);
 
+        // Parent groups are always processed in previous levels due to topological ordering
         if (targetParentGroup) {
-          // Use the target space parent group ID and UUID
           group.parent_id = targetParentGroup.resource.id;
           group.parent_uuid = targetParentGroup.resource.uuid;
-        }
-        else {
-          // Parent group will be processed in the same level or was processed in a previous level
-          const currentParentGroup = parentGroupNode.getData<SpaceComponentGroup>();
-          group.parent_uuid = currentParentGroup.uuid;
-          group.parent_id = null; // API will resolve correct parent_id via parent_uuid
         }
       }
     }
@@ -291,14 +285,9 @@ class ComponentNode extends GraphNode {
           const tagName = tagNode.getName();
           const targetTag = targetData.tags.get(tagName);
 
+          // Tags are always processed in level 0, so they're always available in targetData
           if (targetTag) {
-            // Use the target space tag ID
             resolvedTagIds.push(targetTag.resource.id.toString());
-          }
-          else {
-            // Tag will be processed in the same level or was processed in a previous level
-            const currentTagData = tagNode.getData<SpaceComponentInternalTag>();
-            resolvedTagIds.push(currentTagData.id.toString());
           }
         }
         else {
@@ -320,14 +309,9 @@ class ComponentNode extends GraphNode {
         const groupName = groupNode.getName();
         const targetGroup = targetData.groups.get(groupName);
 
+        // Groups are always processed in previous levels due to topological ordering
         if (targetGroup) {
-          // Use the target space group UUID
           component.component_group_uuid = targetGroup.resource.uuid;
-        }
-        else {
-          // Group will be processed in the same level or was processed in a previous level
-          const currentGroupUuid = groupNode.getData<SpaceComponentGroup>().uuid;
-          component.component_group_uuid = currentGroupUuid;
         }
       }
     }
