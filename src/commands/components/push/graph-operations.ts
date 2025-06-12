@@ -1,7 +1,5 @@
-import { Spinner } from '@topcli/spinner';
 import chalk from 'chalk';
 import { colorPalette } from '../../../constants';
-import { isVitest } from '../../../utils';
 import type { RegionCode } from '../../../constants';
 import type {
   SpaceComponent,
@@ -9,11 +7,10 @@ import type {
   SpaceComponentInternalTag,
   SpaceComponentPreset,
   SpaceData,
-  SpaceDataState,
 } from '../constants';
 import { upsertComponent, upsertComponentGroup, upsertComponentInternalTag, upsertComponentPreset } from './actions';
 import { createHash } from 'node:crypto';
-import { type ProcessingEvent, progressDisplay } from './progress-display';
+import { progressDisplay } from './progress-display';
 
 // =============================================================================
 // TYPE DEFINITIONS
@@ -40,13 +37,6 @@ interface DependencyGraph {
   nodes: Map<string, DependencyNode>;
 }
 
-/** Maps old resource IDs to new ones after processing */
-interface IdMappings {
-  groups: Map<string, string>; // old UUID -> new UUID
-  tags: Map<number, number>; // old ID -> new ID
-  components: Map<string, string>; // old name -> new name
-}
-
 /** Target data with content hashes for efficient comparison */
 interface TargetData {
   components: Map<string, { resource: SpaceComponent; hash: string }>;
@@ -59,7 +49,6 @@ interface TargetData {
 interface PushResults {
   successful: string[];
   failed: Array<{ name: string; error: unknown }>;
-  idMappings: IdMappings;
   skipped: string[];
 }
 
@@ -297,7 +286,7 @@ function buildDependencyGraph(spaceData: SpaceData): DependencyGraph {
 
     // Direct tag assignments (component is tagged)
     component.internal_tag_ids?.forEach((tagId) => {
-      addDependency(componentId, `tag:${tagId}`);
+      addDependency(componentId, `tag:${Number(tagId)}`);
     });
 
     // Schema whitelist dependencies
@@ -506,7 +495,6 @@ async function processNode(
   nodeId: string,
   graph: DependencyGraph,
   space: string,
-  idMappings: IdMappings,
   targetData?: TargetData,
 ): Promise<{ result: any; skipped: boolean }> {
   const node = graph.nodes.get(nodeId)!;
@@ -523,8 +511,19 @@ async function processNode(
           const localHash = generateContentHash(normalized);
 
           if (localHash === existingEntry.hash) {
-            // Content is identical, skip with existing ID mapping
-            idMappings.tags.set(tag.id, existingEntry.resource.id);
+            // Content is identical, but we still need to update references if IDs differ
+            const targetId = existingEntry.resource.id;
+            const currentId = tag.id;
+
+            if (currentId !== targetId) {
+              // Update the node's data with the target ID
+              (node.data as SpaceComponentInternalTag).id = targetId;
+              console.log(`🏷️  Tag ${tag.name}: updated references from local ID ${currentId} to target ID ${targetId}`);
+
+              // Update all dependent nodes that reference this tag
+              updateDependentTagReferences(graph, node.id, currentId, targetId);
+            }
+
             return { result: existingEntry.resource, skipped: true };
           }
           // Content differs, continue with update but preserve target ID
@@ -535,8 +534,13 @@ async function processNode(
       const existingId = targetData?.tags.get(tag.name)?.resource.id;
       const result = await upsertComponentInternalTag(space, tag, existingId);
 
-      if (result && result.id !== tag.id) {
-        idMappings.tags.set(tag.id, result.id);
+      if (result) {
+        // Update the node's data with the new server ID
+        const oldTagId = (node.data as SpaceComponentInternalTag).id;
+        (node.data as SpaceComponentInternalTag).id = result.id;
+
+        // Update all dependent nodes that reference this tag
+        updateDependentTagReferences(graph, node.id, oldTagId, result.id);
       }
 
       // Update target data with new hash for future comparisons
@@ -550,28 +554,32 @@ async function processNode(
     }
 
     case 'group': {
-      const group = { ...node.data } as SpaceComponentGroup;
+      // Use the current data from the graph (which has updated references)
+      const group = node.data as SpaceComponentGroup;
+      const originalUuid = group.uuid; // Capture the original UUID before any modifications
 
       // Check if group exists and compare content hash
       if (targetData) {
         const existingEntry = targetData.groups.get(group.name);
+
         if (existingEntry) {
-          // Create a copy for comparison without modifying the original
-          const groupForComparison = { ...group };
-          // Update parent reference for comparison
-          if (groupForComparison.parent_uuid) {
-            const newParentUuid = idMappings.groups.get(groupForComparison.parent_uuid);
-            if (newParentUuid) {
-              groupForComparison.parent_uuid = newParentUuid;
-            }
-          }
-
-          const normalized = normalizeGroupForComparison(groupForComparison);
+          const normalized = normalizeGroupForComparison(group);
           const localHash = generateContentHash(normalized);
-
           if (localHash === existingEntry.hash) {
-            // Content is identical, skip with existing ID mapping
-            idMappings.groups.set(group.uuid, existingEntry.resource.uuid);
+            // Content is identical, but we still need to update references if UUIDs differ
+            const targetUuid = existingEntry.resource.uuid;
+            const currentUuid = group.uuid;
+
+            if (currentUuid !== targetUuid) {
+              // Update the node's data with the target UUID
+              (node.data as SpaceComponentGroup).uuid = targetUuid;
+              (node.data as SpaceComponentGroup).id = existingEntry.resource.id;
+              console.log(`📁 Group ${group.name}: updated references from local UUID ${currentUuid} to target UUID ${targetUuid}`);
+
+              // Update all dependent nodes that reference this group
+              updateDependentGroupReferences(graph, node.id, currentUuid, targetUuid);
+            }
+
             return { result: existingEntry.resource, skipped: true };
           }
           // Content differs, continue with update but preserve target UUIDs
@@ -580,19 +588,18 @@ async function processNode(
         }
       }
 
-      // Update parent reference if needed
-      if (group.parent_uuid) {
-        const newParentUuid = idMappings.groups.get(group.parent_uuid);
-        if (newParentUuid) {
-          group.parent_uuid = newParentUuid;
-        }
-      }
-
       const existingId = targetData?.groups.get(group.name)?.resource.id;
       const result = await upsertComponentGroup(space, group, existingId);
 
-      if (result && result.uuid !== group.uuid) {
-        idMappings.groups.set(group.uuid, result.uuid);
+      if (result) {
+        // Update the node's data with the new server UUID
+        (node.data as SpaceComponentGroup).uuid = result.uuid;
+        (node.data as SpaceComponentGroup).id = result.id;
+
+        // Always update dependent references if the original UUID differs from result
+        if (originalUuid !== result.uuid) {
+          updateDependentGroupReferences(graph, node.id, originalUuid, result.uuid);
+        }
       }
 
       // Update target data with new hash for future comparisons
@@ -606,22 +613,18 @@ async function processNode(
     }
 
     case 'component': {
-      const component = JSON.parse(JSON.stringify(node.data)) as SpaceComponent;
+      // Use the current data from the graph (which has updated references)
+      const component = node.data as SpaceComponent;
 
       // Check if component exists and compare content hash
       if (targetData) {
         const existingEntry = targetData.components.get(component.name);
         if (existingEntry) {
-          // Create a copy for comparison without modifying the original
-          const componentForComparison = JSON.parse(JSON.stringify(component)) as SpaceComponent;
-          updateComponentReferences(componentForComparison, idMappings);
-
-          const normalized = normalizeComponentForComparison(componentForComparison);
+          const normalized = normalizeComponentForComparison(component);
           const localHash = generateContentHash(normalized);
 
           if (localHash === existingEntry.hash) {
-            // Content is identical, skip with existing ID mapping
-            idMappings.components.set(component.name, existingEntry.resource.name);
+            // Content is identical, skip
             return { result: existingEntry.resource, skipped: true };
           }
           // Content differs, continue with update but preserve target ID
@@ -629,14 +632,19 @@ async function processNode(
         }
       }
 
-      // Update component references for processing
-      updateComponentReferences(component, idMappings);
-
       const existingId = targetData?.components.get(component.name)?.resource.id;
       const result = await upsertComponent(space, component, existingId);
 
-      if (result && result.name !== component.name) {
-        idMappings.components.set(component.name, result.name);
+      if (result) {
+        // Update the node's data with the new server values
+        const oldName = (node.data as SpaceComponent).name;
+        (node.data as SpaceComponent).name = result.name;
+        (node.data as SpaceComponent).id = result.id;
+
+        // Update all dependent nodes that reference this component
+        if (oldName !== result.name) {
+          updateDependentComponentReferences(graph, node.id, oldName, result.name);
+        }
       }
 
       // Update target data with new hash for future comparisons
@@ -655,57 +663,163 @@ async function processNode(
 }
 
 /**
- * Updates a component's references to use new mapped IDs.
+ * Updates all nodes that depend on a tag when the tag gets a new ID
  */
-function updateComponentReferences(component: SpaceComponent, idMappings: IdMappings): void {
-  // Update group assignment
-  if (component.component_group_uuid) {
-    const newUuid = idMappings.groups.get(component.component_group_uuid);
-    if (newUuid) { component.component_group_uuid = newUuid; }
-  }
+function updateDependentTagReferences(graph: DependencyGraph, tagNodeId: string, oldTagId: number, newTagId: number): void {
+  const tagNode = graph.nodes.get(tagNodeId);
+  if (!tagNode) { return; }
 
-  // Update tag assignments
-  if (component.internal_tag_ids?.length > 0) {
-    component.internal_tag_ids = component.internal_tag_ids.map((tagId) => {
-      const newId = idMappings.tags.get(Number(tagId));
-      return newId ? newId.toString() : tagId;
-    });
-  }
+  // Update all components that reference this tag
+  tagNode.dependents.forEach((dependentId) => {
+    const dependentNode = graph.nodes.get(dependentId);
+    if (!dependentNode || dependentNode.type !== 'component') { return; }
 
-  // Update schema whitelists
-  if (component.schema) {
-    updateSchemaWhitelists(component.schema, idMappings);
-  }
+    const component = dependentNode.data as SpaceComponent;
+
+    // Update direct tag assignments
+    if (component.internal_tag_ids?.length > 0) {
+      component.internal_tag_ids = component.internal_tag_ids.map((tagId) => {
+        return Number(tagId) === oldTagId ? newTagId.toString() : tagId;
+      });
+    }
+
+    // Update schema whitelist references
+    if (component.schema) {
+      updateSchemaTagReferences(component.schema, oldTagId, newTagId);
+    }
+  });
 }
 
 /**
- * Updates whitelist references in a component's schema.
+ * Updates all nodes that depend on a group when the group gets a new UUID
  */
-function updateSchemaWhitelists(schema: Record<string, any>, idMappings: IdMappings): void {
+function updateDependentGroupReferences(graph: DependencyGraph, groupNodeId: string, oldGroupUuid: string, newGroupUuid: string): void {
+  const groupNode = graph.nodes.get(groupNodeId);
+  if (!groupNode) { return; }
+
+  // Update all components and groups that reference this group
+  groupNode.dependents.forEach((dependentId) => {
+    const dependentNode = graph.nodes.get(dependentId);
+    if (!dependentNode) { return; }
+
+    if (dependentNode.type === 'component') {
+      const component = dependentNode.data as SpaceComponent;
+
+      // Update direct group assignment
+      if (component.component_group_uuid === oldGroupUuid) {
+        component.component_group_uuid = newGroupUuid;
+      }
+
+      // Update schema whitelist references
+      if (component.schema) {
+        updateSchemaGroupReferences(component.schema, oldGroupUuid, newGroupUuid);
+      }
+    }
+    else if (dependentNode.type === 'group') {
+      const group = dependentNode.data as SpaceComponentGroup;
+
+      // Update parent group reference
+      if (group.parent_uuid === oldGroupUuid) {
+        group.parent_uuid = newGroupUuid;
+
+        // We also need to update parent_id by finding the group with the new UUID
+        // Look for the group node with the new UUID to get its ID
+        for (const [nodeId, node] of graph.nodes) {
+          if (node.type === 'group' && nodeId.startsWith('group:')) {
+            const parentGroup = node.data as SpaceComponentGroup;
+            if (parentGroup.uuid === newGroupUuid) {
+              group.parent_id = parentGroup.id;
+              break;
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+/**
+ * Updates all nodes that depend on a component when the component gets a new name
+ */
+function updateDependentComponentReferences(graph: DependencyGraph, componentNodeId: string, oldComponentName: string, newComponentName: string): void {
+  const componentNode = graph.nodes.get(componentNodeId);
+  if (!componentNode) { return; }
+
+  // Update all components that reference this component in whitelists
+  componentNode.dependents.forEach((dependentId) => {
+    const dependentNode = graph.nodes.get(dependentId);
+    if (!dependentNode || dependentNode.type !== 'component') { return; }
+
+    const component = dependentNode.data as SpaceComponent;
+
+    // Update schema whitelist references
+    if (component.schema) {
+      updateSchemaComponentReferences(component.schema, oldComponentName, newComponentName);
+    }
+  });
+}
+
+/**
+ * Helper functions to update schema references
+ */
+function updateSchemaTagReferences(schema: Record<string, any>, oldTagId: number, newTagId: number): void {
   function traverseField(field: Record<string, any>) {
     if (typeof field !== 'object' || field === null) { return; }
 
-    if (field.type === 'bloks') {
-      // Update group whitelists
-      if (field.restrict_type === 'groups' && Array.isArray(field.component_group_whitelist)) {
-        field.component_group_whitelist = field.component_group_whitelist
-          .map((uuid: string) => idMappings.groups.get(uuid) || uuid);
-      }
-
-      // Update tag whitelists
-      if (Array.isArray(field.component_tag_whitelist)) {
-        field.component_tag_whitelist = field.component_tag_whitelist
-          .map((id: string | number) => idMappings.tags.get(Number(id)) || Number(id));
-      }
-
-      // Update component whitelists
-      if (Array.isArray(field.component_whitelist)) {
-        field.component_whitelist = field.component_whitelist
-          .map((name: string) => idMappings.components.get(name) || name);
-      }
+    if (field.type === 'bloks' && Array.isArray(field.component_tag_whitelist)) {
+      field.component_tag_whitelist = field.component_tag_whitelist.map((id: string | number) => {
+        return Number(id) === oldTagId ? newTagId : Number(id);
+      });
     }
 
-    // Recursively process nested fields
+    Object.values(field).forEach((value) => {
+      if (typeof value === 'object' && value !== null) {
+        traverseField(value);
+      }
+    });
+  }
+
+  Object.values(schema).forEach((field) => {
+    if (typeof field === 'object' && field !== null) {
+      traverseField(field);
+    }
+  });
+}
+
+function updateSchemaGroupReferences(schema: Record<string, any>, oldGroupUuid: string, newGroupUuid: string): void {
+  function traverseField(field: Record<string, any>) {
+    if (typeof field !== 'object' || field === null) { return; }
+
+    if (field.type === 'bloks' && field.restrict_type === 'groups' && Array.isArray(field.component_group_whitelist)) {
+      field.component_group_whitelist = field.component_group_whitelist.map((uuid: string) => {
+        return uuid === oldGroupUuid ? newGroupUuid : uuid;
+      });
+    }
+
+    Object.values(field).forEach((value) => {
+      if (typeof value === 'object' && value !== null) {
+        traverseField(value);
+      }
+    });
+  }
+
+  Object.values(schema).forEach((field) => {
+    if (typeof field === 'object' && field !== null) {
+      traverseField(field);
+    }
+  });
+}
+
+function updateSchemaComponentReferences(schema: Record<string, any>, oldComponentName: string, newComponentName: string): void {
+  function traverseField(field: Record<string, any>) {
+    if (typeof field !== 'object' || field === null) { return; }
+
+    if (field.type === 'bloks' && Array.isArray(field.component_whitelist)) {
+      field.component_whitelist = field.component_whitelist.map((name: string) => {
+        return name === oldComponentName ? newComponentName : name;
+      });
+    }
+
     Object.values(field).forEach((value) => {
       if (typeof value === 'object' && value !== null) {
         traverseField(value);
@@ -732,7 +846,6 @@ async function processLevel(
   level: string[],
   graph: DependencyGraph,
   space: string,
-  idMappings: IdMappings,
   maxConcurrency: number = 5,
   targetData?: TargetData,
 ): Promise<{ successful: string[]; failed: Array<{ name: string; error: unknown }>; skipped: string[] }> {
@@ -749,7 +862,7 @@ async function processLevel(
       const displayName = getNodeDisplayName(node);
 
       try {
-        const { result, skipped: wasSkipped } = await processNode(nodeId, graph, space, idMappings, targetData);
+        const { result, skipped: wasSkipped } = await processNode(nodeId, graph, space, targetData);
 
         if (result) {
           node.processed = true;
@@ -807,7 +920,7 @@ async function processPresetsWithProgress(
   space: string,
   password: string,
   region: RegionCode,
-  componentIdMappings: Map<number, number>,
+  graph: DependencyGraph,
   targetData?: TargetData,
 ): Promise<{ successful: string[]; failed: Array<{ name: string; error: unknown }>; skipped: string[] }> {
   const successful: string[] = [];
@@ -820,12 +933,22 @@ async function processPresetsWithProgress(
       if (targetData) {
         const existingEntry = targetData.presets.get(preset.name);
         if (existingEntry) {
+          // Find the component in the graph to get its current ID
+          let newComponentId = preset.component_id;
+          for (const [nodeId, node] of graph.nodes) {
+            if (node.type === 'component') {
+              const component = node.data as SpaceComponent;
+              // Match by original ID to find the right component
+              if (nodeId === `component:${preset.name}` || component.id === preset.component_id) {
+                newComponentId = component.id;
+                break;
+              }
+            }
+          }
+
           // Create a temporary preset with updated component_id for comparison
           const tempPreset = { ...preset };
-          const newComponentId = componentIdMappings.get(preset.component_id);
-          if (newComponentId) {
-            tempPreset.component_id = newComponentId;
-          }
+          tempPreset.component_id = newComponentId;
 
           const normalized = normalizePresetForComparison(tempPreset);
           const localHash = generateContentHash(normalized);
@@ -843,9 +966,21 @@ async function processPresetsWithProgress(
         }
       }
 
-      const newComponentId = componentIdMappings.get(preset.component_id);
+      // Find the component in the graph to get its current ID
+      let newComponentId: number | undefined;
+      for (const [nodeId, node] of graph.nodes) {
+        if (node.type === 'component') {
+          const component = node.data as SpaceComponent;
+          // Match by original component ID or name
+          if (component.id === preset.component_id || nodeId.endsWith(preset.name)) {
+            newComponentId = component.id;
+            break;
+          }
+        }
+      }
+
       if (!newComponentId) {
-        throw new Error(`No new ID found for component with ID ${preset.component_id}`);
+        throw new Error(`No component found for preset ${preset.name} with component ID ${preset.component_id}`);
       }
 
       const presetToUpdate = {
@@ -963,15 +1098,7 @@ export async function pushWithDependencyGraph(
     successful: [],
     failed: [],
     skipped: [],
-    idMappings: {
-      groups: new Map(),
-      tags: new Map(),
-      components: new Map(),
-    },
   };
-
-  // Track component ID mappings for presets
-  const componentIdMappings = new Map<number, number>();
 
   // Calculate total resources for progress tracking
   const totalResources = levels.reduce((sum, level) => sum + level.length, 0) + spaceData.presets.length;
@@ -982,25 +1109,11 @@ export async function pushWithDependencyGraph(
   for (let i = 0; i < levels.length; i++) {
     const level = levels[i];
 
-    const levelResults = await processLevel(level, graph, space, results.idMappings, maxConcurrency, targetData);
+    const levelResults = await processLevel(level, graph, space, maxConcurrency, targetData);
 
     results.successful.push(...levelResults.successful);
     results.failed.push(...levelResults.failed);
     results.skipped.push(...levelResults.skipped);
-
-    // Track component ID mappings for presets
-    level.forEach((nodeId) => {
-      if (nodeId.startsWith('component:')) {
-        const node = graph.nodes.get(nodeId)!;
-        const originalComponent = node.data as SpaceComponent;
-
-        if (node.processed) {
-          // In practice, we'd get the actual new ID from the upsert result
-          // For now, we'll use the original ID as a fallback
-          componentIdMappings.set(originalComponent.id, originalComponent.id);
-        }
-      }
-    });
   }
 
   // Show completion summary using progress display
@@ -1015,7 +1128,7 @@ export async function pushWithDependencyGraph(
 
   // Process presets (they depend on components being created first)
   if (spaceData.presets.length > 0) {
-    const presetResults = await processPresetsWithProgress(spaceData, space, password, region, componentIdMappings, targetData);
+    const presetResults = await processPresetsWithProgress(spaceData, space, password, region, graph, targetData);
     results.successful.push(...presetResults.successful);
     results.failed.push(...presetResults.failed);
     results.skipped.push(...presetResults.skipped);
