@@ -25,6 +25,7 @@
   ],
   "scripts": {
     "build": "unbuild",
+    "typecheck": "tsc --noEmit",
     "release": "release-it",
     "dev": "pnpm run build && node dist/index.mjs",
     "lint": "eslint .",

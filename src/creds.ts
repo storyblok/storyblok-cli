@@ -7,6 +7,10 @@ import { colorPalette, regionsDomain } from './constants';
 import { getStoryblokGlobalPath, readFile, saveToFile } from './utils/filesystem';
 import type { StoryblokCredentials } from './types';
 
+function isCredentialKey(k: string): k is keyof StoryblokCredentials {
+  return k === 'login' || k === 'password' || k === 'region';
+}
+
 export const getCredentials = async (filePath = join(getStoryblokGlobalPath(), 'credentials.json')): Promise<StoryblokCredentials | null> => {
   try {
     await access(filePath);
@@ -60,7 +64,7 @@ export const removeCredentials = async (region: RegionCode, filepath: string = g
   const credentials = await getCredentials(filePath);
   const machineName = regionsDomain[region] || 'api.storyblok.com';
 
-  if (credentials[machineName]) {
+  if (isCredentialKey(machineName) && credentials) {
     delete credentials[machineName];
 
     try {
