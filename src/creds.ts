@@ -59,28 +59,6 @@ export const addCredentials = async ({
   }
 };
 
-export const removeCredentials = async (region: RegionCode, filepath: string = getStoryblokGlobalPath()) => {
-  const filePath = join(filepath, 'credentials.json');
-  const credentials = await getCredentials(filePath);
-  const machineName = regionsDomain[region] || 'api.storyblok.com';
-
-  if (isCredentialKey(machineName) && credentials) {
-    delete credentials[machineName];
-
-    try {
-      await saveToFile(filePath, JSON.stringify(credentials, null, 2), { mode: 0o600 });
-
-      konsola.ok(`Successfully removed entry for machine ${machineName} from ${chalk.hex(colorPalette.PRIMARY)(filePath)}`, true);
-    }
-    catch (error) {
-      throw new FileSystemError('invalid_argument', 'write', error as NodeJS.ErrnoException, `Error removing entry for machine ${machineName} from credentials.json file`);
-    }
-  }
-  else {
-    konsola.warn(`No entry found for machine ${machineName} in ${chalk.hex(colorPalette.PRIMARY)(filePath)}`, true);
-  }
-};
-
 export const removeAllCredentials = async (filepath: string = getStoryblokGlobalPath()) => {
   const filePath = join(filepath, 'credentials.json');
   await saveToFile(filePath, JSON.stringify({}, null, 2), { mode: 0o600 });
