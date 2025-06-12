@@ -9,6 +9,7 @@ import { session } from '../../../session';
 import { fetchComponent } from '../../../commands/components';
 import { migrationsCommand } from '../command';
 import { generateMigration } from './actions';
+import { mapiClient } from '../../../api';
 
 const program = getProgram();
 
@@ -45,11 +46,16 @@ migrationsCommand
 
     const { password, region } = state;
 
+    mapiClient({
+      token: password,
+      region,
+    });
+
     const spinner = new Spinner({
       verbose: !isVitest,
     }).start(`Generating migration for component ${componentName}...`);
     try {
-      const component = await fetchComponent(space, componentName, password, region);
+      const component = await fetchComponent(space, componentName);
 
       if (!component) {
         spinner.failed(`Failed to fetch component ${componentName}. Make sure the component exists in your space.`);
