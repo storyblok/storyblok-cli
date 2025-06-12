@@ -1,15 +1,8 @@
 import { access } from 'node:fs/promises';
 import { join } from 'node:path';
-import { FileSystemError, handleFileSystemError, konsola } from './utils';
-import chalk from 'chalk';
-import type { RegionCode } from './constants';
-import { colorPalette, regionsDomain } from './constants';
+import { FileSystemError, handleFileSystemError } from './utils';
 import { getStoryblokGlobalPath, readFile, saveToFile } from './utils/filesystem';
 import type { StoryblokCredentials } from './types';
-
-function isCredentialKey(k: string): k is keyof StoryblokCredentials {
-  return k === 'login' || k === 'password' || k === 'region';
-}
 
 export const getCredentials = async (filePath = join(getStoryblokGlobalPath(), 'credentials.json')): Promise<StoryblokCredentials | null> => {
   try {
