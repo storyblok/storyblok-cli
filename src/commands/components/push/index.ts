@@ -7,7 +7,7 @@ import { session } from '../../../session';
 import { readComponentsFiles } from './actions';
 import { componentsCommand } from '../command';
 import { filterSpaceDataByComponent, filterSpaceDataByPattern } from './utils';
-import { pushWithDependencyGraph } from './graph-operations';
+import { buildTargetDataFromMaps, pushWithDependencyGraph } from './graph-operations';
 import chalk from 'chalk';
 import { mapiClient } from '../../../api';
 import { fetchComponentGroups, fetchComponentInternalTags, fetchComponentPresets, fetchComponents } from '../actions';
@@ -143,9 +143,17 @@ componentsCommand
         skipped: [] as string[],
       };
 
+      // Convert target data to hash-enabled format for content comparison
+      const targetData = buildTargetDataFromMaps(
+        spaceState.target.components,
+        spaceState.target.groups,
+        spaceState.target.tags,
+        spaceState.target.presets,
+      );
+
       // Use optimized graph-based dependency resolution
       konsola.info('Using graph-based dependency resolution');
-      const graphResults = await pushWithDependencyGraph(space, password, region, spaceState.local, 5);
+      const graphResults = await pushWithDependencyGraph(space, password, region, spaceState.local, targetData, 5);
       results.successful.push(...graphResults.successful);
       results.failed.push(...graphResults.failed);
       results.skipped.push(...graphResults.skipped);

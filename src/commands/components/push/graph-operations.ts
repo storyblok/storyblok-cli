@@ -12,7 +12,6 @@ import type {
   SpaceDataState,
 } from '../constants';
 import { upsertComponent, upsertComponentGroup, upsertComponentInternalTag, upsertComponentPreset } from './actions';
-import { fetchComponentGroups, fetchComponentInternalTags, fetchComponentPresets, fetchComponents } from '../actions';
 import { createHash } from 'node:crypto';
 import { type ProcessingEvent, progressDisplay } from './progress-display';
 
@@ -124,20 +123,14 @@ function generateContentHash(obj: any): string {
 }
 
 /**
- * Fetches existing resources from target space for content comparison optimization
+ * Converts space state target maps to TargetData format with content hashes
  */
-async function fetchTargetData(space: string): Promise<TargetData> {
-  console.log('Fetching existing resources for content comparison...');
-
-  const promises = [
-    fetchComponents(space),
-    fetchComponentGroups(space),
-    fetchComponentPresets(space),
-    fetchComponentInternalTags(space),
-  ];
-
-  const [components, groups, presets, internalTags] = await Promise.all(promises);
-
+export function buildTargetDataFromMaps(
+  components: Map<string, SpaceComponent>,
+  groups: Map<string, SpaceComponentGroup>,
+  tags: Map<string, SpaceComponentInternalTag>,
+  presets: Map<string, SpaceComponentPreset>,
+): TargetData {
   const targetData: TargetData = {
     components: new Map(),
     groups: new Map(),
@@ -146,37 +139,29 @@ async function fetchTargetData(space: string): Promise<TargetData> {
   };
 
   // Build hash maps for each resource type
-  if (components) {
-    (components as SpaceComponent[]).forEach((component) => {
-      const normalized = normalizeComponentForComparison(component);
-      const hash = generateContentHash(normalized);
-      targetData.components.set(component.name, { resource: component, hash });
-    });
-  }
+  components.forEach((component) => {
+    const normalized = normalizeComponentForComparison(component);
+    const hash = generateContentHash(normalized);
+    targetData.components.set(component.name, { resource: component, hash });
+  });
 
-  if (groups) {
-    (groups as SpaceComponentGroup[]).forEach((group) => {
-      const normalized = normalizeGroupForComparison(group);
-      const hash = generateContentHash(normalized);
-      targetData.groups.set(group.name, { resource: group, hash });
-    });
-  }
+  groups.forEach((group) => {
+    const normalized = normalizeGroupForComparison(group);
+    const hash = generateContentHash(normalized);
+    targetData.groups.set(group.name, { resource: group, hash });
+  });
 
-  if (presets) {
-    (presets as SpaceComponentPreset[]).forEach((preset) => {
-      const normalized = normalizePresetForComparison(preset);
-      const hash = generateContentHash(normalized);
-      targetData.presets.set(preset.name, { resource: preset, hash });
-    });
-  }
+  presets.forEach((preset) => {
+    const normalized = normalizePresetForComparison(preset);
+    const hash = generateContentHash(normalized);
+    targetData.presets.set(preset.name, { resource: preset, hash });
+  });
 
-  if (internalTags) {
-    (internalTags as SpaceComponentInternalTag[]).forEach((tag) => {
-      const normalized = normalizeTagForComparison(tag);
-      const hash = generateContentHash(normalized);
-      targetData.tags.set(tag.name, { resource: tag, hash });
-    });
-  }
+  tags.forEach((tag) => {
+    const normalized = normalizeTagForComparison(tag);
+    const hash = generateContentHash(normalized);
+    targetData.tags.set(tag.name, { resource: tag, hash });
+  });
 
   console.log(`Found ${targetData.components.size} components, ${targetData.groups.size} groups, ${targetData.tags.size} tags, ${targetData.presets.size} presets`);
   return targetData;
@@ -487,8 +472,7 @@ function determineProcessingOrder(graph: DependencyGraph): string[][] {
 
     // For each node we're processing in this level
     for (const nodeId of currentLevel) {
-      const node = graph.nodes.get(nodeId);
-      if (!node) { continue; }
+      const node = graph.nodes.get(nodeId)!;
 
       // Reduce dependency count for all nodes that depend on this one
       for (const dependentId of node.dependents) {
@@ -548,7 +532,8 @@ async function processNode(
         }
       }
 
-      const result = await upsertComponentInternalTag(space, tag);
+      const existingId = targetData?.tags.get(tag.name)?.resource.id;
+      const result = await upsertComponentInternalTag(space, tag, existingId);
 
       if (result && result.id !== tag.id) {
         idMappings.tags.set(tag.id, result.id);
@@ -603,7 +588,8 @@ async function processNode(
         }
       }
 
-      const result = await upsertComponentGroup(space, group);
+      const existingId = targetData?.groups.get(group.name)?.resource.id;
+      const result = await upsertComponentGroup(space, group, existingId);
 
       if (result && result.uuid !== group.uuid) {
         idMappings.groups.set(group.uuid, result.uuid);
@@ -646,7 +632,8 @@ async function processNode(
       // Update component references for processing
       updateComponentReferences(component, idMappings);
 
-      const result = await upsertComponent(space, component);
+      const existingId = targetData?.components.get(component.name)?.resource.id;
+      const result = await upsertComponent(space, component, existingId);
 
       if (result && result.name !== component.name) {
         idMappings.components.set(component.name, result.name);
@@ -755,8 +742,6 @@ async function processLevel(
 
   // Process in batches to control concurrent API calls
   for (let i = 0; i < level.length; i += maxConcurrency) {
-    // await new Promise(resolve => setTimeout(resolve, 1000));
-
     const batch = level.slice(i, i + maxConcurrency);
 
     const batchPromises = batch.map(async (nodeId) => {
@@ -869,7 +854,8 @@ async function processPresetsWithProgress(
         component_id: newComponentId,
       };
 
-      const result = await upsertComponentPreset(space, presetToUpdate, password, region);
+      const existingId = targetData?.presets.get(preset.name)?.resource.id;
+      const result = await upsertComponentPreset(space, presetToUpdate, password, region, existingId);
       successful.push(preset.name);
       progressDisplay.handleEvent({
         type: 'success',
@@ -948,6 +934,7 @@ export async function pushWithDependencyGraph(
   password: string,
   region: RegionCode,
   spaceData: SpaceData,
+  targetData: TargetData,
   maxConcurrency: number = 5,
 ): Promise<PushResults> {
   // Build the dependency graph
@@ -966,8 +953,7 @@ export async function pushWithDependencyGraph(
     console.log(`Circular component whitelists detected (allowed): ${circularWhitelists.join(', ')}`);
   }
 
-  // Fetch target data for content comparison optimization
-  const targetData = await fetchTargetData(space);
+  // Target data is already provided - no need to fetch again
 
   // Determine processing order
   const levels = determineProcessingOrder(graph);

@@ -44,23 +44,18 @@ export const updateComponent = async (space: string, componentId: number, compon
   }
 };
 
-export const upsertComponent = async (space: string, component: SpaceComponent): Promise<SpaceComponent | undefined> => {
-  try {
-    return await pushComponent(space, component);
+export const upsertComponent = async (
+  space: string,
+  component: SpaceComponent,
+  existingId?: number,
+): Promise<SpaceComponent | undefined> => {
+  if (existingId) {
+    // We know it exists, update directly
+    return await updateComponent(space, existingId, component);
   }
-  catch (error) {
-    if (error instanceof APIError && error.code === 422) {
-      const responseData = error.response?.data as { [key: string]: string[] } | undefined;
-      if (responseData?.name?.[0] === 'has already been taken') {
-        // Find existing component by name
-        const existingComponent = await fetchComponent(space, component.name);
-        if (existingComponent) {
-          // Update existing component
-          return await updateComponent(space, existingComponent.id, component);
-        }
-      }
-    }
-    throw error;
+  else {
+    // New resource, create directly
+    return await pushComponent(space, component);
   }
 };
 
@@ -98,29 +93,23 @@ export const updateComponentGroup = async (space: string, groupId: number, compo
   }
 };
 
-export const upsertComponentGroup = async (space: string, group: SpaceComponentGroup): Promise<SpaceComponentGroup | undefined> => {
-  try {
-    return await pushComponentGroup(space, group);
+export const upsertComponentGroup = async (
+  space: string,
+  group: SpaceComponentGroup,
+  existingId?: number,
+): Promise<SpaceComponentGroup | undefined> => {
+  if (existingId) {
+    // We know it exists, update directly
+    return await updateComponentGroup(space, existingId, group);
   }
-  catch (error) {
-    if (error instanceof APIError && error.code === 422) {
-      const responseData = error.response?.data as { [key: string]: string[] } | undefined;
-      if (responseData?.name?.[0] === 'has already been taken') {
-        // Find existing group by name
-        const existingGroups = await fetchComponentGroups(space);
-        const existingGroup = existingGroups?.find(g => g.name === group.name);
-        if (existingGroup) {
-          // Update existing group
-          return await updateComponentGroup(space, existingGroup.id, group);
-        }
-      }
-    }
-    throw error;
+  else {
+    // New resource, create directly
+    return await pushComponentGroup(space, group);
   }
 };
 
 // Component preset actions
-export const pushComponentPreset = async (space: string, componentPreset: { preset: Partial<SpaceComponentPreset> }): Promise<SpaceComponentPreset | undefined> => {
+export const pushComponentPreset = async (space: string, componentPreset: { preset: Partial<SpaceComponentPreset> }, _token?: string, _region?: RegionCode): Promise<SpaceComponentPreset | undefined> => {
   try {
     const client = mapiClient();
 
@@ -136,7 +125,7 @@ export const pushComponentPreset = async (space: string, componentPreset: { pres
   }
 };
 
-export const updateComponentPreset = async (space: string, presetId: number, componentPreset: { preset: Partial<SpaceComponentPreset> }): Promise<SpaceComponentPreset | undefined> => {
+export const updateComponentPreset = async (space: string, presetId: number, componentPreset: { preset: Partial<SpaceComponentPreset> }, _token?: string, _region?: RegionCode): Promise<SpaceComponentPreset | undefined> => {
   try {
     const client = mapiClient();
 
@@ -152,24 +141,20 @@ export const updateComponentPreset = async (space: string, presetId: number, com
   }
 };
 
-export const upsertComponentPreset = async (space: string, preset: Partial<SpaceComponentPreset>, token: string, region: RegionCode): Promise<SpaceComponentPreset | undefined> => {
-  try {
-    return await pushComponentPreset(space, { preset }, token, region);
+export const upsertComponentPreset = async (
+  space: string,
+  preset: Partial<SpaceComponentPreset>,
+  token: string,
+  region: RegionCode,
+  existingId?: number,
+): Promise<SpaceComponentPreset | undefined> => {
+  if (existingId) {
+    // We know it exists, update directly
+    return await updateComponentPreset(space, existingId, { preset }, token, region);
   }
-  catch (error) {
-    if (error instanceof APIError && error.code === 422) {
-      const responseData = error.response?.data as { [key: string]: string[] } | undefined;
-      if (responseData?.name?.[0] === 'has already been taken') {
-        // Find existing preset by name
-        const existingPresets = await fetchComponentPresets(space, token, region);
-        const existingPreset = existingPresets?.find(p => p.name === preset.name && p.component_id === preset.component_id);
-        if (existingPreset) {
-          // Update existing preset
-          return await updateComponentPreset(space, existingPreset.id, { preset }, token, region);
-        }
-      }
-    }
-    throw error;
+  else {
+    // New resource, create directly
+    return await pushComponentPreset(space, { preset }, token, region);
   }
 };
 
@@ -211,24 +196,18 @@ export const updateComponentInternalTag = async (space: string, tagId: number, c
   }
 };
 
-export const upsertComponentInternalTag = async (space: string, tag: SpaceComponentInternalTag): Promise<SpaceComponentInternalTag | undefined> => {
-  try {
-    return await pushComponentInternalTag(space, tag);
+export const upsertComponentInternalTag = async (
+  space: string,
+  tag: SpaceComponentInternalTag,
+  existingId?: number,
+): Promise<SpaceComponentInternalTag | undefined> => {
+  if (existingId) {
+    // We know it exists, update directly
+    return await updateComponentInternalTag(space, existingId, tag);
   }
-  catch (error) {
-    if (error instanceof APIError && error.code === 422) {
-      const responseData = error.response?.data as { [key: string]: string[] } | undefined;
-      if (responseData?.name?.[0] === 'has already been taken') {
-        // Find existing tag by name
-        const existingTags = await fetchComponentInternalTags(space);
-        const existingTag = existingTags?.find(t => t.name === tag.name);
-        if (existingTag) {
-          // Update existing tag
-          return await updateComponentInternalTag(space, existingTag.id, tag);
-        }
-      }
-    }
-    throw error;
+  else {
+    // New resource, create directly
+    return await pushComponentInternalTag(space, tag);
   }
 };
 

@@ -1,5 +1,4 @@
 import chalk from 'chalk';
-import { colorPalette } from '../../../constants';
 
 export type ProcessingEvent =
   | { type: 'start'; total: number }
