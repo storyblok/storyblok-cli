@@ -70,7 +70,7 @@ describe('userCommand', () => {
     };
     await userCommand.parseAsync(['node', 'test']);
 
-    expect(konsola.error).toHaveBeenCalledWith('You are currently not logged in. Please run storyblok login to authenticate, or storyblok signup to signup.', null, {
+    expect(konsola.error).toHaveBeenCalledWith('You are currently not logged in. Please run storyblok login to authenticate, or storyblok signup to sign up.', null, {
       header: true,
     });
   });

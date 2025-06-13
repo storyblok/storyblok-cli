@@ -86,7 +86,7 @@ describe('languagesCommand', () => {
         session().state = {
           isLoggedIn: false,
         };
-        const mockError = new CommandError(`You are currently not logged in. Please run storyblok login to authenticate, or storyblok signup to signup.`);
+        const mockError = new CommandError(`You are currently not logged in. Please run storyblok login to authenticate, or storyblok signup to sign up.`);
         await languagesCommand.parseAsync(['node', 'test', 'pull', '--space', '12345']);
         expect(konsola.error).toHaveBeenCalledWith(mockError.message, null, {
           header: true,
