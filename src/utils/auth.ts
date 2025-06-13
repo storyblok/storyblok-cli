@@ -18,7 +18,7 @@ type AuthenticatedSessionState = SessionState & {
 export function requireAuthentication(state: SessionState, verbose = false): state is AuthenticatedSessionState {
   if (!state.isLoggedIn || !state.password || !state.region) {
     handleError(
-      new CommandError(`You are currently not logged in. Please run ${chalk.hex(colorPalette.PRIMARY)('storyblok login')} to authenticate, or ${chalk.hex(colorPalette.PRIMARY)('storyblok signup')} to signup.`),
+      new CommandError(`You are currently not logged in. Please run ${chalk.hex(colorPalette.PRIMARY)('storyblok login')} to authenticate, or ${chalk.hex(colorPalette.PRIMARY)('storyblok signup')} to sign up.`),
       verbose,
     );
     return false;
