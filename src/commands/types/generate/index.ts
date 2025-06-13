@@ -1,5 +1,5 @@
 import { colorPalette, commands } from '../../../constants';
-import { CommandError, handleError, isVitest, konsola } from '../../../utils';
+import { CommandError, handleError, isVitest, konsola, requireAuthentication } from '../../../utils';
 import { getProgram } from '../../../program';
 import { session } from '../../../session';
 import { Spinner } from '@topcli/spinner';
@@ -31,8 +31,7 @@ typesCommand
     const { state, initializeSession } = session();
     await initializeSession();
 
-    if (!state.isLoggedIn || !state.password || !state.region) {
-      handleError(new CommandError(`You are currently not logged in. Please login first to get your user info.`), verbose);
+    if (!requireAuthentication(state, verbose)) {
       return;
     }
     if (!space) {

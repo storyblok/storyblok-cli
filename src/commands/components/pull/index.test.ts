@@ -38,24 +38,7 @@ vi.mock('../../../session', () => {
   };
 });
 
-vi.mock('../../../utils', async () => {
-  const actualUtils = await vi.importActual('../../../utils');
-  return {
-    ...actualUtils,
-    isVitestRunning: true,
-    konsola: {
-      ok: vi.fn(),
-      title: vi.fn(),
-      warn: vi.fn(),
-      error: vi.fn(),
-      br: vi.fn(),
-    },
-    handleError: (error: unknown, header = false) => {
-      konsola.error(error as string, header);
-      // Optionally, prevent process.exit during tests
-    },
-  };
-});
+vi.mock('../../../utils/konsola');
 
 describe('pull', () => {
   beforeEach(() => {
@@ -157,9 +140,10 @@ describe('pull', () => {
       session().state = {
         isLoggedIn: false,
       };
-      const mockError = new CommandError(`You are currently not logged in. Please login first to get your user info.`);
       await componentsCommand.parseAsync(['node', 'test', 'pull', '--space', '12345']);
-      expect(konsola.error).toHaveBeenCalledWith(mockError, false);
+      expect(konsola.error).toHaveBeenCalledWith('You are currently not logged in. Please run storyblok login to authenticate, or storyblok signup to sign up.', null, {
+        header: true,
+      });
     });
 
     it('should throw an error if the space is not provided', async () => {
@@ -172,7 +156,9 @@ describe('pull', () => {
       const mockError = new CommandError(`Please provide the space as argument --space YOUR_SPACE_ID.`);
 
       await componentsCommand.parseAsync(['node', 'test', 'pull']);
-      expect(konsola.error).toHaveBeenCalledWith(mockError, false);
+      expect(konsola.error).toHaveBeenCalledWith(mockError.message, null, {
+        header: true,
+      });
     });
   });
 

@@ -2,7 +2,7 @@ import type { PullComponentsOptions } from './constants';
 
 import { Spinner } from '@topcli/spinner';
 import { colorPalette, commands } from '../../../constants';
-import { CommandError, handleError, isVitest, konsola } from '../../../utils';
+import { CommandError, handleError, isVitest, konsola, requireAuthentication } from '../../../utils';
 import { session } from '../../../session';
 import { fetchComponent, fetchComponentGroups, fetchComponentInternalTags, fetchComponentPresets, fetchComponents, saveComponentsToFiles } from '../actions';
 import { componentsCommand } from '../command';
@@ -30,8 +30,7 @@ componentsCommand
     const { state, initializeSession } = session();
     await initializeSession();
 
-    if (!state.isLoggedIn || !state.password || !state.region) {
-      handleError(new CommandError(`You are currently not logged in. Please login first to get your user info.`), verbose);
+    if (!requireAuthentication(state, verbose)) {
       return;
     }
     if (!space) {

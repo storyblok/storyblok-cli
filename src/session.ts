@@ -2,7 +2,7 @@
 import { type RegionCode, regionsDomain } from './constants';
 import { addCredentials, getCredentials } from './creds';
 
-interface SessionState {
+export interface SessionState {
   isLoggedIn: boolean;
   login?: string;
   password?: string;
