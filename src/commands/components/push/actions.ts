@@ -108,7 +108,7 @@ export const upsertComponentGroup = async (
 };
 
 // Component preset actions
-export const pushComponentPreset = async (space: string, componentPreset: { preset: Partial<SpaceComponentPreset> }, _token?: string, _region?: RegionCode): Promise<SpaceComponentPreset | undefined> => {
+export const pushComponentPreset = async (space: string, componentPreset: { preset: Partial<SpaceComponentPreset> }): Promise<SpaceComponentPreset | undefined> => {
   try {
     const client = mapiClient();
 
@@ -124,7 +124,7 @@ export const pushComponentPreset = async (space: string, componentPreset: { pres
   }
 };
 
-export const updateComponentPreset = async (space: string, presetId: number, componentPreset: { preset: Partial<SpaceComponentPreset> }, _token?: string, _region?: RegionCode): Promise<SpaceComponentPreset | undefined> => {
+export const updateComponentPreset = async (space: string, presetId: number, componentPreset: { preset: Partial<SpaceComponentPreset> }): Promise<SpaceComponentPreset | undefined> => {
   try {
     const client = mapiClient();
 
@@ -143,17 +143,15 @@ export const updateComponentPreset = async (space: string, presetId: number, com
 export const upsertComponentPreset = async (
   space: string,
   preset: Partial<SpaceComponentPreset>,
-  token: string,
-  region: RegionCode,
   existingId?: number,
 ): Promise<SpaceComponentPreset | undefined> => {
   if (existingId) {
     // We know it exists, update directly
-    return await updateComponentPreset(space, existingId, { preset }, token, region);
+    return await updateComponentPreset(space, existingId, { preset });
   }
   else {
     // New resource, create directly
-    return await pushComponentPreset(space, { preset }, token, region);
+    return await pushComponentPreset(space, { preset });
   }
 };
 

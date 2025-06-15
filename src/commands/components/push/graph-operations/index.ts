@@ -37,16 +37,8 @@ export async function pushWithDependencyGraph(
   const graph = buildDependencyGraph(context);
   validateGraph(graph);
 
-  // Process resources with 2-pass per level approach:
-  // - Pass 1: Resolve references (dependencies from previous levels exist)
-  // - Pass 2: Process resources with resolved references
+  // Process all resources using the dependency graph
   const results = await processAllResources(graph, space, maxConcurrency, force);
-
-  // TODO: Process presets after main resources
-  // const presetResults = await processPresets(spaceData.presets, graph, space, password, region);
-  // results.successful.push(...presetResults.successful);
-  // results.failed.push(...presetResults.failed);
-  // results.skipped.push(...presetResults.skipped);
 
   return results;
 }

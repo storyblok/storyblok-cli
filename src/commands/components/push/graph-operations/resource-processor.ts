@@ -168,6 +168,7 @@ function getResourceTypeName(type: string): string {
     case 'component': return 'component';
     case 'group': return 'group';
     case 'tag': return 'tag';
+    case 'preset': return 'preset';
     default: return type;
   }
 }
@@ -180,6 +181,7 @@ function getResourceTypeColor(type: string): string {
     case 'component': return colorPalette.COMPONENTS;
     case 'group': return '#4ade80'; // green
     case 'tag': return '#fbbf24'; // yellow
+    case 'preset': return '#a855f7'; // purple
     default: return colorPalette.COMPONENTS;
   }
 }

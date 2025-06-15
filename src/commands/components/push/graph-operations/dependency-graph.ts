@@ -2,13 +2,15 @@ import type {
   SpaceComponent,
   SpaceComponentGroup,
   SpaceComponentInternalTag,
+  SpaceComponentPreset,
 } from '../../constants';
 import type { DependencyGraph, GraphBuildingContext, NodeData, NodeType, SchemaDependencies, TargetResourceInfo, UnifiedNode } from './types';
-import { upsertComponent, upsertComponentGroup, upsertComponentInternalTag } from '../actions';
+import { upsertComponent, upsertComponentGroup, upsertComponentInternalTag, upsertComponentPreset } from '../actions';
 import {
   generateContentHash,
   normalizeComponentForComparison,
   normalizeGroupForComparison,
+  normalizePresetForComparison,
   normalizeTagForComparison,
 } from './comparison-utils';
 
@@ -61,6 +63,21 @@ export function buildDependencyGraph(context: GraphBuildingContext): DependencyG
     graph.nodes.set(nodeId, node);
   });
 
+  // Create nodes for all presets with colocated target data
+  spaceState.local.presets.forEach((preset) => {
+    const nodeId = `preset:${preset.name}`;
+    const targetPreset = spaceState.target.presets.get(preset.name);
+    const targetData = targetPreset
+      ? {
+          resource: targetPreset,
+          id: targetPreset.id,
+          hash: generateContentHash(normalizePresetForComparison(preset)),
+        }
+      : undefined;
+    const node = new PresetNode(preset, targetData);
+    graph.nodes.set(nodeId, node);
+  });
+
   // Add group parent dependencies
   spaceState.local.groups.forEach((group) => {
     if (group.parent_uuid) {
@@ -108,6 +125,18 @@ export function buildDependencyGraph(context: GraphBuildingContext): DependencyG
         const dependencyId = `component:${componentName}`;
         addDependency(componentId, dependencyId);
       });
+    }
+  });
+
+  // Add preset dependencies on components
+  spaceState.local.presets.forEach((preset) => {
+    const presetId = `preset:${preset.name}`;
+
+    // Find the component this preset belongs to
+    const component = spaceState.local.components.find(c => c.id === preset.component_id);
+    if (component) {
+      const componentId = `component:${component.name}`;
+      addDependency(presetId, componentId);
     }
   });
 
@@ -587,5 +616,79 @@ export class ComponentNode extends GraphNode<SpaceComponent> {
     const result = await upsertComponent(space, this.sourceData, existingId as number | undefined);
     if (!result) { throw new Error(`Failed to upsert component ${this.name}`); }
     return result;
+  }
+}
+
+/**
+ * Preset node implementation
+ * Presets depend on components (via component_id)
+ */
+class PresetNode implements UnifiedNode<SpaceComponentPreset> {
+  public readonly id: string;
+  public readonly name: string;
+  public readonly type: NodeType = 'preset';
+  public readonly sourceData: SpaceComponentPreset;
+  public targetData?: TargetResourceInfo<SpaceComponentPreset>;
+  public readonly dependencies = new Set<string>();
+  public readonly dependents = new Set<string>();
+
+  constructor(preset: SpaceComponentPreset, targetData?: TargetResourceInfo<SpaceComponentPreset>) {
+    this.sourceData = preset;
+    this.targetData = targetData;
+    this.id = `preset:${preset.name}`;
+    this.name = preset.name;
+  }
+
+  getName(): string {
+    return this.name;
+  }
+
+  normalize(): any {
+    return normalizePresetForComparison(this.sourceData);
+  }
+
+  shouldSkip(): boolean {
+    if (!this.targetData) { return false; }
+
+    const sourceHash = generateContentHash(this.normalize());
+    return sourceHash === this.targetData.hash;
+  }
+
+  resolveReferences(graph: DependencyGraph): void {
+    // Find the component this preset belongs to and update component_id
+    const componentName = this.findComponentNameById(this.sourceData.component_id, graph);
+    if (componentName) {
+      const componentNode = graph.nodes.get(`component:${componentName}`);
+      if (componentNode?.targetData) {
+        this.sourceData.component_id = componentNode.targetData.id as number;
+      }
+    }
+  }
+
+  private findComponentNameById(componentId: number, graph: DependencyGraph): string | null {
+    // Find component by matching source component_id
+    for (const [_nodeId, node] of graph.nodes) {
+      if (node.type === 'component' && (node.sourceData as SpaceComponent).id === componentId) {
+        return node.name;
+      }
+    }
+    return null;
+  }
+
+  async upsert(space: string): Promise<SpaceComponentPreset> {
+    const existingId = this.targetData?.id as number | undefined;
+    const result = await upsertComponentPreset(space, this.sourceData, existingId);
+    if (!result) {
+      throw new Error(`Failed to upsert preset: ${this.name}`);
+    }
+    return result;
+  }
+
+  updateTargetData(result: SpaceComponentPreset): void {
+    this.targetData = {
+      resource: result,
+      id: result.id,
+      hash: generateContentHash(this.normalize()),
+    };
   }
 }

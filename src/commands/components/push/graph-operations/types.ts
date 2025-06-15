@@ -3,6 +3,7 @@ import type {
   SpaceComponent,
   SpaceComponentGroup,
   SpaceComponentInternalTag,
+  SpaceComponentPreset,
   SpaceDataState,
 } from '../../constants';
 
@@ -11,10 +12,10 @@ import type {
 // =============================================================================
 
 /** Types of nodes in our dependency graph */
-export type NodeType = 'component' | 'group' | 'tag';
+export type NodeType = 'component' | 'group' | 'tag' | 'preset';
 
 /** Data that can be stored in a graph node */
-export type NodeData = SpaceComponent | SpaceComponentGroup | SpaceComponentInternalTag;
+export type NodeData = SpaceComponent | SpaceComponentGroup | SpaceComponentInternalTag | SpaceComponentPreset;
 
 /** Target resource information colocated with graph nodes */
 export interface TargetResourceInfo<T extends NodeData> {
