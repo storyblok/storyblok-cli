@@ -3,7 +3,7 @@ import type {
   SpaceComponent,
   SpaceComponentGroup,
   SpaceComponentInternalTag,
-  SpaceComponentPreset,
+  SpaceDataState,
 } from '../../constants';
 
 // =============================================================================
@@ -16,12 +16,35 @@ export type NodeType = 'component' | 'group' | 'tag';
 /** Data that can be stored in a graph node */
 export type NodeData = SpaceComponent | SpaceComponentGroup | SpaceComponentInternalTag;
 
-/** Target data with content hashes for efficient comparison */
-export interface TargetData {
-  components: Map<string, { resource: SpaceComponent; hash: string }>;
-  groups: Map<string, { resource: SpaceComponentGroup; hash: string }>;
-  tags: Map<string, { resource: SpaceComponentInternalTag; hash: string }>;
-  presets: Map<string, { resource: SpaceComponentPreset; hash: string }>;
+/** Target resource information colocated with graph nodes */
+export interface TargetResourceInfo<T extends NodeData> {
+  resource: T;
+  id: string | number;
+  hash: string;
+}
+
+/** A unified node that tracks both source and target resources */
+export interface UnifiedNode<T extends NodeData> {
+  id: string;
+  name: string;
+  type: NodeType;
+  sourceData: T;
+  targetData?: TargetResourceInfo<T>;
+  dependencies: Set<string>;
+  dependents: Set<string>;
+
+  // Methods that each node must implement
+  getName: () => string;
+  normalize: () => any;
+  shouldSkip: () => boolean;
+  resolveReferences: (graph: DependencyGraph) => void;
+  upsert: (space: string) => Promise<T>;
+  updateTargetData: (result: T) => void;
+}
+
+/** The complete dependency graph using unified nodes */
+export interface DependencyGraph {
+  nodes: Map<string, UnifiedNode<any>>;
 }
 
 /** Results from the push operation */
@@ -36,50 +59,6 @@ export interface SchemaDependencies {
   groupUuids: Set<string>;
   tagIds: Set<number>;
   componentNames: Set<string>;
-}
-
-// =============================================================================
-// GRAPH TYPES
-// =============================================================================
-
-/** Abstract base class for all graph nodes */
-export abstract class GraphNode {
-  constructor(
-    public readonly id: string,
-    public readonly type: NodeType,
-    protected data: NodeData,
-    public readonly dependencies: Set<string> = new Set(),
-    public readonly dependents: Set<string> = new Set(),
-  ) {}
-
-  // Graph structure methods
-  addDependency(dependencyId: string): void {
-    this.dependencies.add(dependencyId);
-  }
-
-  addDependent(dependentId: string): void {
-    this.dependents.add(dependentId);
-  }
-
-  getName(): string {
-    return (this.data as any).name;
-  }
-
-  getData<T extends NodeData>(): T {
-    return this.data as T;
-  }
-
-  // 2-Pass processing interface
-  abstract resolveReferences(targetData: TargetData, graph: DependencyGraph): void;
-  abstract shouldSkip(targetData: TargetData): boolean;
-  abstract upsert(space: string, password: string, region: RegionCode, targetData: TargetData): Promise<any>;
-  abstract updateTargetData(result: any, targetData: TargetData): void;
-  abstract normalize(): any;
-}
-
-/** The complete dependency graph */
-export interface DependencyGraph {
-  nodes: Map<string, GraphNode>;
 }
 
 // =============================================================================
@@ -99,4 +78,10 @@ export interface PushConfig {
   password: string;
   region: RegionCode;
   maxConcurrency: number;
+  force: boolean;
+}
+
+/** Graph building context with source and target data */
+export interface GraphBuildingContext {
+  spaceState: SpaceDataState;
 }

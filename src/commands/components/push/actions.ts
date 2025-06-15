@@ -1,11 +1,10 @@
-import { APIError, FileSystemError, handleAPIError, handleFileSystemError } from '../../../utils';
+import { FileSystemError, handleAPIError, handleFileSystemError } from '../../../utils';
 import type { RegionCode } from '../../../constants';
 import type { SpaceComponent, SpaceComponentGroup, SpaceComponentInternalTag, SpaceComponentPreset, SpaceData } from '../constants';
 import type { ReadComponentsOptions } from './constants';
 import { join } from 'node:path';
 import { readdir, readFile } from 'node:fs/promises';
 import { resolvePath } from '../../../utils/filesystem';
-import { fetchComponent, fetchComponentGroups, fetchComponentInternalTags, fetchComponentPresets } from '../actions';
 import type { FileReaderResult } from '../../../types';
 import chalk from 'chalk';
 import { mapiClient } from '../../../api';

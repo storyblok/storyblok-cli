@@ -1,13 +1,12 @@
 import type { RegionCode } from '../../../../constants';
-import type { SpaceData } from '../../constants';
-import type { PushResults, TargetData } from './types';
+import type { SpaceDataState } from '../../constants';
+import type { GraphBuildingContext, PushResults } from './types';
 
 import { buildDependencyGraph, validateGraph } from './dependency-graph';
 import { processAllResources } from './resource-processor';
 
 // Re-export commonly used utilities
-export { buildTargetDataFromMaps } from './comparison-utils';
-export type { PushResults, TargetData } from './types';
+export type { PushResults } from './types';
 
 // =============================================================================
 // MAIN COORDINATOR
@@ -17,34 +16,34 @@ export type { PushResults, TargetData } from './types';
  * Main function to push components using graph-based dependency resolution.
  *
  * Architecture:
- * - Build dependency graph with topological ordering
+ * - Build dependency graph with colocated target data
  * - For each level: resolve references then process resources
+ * - Target data is embedded in each graph node for efficient upserts
  *
  * Benefits:
  * - Deterministic processing order
  * - References resolved when dependencies exist
- * - Clean behavioral node abstraction
+ * - Clean behavioral node abstraction with colocated data
  * - Robust error handling and progress tracking
  */
 export async function pushWithDependencyGraph(
   space: string,
-  password: string,
-  region: RegionCode,
-  spaceData: SpaceData,
-  targetData: TargetData,
+  spaceState: SpaceDataState,
   maxConcurrency: number = 5,
+  force: boolean = false,
 ): Promise<PushResults> {
-  // Build and validate the dependency graph
-  const graph = buildDependencyGraph(spaceData);
+  // Build and validate the dependency graph with colocated target data
+  const context: GraphBuildingContext = { spaceState };
+  const graph = buildDependencyGraph(context);
   validateGraph(graph);
 
   // Process resources with 2-pass per level approach:
   // - Pass 1: Resolve references (dependencies from previous levels exist)
   // - Pass 2: Process resources with resolved references
-  const results = await processAllResources(graph, space, password, region, targetData, maxConcurrency);
+  const results = await processAllResources(graph, space, maxConcurrency, force);
 
   // TODO: Process presets after main resources
-  // const presetResults = await processPresets(spaceData.presets, graph, targetData, space, password, region);
+  // const presetResults = await processPresets(spaceData.presets, graph, space, password, region);
   // results.successful.push(...presetResults.successful);
   // results.failed.push(...presetResults.failed);
   // results.skipped.push(...presetResults.skipped);

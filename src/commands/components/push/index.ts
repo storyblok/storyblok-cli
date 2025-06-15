@@ -7,7 +7,7 @@ import { session } from '../../../session';
 import { readComponentsFiles } from './actions';
 import { componentsCommand } from '../command';
 import { filterSpaceDataByComponent, filterSpaceDataByPattern } from './utils';
-import { buildTargetDataFromMaps, pushWithDependencyGraph } from './graph-operations';
+import { pushWithDependencyGraph } from './graph-operations';
 import chalk from 'chalk';
 import { mapiClient } from '../../../api';
 import { fetchComponentGroups, fetchComponentInternalTags, fetchComponentPresets, fetchComponents } from '../actions';
@@ -22,6 +22,7 @@ componentsCommand
   .option('--fi, --filter <filter>', 'glob filter to apply to the components before pushing')
   .option('--sf, --separate-files', 'Read from separate files instead of consolidated files')
   .option('--su, --suffix <suffix>', 'Suffix to add to the component name')
+  .option('--force', 'Force update all resources, bypassing skip checks for unchanged content')
   .action(async (componentName: string | undefined, options: PushComponentsOptions) => {
     konsola.title(` ${commands.COMPONENTS} `, colorPalette.COMPONENTS, componentName ? `Pushing component ${componentName}...` : 'Pushing components...');
     console.time('perf: push components separate files');
@@ -29,7 +30,7 @@ componentsCommand
     const verbose = program.opts().verbose;
     const { space, path } = componentsCommand.opts();
 
-    const { from, filter } = options;
+    const { from, filter, force } = options;
 
     // Check if the user is logged in
     const { state, initializeSession } = session();
@@ -143,17 +144,12 @@ componentsCommand
         skipped: [] as string[],
       };
 
-      // Convert target data to hash-enabled format for content comparison
-      const targetData = buildTargetDataFromMaps(
-        spaceState.target.components,
-        spaceState.target.groups,
-        spaceState.target.tags,
-        spaceState.target.presets,
-      );
-
-      // Use optimized graph-based dependency resolution
+      // Use optimized graph-based dependency resolution with colocated target data
       konsola.info('Using graph-based dependency resolution');
-      const graphResults = await pushWithDependencyGraph(space, password, region, spaceState.local, targetData, 5);
+      if (force) {
+        konsola.info('Force mode enabled - bypassing skip checks for unchanged content');
+      }
+      const graphResults = await pushWithDependencyGraph(space, spaceState, 5, force);
       results.successful.push(...graphResults.successful);
       results.failed.push(...graphResults.failed);
       results.skipped.push(...graphResults.skipped);

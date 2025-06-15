@@ -1,6 +1,5 @@
 import { colorPalette } from '../../../../constants';
-import type { RegionCode } from '../../../../constants';
-import type { DependencyGraph, NodeProcessingResult, PushResults, TargetData } from './types';
+import type { DependencyGraph, NodeProcessingResult, PushResults } from './types';
 import { determineProcessingOrder } from './dependency-graph';
 import { progressDisplay } from '../progress-display';
 
@@ -14,10 +13,8 @@ import { progressDisplay } from '../progress-display';
 export async function processAllResources(
   graph: DependencyGraph,
   space: string,
-  password: string,
-  region: RegionCode,
-  targetData: TargetData,
   maxConcurrency: number = 5,
+  force: boolean = false,
 ): Promise<PushResults> {
   const levels = determineProcessingOrder(graph);
   const results: PushResults = { successful: [], failed: [], skipped: [] };
@@ -29,7 +26,7 @@ export async function processAllResources(
   progressDisplay.start(totalResources);
 
   for (const level of levels) {
-    const levelResults = await processLevel(level, graph, space, password, region, targetData, maxConcurrency);
+    const levelResults = await processLevel(level, graph, space, maxConcurrency, force);
     mergeResults(results, levelResults);
   }
 
@@ -55,15 +52,13 @@ async function processLevel(
   level: string[],
   graph: DependencyGraph,
   space: string,
-  password: string,
-  region: RegionCode,
-  targetData: TargetData,
   maxConcurrency: number,
+  force: boolean,
 ): Promise<PushResults> {
   // PASS 1: Resolve references for this level (now that dependencies from previous levels exist)
   for (const nodeId of level) {
     const node = graph.nodes.get(nodeId)!;
-    node.resolveReferences(targetData, graph);
+    node.resolveReferences(graph);
   }
 
   // PASS 2: Process all nodes in this level with resolved references
@@ -80,7 +75,7 @@ async function processLevel(
     }
 
     // Start processing the node
-    const promise = processNode(nodeId, graph, space, password, region, targetData);
+    const promise = processNode(nodeId, graph, space, force);
     promises.push(promise);
     semaphore[slotIndex] = promise;
   }
@@ -96,15 +91,13 @@ async function processNode(
   nodeId: string,
   graph: DependencyGraph,
   space: string,
-  password: string,
-  region: RegionCode,
-  targetData: TargetData,
+  force: boolean,
 ): Promise<NodeProcessingResult> {
   const node = graph.nodes.get(nodeId)!;
 
   try {
-    // Skip if resource is already up-to-date
-    if (node.shouldSkip(targetData)) {
+    // Skip if resource is already up-to-date (unless force is enabled)
+    if (!force && node.shouldSkip()) {
       progressDisplay.handleEvent({
         type: 'skip',
         name: node.getName(),
@@ -114,8 +107,8 @@ async function processNode(
     }
 
     // Create/update the resource with resolved references
-    const result = await node.upsert(space, password, region, targetData);
-    node.updateTargetData(result, targetData);
+    const result = await node.upsert(space);
+    node.updateTargetData(result);
 
     progressDisplay.handleEvent({
       type: 'success',
