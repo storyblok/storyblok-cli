@@ -1,5 +1,5 @@
 import { colorPalette, commands } from '../../constants';
-import { CommandError, handleError, isVitest, konsola } from '../../utils';
+import { CommandError, handleError, isVitest, konsola, requireAuthentication } from '../../utils';
 import { getProgram } from '../../program';
 import { session } from '../../session';
 import { fetchLanguages, saveLanguagesToFile } from './actions';
@@ -34,8 +34,7 @@ languagesCommand
     const { state, initializeSession } = session();
     await initializeSession();
 
-    if (!state.isLoggedIn || !state.password || !state.region) {
-      handleError(new CommandError(`You are currently not logged in. Please login first to get your user info.`), verbose);
+    if (!requireAuthentication(state, verbose)) {
       return;
     }
     if (!space) {
@@ -43,13 +42,15 @@ languagesCommand
       return;
     }
 
+    const { password, region } = state;
+
     const spinner = new Spinner({
       verbose: !isVitest,
     });
     try {
       spinner.start(`Fetching ${chalk.hex(colorPalette.LANGUAGES)('languages')}`);
 
-      const internationalization = await fetchLanguages(space, state.password, state.region);
+      const internationalization = await fetchLanguages(space, password, region);
 
       if (!internationalization || internationalization.languages?.length === 0) {
         spinner.failed();

@@ -85,6 +85,7 @@ export const updateComponentGroup = async (space: string, groupId: number, compo
       body: JSON.stringify(componentGroup),
     });
     return data.component_group;
+    return data.component_group;
   }
   catch (error) {
     handleAPIError('update_component_group', error as Error, `Failed to update component group ${componentGroup.name}`);

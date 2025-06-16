@@ -8,30 +8,7 @@ import { updateStory } from '../../stories/actions';
 import type { RollbackData } from './actions';
 import type { StoryContent } from '../../stories/constants';
 
-// Mock dependencies
-vi.mock('../../../utils', async () => {
-  const actualUtils = await vi.importActual('../../../utils');
-  return {
-    ...actualUtils,
-    isVitestRunning: true,
-    konsola: {
-      ok: vi.fn(),
-      title: vi.fn(),
-      warn: vi.fn(),
-      error: vi.fn(),
-      info: vi.fn(),
-      br: vi.fn(),
-    },
-    handleError: (error: unknown) => {
-      if (error instanceof Error) {
-        konsola.error(error.message);
-      }
-      else {
-        konsola.error(String(error));
-      }
-    },
-  };
-});
+vi.mock('../../../utils/konsola');
 
 // Mock process.exit
 const mockExit = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
@@ -170,9 +147,9 @@ describe('migrations rollback command', () => {
       '12345',
     ]);
 
-    expect(konsola.error).toHaveBeenCalledWith(
-      'You are currently not logged in. Please login first to get your user info.',
-    );
+    expect(konsola.error).toHaveBeenCalledWith('You are currently not logged in. Please run storyblok login to authenticate, or storyblok signup to sign up.', null, {
+      header: true,
+    });
     expect(readRollbackFile).not.toHaveBeenCalled();
     expect(updateStory).not.toHaveBeenCalled();
   });
@@ -193,6 +170,10 @@ describe('migrations rollback command', () => {
 
     expect(konsola.error).toHaveBeenCalledWith(
       'Please provide the space as argument --space YOUR_SPACE_ID.',
+      null,
+      {
+        header: true,
+      },
     );
     expect(readRollbackFile).not.toHaveBeenCalled();
     expect(updateStory).not.toHaveBeenCalled();
@@ -218,6 +199,10 @@ describe('migrations rollback command', () => {
 
     expect(konsola.error).toHaveBeenCalledWith(
       'Failed to rollback migration: File not found',
+      null,
+      {
+        header: true,
+      },
     );
     expect(updateStory).not.toHaveBeenCalled();
   });

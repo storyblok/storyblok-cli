@@ -1,6 +1,7 @@
 export const commands = {
   LOGIN: 'login',
   LOGOUT: 'logout',
+  SIGNUP: 'signup',
   USER: 'user',
   COMPONENTS: 'Components',
   LANGUAGES: 'languages',
@@ -12,6 +13,7 @@ export const colorPalette = {
   PRIMARY: '#8d60ff',
   LOGIN: '#dad4ff',
   LOGOUT: '#6d6d6d',
+  SIGNUP: '#b6ff6d',
   USER: '#71d300',
   COMPONENTS: '#a185ff',
   LANGUAGES: '#f5c003',

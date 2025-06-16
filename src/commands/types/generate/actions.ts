@@ -252,14 +252,14 @@ const getComponentPropertiesTypeAnnotations = async (
   }, Promise.resolve({} as JSONSchema));
 };
 
-const loadCustomFieldsParser = async (path: string) => {
+const loadCustomFieldsParser = async (path: string): Promise<((key: string, value: Record<string, unknown>) => Record<string, unknown>) | undefined> => {
   try {
     const customFieldsParser = await import(resolve(path));
     return customFieldsParser.default;
   }
   catch (error) {
     handleError(error as Error);
-    return null;
+    return undefined;
   }
 };
 
@@ -280,7 +280,7 @@ export const generateTypes = async (
   try {
     const typeDefs = [...DEFAULT_TYPEDEFS_HEADER];
     const storyblokPropertyTypes = new Set<string>();
-    let customFieldsParser: Record<string, unknown> | undefined;
+    let customFieldsParser: ((key: string, value: Record<string, unknown>) => Record<string, unknown>) | undefined;
     let compilerOptions: Record<string, unknown> | undefined;
     // Custom fields parser
     if (options.customFieldsParser) {
@@ -311,6 +311,10 @@ export const generateTypes = async (
         Object.entries(componentPropertiesTypeAnnotations).forEach(([_, property]) => {
           if (property.type && Array.from(storyblokSchemas.keys()).includes(property.type as StoryblokPropertyType)) {
             storyblokPropertyTypes.add(property.type as StoryblokPropertyType);
+          }
+          // Check if the property uses ISbStoryData
+          if (property.tsType && property.tsType.includes(STORY_TYPE)) {
+            storyblokPropertyTypes.add(STORY_TYPE);
           }
         });
       }
@@ -346,6 +350,14 @@ export const generateTypes = async (
 
     // Add imports for Storyblok types if needed
     const imports: string[] = [];
+
+    // Check if ISbStoryData is needed
+    const needsISbStoryData = storyblokPropertyTypes.has(STORY_TYPE);
+    if (needsISbStoryData) {
+      imports.push(`import type { ${STORY_TYPE} } from '@storyblok/js';`);
+      storyblokPropertyTypes.delete(STORY_TYPE); // Remove it so it's not included in the next import
+    }
+
     if (storyblokPropertyTypes.size > 0) {
       const typeImports = Array.from(storyblokPropertyTypes).map((type) => {
         const pascalType = toPascalCase(type);

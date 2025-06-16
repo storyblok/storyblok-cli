@@ -1,7 +1,7 @@
 {
   "name": "storyblok",
   "type": "module",
-  "version": "4.0.0-beta.4",
+  "version": "4.0.0-beta.5",
   "packageManager": "pnpm@10.10.0",
   "description": "Storyblok CLI",
   "author": "Alvaro Saburido <hola@alvarosaburido.dev> (https://github.com/alvarosabu/)",
@@ -25,6 +25,7 @@
   ],
   "scripts": {
     "build": "unbuild",
+    "typecheck": "tsc --noEmit",
     "release": "release-it",
     "dev": "pnpm run build && node dist/index.mjs",
     "lint": "eslint .",
