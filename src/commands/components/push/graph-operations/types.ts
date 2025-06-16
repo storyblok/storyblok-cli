@@ -21,7 +21,6 @@ export type NodeData = SpaceComponent | SpaceComponentGroup | SpaceComponentInte
 export interface TargetResourceInfo<T extends NodeData> {
   resource: T;
   id: string | number;
-  hash: string;
 }
 
 /** A unified node that tracks both source and target resources */
@@ -36,8 +35,6 @@ export interface UnifiedNode<T extends NodeData> {
 
   // Methods that each node must implement
   getName: () => string;
-  normalize: () => any;
-  shouldSkip: () => boolean;
   resolveReferences: (graph: DependencyGraph) => void;
   upsert: (space: string) => Promise<T>;
   updateTargetData: (result: T) => void;
@@ -52,7 +49,6 @@ export interface DependencyGraph {
 export interface PushResults {
   successful: string[];
   failed: Array<{ name: string; error: unknown }>;
-  skipped: string[];
 }
 
 /** Dependencies extracted from component schemas */
@@ -75,7 +71,6 @@ export interface ProcessingLevel {
 /** Result from processing a single node */
 export interface NodeProcessingResult {
   name: string;
-  skipped: boolean;
   error?: any;
 }
 
@@ -85,7 +80,6 @@ export interface PushConfig {
   password: string;
   region: RegionCode;
   maxConcurrency: number;
-  force: boolean;
 }
 
 /** Graph building context with source and target data */

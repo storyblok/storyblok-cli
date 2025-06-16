@@ -20,11 +20,6 @@ export interface PushComponentsOptions extends CommandOptions {
    * Suffix to add to the component name.
    */
   suffix?: string;
-  /**
-   * Force update all resources, bypassing skip checks for unchanged content.
-   * @default false
-   */
-  force?: boolean;
 }
 
 export interface ReadComponentsOptions extends PushComponentsOptions {

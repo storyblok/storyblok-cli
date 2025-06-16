@@ -17,10 +17,9 @@ export async function processAllResources(
   graph: DependencyGraph,
   space: string,
   maxConcurrency: number = 5,
-  force: boolean = false,
 ): Promise<PushResults> {
   const levels = determineProcessingOrder(graph);
-  const results: PushResults = { successful: [], failed: [], skipped: [] };
+  const results: PushResults = { successful: [], failed: [] };
 
   // Calculate total resources for progress tracking
   const totalResources = levels.reduce((sum, level) => sum + level.nodes.length, 0);
@@ -31,12 +30,12 @@ export async function processAllResources(
   for (const level of levels) {
     if (level.isCyclic) {
       // Handle circular dependencies with stub creation
-      const cyclicResults = await processCyclicLevel(level, graph, space, maxConcurrency, force);
+      const cyclicResults = await processCyclicLevel(level, graph, space, maxConcurrency);
       mergeResults(results, cyclicResults);
     }
     else {
       // Handle regular level
-      const levelResults = await processLevel(level.nodes, graph, space, maxConcurrency, force);
+      const levelResults = await processLevel(level.nodes, graph, space, maxConcurrency);
       mergeResults(results, levelResults);
     }
   }
@@ -46,7 +45,7 @@ export async function processAllResources(
     type: 'complete',
     summary: {
       updated: results.successful.length,
-      unchanged: results.skipped.length,
+      unchanged: 0, // No longer skip resources - all are processed
       failed: results.failed.length,
     },
   });
@@ -63,7 +62,6 @@ async function processCyclicLevel(
   graph: DependencyGraph,
   space: string,
   maxConcurrency: number,
-  force: boolean,
 ): Promise<PushResults> {
   // Clear current progress display and show circular dependency message
   progressDisplay.clearProgress();
@@ -73,7 +71,7 @@ async function processCyclicLevel(
   await createStubComponents(level.nodes, graph, space);
 
   // STEP 2: Process the cyclic level normally (references can now resolve)
-  return await processLevel(level.nodes, graph, space, maxConcurrency, force);
+  return await processLevel(level.nodes, graph, space, maxConcurrency);
 }
 
 /**
@@ -151,7 +149,6 @@ async function processLevel(
   graph: DependencyGraph,
   space: string,
   maxConcurrency: number,
-  force: boolean,
 ): Promise<PushResults> {
   // PASS 1: Resolve references for this level (now that dependencies from previous levels exist)
   for (const nodeId of level) {
@@ -173,7 +170,7 @@ async function processLevel(
     }
 
     // Start processing the node
-    const promise = processNode(nodeId, graph, space, force);
+    const promise = processNode(nodeId, graph, space);
     promises.push(promise);
     semaphore[slotIndex] = promise;
   }
@@ -189,25 +186,13 @@ async function processNode(
   nodeId: string,
   graph: DependencyGraph,
   space: string,
-  force: boolean,
 ): Promise<NodeProcessingResult> {
   const node = graph.nodes.get(nodeId)!;
   // Track start time for individual process timing
   const startTime = Date.now();
 
   try {
-    // Skip if resource is already up-to-date (unless force is enabled)
-    if (!force && node.shouldSkip()) {
-      const elapsedMs = Date.now() - startTime;
-      progressDisplay.handleEvent({
-        type: 'skip',
-        name: node.getName(),
-        resourceType: getResourceTypeName(node.type),
-        elapsedMs,
-      });
-      return { name: node.getName(), skipped: true };
-    }
-
+    // Always perform upsert - change detection removed due to unstable ID issues
     // Create/update the resource with resolved references
     const result = await node.upsert(space);
     node.updateTargetData(result);
@@ -221,7 +206,7 @@ async function processNode(
       elapsedMs,
     });
 
-    return { name: node.getName(), skipped: false };
+    return { name: node.getName() };
   }
   catch (error) {
     const elapsedMs = Date.now() - startTime;
@@ -232,7 +217,7 @@ async function processNode(
       error,
       elapsedMs,
     });
-    return { name: node.getName(), skipped: false, error };
+    return { name: node.getName(), error };
   }
 }
 
@@ -240,14 +225,11 @@ async function processNode(
  * Aggregates results from multiple node processing operations
  */
 function aggregateResults(results: NodeProcessingResult[]): PushResults {
-  const aggregated: PushResults = { successful: [], failed: [], skipped: [] };
+  const aggregated: PushResults = { successful: [], failed: [] };
 
   for (const result of results) {
     if (result.error) {
       aggregated.failed.push({ name: result.name, error: result.error });
-    }
-    else if (result.skipped) {
-      aggregated.skipped.push(result.name);
     }
     else {
       aggregated.successful.push(result.name);
@@ -263,7 +245,6 @@ function aggregateResults(results: NodeProcessingResult[]): PushResults {
 function mergeResults(target: PushResults, source: PushResults): void {
   target.successful.push(...source.successful);
   target.failed.push(...source.failed);
-  target.skipped.push(...source.skipped);
 }
 
 /**

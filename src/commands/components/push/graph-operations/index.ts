@@ -29,7 +29,6 @@ export async function pushWithDependencyGraph(
   space: string,
   spaceState: SpaceDataState,
   maxConcurrency: number = 5,
-  force: boolean = false,
 ): Promise<PushResults> {
   // Build and validate the dependency graph with colocated target data
   const context: GraphBuildingContext = { spaceState };
@@ -37,7 +36,7 @@ export async function pushWithDependencyGraph(
   validateGraph(graph);
 
   // Process all resources using the dependency graph
-  const results = await processAllResources(graph, space, maxConcurrency, force);
+  const results = await processAllResources(graph, space, maxConcurrency);
 
   return results;
 }

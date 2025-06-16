@@ -6,13 +6,6 @@ import type {
 } from '../../constants';
 import type { DependencyGraph, GraphBuildingContext, NodeData, NodeType, ProcessingLevel, SchemaDependencies, TargetResourceInfo, UnifiedNode } from './types';
 import { upsertComponent, upsertComponentGroup, upsertComponentInternalTag, upsertComponentPreset } from '../actions';
-import {
-  generateContentHash,
-  normalizeComponentForComparison,
-  normalizeGroupForComparison,
-  normalizePresetForComparison,
-  normalizeTagForComparison,
-} from './comparison-utils';
 
 // =============================================================================
 // GRAPH BUILDING
@@ -71,7 +64,6 @@ export function buildDependencyGraph(context: GraphBuildingContext): DependencyG
       ? {
           resource: targetPreset,
           id: targetPreset.id,
-          hash: generateContentHash(normalizePresetForComparison(preset)),
         }
       : undefined;
     const node = new PresetNode(preset, targetData);
@@ -495,21 +487,12 @@ class GraphNode<TSource extends NodeData> implements UnifiedNode<TSource> {
       this.targetData = {
         resource: targetResource,
         id: (targetResource as any).id,
-        hash: generateContentHash(this.normalize()),
       };
     }
   }
 
   getName(): string {
     return this.name;
-  }
-
-  shouldSkip(): boolean {
-    if (!this.targetData) {
-      return false;
-    }
-    const normalizedSource = this.normalize();
-    return generateContentHash(normalizedSource) === this.targetData.hash;
   }
 
   resolveReferences(_graph: DependencyGraph): void {
@@ -520,15 +503,10 @@ class GraphNode<TSource extends NodeData> implements UnifiedNode<TSource> {
     throw new Error('upsert must be implemented by derived classes');
   }
 
-  normalize(): any {
-    throw new Error('normalize must be implemented by derived classes');
-  }
-
   updateTargetData(result: TSource): void {
     this.targetData = {
       resource: result,
       id: (result as any).id,
-      hash: generateContentHash(this.normalize()),
     };
   }
 }
@@ -536,10 +514,6 @@ class GraphNode<TSource extends NodeData> implements UnifiedNode<TSource> {
 export class TagNode extends GraphNode<SpaceComponentInternalTag> {
   constructor(id: string, data: SpaceComponentInternalTag, targetTag?: SpaceComponentInternalTag) {
     super(id, 'tag', data.name, data, targetTag);
-  }
-
-  normalize(): any {
-    return normalizeTagForComparison(this.sourceData);
   }
 
   resolveReferences(_graph: DependencyGraph): void {
@@ -559,10 +533,6 @@ export class TagNode extends GraphNode<SpaceComponentInternalTag> {
 export class GroupNode extends GraphNode<SpaceComponentGroup> {
   constructor(id: string, data: SpaceComponentGroup, targetGroup?: SpaceComponentGroup) {
     super(id, 'group', data.name, data, targetGroup);
-  }
-
-  normalize(): any {
-    return normalizeGroupForComparison(this.sourceData);
   }
 
   resolveReferences(graph: DependencyGraph): void {
@@ -594,10 +564,6 @@ export class GroupNode extends GraphNode<SpaceComponentGroup> {
 export class ComponentNode extends GraphNode<SpaceComponent> {
   constructor(id: string, data: SpaceComponent, targetComponent?: SpaceComponent) {
     super(id, 'component', data.name, data, targetComponent);
-  }
-
-  normalize(): any {
-    return normalizeComponentForComparison(this.sourceData);
   }
 
   resolveReferences(graph: DependencyGraph): void {
@@ -732,19 +698,6 @@ class PresetNode implements UnifiedNode<SpaceComponentPreset> {
     return this.name;
   }
 
-  normalize(): any {
-    return normalizePresetForComparison(this.sourceData);
-  }
-
-  shouldSkip(): boolean {
-    if (!this.targetData) {
-      return false;
-    }
-
-    const sourceHash = generateContentHash(this.normalize());
-    return sourceHash === this.targetData.hash;
-  }
-
   resolveReferences(graph: DependencyGraph): void {
     // Find the component this preset belongs to and update component_id
     const componentName = this.findComponentNameById(this.sourceData.component_id, graph);
@@ -779,7 +732,6 @@ class PresetNode implements UnifiedNode<SpaceComponentPreset> {
     this.targetData = {
       resource: result,
       id: result.id,
-      hash: generateContentHash(this.normalize()),
     };
   }
 }

@@ -22,14 +22,14 @@ componentsCommand
   .option('--fi, --filter <filter>', 'glob filter to apply to the components before pushing')
   .option('--sf, --separate-files', 'Read from separate files instead of consolidated files')
   .option('--su, --suffix <suffix>', 'Suffix to add to the component name')
-  .option('--force', 'Force update all resources, bypassing skip checks for unchanged content')
+
   .action(async (componentName: string | undefined, options: PushComponentsOptions) => {
     konsola.title(` ${commands.COMPONENTS} `, colorPalette.COMPONENTS, componentName ? `Pushing component ${componentName}...` : 'Pushing components...');
     // Global options
     const verbose = program.opts().verbose;
     const { space, path } = componentsCommand.opts();
 
-    const { from, filter, force } = options;
+    const { from, filter } = options;
 
     // Check if the user is logged in
     const { state, initializeSession } = session();
@@ -140,18 +140,13 @@ componentsCommand
       const results = {
         successful: [] as string[],
         failed: [] as Array<{ name: string; error: unknown }>,
-        skipped: [] as string[],
       };
 
       // Use optimized graph-based dependency resolution with colocated target data
       konsola.info('Using graph-based dependency resolution');
-      if (force) {
-        konsola.info('Force mode enabled - bypassing skip checks for unchanged content');
-      }
-      const graphResults = await pushWithDependencyGraph(space, spaceState, 5, force);
+      const graphResults = await pushWithDependencyGraph(space, spaceState, 5);
       results.successful.push(...graphResults.successful);
       results.failed.push(...graphResults.failed);
-      results.skipped.push(...graphResults.skipped);
 
       if (results.failed.length > 0) {
         if (!verbose) {
