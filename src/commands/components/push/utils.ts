@@ -2,53 +2,61 @@ import type { SpaceData } from '../constants';
 import { minimatch } from 'minimatch';
 
 /**
- * Filters space data to only include a specific component and its dependencies
+ * Filters space data to only include a specific component (no dependencies)
  */
 export function filterSpaceDataByComponent(spaceData: SpaceData, componentName: string): SpaceData {
-  const filteredSpaceData: SpaceData = {
-    components: [],
-    groups: [...spaceData.groups], // Keep all groups for dependency resolution
-    internalTags: [...spaceData.internalTags], // Keep all tags for dependency resolution
-    presets: [],
-  };
-
   // Find the target component
   const targetComponent = spaceData.components.find(component => component.name === componentName);
-  if (targetComponent) {
-    filteredSpaceData.components.push(targetComponent);
-
-    // Find presets for this component
-    filteredSpaceData.presets = spaceData.presets.filter(
-      preset => preset.component_id === targetComponent.id,
-    );
+  if (!targetComponent) {
+    return {
+      components: [],
+      groups: [],
+      internalTags: [],
+      presets: [],
+    };
   }
 
-  return filteredSpaceData;
+  // Find presets for this component
+  const filteredPresets = spaceData.presets.filter(
+    preset => preset.component_id === targetComponent.id,
+  );
+
+  return {
+    components: [targetComponent],
+    groups: [], // No groups - dependencies assumed to exist in target
+    internalTags: [], // No tags - dependencies assumed to exist in target
+    presets: filteredPresets,
+  };
 }
 
 /**
- * Filters space data to only include components matching a glob pattern
+ * Filters space data to only include components matching a glob pattern (no dependencies)
  */
 export function filterSpaceDataByPattern(spaceData: SpaceData, pattern: string): SpaceData {
-  const filteredSpaceData: SpaceData = {
-    components: [],
-    groups: [...spaceData.groups], // Keep all groups for dependency resolution
-    internalTags: [...spaceData.internalTags], // Keep all tags for dependency resolution
-    presets: [],
-  };
-
   // Filter components by pattern
   const matchingComponents = spaceData.components.filter(component =>
     minimatch(component.name, pattern),
   );
 
-  filteredSpaceData.components = matchingComponents;
+  if (matchingComponents.length === 0) {
+    return {
+      components: [],
+      groups: [],
+      internalTags: [],
+      presets: [],
+    };
+  }
 
   // Find presets for matching components
   const componentIds = matchingComponents.map(component => component.id);
-  filteredSpaceData.presets = spaceData.presets.filter(
+  const filteredPresets = spaceData.presets.filter(
     preset => componentIds.includes(preset.component_id),
   );
 
-  return filteredSpaceData;
+  return {
+    components: matchingComponents,
+    groups: [], // No groups - dependencies assumed to exist in target
+    internalTags: [], // No tags - dependencies assumed to exist in target
+    presets: filteredPresets,
+  };
 }
