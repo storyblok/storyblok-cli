@@ -25,7 +25,6 @@ componentsCommand
   .option('--force', 'Force update all resources, bypassing skip checks for unchanged content')
   .action(async (componentName: string | undefined, options: PushComponentsOptions) => {
     konsola.title(` ${commands.COMPONENTS} `, colorPalette.COMPONENTS, componentName ? `Pushing component ${componentName}...` : 'Pushing components...');
-    console.time('perf: push components separate files');
     // Global options
     const verbose = program.opts().verbose;
     const { space, path } = componentsCommand.opts();
@@ -165,8 +164,6 @@ componentsCommand
           });
         }
       }
-      console.log(`${requestCount} requests made`);
-      console.timeEnd(`perf: push components separate files`);
     }
     catch (error) {
       handleError(error as Error, verbose);

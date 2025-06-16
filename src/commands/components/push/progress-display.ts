@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+import { konsola } from '../../../utils/konsola';
 
 export type ProcessingEvent =
   | { type: 'start'; total: number }
@@ -56,7 +57,7 @@ export class ProgressDisplay {
       case 'complete': {
         this.clearProgress();
         const { updated, unchanged, failed } = event.summary;
-        console.log(`\n✅ Completed: ${updated} updated, ${unchanged} unchanged, ${failed} failed`);
+        konsola.ok(`Completed: ${updated} updated, ${unchanged} unchanged, ${failed} failed`);
 
         // Show summary of skipped items when there are many
         if (unchanged > 5) {
