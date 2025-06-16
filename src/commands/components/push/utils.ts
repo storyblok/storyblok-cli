@@ -1,5 +1,5 @@
 import type { SpaceData } from '../constants';
-import minimatch from 'minimatch';
+import { minimatch } from 'minimatch';
 
 /**
  * Filters space data to only include a specific component and its dependencies
