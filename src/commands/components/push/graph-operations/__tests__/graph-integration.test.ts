@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { buildDependencyGraph, determineProcessingOrder, validateGraph } from '../dependency-graph';
 import { processAllResources } from '../resource-processor';
-import type { SpaceDataState } from '../../constants';
+import type { SpaceDataState } from '../../../constants';
 
 // Mock the API functions
 vi.mock('../../actions', () => ({
