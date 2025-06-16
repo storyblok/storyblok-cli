@@ -66,6 +66,12 @@ export interface SchemaDependencies {
 // PROCESSING TYPES
 // =============================================================================
 
+/** Processing level that can be either regular or circular */
+export interface ProcessingLevel {
+  nodes: string[];
+  isCyclic: boolean;
+}
+
 /** Result from processing a single node */
 export interface NodeProcessingResult {
   name: string;

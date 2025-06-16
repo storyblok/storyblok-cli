@@ -4,7 +4,7 @@ import type {
   SpaceComponentInternalTag,
   SpaceComponentPreset,
 } from '../../constants';
-import type { DependencyGraph, GraphBuildingContext, NodeData, NodeType, SchemaDependencies, TargetResourceInfo, UnifiedNode } from './types';
+import type { DependencyGraph, GraphBuildingContext, NodeData, NodeType, ProcessingLevel, SchemaDependencies, TargetResourceInfo, UnifiedNode } from './types';
 import { upsertComponent, upsertComponentGroup, upsertComponentInternalTag, upsertComponentPreset } from '../actions';
 import {
   generateContentHash,
@@ -315,11 +315,72 @@ export function detectCircularWhitelists(graph: DependencyGraph): string[] {
 }
 
 /**
- * Determines the processing order using topological sorting.
- * Returns an array of levels, where each level contains nodes that can be processed in parallel.
+ * Detects strongly connected components using Tarjan's algorithm.
+ * Returns an array of SCCs, where each SCC is an array of node IDs.
  */
-export function determineProcessingOrder(graph: DependencyGraph): string[][] {
-  const levels: string[][] = [];
+export function detectStronglyConnectedComponents(nodeIds: string[], graph: DependencyGraph): string[][] {
+  const index = new Map<string, number>();
+  const lowLink = new Map<string, number>();
+  const onStack = new Set<string>();
+  const stack: string[] = [];
+  const sccs: string[][] = [];
+  let currentIndex = 0;
+
+  function strongConnect(nodeId: string) {
+    // Set the depth index for this node to the smallest unused index
+    index.set(nodeId, currentIndex);
+    lowLink.set(nodeId, currentIndex);
+    currentIndex++;
+    stack.push(nodeId);
+    onStack.add(nodeId);
+
+    // Consider successors of this node
+    const node = graph.nodes.get(nodeId);
+    if (node) {
+      for (const dependencyId of node.dependencies) {
+        if (nodeIds.includes(dependencyId)) { // Only consider nodes in the remaining set
+          if (!index.has(dependencyId)) {
+            // Successor has not yet been visited; recurse on it
+            strongConnect(dependencyId);
+            lowLink.set(nodeId, Math.min(lowLink.get(nodeId)!, lowLink.get(dependencyId)!));
+          }
+          else if (onStack.has(dependencyId)) {
+            // Successor is in stack and hence in the current SCC
+            lowLink.set(nodeId, Math.min(lowLink.get(nodeId)!, index.get(dependencyId)!));
+          }
+        }
+      }
+    }
+
+    // If this is a root node, pop the stack and create an SCC
+    if (lowLink.get(nodeId) === index.get(nodeId)) {
+      const scc: string[] = [];
+      let w: string;
+      do {
+        w = stack.pop()!;
+        onStack.delete(w);
+        scc.push(w);
+      } while (w !== nodeId);
+      sccs.push(scc);
+    }
+  }
+
+  // Run the algorithm for all unvisited nodes
+  for (const nodeId of nodeIds) {
+    if (!index.has(nodeId)) {
+      strongConnect(nodeId);
+    }
+  }
+
+  return sccs;
+}
+
+/**
+ * Determines the processing order using topological sorting with SCC handling.
+ * Returns an array of ProcessingLevels, which can be either regular or cyclic levels.
+ */
+export function determineProcessingOrder(graph: DependencyGraph): ProcessingLevel[] {
+  const levels: ProcessingLevel[] = [];
   const inDegree = new Map<string, number>();
 
   // Calculate in-degrees for all nodes
@@ -338,12 +399,32 @@ export function determineProcessingOrder(graph: DependencyGraph): string[][] {
     }
 
     if (currentLevel.length === 0) {
-      // If no nodes can be processed, we have unresolvable cycles
-      const remaining = Array.from(inDegree.keys());
-      throw new Error(`Unresolvable dependencies detected: ${remaining.join(', ')}`);
+      // If no nodes can be processed, we have cycles - detect SCCs
+      const remainingNodes = Array.from(inDegree.keys());
+      const sccs = detectStronglyConnectedComponents(remainingNodes, graph);
+
+      for (const scc of sccs) {
+        // Validate that SCCs only contain components (not groups/tags)
+        const hasNonComponent = scc.some(nodeId =>
+          nodeId.startsWith('group:') || nodeId.startsWith('tag:') || nodeId.startsWith('preset:'),
+        );
+
+        if (hasNonComponent) {
+          throw new Error(`Unsupported circular dependency involving groups, tags, or presets: ${scc.join(' → ')}`);
+        }
+
+        // Add as cyclic level - these will need special processing
+        levels.push({ nodes: scc, isCyclic: true });
+
+        // Remove SCC nodes from processing
+        scc.forEach(nodeId => inDegree.delete(nodeId));
+      }
+
+      continue; // Continue with remaining nodes after handling cycles
     }
 
-    levels.push(currentLevel);
+    // Add regular level
+    levels.push({ nodes: currentLevel, isCyclic: false });
 
     // Remove processed nodes and update in-degrees
     for (const nodeId of currentLevel) {

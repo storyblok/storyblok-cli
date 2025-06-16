@@ -1,7 +1,9 @@
 import { colorPalette } from '../../../../constants';
-import type { DependencyGraph, NodeProcessingResult, PushResults } from './types';
+import type { DependencyGraph, NodeProcessingResult, ProcessingLevel, PushResults } from './types';
 import { determineProcessingOrder } from './dependency-graph';
 import { progressDisplay } from '../progress-display';
+import { pushComponent } from '../actions';
+import type { SpaceComponent } from '../../constants';
 
 // =============================================================================
 // RESOURCE PROCESSING
@@ -20,14 +22,22 @@ export async function processAllResources(
   const results: PushResults = { successful: [], failed: [], skipped: [] };
 
   // Calculate total resources for progress tracking
-  const totalResources = levels.reduce((sum, level) => sum + level.length, 0);
+  const totalResources = levels.reduce((sum, level) => sum + level.nodes.length, 0);
 
   // Initialize progress display
   progressDisplay.start(totalResources);
 
   for (const level of levels) {
-    const levelResults = await processLevel(level, graph, space, maxConcurrency, force);
-    mergeResults(results, levelResults);
+    if (level.isCyclic) {
+      // Handle circular dependencies with stub creation
+      const cyclicResults = await processCyclicLevel(level, graph, space, maxConcurrency, force);
+      mergeResults(results, cyclicResults);
+    }
+    else {
+      // Handle regular level
+      const levelResults = await processLevel(level.nodes, graph, space, maxConcurrency, force);
+      mergeResults(results, levelResults);
+    }
   }
 
   // Show completion summary using progress display
@@ -41,6 +51,93 @@ export async function processAllResources(
   });
 
   return results;
+}
+
+/**
+ * Processes a cyclic level with circular dependency handling.
+ * Creates stub components for missing components in the cycle, then processes normally.
+ */
+async function processCyclicLevel(
+  level: ProcessingLevel,
+  graph: DependencyGraph,
+  space: string,
+  maxConcurrency: number,
+  force: boolean,
+): Promise<PushResults> {
+  // Clear current progress display and show circular dependency message
+  progressDisplay.clearProgress();
+  console.log(`\n🔄 Detected circular dependencies: ${level.nodes.map(id => id.replace('component:', '')).join(', ')}`);
+
+  // STEP 1: Create stub components for any missing components in the cycle
+  await createStubComponents(level.nodes, graph, space);
+
+  // STEP 2: Process the cyclic level normally (references can now resolve)
+  return await processLevel(level.nodes, graph, space, maxConcurrency, force);
+}
+
+/**
+ * Creates stub components for missing components in circular dependencies.
+ */
+async function createStubComponents(
+  nodeIds: string[],
+  graph: DependencyGraph,
+  space: string,
+): Promise<void> {
+  const missingComponents: string[] = [];
+
+  for (const nodeId of nodeIds) {
+    const node = graph.nodes.get(nodeId);
+    if (node && node.type === 'component' && !node.targetData) {
+      missingComponents.push(node.name);
+    }
+  }
+
+  if (missingComponents.length === 0) {
+    return; // No missing components to create stubs for
+  }
+
+  console.log(`📝 Creating stub components for circular dependencies: ${missingComponents.join(', ')}`);
+
+  // Create minimal stub components
+  for (const nodeId of nodeIds) {
+    const node = graph.nodes.get(nodeId);
+    if (node && node.type === 'component' && !node.targetData) {
+      try {
+        const stubComponent = createMinimalStubComponent(node.name);
+        const result = await pushComponent(space, stubComponent);
+
+        if (result) {
+          // Update the node's target data so future references can resolve
+          node.updateTargetData(result);
+          console.log(`✓ Created stub component: ${node.name}`);
+        }
+      }
+      catch (error) {
+        console.error(`✗ Failed to create stub component ${node.name}:`, error);
+        throw error;
+      }
+    }
+  }
+
+  // Add a blank line before resuming normal processing
+  console.log('');
+}
+
+/**
+ * Creates a minimal stub component with only required fields.
+ */
+function createMinimalStubComponent(name: string): SpaceComponent {
+  return {
+    name,
+    display_name: name,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    id: 0, // Will be set by API
+    schema: {}, // Minimal empty schema
+    color: null,
+    internal_tags_list: [],
+    internal_tag_ids: [],
+  };
 }
 
 /**

@@ -72,7 +72,7 @@ export class ProgressDisplay {
     process.stdout.write(`\r${this.currentProgressLine}`);
   }
 
-  private clearProgress() {
+  clearProgress() {
     if (this.currentProgressLine) {
       process.stdout.write(`\r${' '.repeat(this.currentProgressLine.length)}\r`);
     }
