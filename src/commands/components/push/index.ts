@@ -164,6 +164,7 @@ componentsCommand
           });
         }
       }
+      console.log(`${requestCount} requests made`);
     }
     catch (error) {
       handleError(error as Error, verbose);
