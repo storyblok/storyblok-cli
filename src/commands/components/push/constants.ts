@@ -4,8 +4,8 @@ export interface PushComponentsOptions extends CommandOptions {
 
   /**
    * The glob pattern filter to apply to components before pushing.
-   * Only matching components (and their presets) will be pushed.
-   * Dependencies are assumed to exist in the target space.
+   * Matching components and all their dependencies (groups, tags, other components)
+   * will be collected and pushed together.
    * @default `.*`
    */
   filter?: string;
