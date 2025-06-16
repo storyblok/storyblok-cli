@@ -192,14 +192,18 @@ async function processNode(
   force: boolean,
 ): Promise<NodeProcessingResult> {
   const node = graph.nodes.get(nodeId)!;
+  // Track start time for individual process timing
+  const startTime = Date.now();
 
   try {
     // Skip if resource is already up-to-date (unless force is enabled)
     if (!force && node.shouldSkip()) {
+      const elapsedMs = Date.now() - startTime;
       progressDisplay.handleEvent({
         type: 'skip',
         name: node.getName(),
         resourceType: getResourceTypeName(node.type),
+        elapsedMs,
       });
       return { name: node.getName(), skipped: true };
     }
@@ -208,21 +212,25 @@ async function processNode(
     const result = await node.upsert(space);
     node.updateTargetData(result);
 
+    const elapsedMs = Date.now() - startTime;
     progressDisplay.handleEvent({
       type: 'success',
       name: node.getName(),
       resourceType: getResourceTypeName(node.type),
       color: getResourceTypeColor(node.type),
+      elapsedMs,
     });
 
     return { name: node.getName(), skipped: false };
   }
   catch (error) {
+    const elapsedMs = Date.now() - startTime;
     progressDisplay.handleEvent({
       type: 'error',
       name: node.getName(),
       resourceType: getResourceTypeName(node.type),
       error,
+      elapsedMs,
     });
     return { name: node.getName(), skipped: false, error };
   }
