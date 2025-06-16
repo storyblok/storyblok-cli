@@ -119,7 +119,9 @@ function normalizeForHashing(obj: any): any {
   if (obj === null || obj === undefined) {
     return obj;
   }
-  if (Array.isArray(obj)) { return obj.map(normalizeForHashing); }
+  if (Array.isArray(obj)) {
+    return obj.map(normalizeForHashing);
+  }
 
   if (typeof obj === 'object') {
     const normalized: Record<string, any> = {};
