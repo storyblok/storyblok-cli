@@ -1,5 +1,4 @@
 import { FileSystemError, handleAPIError, handleFileSystemError } from '../../../utils';
-import type { RegionCode } from '../../../constants';
 import type { SpaceComponent, SpaceComponentGroup, SpaceComponentInternalTag, SpaceComponentPreset, SpaceData } from '../constants';
 import type { ReadComponentsOptions } from './constants';
 import { join } from 'node:path';

@@ -4,9 +4,7 @@ import type {
   SpaceComponentGroup,
   SpaceComponentInternalTag,
   SpaceComponentPreset,
-  SpaceDataState,
 } from '../../constants';
-import type { TargetData } from './types';
 
 // =============================================================================
 // NORMALIZATION FUNCTIONS
@@ -118,7 +116,9 @@ export function normalizePresetForComparison(preset: SpaceComponentPreset): Part
  * Sorts object keys to ensure identical objects produce identical hashes.
  */
 function normalizeForHashing(obj: any): any {
-  if (obj === null || obj === undefined) { return obj; }
+  if (obj === null || obj === undefined) {
+    return obj;
+  }
   if (Array.isArray(obj)) { return obj.map(normalizeForHashing); }
 
   if (typeof obj === 'object') {
@@ -142,71 +142,4 @@ function normalizeForHashing(obj: any): any {
 export function generateContentHash(obj: any): string {
   const normalized = normalizeForHashing(obj);
   return createHash('sha256').update(JSON.stringify(normalized)).digest('hex');
-}
-
-// =============================================================================
-// TARGET DATA UTILITIES
-// =============================================================================
-
-/**
- * Converts space state target maps to TargetData format with content hashes
- */
-export function buildTargetDataFromMaps(
-  spaceState: SpaceDataState,
-): TargetData {
-  const { components, groups, tags, presets } = spaceState.target;
-  const { components: localComponents, groups: localGroups, internalTags: localTags, presets: localPresets } = spaceState.local;
-
-  const targetData: TargetData = {
-    components: new Map(),
-    groups: new Map(),
-    tags: new Map(),
-    presets: new Map(),
-  };
-
-  // Build component map
-  components.forEach((component, name) => {
-    const localComponent = localComponents.find(c => c.name === name);
-    targetData.components.set(name, {
-      resource: component,
-      sourceId: localComponent?.id || component.id,
-      targetId: component.id, // Initially same as source, will be updated after upsert,
-      hash: generateContentHash(localComponent),
-    });
-  });
-
-  // Build group map
-  groups.forEach((group, name) => {
-    const localGroup = localGroups.find(g => g.name === name);
-    targetData.groups.set(name, {
-      resource: group,
-      sourceId: localGroup?.id || group.id,
-      targetId: group.id, // Initially same as source, will be updated after upsert
-      hash: generateContentHash(group),
-    });
-  });
-
-  // Build tag map
-  tags.forEach((tag, name) => {
-    const localTag = localTags.find(t => t.name === name);
-    targetData.tags.set(name, {
-      resource: tag,
-      sourceId: localTag?.id || tag.id,
-      targetId: tag.id, // Initially same as source, will be updated after upsert
-      hash: generateContentHash(localTag),
-    });
-  });
-
-  // Build preset map
-  presets.forEach((preset, name) => {
-    const localPreset = localPresets.find(p => p.name === name);
-    targetData.presets.set(name, {
-      resource: preset,
-      sourceId: localPreset?.id || preset.id,
-      targetId: preset.id, // Initially same as source, will be updated after upsert
-      hash: generateContentHash(localPreset),
-    });
-  });
-
-  return targetData;
 }

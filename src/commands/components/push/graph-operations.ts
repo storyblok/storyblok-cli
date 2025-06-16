@@ -5,8 +5,6 @@
 
 // Re-export the new modular implementation for backward compatibility
 export {
-  buildTargetDataFromMaps,
   type PushResults,
   pushWithDependencyGraph,
-  type TargetData,
 } from './graph-operations/index';

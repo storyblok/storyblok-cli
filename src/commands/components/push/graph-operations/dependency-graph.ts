@@ -505,7 +505,9 @@ class GraphNode<TSource extends NodeData> implements UnifiedNode<TSource> {
   }
 
   shouldSkip(): boolean {
-    if (!this.targetData) { return false; }
+    if (!this.targetData) {
+      return false;
+    }
     const normalizedSource = this.normalize();
     return generateContentHash(normalizedSource) === this.targetData.hash;
   }
@@ -547,7 +549,9 @@ export class TagNode extends GraphNode<SpaceComponentInternalTag> {
   async upsert(space: string): Promise<SpaceComponentInternalTag> {
     const existingId = this.targetData?.id;
     const result = await upsertComponentInternalTag(space, this.sourceData, existingId as number | undefined);
-    if (!result) { throw new Error(`Failed to upsert tag ${this.name}`); }
+    if (!result) {
+      throw new Error(`Failed to upsert tag ${this.name}`);
+    }
     return result;
   }
 }
@@ -580,7 +584,9 @@ export class GroupNode extends GraphNode<SpaceComponentGroup> {
   async upsert(space: string): Promise<SpaceComponentGroup> {
     const existingId = this.targetData?.id;
     const result = await upsertComponentGroup(space, this.sourceData, existingId as number | undefined);
-    if (!result) { throw new Error(`Failed to upsert group ${this.name}`); }
+    if (!result) {
+      throw new Error(`Failed to upsert group ${this.name}`);
+    }
     return result;
   }
 }
@@ -695,7 +701,9 @@ export class ComponentNode extends GraphNode<SpaceComponent> {
   async upsert(space: string): Promise<SpaceComponent> {
     const existingId = this.targetData?.id;
     const result = await upsertComponent(space, this.sourceData, existingId as number | undefined);
-    if (!result) { throw new Error(`Failed to upsert component ${this.name}`); }
+    if (!result) {
+      throw new Error(`Failed to upsert component ${this.name}`);
+    }
     return result;
   }
 }
@@ -729,7 +737,9 @@ class PresetNode implements UnifiedNode<SpaceComponentPreset> {
   }
 
   shouldSkip(): boolean {
-    if (!this.targetData) { return false; }
+    if (!this.targetData) {
+      return false;
+    }
 
     const sourceHash = generateContentHash(this.normalize());
     return sourceHash === this.targetData.hash;

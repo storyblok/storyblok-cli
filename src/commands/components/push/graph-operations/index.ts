@@ -1,4 +1,3 @@
-import type { RegionCode } from '../../../../constants';
 import type { SpaceDataState } from '../../constants';
 import type { GraphBuildingContext, PushResults } from './types';
 

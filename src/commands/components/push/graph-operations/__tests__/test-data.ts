@@ -101,7 +101,7 @@ export function createHierarchicalGroupsScenario() {
 export function createComplexSchemaDependenciesScenario() {
   const tag1 = createTestTag({ id: 1, name: 'tag-1' });
   const tag2 = createTestTag({ id: 2, name: 'tag-2' });
-  
+
   const group1 = createTestGroup({ id: 1, name: 'group-1', uuid: 'group-1-uuid' });
   const group2 = createTestGroup({ id: 2, name: 'group-2', uuid: 'group-2-uuid' });
 
@@ -310,4 +310,4 @@ export function createTargetOnlyResourcesScenario() {
     source: [sourceComponent],
     target: [targetComponent1, targetComponent2],
   };
-} 
+}
