@@ -35,7 +35,7 @@ export class ProgressDisplay {
         this.processed++;
         this.updated++;
         this.clearProgress();
-        console.log(`✓ ${this.capitalize(event.resourceType)}→ ${chalk.hex(event.color)(event.name)} - Updated`);
+        console.log(`${chalk.green('✓')} ${this.capitalize(event.resourceType)}→ ${chalk.hex(event.color)(event.name)} - Updated`);
         this.updateProgress();
         break;
 
@@ -49,7 +49,7 @@ export class ProgressDisplay {
         this.processed++;
         this.failed++;
         this.clearProgress();
-        console.log(`✗ ${this.capitalize(event.resourceType)}→ ${chalk.red(event.name)} - Failed`);
+        console.log(`${chalk.red('✗')} ${this.capitalize(event.resourceType)}→ ${chalk.red(event.name)} - Failed`);
         this.updateProgress();
         break;
 

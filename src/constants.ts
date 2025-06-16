@@ -17,6 +17,9 @@ export const colorPalette = {
   LANGUAGES: '#f5c003',
   MIGRATIONS: '#8CE2FF',
   TYPES: '#3178C6',
+  GROUPS: '#4ade80',
+  TAGS: '#fbbf24',
+  PRESETS: '#a855f7',
 } as const;
 
 export interface ReadonlyArray<T> {

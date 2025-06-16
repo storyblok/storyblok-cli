@@ -4,6 +4,7 @@ import { determineProcessingOrder } from './dependency-graph';
 import { progressDisplay } from '../progress-display';
 import { pushComponent } from '../actions';
 import type { SpaceComponent } from '../../constants';
+import chalk from 'chalk';
 
 // =============================================================================
 // RESOURCE PROCESSING
@@ -109,7 +110,7 @@ async function createStubComponents(
         if (result) {
           // Update the node's target data so future references can resolve
           node.updateTargetData(result);
-          console.log(`✓ Created stub component: ${node.name}`);
+          console.log(`${chalk.green('✓')} Created stub component: ${node.name}`);
         }
       }
       catch (error) {
@@ -276,9 +277,9 @@ function getResourceTypeName(type: string): string {
 function getResourceTypeColor(type: string): string {
   switch (type) {
     case 'component': return colorPalette.COMPONENTS;
-    case 'group': return '#4ade80'; // green
-    case 'tag': return '#fbbf24'; // yellow
-    case 'preset': return '#a855f7'; // purple
+    case 'group': return colorPalette.GROUPS;
+    case 'tag': return colorPalette.TAGS;
+    case 'preset': return colorPalette.PRESETS;
     default: return colorPalette.COMPONENTS;
   }
 }
