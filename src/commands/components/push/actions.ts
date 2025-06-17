@@ -275,6 +275,7 @@ export const readComponentsFiles = async (
     return await readSeparateFiles(resolvedPath, suffix);
   }
 
+  // When not using separate files, always look in the consolidated directory
   return await readConsolidatedFiles(resolvedPath, suffix);
 };
 
@@ -285,36 +286,50 @@ async function readSeparateFiles(resolvedPath: string, suffix?: string): Promise
   let groups: SpaceComponentGroup[] = [];
   let internalTags: SpaceComponentInternalTag[] = [];
 
+  // Read system files from consolidated directory
+  const consolidatedPath = join(resolvedPath, 'consolidated');
+  try {
+    const [groupsResult, tagsResult] = await Promise.all([
+      readJsonFile<SpaceComponentGroup>(join(consolidatedPath, suffix ? `groups.${suffix}.json` : 'groups.json')),
+      readJsonFile<SpaceComponentInternalTag>(join(consolidatedPath, suffix ? `tags.${suffix}.json` : 'tags.json')),
+    ]);
+
+    if (groupsResult.error) {
+      handleFileSystemError('read', groupsResult.error);
+    }
+    else {
+      groups = groupsResult.data;
+    }
+
+    if (tagsResult.error) {
+      handleFileSystemError('read', tagsResult.error);
+    }
+    else {
+      internalTags = tagsResult.data;
+    }
+  }
+  catch (error) {
+    // If consolidated directory doesn't exist or files are not found, continue with empty arrays
+    handleFileSystemError('read', error as Error);
+    console.warn('No consolidated directory found or system files missing. Groups and tags will be empty.');
+  }
+
+  // Filter component files
   const filteredFiles = files.filter((file) => {
     if (suffix) {
       return file.endsWith(`.${suffix}.json`);
     }
     else {
       // Regex to match files with a pattern like .<suffix>.json
-      return !/\.\w+\.json$/.test(file) || file.endsWith('.presets.json'); ;
+      return !/\.\w+\.json$/.test(file) || file.endsWith('.presets.json');
     }
   });
 
+  // Read component files from root directory
   for (const file of filteredFiles) {
     const filePath = join(resolvedPath, file);
 
-    if (file === 'groups.json' || file === `groups.${suffix}.json`) {
-      const result = await readJsonFile<SpaceComponentGroup>(filePath);
-      if (result.error) {
-        handleFileSystemError('read', result.error);
-        continue;
-      }
-      groups = result.data;
-    }
-    else if (file === 'tags.json' || file === `tags.${suffix}.json`) {
-      const result = await readJsonFile<SpaceComponentInternalTag>(filePath);
-      if (result.error) {
-        handleFileSystemError('read', result.error);
-        continue;
-      }
-      internalTags = result.data;
-    }
-    else if (file.endsWith('.presets.json') || file.endsWith(`.presets.${suffix}.json`)) {
+    if (file.endsWith('.presets.json') || file.endsWith(`.presets.${suffix}.json`)) {
       const result = await readJsonFile<SpaceComponentPreset>(filePath);
       if (result.error) {
         handleFileSystemError('read', result.error);
@@ -323,9 +338,6 @@ async function readSeparateFiles(resolvedPath: string, suffix?: string): Promise
       presets.push(...result.data);
     }
     else if (file.endsWith('.json') || file.endsWith(`${suffix}.json`)) {
-      if (file === 'components.json' || file === `components.${suffix}.json`) {
-        continue;
-      }
       const result = await readJsonFile<SpaceComponent>(filePath);
       if (result.error) {
         handleFileSystemError('read', result.error);
@@ -344,11 +356,26 @@ async function readSeparateFiles(resolvedPath: string, suffix?: string): Promise
 }
 
 async function readConsolidatedFiles(resolvedPath: string, suffix?: string): Promise<SpaceData> {
-  // Read required components file
-  const componentsPath = join(resolvedPath, suffix ? `components.${suffix}.json` : 'components.json');
+  // Read required components file from consolidated directory
+  const consolidatedPath = join(resolvedPath, 'consolidated');
+
+  // Check if consolidated directory exists
+  try {
+    await readdir(consolidatedPath);
+  }
+  catch (error) {
+    throw new FileSystemError(
+      'file_not_found',
+      'read',
+      error as Error,
+      `No consolidated directory found in ${resolvedPath}. Please make sure you have pulled the components first.`,
+    );
+  }
+
+  const componentsPath = join(consolidatedPath, suffix ? `components.${suffix}.json` : 'components.json');
   const componentsResult = await readJsonFile<SpaceComponent>(componentsPath);
 
-  if (componentsResult.error || !componentsResult.data.length) {
+  if (componentsResult.error || componentsResult.data.length === 0) {
     throw new FileSystemError(
       'file_not_found',
       'read',
@@ -357,11 +384,11 @@ async function readConsolidatedFiles(resolvedPath: string, suffix?: string): Pro
     );
   }
 
-  // Read optional files
+  // Read optional files from consolidated directory
   const [groupsResult, presetsResult, tagsResult] = await Promise.all([
-    readJsonFile<SpaceComponentGroup>(join(resolvedPath, suffix ? `groups.${suffix}.json` : 'groups.json')),
-    readJsonFile<SpaceComponentPreset>(join(resolvedPath, suffix ? `presets.${suffix}.json` : 'presets.json')),
-    readJsonFile<SpaceComponentInternalTag>(join(resolvedPath, suffix ? `tags.${suffix}.json` : 'tags.json')),
+    readJsonFile<SpaceComponentGroup>(join(consolidatedPath, suffix ? `groups.${suffix}.json` : 'groups.json')),
+    readJsonFile<SpaceComponentPreset>(join(consolidatedPath, suffix ? `presets.${suffix}.json` : 'presets.json')),
+    readJsonFile<SpaceComponentInternalTag>(join(consolidatedPath, suffix ? `tags.${suffix}.json` : 'tags.json')),
   ]);
 
   return {

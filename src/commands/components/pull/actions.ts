@@ -95,6 +95,9 @@ export const saveComponentsToFiles = async (
     ? resolve(process.cwd(), path, 'components', space)
     : resolvePath(path, `components/${space}`);
 
+  // Create a consolidated directory for system files
+  const consolidatedPath = join(resolvedPath, 'consolidated');
+
   try {
     if (separateFiles) {
       // Save in separate files without nested structure
@@ -108,33 +111,37 @@ export const saveComponentsToFiles = async (
           const presetsFilePath = join(resolvedPath, suffix ? `${component.name}.presets.${suffix}.json` : `${component.name}.presets.json`);
           await saveToFile(presetsFilePath, JSON.stringify(componentPresets, null, 2));
         }
-        // Always save groups in a consolidated file
-        const groupsFilePath = join(resolvedPath, suffix ? `groups.${suffix}.json` : `groups.json`);
-        await saveToFile(groupsFilePath, JSON.stringify(groups, null, 2));
+      }
 
-        // Always save internal tags in a consolidated file
-        const internalTagsFilePath = join(resolvedPath, suffix ? `tags.${suffix}.json` : `tags.json`);
+      // Save consolidated files in the consolidated directory
+      if (groups.length > 0) {
+        const groupsFilePath = join(consolidatedPath, suffix ? `groups.${suffix}.json` : `groups.json`);
+        await saveToFile(groupsFilePath, JSON.stringify(groups, null, 2));
+      }
+
+      if (internalTags.length > 0) {
+        const internalTagsFilePath = join(consolidatedPath, suffix ? `tags.${suffix}.json` : `tags.json`);
         await saveToFile(internalTagsFilePath, JSON.stringify(internalTags, null, 2));
       }
       return;
     }
 
-    // Default to saving consolidated files
-    const componentsFilePath = join(resolvedPath, suffix ? `${filename}.${suffix}.json` : `${filename}.json`);
+    // Default to saving consolidated files in the consolidated directory
+    const componentsFilePath = join(consolidatedPath, suffix ? `${filename}.${suffix}.json` : `${filename}.json`);
     await saveToFile(componentsFilePath, JSON.stringify(components, null, 2));
 
     if (groups.length > 0) {
-      const groupsFilePath = join(resolvedPath, suffix ? `groups.${suffix}.json` : `groups.json`);
+      const groupsFilePath = join(consolidatedPath, suffix ? `groups.${suffix}.json` : `groups.json`);
       await saveToFile(groupsFilePath, JSON.stringify(groups, null, 2));
     }
 
     if (presets.length > 0) {
-      const presetsFilePath = join(resolvedPath, suffix ? `presets.${suffix}.json` : `presets.json`);
+      const presetsFilePath = join(consolidatedPath, suffix ? `presets.${suffix}.json` : `presets.json`);
       await saveToFile(presetsFilePath, JSON.stringify(presets, null, 2));
     }
 
     if (internalTags.length > 0) {
-      const internalTagsFilePath = join(resolvedPath, suffix ? `tags.${suffix}.json` : `tags.json`);
+      const internalTagsFilePath = join(consolidatedPath, suffix ? `tags.${suffix}.json` : `tags.json`);
       await saveToFile(internalTagsFilePath, JSON.stringify(internalTags, null, 2));
     }
   }

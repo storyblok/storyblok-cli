@@ -167,7 +167,7 @@ describe('pull components actions', () => {
   describe('saveComponentsToFiles', () => {
     it('should save components to files successfully', async () => {
       vol.fromJSON({
-        '/path/to/components/12345': null,
+        '/path/to/components/12345/consolidated': null,
       });
 
       const components = [{
@@ -188,7 +188,7 @@ describe('pull components actions', () => {
         space: '12345',
       });
 
-      const files = vol.readdirSync('/path/to/components/12345');
+      const files = vol.readdirSync('/path/to/components/12345/consolidated');
       expect(files).toEqual(['components.json']);
     });
 
@@ -215,7 +215,7 @@ describe('pull components actions', () => {
         verbose: false,
       });
 
-      const files = vol.readdirSync('/path/to2/components/12345');
+      const files = vol.readdirSync('/path/to2/components/12345/consolidated');
       expect(files).toEqual(['custom.json']);
     });
 
@@ -247,7 +247,7 @@ describe('pull components actions', () => {
         console.log('TEST', error);
       }
 
-      const files = vol.readdirSync('/path/to3/components/12345');
+      const files = vol.readdirSync('/path/to3/components/12345/consolidated');
       expect(files).toEqual(['components.custom.json']);
     });
 
@@ -285,7 +285,7 @@ describe('pull components actions', () => {
       });
 
       const files = vol.readdirSync('/path/to4/components/12345');
-      expect(files).toEqual(['component-name-2.json', 'component-name.json', 'groups.json', 'tags.json']);
+      expect(files).toEqual(['component-name-2.json', 'component-name.json']);
     });
   });
 });

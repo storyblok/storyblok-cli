@@ -97,7 +97,7 @@ describe('pull', () => {
         path: undefined,
         separateFiles: false,
       });
-      expect(konsola.ok).toHaveBeenCalledWith(`Components downloaded successfully to ${chalk.hex(colorPalette.PRIMARY)(`.storyblok/components/12345/components.json`)}`);
+      expect(konsola.ok).toHaveBeenCalledWith(`Components downloaded successfully to ${chalk.hex(colorPalette.PRIMARY)(`.storyblok/components/12345/consolidated/components.json`)}`);
     });
 
     it('should fetch a component by name', async () => {
@@ -127,6 +127,7 @@ describe('pull', () => {
         presets: [],
         internalTags: [],
       }, { separateFiles: true, path: undefined });
+      expect(konsola.ok).toHaveBeenCalledWith(`Component ${chalk.hex(colorPalette.PRIMARY)('component-name')} downloaded successfully in ${chalk.hex(colorPalette.PRIMARY)(`.storyblok/components/12345/component-name.json`)}`);
     });
 
     it('should throw an error if the component is not found', async () => {
@@ -192,7 +193,7 @@ describe('pull', () => {
         presets: [],
         internalTags: [],
       }, { path: '/path/to/components', separateFiles: false });
-      expect(konsola.ok).toHaveBeenCalledWith(`Components downloaded successfully to ${chalk.hex(colorPalette.PRIMARY)(`/path/to/components/components/12345/components.json`)}`);
+      expect(konsola.ok).toHaveBeenCalledWith(`Components downloaded successfully to ${chalk.hex(colorPalette.PRIMARY)(`/path/to/components/components/12345/consolidated/components.json`)}`);
     });
   });
 
@@ -226,7 +227,7 @@ describe('pull', () => {
         presets: [],
         internalTags: [],
       }, { filename: 'custom', separateFiles: false });
-      expect(konsola.ok).toHaveBeenCalledWith(`Components downloaded successfully to ${chalk.hex(colorPalette.PRIMARY)(`.storyblok/components/12345/custom.json`)}`);
+      expect(konsola.ok).toHaveBeenCalledWith(`Components downloaded successfully to ${chalk.hex(colorPalette.PRIMARY)(`.storyblok/components/12345/consolidated/custom.json`)}`);
     });
   });
 

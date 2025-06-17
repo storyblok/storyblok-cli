@@ -16,7 +16,11 @@ This will upload all components and their dependencies from:
 .storyblok/
 └── components/
     └── YOUR_SPACE_ID/
-        ├── components.json      # All components
+        └── consolidated/
+            ├── components.json      # All components
+            ├── groups.json         # Component groups
+            ├── presets.json        # Component presets
+            └── tags.json           # Component tags
 ```
 
 ## Push a Single Component
@@ -31,6 +35,10 @@ This will upload a single component and its dependencies from:
 └── components/
     └── YOUR_SPACE_ID/
         ├── COMPONENT_NAME.json  # Single component
+        ├── COMPONENT_NAME.presets.json  # Component presets
+        └── consolidated/
+            ├── groups.json         # Component groups
+            └── tags.json           # Component tags
 ```
 
 ## Options
@@ -55,7 +63,11 @@ Reads from:
 .storyblok/
 └── components/
     └── 12345/
-        ├── components.json      # All components
+        └── consolidated/
+            ├── components.json      # All components
+            ├── groups.json         # Component groups
+            ├── presets.json        # Component presets
+            └── tags.json           # Component tags
 ```
 
 2. Push a single component:
@@ -68,6 +80,10 @@ Reads from:
 └── components/
     └── 12345/
         ├── hero.json           # Single component
+        ├── hero.presets.json   # Component presets
+        └── consolidated/
+            ├── groups.json     # Component groups
+            └── tags.json       # Component tags
 ```
 
 3. Push components with filter:
@@ -79,7 +95,8 @@ Reads from:
 .storyblok/
 └── components/
     └── 12345/
-        ├── components.json      # All components
+        └── consolidated/
+            ├── components.json      # All components
 ```
 
 4. Push components from a different space:
@@ -91,7 +108,8 @@ Reads from:
 .storyblok/
 └── components/
     └── 67890/
-        ├── components.json      # All components
+        └── consolidated/
+            ├── components.json      # All components
 ```
 
 5. Push components from separate files:
@@ -103,11 +121,11 @@ Reads from:
 .storyblok/
 └── components/
     └── 12345/
-        ├── hero.json           # Individual components
-        ├── hero.presets.json   # Component presets
-        ├── feature.json
-        ├── feature.presets.json
-        ├── ...
+        └── consolidated/
+            ├── components.json      # All components
+            ├── groups.json         # Component groups
+            ├── presets.json        # Component presets
+            └── tags.json           # Component tags
 ```
 
 6. Push components from a custom path:
@@ -119,7 +137,11 @@ Reads from:
 backup/
 └── components/
     └── 12345/
-        ├── components.json      # All components
+        └── consolidated/
+            ├── components.json      # All components
+            ├── groups.json         # Component groups
+            ├── presets.json        # Component presets
+            └── tags.json           # Component tags
 ```
 
 ## File Structure
@@ -129,7 +151,8 @@ The command reads from the following file structure:
 {path}/
 └── components/
     └── {spaceId}/
-        ├── components.{suffix}.json  # Components file
+        └── consolidated/
+            ├── components.{suffix}.json  # Components file
 ```
 
 When using `--separate-files`:
@@ -137,11 +160,12 @@ When using `--separate-files`:
 {path}/
 └── components/
     └── {spaceId}/
-        ├── {componentName1}.{suffix}.json        # Individual components
-        ├── {componentName1}.presets.json         # Component presets
-        ├── {componentName2}.{suffix}.json
-        ├── {componentName2}.presets.json
-        ├── ...
+        └── consolidated/
+            ├── {componentName1}.{suffix}.json        # Individual components
+            ├── {componentName1}.presets.json         # Component presets
+            ├── {componentName2}.{suffix}.json
+            ├── {componentName2}.presets.json
+            ├── ...
 ```
 
 Where:

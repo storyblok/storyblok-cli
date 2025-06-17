@@ -416,10 +416,10 @@ describe('push components actions', () => {
   describe('readComponentsFiles', () => {
     it('should read components from consolidated files successfully', async () => {
       vol.fromJSON({
-        '/path/to/components/12345/components.json': JSON.stringify([mockComponent]),
-        '/path/to/components/12345/groups.json': JSON.stringify([mockComponentGroup]),
-        '/path/to/components/12345/presets.json': JSON.stringify([mockComponentPreset]),
-        '/path/to/components/12345/tags.json': JSON.stringify([mockInternalTag]),
+        '/path/to/components/12345/consolidated/components.json': JSON.stringify([mockComponent]),
+        '/path/to/components/12345/consolidated/groups.json': JSON.stringify([mockComponentGroup]),
+        '/path/to/components/12345/consolidated/presets.json': JSON.stringify([mockComponentPreset]),
+        '/path/to/components/12345/consolidated/tags.json': JSON.stringify([mockInternalTag]),
       });
 
       const result = await readComponentsFiles({
@@ -439,10 +439,10 @@ describe('push components actions', () => {
 
     it('should read components from consolidated files with suffix successfully', async () => {
       vol.fromJSON({
-        '/path/to/components/12345/components.dev.json': JSON.stringify([mockComponent]),
-        '/path/to/components/12345/groups.dev.json': JSON.stringify([mockComponentGroup]),
-        '/path/to/components/12345/presets.dev.json': JSON.stringify([mockComponentPreset]),
-        '/path/to/components/12345/tags.dev.json': JSON.stringify([mockInternalTag]),
+        '/path/to/components/12345/consolidated/components.dev.json': JSON.stringify([mockComponent]),
+        '/path/to/components/12345/consolidated/groups.dev.json': JSON.stringify([mockComponentGroup]),
+        '/path/to/components/12345/consolidated/presets.dev.json': JSON.stringify([mockComponentPreset]),
+        '/path/to/components/12345/consolidated/tags.dev.json': JSON.stringify([mockInternalTag]),
       });
 
       const result = await readComponentsFiles({
@@ -465,8 +465,8 @@ describe('push components actions', () => {
       vol.fromJSON({
         '/path/to/components/23746/component-name.json': JSON.stringify(mockComponent),
         '/path/to/components/23746/component-name.presets.json': JSON.stringify([mockComponentPreset]),
-        '/path/to/components/23746/groups.json': JSON.stringify([mockComponentGroup]),
-        '/path/to/components/23746/tags.json': JSON.stringify([mockInternalTag]),
+        '/path/to/components/23746/consolidated/groups.json': JSON.stringify([mockComponentGroup]),
+        '/path/to/components/23746/consolidated/tags.json': JSON.stringify([mockInternalTag]),
       });
 
       const result = await readComponentsFiles({
@@ -488,8 +488,8 @@ describe('push components actions', () => {
       vol.fromJSON({
         '/path/to/components/23747/component-name.dev.json': JSON.stringify(mockComponent),
         '/path/to/components/23747/component-a.presets.dev.json': JSON.stringify([mockComponentPreset]),
-        '/path/to/components/23747/groups.dev.json': JSON.stringify([mockComponentGroup]),
-        '/path/to/components/23747/tags.dev.json': JSON.stringify([mockInternalTag]),
+        '/path/to/components/23747/consolidated/groups.dev.json': JSON.stringify([mockComponentGroup]),
+        '/path/to/components/23747/consolidated/tags.dev.json': JSON.stringify([mockInternalTag]),
       });
 
       const result = await readComponentsFiles({
@@ -510,11 +510,11 @@ describe('push components actions', () => {
 
     it('should ignore component consolidated files if separate files are used', async () => {
       vol.fromJSON({
-        '/path/to/components/23748/components.json': JSON.stringify([mockComponent]),
+        '/path/to/components/23748/consolidated/components.json': JSON.stringify([mockComponent]),
         '/path/to/components/23748/component-name.json': JSON.stringify(mockComponent),
         '/path/to/components/23748/component-name.presets.json': JSON.stringify([mockComponentPreset]),
-        '/path/to/components/23748/groups.json': JSON.stringify([mockComponentGroup]),
-        '/path/to/components/23748/tags.json': JSON.stringify([mockInternalTag]),
+        '/path/to/components/23748/consolidated/groups.json': JSON.stringify([mockComponentGroup]),
+        '/path/to/components/23748/consolidated/tags.json': JSON.stringify([mockInternalTag]),
       });
 
       const result = await readComponentsFiles({
