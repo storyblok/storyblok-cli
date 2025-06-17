@@ -3,7 +3,9 @@ import type { CommandOptions } from '../../../types';
 export interface PushComponentsOptions extends CommandOptions {
 
   /**
-   * The regex filter to apply to the components before pushing.
+   * The glob pattern filter to apply to components before pushing.
+   * Matching components and all their dependencies (groups, tags, other components)
+   * will be collected and pushed together.
    * @default `.*`
    */
   filter?: string;

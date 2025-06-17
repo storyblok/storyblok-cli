@@ -6,16 +6,12 @@ import { CommandError, handleError, konsola, requireAuthentication } from '../..
 import { session } from '../../../session';
 import { readComponentsFiles } from './actions';
 import { componentsCommand } from '../command';
-import {
-  filterSpaceDataByComponent,
-  filterSpaceDataByPattern,
-  handleComponentGroups,
-  handleComponents,
-  handleTags,
-  handleWhitelists,
-} from './operations';
+import { filterSpaceDataByComponent, filterSpaceDataByPattern } from './utils';
+import { pushWithDependencyGraph } from './graph-operations';
 import chalk from 'chalk';
 import { mapiClient } from '../../../api';
+import { fetchComponentGroups, fetchComponentInternalTags, fetchComponentPresets, fetchComponents } from '../actions';
+import type { SpaceComponent, SpaceComponentGroup, SpaceComponentInternalTag, SpaceComponentPreset, SpaceDataState } from '../constants';
 
 const program = getProgram(); // Get the shared singleton instance
 
@@ -26,6 +22,7 @@ componentsCommand
   .option('--fi, --filter <filter>', 'glob filter to apply to the components before pushing')
   .option('--sf, --separate-files', 'Read from separate files instead of consolidated files')
   .option('--su, --suffix <suffix>', 'Suffix to add to the component name')
+
   .action(async (componentName: string | undefined, options: PushComponentsOptions) => {
     konsola.title(` ${commands.COMPONENTS} `, colorPalette.COMPONENTS, componentName ? `Pushing component ${componentName}...` : 'Pushing components...');
     // Global options
@@ -58,37 +55,83 @@ componentsCommand
 
     const { password, region } = state;
 
+    let requestCount = 0;
+
     mapiClient({
       token: password,
       region,
+      onRequest: (_request) => {
+        requestCount++;
+      },
     });
 
     try {
-      let spaceData = await readComponentsFiles({
-        ...options,
-        path,
-        space,
-      });
+      const spaceState: SpaceDataState = {
+        local: await readComponentsFiles({
+          ...options,
+          path,
+          space,
+        }),
+        target: {
+          components: new Map(),
+          groups: new Map(),
+          tags: new Map(),
+          presets: new Map(),
+        },
+      };
+
+      // Target space data
+      const promises = [
+        fetchComponents(space),
+        fetchComponentGroups(space),
+        fetchComponentPresets(space),
+        fetchComponentInternalTags(space),
+      ];
+      const [components, groups, presets, internalTags] = await Promise.all(promises);
+
+      if (components) {
+        (components as SpaceComponent[]).forEach((component) => {
+          spaceState.target.components.set(component.name, component);
+        });
+      }
+
+      if (groups) {
+        (groups as SpaceComponentGroup[]).forEach((group) => {
+          spaceState.target.groups.set(group.name, group);
+        });
+      }
+
+      if (presets) {
+        (presets as SpaceComponentPreset[]).forEach((preset) => {
+          spaceState.target.presets.set(preset.name, preset);
+        });
+      }
+
+      if (internalTags) {
+        (internalTags as SpaceComponentInternalTag[]).forEach((tag) => {
+          spaceState.target.tags.set(tag.name, tag);
+        });
+      }
 
       // If componentName is provided, filter space data to only include related resources
       if (componentName) {
-        spaceData = filterSpaceDataByComponent(spaceData, componentName);
-        if (!spaceData.components.length) {
+        spaceState.local = filterSpaceDataByComponent(spaceState.local, componentName);
+        if (!spaceState.local.components.length) {
           handleError(new CommandError(`Component "${componentName}" not found.`), verbose);
           return;
         }
       }
       // If filter pattern is provided, filter space data to match the pattern
       else if (filter) {
-        spaceData = filterSpaceDataByPattern(spaceData, filter);
-        if (!spaceData.components.length) {
+        spaceState.local = filterSpaceDataByPattern(spaceState.local, filter);
+        if (!spaceState.local.components.length) {
           handleError(new CommandError(`No components found matching pattern "${filter}".`), verbose);
           return;
         }
         konsola.info(`Filter applied: ${filter}`);
       }
 
-      if (!spaceData.components.length) {
+      if (!spaceState.local.components.length) {
         konsola.warn('No components found. Please make sure you have pulled the components first.');
         return;
       }
@@ -98,38 +141,11 @@ componentsCommand
         failed: [] as Array<{ name: string; error: unknown }>,
       };
 
-      // First, process whitelist dependencies
-      const whitelistResults = await handleWhitelists(space, spaceData);
-      results.successful.push(...whitelistResults.successful);
-      results.failed.push(...whitelistResults.failed);
-
-      // Then process remaining tags (skip those already processed in whitelists)
-      const tagsResults = await handleTags(space, spaceData.internalTags, whitelistResults.processedTagIds);
-      results.successful.push(...tagsResults.successful);
-      results.failed.push(...tagsResults.failed);
-
-      // Then process remaining groups (skip those already processed in whitelists)
-      const groupsResults = await handleComponentGroups(space, spaceData.groups, whitelistResults.processedGroupUuids);
-      results.successful.push(...groupsResults.successful);
-      results.failed.push(...groupsResults.failed);
-
-      // Finally process remaining components (skip those already processed in whitelists)
-      const remainingComponents = spaceData.components.filter(
-        component => !whitelistResults.processedComponentNames.has(component.name),
-      );
-
-      const componentsResults = await handleComponents({
-        space,
-        spaceData: {
-          ...spaceData,
-          components: remainingComponents,
-        },
-        groupsUuidMap: new Map([...whitelistResults.groupsUuidMap, ...groupsResults.uuidMap]), // Merge both group maps
-        tagsIdMaps: new Map([...whitelistResults.tagsIdMap, ...tagsResults.idMap]), // Merge both tag maps
-        componentNameMap: whitelistResults.componentNameMap,
-      });
-      results.successful.push(...componentsResults.successful);
-      results.failed.push(...componentsResults.failed);
+      // Use optimized graph-based dependency resolution with colocated target data
+      konsola.info('Using graph-based dependency resolution');
+      const graphResults = await pushWithDependencyGraph(space, spaceState, 5);
+      results.successful.push(...graphResults.successful);
+      results.failed.push(...graphResults.failed);
 
       if (results.failed.length > 0) {
         if (!verbose) {
@@ -142,6 +158,7 @@ componentsCommand
           });
         }
       }
+      console.log(`${requestCount} requests made`);
     }
     catch (error) {
       handleError(error as Error, verbose);

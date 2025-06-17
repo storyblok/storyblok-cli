@@ -9,6 +9,8 @@ export interface ManagementApiClientOptions {
   maxRetries?: number;
   baseDelay?: number;
   verbose?: boolean;
+  onRequest?: (request: { path: string; method: string; headers: HeadersInit; body?: any }) => void;
+  onResponse?: (response: { path: string; method: string; status: number; data: any; attempt: number }) => void;
 }
 
 export interface FetchOptions {
@@ -30,6 +32,7 @@ export interface MapiClient {
   post: <T>(path: string, fetchOptions?: FetchOptions) => Promise<GetResponse<T>>;
   put: <T>(path: string, fetchOptions?: FetchOptions) => Promise<GetResponse<T>>;
   dispose: () => void;
+  getRequestCount: () => number;
 }
 
 let instance: MapiClient | null = null;
@@ -79,11 +82,22 @@ const createMapiClient = (options: ManagementApiClientOptions): MapiClient => {
         console.log(`${state.url}/${path} - Attempt ${attempt}`);
       }
 
-      const res = await fetch(`${state.url}/${path}`, {
+      // Prepare request data for interceptor
+      const requestData = {
+        path,
+        method: fetchOptions?.method || 'GET',
         headers: {
           ...state.baseHeaders,
           ...fetchOptions?.headers,
-        } as HeadersInit,
+        } as Record<string, string>,
+        body: fetchOptions?.body,
+      };
+
+      // Call request interceptor if provided
+      options?.onRequest?.(requestData);
+
+      const res = await fetch(`${state.url}/${path}`, {
+        headers: requestData.headers as HeadersInit,
         ...fetchOptions,
       });
 
@@ -98,6 +112,16 @@ const createMapiClient = (options: ManagementApiClientOptions): MapiClient => {
           data: null,
         });
       }
+
+      // Call response interceptor if provided
+      options?.onResponse?.({
+        path,
+        method: requestData.method,
+        status: res.status,
+        data,
+        attempt,
+      });
+
       if (res.ok) {
         if (options?.verbose) {
           console.log(`✅ ${path}`);
