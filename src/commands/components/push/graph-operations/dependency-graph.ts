@@ -97,6 +97,16 @@ export function buildDependencyGraph(context: GraphBuildingContext): DependencyG
       addDependency(componentId, groupId);
     }
 
+    // Add dependencies on preset_id (component preset reference)
+    if (component.preset_id) {
+      // Find the preset by ID and create dependency
+      const preset = spaceState.local.presets.find(p => p.id === component.preset_id);
+      if (preset) {
+        const presetId = `preset:${preset.name}`;
+        addDependency(componentId, presetId);
+      }
+    }
+
     if (component.schema) {
       const dependencies = collectWhitelistDependencies(component.schema);
 
@@ -398,7 +408,7 @@ export function determineProcessingOrder(graph: DependencyGraph): ProcessingLeve
       for (const scc of sccs) {
         // Validate that SCCs only contain components (not groups/tags)
         const hasNonComponent = scc.some(nodeId =>
-          nodeId.startsWith('group:') || nodeId.startsWith('tag:') || nodeId.startsWith('preset:'),
+          nodeId.startsWith('group:') || nodeId.startsWith('tag:'),
         );
 
         if (hasNonComponent) {
@@ -600,6 +610,20 @@ export class ComponentNode extends GraphNode<SpaceComponent> {
       updatedData.internal_tag_ids = resolvedTagIds;
     }
 
+    // Resolve preset reference
+    if (this.sourceData.preset_id) {
+      // Find the preset by ID and resolve to target preset ID
+      const preset = this.findPresetById(this.sourceData.preset_id, graph);
+      if (preset) {
+        const presetNodeId = `preset:${preset.name}`;
+        const presetNode = graph.nodes.get(presetNodeId);
+
+        if (presetNode?.targetData) {
+          updatedData.preset_id = presetNode.targetData.id as number;
+        }
+      }
+    }
+
     // Resolve schema references (component whitelists, group whitelists, tag whitelists)
     if (this.sourceData.schema) {
       updatedData.schema = this.resolveSchemaReferences(this.sourceData.schema, graph);
@@ -607,6 +631,16 @@ export class ComponentNode extends GraphNode<SpaceComponent> {
 
     // Update the source data with resolved references
     this.sourceData = updatedData;
+  }
+
+  private findPresetById(presetId: number, graph: DependencyGraph): SpaceComponentPreset | null {
+    // Find preset by matching source preset_id
+    for (const [_nodeId, node] of graph.nodes) {
+      if (node.type === 'preset' && (node.sourceData as SpaceComponentPreset).id === presetId) {
+        return node.sourceData as SpaceComponentPreset;
+      }
+    }
+    return null;
   }
 
   private resolveSchemaReferences(schema: Record<string, any>, graph: DependencyGraph): Record<string, any> {
