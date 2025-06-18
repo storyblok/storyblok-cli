@@ -8,9 +8,9 @@
 [![GitHub issues](https://img.shields.io/github/issues/storyblok/storyblok-cli.svg?style=flat-square&v=1)](https://github.com/storyblok/storyblok/issues?q=is%3Aopen+is%3Aissue)
 [![GitHub closed issues](https://img.shields.io/github/issues-closed/storyblok/storyblok-cli.svg?style=flat-square&v=1)](https://github.com/storyblok/storyblok-cli/issues?q=is%3Aissue+is%3Aclosed)
 
-## BREAKING CHANGE
 
-We added the `region` option upon login. If you are using the CLI, please `logout` and `login` again providing your user region.
+> [!WARNING]
+> This the legacy branch of the Storyblok CLI. We recommend you migrate to the new [CLI v4](https://github.com/storyblok/storyblok-cli/tree/main) for enhanced experience and support. 
 
 ## Installation
 
