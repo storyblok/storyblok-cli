@@ -1,7 +1,11 @@
 {
   "name": "storyblok",
-  "version": "3.25.0",
-  "description": "A simple CLI to start Storyblok from your command line.",
+  "type": "module",
+  "version": "4.0.0",
+  "packageManager": "pnpm@10.10.0",
+  "description": "Storyblok CLI",
+  "author": "Alvaro Saburido <hola@alvarosaburido.dev> (https://github.com/alvarosabu/)",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/storyblok/storyblok-cli.git"
@@ -12,70 +16,54 @@
     "node",
     "javascript"
   ],
-  "main": "./dist/cli.mjs",
+  "main": "./dist/index.mjs",
+  "bin": {
+    "storyblok": "./dist/index.mjs"
+  },
   "files": [
     "dist/**"
   ],
-  "bin": {
-    "storyblok": "./dist/cli.mjs"
-  },
-  "type": "module",
   "scripts": {
     "build": "unbuild",
-    "dev": "npm run build && ./dist/cli.mjs",
-    "lint": "eslint src/",
-    "lint:fix": "eslint src/ --fix",
-    "test:unit": "node --experimental-vm-modules ./node_modules/.bin/jest --silent",
-    "test:coverage": "node --experimental-vm-modules ./node_modules/.bin/jest --coverage"
+    "typecheck": "tsc --noEmit",
+    "release": "release-it",
+    "dev": "pnpm run build && node dist/index.mjs",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "vitest",
+    "test:ci": "vitest run",
+    "test:ui": "vitest --ui",
+    "coverage": "vitest run --coverage"
   },
-  "author": "Dominik Angerer <dominikangerer1@gmail.com>, Alexander Feiglstorfer <delooks@gmail.com>",
-  "license": "MIT",
   "dependencies": {
-    "@storyblok/region-helper": "^1.0.0",
-    "axios": "^0.30.0",
-    "chalk": "^4.1.0",
-    "clear": "0.1.0",
-    "commander": "^5.1.0",
-    "fast-csv": "^4.3.6",
-    "figlet": "^1.5.0",
-    "form-data": "^3.0.0",
-    "fs-extra": "^9.0.1",
-    "git-clone": "^0.2.0",
-    "inquirer": "^7.3.2",
-    "json-schema-to-typescript": "^13.1.2",
-    "lodash": "^4.17.21",
-    "netrc": "0.1.4",
-    "on-change": "^2.0.1",
-    "open": "^6.0.0",
-    "p-series": "^2.1.0",
-    "path": "^0.12.7",
-    "simple-uuid": "^0.0.1",
-    "storyblok-js-client": "6.10.3",
-    "update-notifier": "^5.1.0",
-    "xml-js": "^1.6.11"
-  },
-  "engines": {
-    "node": ">=18.0.0"
+    "@inquirer/prompts": "^7.5.1",
+    "@storyblok/js": "^4.0.0",
+    "@topcli/spinner": "^2.1.2",
+    "chalk": "^5.4.1",
+    "commander": "^13.1.0",
+    "dotenv": "^16.5.0",
+    "json-schema-to-typescript": "^15.0.4",
+    "minimatch": "^10.0.3",
+    "ohash": "^2.0.11",
+    "pathe": "^2.0.3",
+    "read-package-up": "^11.0.0",
+    "storyblok-js-client": "^6.10.12"
   },
   "devDependencies": {
-    "concat-stream": "^2.0.0",
-    "eslint": "^7.2.0",
-    "eslint-config-standard": "^14.1.1",
-    "eslint-plugin-import": "^2.21.2",
-    "eslint-plugin-jest": "^23.18.0",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^4.2.1",
-    "eslint-plugin-standard": "^4.0.1",
-    "jest": "^29.7.0",
-    "typescript": "^5.3.3",
-    "unbuild": "^2.0.0"
-  },
-  "release": {
-    "branches": [
-      "main"
-    ]
-  },
-  "prettier": {
-    "printWidth": 120
+    "@release-it/conventional-changelog": "10.0.0",
+    "@storyblok/eslint-config": "^0.3.0",
+    "@types/inquirer": "^9.0.8",
+    "@types/node": "^22.15.18",
+    "@vitest/coverage-v8": "^3.1.3",
+    "@vitest/ui": "^3.1.3",
+    "eslint": "^9.26.0",
+    "memfs": "^4.17.1",
+    "msw": "^2.8.2",
+    "release-it": "^18.1.2",
+    "typescript": "^5.8.3",
+    "unbuild": "^3.5.0",
+    "uuid": "^11.1.0",
+    "vite": "^6.3.5",
+    "vitest": "^3.1.3"
   }
 }

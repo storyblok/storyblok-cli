@@ -1,20 +1,27 @@
 {
   "compilerOptions": {
-    "esModuleInterop": false,
-    "allowSyntheticDefaultImports": true,
-    "skipLibCheck": true,
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
-    "strict": true,
-    "noImplicitAny": true,
-    "allowJs": true,
-    "noEmit": true,
-    "noUnusedLocals": true,
+    "target": "esnext",
+    "lib": ["esnext", "DOM", "DOM.Iterable"],
+    "baseUrl": ".",
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
-    "types": ["node"],
-    "outDir": "dist"
+    "types": ["node", "vitest/globals"],
+    "allowImportingTsExtensions": true,
+    /* Linting */
+    "strict": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "inlineSourceMap": false,
+    "noEmit": true,
+    /* Debugging */
+    "sourceMap": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "skipLibCheck": true
   },
-  "include": ["src/types"],
-  "exclude": ["dist/**/*"]
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "exclude": ["node_modules", "**/*.test.ts", "**/*.test.tsx", "**/__tests__/**", "**/test/**", "**/tests/**"]
 }
