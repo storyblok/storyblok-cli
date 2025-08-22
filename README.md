@@ -1,3 +1,8 @@
+> [!WARNING]
+> This repository is no longer actively maintained and contains the previous Storyblok CLI v3.x. We recommend all users migrate to [CLI v4](https://github.com/storyblok/monoblok/tree/main/packages/cli).
+> Do not create or reference issues from this repo. For issues on v4, please create them here in the [Monoblok issue tracker](https://github.com/storyblok/monoblok/issues)
+
+
 <p align="center">
   <h1 align="center">Storyblok CLI</h1>
   <p align="center">A simple CLI for scaffolding <a href="https://www.storyblok.com?utm_source=github.com&utm_medium=readme&utm_campaign=storyblok" target="_blank">Storyblok</a> projects and fieldtypes.</p>
@@ -9,8 +14,6 @@
 [![GitHub closed issues](https://img.shields.io/github/issues-closed/storyblok/storyblok-cli.svg?style=flat-square&v=1)](https://github.com/storyblok/storyblok-cli/issues?q=is%3Aissue+is%3Aclosed)
 
 
-> [!WARNING]
-> This the legacy branch of the Storyblok CLI. We recommend you migrate to the new [CLI v4](https://github.com/storyblok/storyblok-cli/tree/main) for enhanced experience and support. 
 
 ## Installation
 
