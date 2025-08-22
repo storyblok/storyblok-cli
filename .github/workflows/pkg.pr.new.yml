@@ -1,13 +1,12 @@
 name: Publish Any Commit
 on:
   push:
-    tags:
-      - '!**'
     branches:
       - '**'
+    tags:
+      - '!**'
 
 env:
-  PNPM_CACHE_FOLDER: .pnpm-store
   HUSKY: 0 # Bypass husky commit hook for CI
 
 permissions: {}
@@ -26,13 +25,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - run: npm i -g --force corepack && corepack enable
+      - run: corepack enable
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: pnpm
+          cache: yarn
       - name: Install dependencies
-        run: pnpm install
+        run: yarn install
       - name: Build
-        run: pnpm build
-      - run: pnpx pkg-pr-new publish --compact --pnpm
+        run: yarn build
+      - run: npx pkg-pr-new publish --compact
