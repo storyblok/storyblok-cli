@@ -28,3 +28,7 @@ export const DEFAULT_AGENT = {
   SB_Agent: 'SB-CLI',
   SB_Agent_Version: process.env.npm_package_version || '3.0.0'
 }
+
+export const PAGINATION = {
+  datasource_entries: 1000,
+}

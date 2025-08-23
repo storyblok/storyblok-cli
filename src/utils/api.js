@@ -272,7 +272,7 @@ export default {
     const client = this.getClient()
 
     return client
-      .get(this.getPath(`datasource_entries?datasource_id=${id}`))
+      .get(this.getPath(`datasource_entries?datasource_id=${id}&per_page=${PAGINATION.datasource_entries}`))
       .then(data => data.data.datasource_entries || [])
       .catch(err => Promise.reject(err))
   },
