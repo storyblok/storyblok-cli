@@ -125,6 +125,7 @@ const SyncSpaces = {
         const { data } = await this.client.get('spaces/' + this.targetSpaceId + '/stories', { with_slug: story.full_slug })
         const existingStory = data.stories[0]
         const storyData = await this.getStoryWithTranslatedSlugs(sourceStory, existingStory ? existingStory[0] : null)
+
         await this.updateStoriesAndFolders(storyData, existingStory, sourceStory)
       } catch (e) {
         console.error(
@@ -167,6 +168,7 @@ const SyncSpaces = {
         const { data } = await this.client.get(`spaces/${this.targetSpaceId}/stories`, targetFolderParams)
         const existingFolder = data.stories[0] || null
         const folderData = await this.getStoryWithTranslatedSlugs(folderResult.data.story, existingFolder)
+
         delete folderData.id
         delete folderData.created_at
 
@@ -192,6 +194,10 @@ const SyncSpaces = {
 
         await this.updateStoriesAndFolders(folderData, existingFolder, folder, true)
       } catch (e) {
+        if (e.response.includes('You cannot change the is_folder attribute.')) {
+          console.log(chalk.yellow('-') + ` Folder ${folder.name} is already a story in the target space ${this.targetSpaceId} and cannot be synced as a folder`)
+          continue
+        }
         console.error(
           chalk.red('X') + ` Folder ${folder.name} Sync failed: ${e.message}`
         )
