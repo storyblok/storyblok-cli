@@ -60,6 +60,11 @@ const SyncSpaces = {
     return folderMapping
   },
 
+  isUUIDTakenError (error) {
+    return (error && error.status === 422 && error.response.includes('UUID has already been taken')
+    )
+  },
+
   async updateStoriesAndFolders (data, targetContent = null, sourceContent = null, isFolder = false) {
     let createdStory = null
     const contentName = sourceContent.name
@@ -82,7 +87,14 @@ const SyncSpaces = {
     createdStory = createdStory.data.story
 
     if (createdStory.uuid !== sourceContent.uuid) {
-      await this.client.put(`spaces/${this.targetSpaceId}/stories/${createdStory.id}/update_uuid`, { uuid: sourceContent.uuid })
+      try {
+        await this.client.put(`spaces/${this.targetSpaceId}/stories/${createdStory.id}/update_uuid`, { uuid: sourceContent.uuid })
+      } catch (e) {
+        // Silently ignore only the specific UUID taken error; otherwise rethrow
+        if (!this.isUUIDTakenError(e)) {
+          throw e
+        }
+      }
     }
 
     return createdStory
