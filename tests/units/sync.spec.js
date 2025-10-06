@@ -67,4 +67,76 @@ describe('testing sync function', () => {
       }
     }
   })
+  
+  describe('UUID update handling in folders sync', () => {
+    const SOURCE_SPACE = 'SRC'
+    const TARGET_SPACE = 'TGT'
+
+    const makeApiWithClient = (client) => ({ getClient: () => client })
+
+    const makeBaseClient = ({ putThrows }) => ({
+      getAll: (path, params) => {
+        if (path === `spaces/${SOURCE_SPACE}/stories` && params && params.folder_only === 1) {
+          return Promise.resolve([
+            { id: 1, full_slug: 'brand', parent_id: 0, name: 'brand' }
+          ])
+        }
+        return Promise.reject(new Error('Unexpected getAll call'))
+      },
+      get: (path, params) => {
+        if (path === `spaces/${SOURCE_SPACE}/stories/1`) {
+          return Promise.resolve({ data: { story: { id: 1, uuid: 'SRC-UUID', full_slug: 'brand', name: 'brand' } } })
+        }
+        if (path === `spaces/${TARGET_SPACE}/stories` && params && params.with_slug === 'brand') {
+          return Promise.resolve({ data: { stories: [] } })
+        }
+      },
+      post: (path, _payload) => {
+        if (path === `spaces/${TARGET_SPACE}/stories`) {
+          return Promise.resolve({ data: { story: { id: 99, uuid: 'TARGET-UUID', full_slug: 'brand' } } })
+        }
+      },
+      put: (path, _payload) => {
+        if (path === `spaces/${TARGET_SPACE}/stories/99/update_uuid`) {
+          if (putThrows) return Promise.reject(putThrows)
+          return Promise.resolve({})
+        }
+      }
+    })
+
+    let errorSpy
+    let originalError
+
+    beforeEach(() => {
+      originalError = console.error
+      errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+    })
+
+    afterEach(() => {
+      errorSpy.mockRestore()
+      console.error = originalError
+      jest.clearAllMocks()
+    })
+
+    it('silences UUID has already been taken (422) for update_uuid', async () => {
+      const uuidTakenError = { message: 'Unprocessable Content', status: 422, response: ['UUID has already been taken'] }
+      const client = makeBaseClient({ putThrows: uuidTakenError })
+      const api = makeApiWithClient(client)
+
+      await sync(['folders'], { api, token: 'x', source: SOURCE_SPACE, target: TARGET_SPACE })
+
+      expect(errorSpy).not.toHaveBeenCalled()
+    })
+
+    it('rethrows non-UUID 422 errors to be handled upstream (logs by outer catch)', async () => {
+      const other422 = { message: 'Unprocessable Content', status: 422, response: ['Some other error'] }
+      const client = makeBaseClient({ putThrows: other422 })
+      const api = makeApiWithClient(client)
+
+      await sync(['folders'], { api, token: 'x', source: SOURCE_SPACE, target: TARGET_SPACE })
+
+      expect(errorSpy).toHaveBeenCalled()
+      expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('Folder brand Sync failed: Unprocessable Content'))
+    })
+  })
 })
